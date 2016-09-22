@@ -5,9 +5,9 @@ import (
 	"github.com/iris-contrib/template/html"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
-	"maizuo.com/smart-cinema/src/server/common"
-	"maizuo.com/smart-cinema/src/server/route/api"
-	"maizuo.com/smart-cinema/src/server/route/web"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/route/api"
+	"maizuo.com/soda-manager/src/server/route/web"
 )
 
 func SetUpServer() {
