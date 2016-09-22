@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/smart-cinema/src/server/service"
+	"maizuo.com/soda-manager/src/server/service"
 	"strconv"
-	"maizuo.com/smart-cinema/src/server/model"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 type UserController struct {

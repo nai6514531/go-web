@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/smart-cinema/src/server/enity"
-	"maizuo.com/smart-cinema/src/server/service"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/service"
 	"strconv"
 	"fmt"
 )

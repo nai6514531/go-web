@@ -15,7 +15,7 @@ import (
 	"strings"
 	"encoding/xml"
 	"github.com/levigross/grequests"
-	"maizuo.com/smart-cinema/src/server/common"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 type WeChatPayKit struct {
@@ -167,7 +167,7 @@ func (self WeChatPayKit)CreateUnifiedOrder() {
 	str_req := string(requestBytes)
 	str_req = strings.Replace(str_req, "UnifyOrderRequest", "xml", -1)
 	requestBytes = []byte(str_req)
-	response, err := grequests.Post("https://smart-cinema.maizuo.com:8080/api/pay/unifiedorder", &grequests.RequestOptions{
+	response, err := grequests.Post("https://soda-manager.maizuo.com:8080/api/pay/unifiedorder", &grequests.RequestOptions{
 		XML:requestBytes,
 		Headers:map[string]string{
 			"Accept": "application/xml",

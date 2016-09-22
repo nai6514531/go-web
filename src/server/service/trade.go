@@ -1,9 +1,9 @@
 package service
 
 import (
-	"maizuo.com/smart-cinema/src/server/model"
-	"maizuo.com/smart-cinema/src/server/common"
-	"maizuo.com/smart-cinema/src/server/util"
+	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/util"
 	"time"
 	"strconv"
 	"fmt"
