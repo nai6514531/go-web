@@ -1,0 +1,16 @@
+{
+  "name": "智能影院商城",
+  "title": "智能影院商城",
+  "url": "http://smart-cinema.maizuo.com",
+  "header": {
+	"title": "智能影院商城"
+  },
+  "footer": {
+  },
+  "order": [
+  ],
+  "template": {
+	"withCompare": true,
+	"withGenerator": true
+  }
+}

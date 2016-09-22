@@ -1,0 +1,54 @@
+isDevelopment: true
+staticSystemPath: "./src/build/static"
+staticRequestPath: "/static"
+templateServe: "./src/template"
+templateSuffix: ".html"
+faviconPath: "./src/build/static/img/favicon.ico"
+logFilePath: "./log/log.log"
+pay:
+  wechat:
+    appid: ""
+    mch_id: ""
+    apiKey: ""
+server:
+  host: "0.0.0.0"
+  port: 8080
+  captcha:
+    key: "CAPTCHA"
+    font-path: "./resource/font/comic.ttf"
+  rate-limiter:
+    rate: "10-M"
+    redis:
+      addr: "192.168.1.204:6379"
+      password: "123456"
+      database: 10
+      prefix: "smart-cinema-rate-limiter"
+      max-retry: 3
+  session:
+    cookie: "sess"
+    expires: 3600
+    redis:
+      addr: "192.168.1.204:6379"
+      password: "123456"
+      database: 10
+      prefix: "smart-cinema-session-"
+      maxidle: 20
+      max-active: 50
+      max-age-seconds: 3600
+      idle-timeout: 60
+  db:
+    dialect: "mysql"
+    host: "192.168.1.204"
+    port: 3306
+    user: "web"
+    password: "123456"
+    database: "smart-cinema"
+  redis:
+        addr: "192.168.1.204:6379"
+        password: "123456"
+        database: 10
+        prefix: "smart-cinema-"
+        max-idle: 20
+        max-active: 50
+        idle-timeout: 60
+
