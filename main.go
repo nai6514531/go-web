@@ -1,8 +1,8 @@
 package main
 
 import (
-	"maizuo.com/smart-cinema/src/server"
-	"maizuo.com/smart-cinema/src/server/common"
+	"maizuo.com/soda-manager/src/server"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 func main() {
