@@ -23,7 +23,7 @@ func SetUpLogger() error {
 		log.SetOutput(logFile)
 	}
 	Logger = log.WithFields(log.Fields{
-		"system": "[h5-smart-cinema]",
+		"system": "[h5-soda-manager]",
 		"from":   "15",
 		"to":     "26",
 	})

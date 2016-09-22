@@ -5,7 +5,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"github.com/ulule/limiter"
-	"maizuo.com/smart-cinema/src/server/middleware"
+	"maizuo.com/soda-manager/src/server/middleware"
 )
 
 func SetUpRateLimiter() {

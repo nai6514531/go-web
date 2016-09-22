@@ -2,7 +2,7 @@ package web
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/smart-cinema/src/server/controller/web"
+	"maizuo.com/soda-manager/src/server/controller/web"
 )
 
 func Web() {

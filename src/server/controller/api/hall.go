@@ -2,10 +2,10 @@ package controller
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/smart-cinema/src/server/enity"
-	"maizuo.com/smart-cinema/src/server/util"
-	"maizuo.com/smart-cinema/src/server/service"
-	"maizuo.com/smart-cinema/src/server/model"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/util"
+	"maizuo.com/soda-manager/src/server/service"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 var (

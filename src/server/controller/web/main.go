@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"image/color"
 	"image/png"
-	"maizuo.com/smart-cinema/src/server/common"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 type WebController struct {
