@@ -2,52 +2,49 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	//"maizuo.com/soda-manager/src/server/model"
+	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/service"
-	"strconv"
-	"maizuo.com/soda-manager/src/server/model"
+	//"strconv"
+	"crypto/md5"
+	"fmt"
 )
 
 type UserController struct {
 }
 
-func (self *UserController) List(ctx *iris.Context) {
-	ctx.Write("from user.List")
-}
+/**
+ * @api {get} /api/user/signin 用户登陆
+ * @apiName Signin
+ * @apiGroup User
+ */
+func (self *UserController) Signin(ctx *iris.Context) {
+	account := ctx.URLParam("account")
+	urlMd5PasswordCaptcha := ctx.URLParam("password")
+	userService := &service.UserService{}
 
-func (self *UserController) Basic(ctx *iris.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-	var userService = &service.UserService{}
-	user, e := userService.Basic(id)
-	if e != nil {
-		println(e.Error())
-		ctx.JSON(iris.StatusOK, user)
+	//以用户名查找表
+	user, err := userService.FindByAccount(account)
+	if err != nil {
+		print(err.Error())
 	}
+
+	//以 md5( md5(明文密码) + 验证码) 比对
+	dbMd5Password := fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
+	captchaKey := viper.GetString("server.captcha.Key")
+	sPasswordCaptcha := fmt.Sprintf("%s%s", dbMd5Password, ctx.Session().Get(captchaKey))
+	dbMd5PasswordCaptcha := fmt.Sprintf("%x", md5.Sum([]byte(sPasswordCaptcha)))
+
+	if dbMd5PasswordCaptcha == urlMd5PasswordCaptcha { //比对符合确认登陆,设置session
+		ctx.Session().Set("isSignin", 1)
+		ctx.Session().Set("account", account) //缓存账号
+	} else {
+		ctx.Session().Set("isSignin", 0)
+	}
+
 	ctx.JSON(iris.StatusOK, user)
-	//ctx.Write("from user.Detail:" + id)
 }
 
-func (self *UserController) Delete(ctx *iris.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-	var userService = &service.UserService{}
-	r, e := userService.Delete(id)
-	if e != nil {
-		print(e.Error())
-	}
-	ctx.JSON(iris.StatusOK, r)
-}
-
-func (sefl *UserController) Create(ctx *iris.Context) {
-	var userService = &service.UserService{}
-	user := &model.User{}
-	ctx.ReadJSON(user)
-	r, _ := userService.Create(user)
-	ctx.JSON(iris.StatusOK, r)
-}
-
-func (sefl *UserController) Update(ctx *iris.Context) {
-	id, _ := strconv.Atoi(ctx.Param("id"))
-	var userService = &service.UserService{}
-	user, _ := userService.Basic(id)
-	r, _ := userService.Update(user)
-	ctx.JSON(iris.StatusOK, r)
-}
+// func (self *UserController) Test(ctx *iris.Context) {
+// 	ctx.Write("aaaaaaaaaaaa")
+// }
