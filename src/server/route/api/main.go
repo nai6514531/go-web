@@ -32,7 +32,7 @@ func Api() {
 	})
 
 	api.Get("/user/aaa/:name/tttt", Hello)
-	api.Get("/user/singin", user.Signin)
+	api.Get("/user/signin", user.Signin)
 	//api.Delete("/user/:id/goods", user.Delete)
 	//api.Post("/user", user.Create)
 

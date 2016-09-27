@@ -19,7 +19,7 @@ type UserController struct {
  * @apiGroup User
  */
 func (self *UserController) Signin(ctx *iris.Context) {
-	sName := ctx.URLParam("signin_name")
+	sName := ctx.URLParam("account")
 	urlMd5PasswordCaptcha := ctx.URLParam("password")
 	userService := &service.UserService{}
 
@@ -42,4 +42,8 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	ctx.JSON(iris.StatusOK, user)
+}
+
+func (self *UserController) Test(ctx *iris.Context) {
+	ctx.Write("aaaaaaaaaaaa")
 }
