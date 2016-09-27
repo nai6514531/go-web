@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strconv"
-	"maizuo.com/soda-manager/src/server/model"
 )
 
 type UserController struct {
@@ -50,4 +50,8 @@ func (sefl *UserController) Update(ctx *iris.Context) {
 	user, _ := userService.Basic(id)
 	r, _ := userService.Update(user)
 	ctx.JSON(iris.StatusOK, r)
+}
+
+func (sefl *UserController) Test(ctx *iris.Context) {
+	ctx.JSON(iris.StatusOK, ctx.Param("name"))
 }
