@@ -32,8 +32,8 @@ func Api() {
 	})
 
 	api.Get("/user/aaa/:name/tttt", Hello)
-	//api.Get("/user/:id", user.Basic)
+	api.Get("/user/singin", user.Signin)
 	//api.Delete("/user/:id/goods", user.Delete)
-	api.Post("/user", user.Create)
+	//api.Post("/user", user.Create)
 
 }
