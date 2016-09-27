@@ -19,12 +19,12 @@ type UserController struct {
  * @apiGroup User
  */
 func (self *UserController) Signin(ctx *iris.Context) {
-	sName := ctx.URLParam("account")
+	account := ctx.URLParam("account")
 	urlMd5PasswordCaptcha := ctx.URLParam("password")
 	userService := &service.UserService{}
 
 	//以用户名查找表
-	user, err := userService.FindByAccount(sName)
+	user, err := userService.FindByAccount(account)
 	if err != nil {
 		print(err.Error())
 	}
@@ -37,6 +37,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 
 	if dbMd5PasswordCaptcha == urlMd5PasswordCaptcha { //比对符合确认登陆,设置session
 		ctx.Session().Set("isSignin", 1)
+		ctx.Session().Set("account", account) //缓存账号
 	} else {
 		ctx.Session().Set("isSignin", 0)
 	}
@@ -44,6 +45,6 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, user)
 }
 
-func (self *UserController) Test(ctx *iris.Context) {
-	ctx.Write("aaaaaaaaaaaa")
-}
+// func (self *UserController) Test(ctx *iris.Context) {
+// 	ctx.Write("aaaaaaaaaaaa")
+// }

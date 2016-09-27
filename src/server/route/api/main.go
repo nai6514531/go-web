@@ -5,9 +5,6 @@ import (
 	"maizuo.com/soda-manager/src/server/controller/api"
 )
 
-func Hello(ctx *iris.Context) {
-	ctx.Write("hello,%s", ctx.Param("name"))
-}
 func Api() {
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -17,8 +14,11 @@ func Api() {
 	})
 
 	var (
-		user = &controller.UserController{}
+		user    = &controller.UserController{}
+		session = &controller.SessionController{}
 	)
+
+	api.Post("/session", session.Create) //创建会话（登陆）
 
 	api.UseFunc(func(ctx *iris.Context) {
 		//your authentication logic here...
@@ -31,7 +31,6 @@ func Api() {
 		}
 	})
 
-	api.Get("/user/aaa/:name/tttt", Hello)
 	api.Get("/user/signin", user.Signin)
 	//api.Delete("/user/:id/goods", user.Delete)
 	//api.Post("/user", user.Create)
