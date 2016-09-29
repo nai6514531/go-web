@@ -6,8 +6,7 @@ module.exports = {
 	context: APP_PATH,
 	entry: {
 		app: './app/main.jsx',
-		signin: './signin/main.jsx',
-		manager: './manager/main.jsx'
+		signin: './signin/main.jsx'
 	},
 	output: {
 		filename: 'entry/[name].js',
