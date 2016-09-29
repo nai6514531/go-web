@@ -16,6 +16,7 @@ func Api() {
 	var (
 		user    = &controller.UserController{}
 		session = &controller.SessionController{}
+		region = &controller.RegionController{}
 	)
 
 	api.Post("/session", session.Create) //创建会话（登陆）
@@ -34,5 +35,13 @@ func Api() {
 	api.Get("/user/signin", user.Signin)
 	//api.Delete("/user/:id/goods", user.Delete)
 	//api.Post("/user", user.Create)
+
+	api.Get("/region/province",region.Province)
+	api.Get("/region/province/:id", region.ProvinceDetail)
+	api.Get("/region/province/:id/city",region.CityOfProvince)
+	api.Get("/region/city", region.City)
+	api.Get("/region/city/:id", region.CityDetail)
+	api.Get("/region/city/:id/district",region.DistrictOfCity)
+	api.Get("/region/district/:id", region.DistrictDetail)
 
 }
