@@ -5,14 +5,18 @@ package model
 */
 type User struct {
 	Model
-	Account        string `json:"account"`          //账号
-	Agent          string `json:"angent"`           //代理商
-	Password       string `json:"password"`         //密码
-	Telphone       string `json:"telphone"`         //服务电话
-	Mobile         string `json:"mobile"`           //手机
-	Email          string `json:"email"`            //邮箱
-	AlipayAccount  string `json:"alipay_account"`   //支付宝账号
-	AlipayRealName string `json:"alipay_real_name"` //支付宝姓名
+	Name      string `json:"name"`
+	Contact   string `json:"contact"`
+	Address   string `json:"address"`
+	Mobile    string `json:"mobile"`
+	Account   string `json:"account"`   //账号
+	Password  string `json:"password"`  //密码
+	Telephone string `json:"telephone"` //服务电话
+	Email     string `json:"email"`     //邮箱
+	ParentId  int    `json:"parent_id"`
+	Gender    int    `json:"gender"`
+	Age       int    `json:"age"`
+	Status    int    `json:"status"`
 }
 
 func (User) TableName() string {

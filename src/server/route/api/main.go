@@ -16,7 +16,9 @@ func Api() {
 	var (
 		user    = &controller.UserController{}
 		session = &controller.SessionController{}
-		region = &controller.RegionController{}
+		region  = &controller.RegionController{}
+		device  = &controller.DeviceController{}
+		referenceDevice  = &controller.ReferenceDeviceController{}
 	)
 
 	api.Post("/session", session.Create) //创建会话（登陆）
@@ -32,16 +34,20 @@ func Api() {
 		}
 	})
 
-	api.Get("/user/signin", user.Signin)
-	//api.Delete("/user/:id/goods", user.Delete)
-	//api.Post("/user", user.Create)
+	api.Get("/user", user.ListByParent)
+	api.Get("/user/:id", user.Basic)
 
-	api.Get("/region/province",region.Province)
-	api.Get("/region/province/:id", region.ProvinceDetail)
-	api.Get("/region/province/:id/city",region.CityOfProvince)
-	api.Get("/region/city", region.City)
-	api.Get("/region/city/:id", region.CityDetail)
-	api.Get("/region/city/:id/district",region.DistrictOfCity)
-	api.Get("/region/district/:id", region.DistrictDetail)
+	api.Get("/province", region.Province)
+	api.Get("/province/:id", region.ProvinceDetail)
+	api.Get("/province/:id/city", region.CityOfProvince)
+	api.Get("/province/:id/school", region.SchoolOfProvince)
+	api.Get("/city", region.City)
+	api.Get("/city/:id", region.CityDetail)
+	api.Get("/city/:id/district", region.DistrictOfCity)
+	api.Get("/district/:id", region.DistrictDetail)
+
+	api.Get("/device",device.List)
+
+	api.Get("/reference-device",referenceDevice.List)
 
 }
