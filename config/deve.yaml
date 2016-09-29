@@ -22,16 +22,18 @@ server:
       addr: "192.168.1.204:6379"
       password: "123456"
       database: 10
-      prefix: "soda-manager-rate-limiter"
+      prefix: "soda-manager-rate-limiter:"
       max-retry: 3
   session:
+    user:
+      key: "USER"
     cookie: "sess"
     expires: 3600
     redis:
       addr: "192.168.1.204:6379"
       password: "123456"
       database: 10
-      prefix: "soda-manager-session-"
+      prefix: "soda-manager-session:"
       maxidle: 20
       max-active: 50
       max-age-seconds: 3600
@@ -47,7 +49,7 @@ server:
         addr: "192.168.1.204:6379"
         password: "123456"
         database: 10
-        prefix: "soda-manager-"
+        prefix: "soda-manager:"
         max-idle: 20
         max-active: 50
         idle-timeout: 60

@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/viper"
 	"image/color"
 	"image/png"
-	"maizuo.com/soda-manager/src/server/common"
 )
 
 type WebController struct {
@@ -14,20 +13,16 @@ type WebController struct {
 }
 
 func (self *WebController) Index(ctx *iris.Context) {
-	common.Logger.Warning("into index page")
-	ctx.Render("index.html", map[string]interface{}{"Name": "iris"})
+	session_user_key := viper.GetString("server.session.user.key")
+	if ctx.Session().Get(session_user_key) != nil {
+		ctx.Render("index.html", map[string]interface{}{"title": "首页"})
+	} else {
+		ctx.Render("signin.html", map[string]interface{}{"title": "登录"})
+	}
 }
 
 func (self *WebController) Signin(ctx *iris.Context) {
-	ctx.Render("signin.html", map[string]interface{}{"Name": "iris"}, iris.RenderOptions{"gzip": true})
-}
-
-func (self *WebController) Manager(ctx *iris.Context) {
-	ctx.Render("manager.html", map[string]interface{}{"Name": "iris"}, iris.RenderOptions{"gzip": true})
-}
-
-func (self *WebController) Printer(ctx *iris.Context) {
-	ctx.Render("printer.html", map[string]interface{}{"Name": "iris"}, iris.RenderOptions{"gzip": true})
+	ctx.Render("signin.html", map[string]interface{}{"title": "登录"})
 }
 
 func (self *WebController) Captcha(ctx *iris.Context) {
