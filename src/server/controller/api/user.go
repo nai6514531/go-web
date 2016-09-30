@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"github.com/kataras/iris"
-	//"maizuo.com/soda-manager/src/server/model"
-	//"crypto/md5"
 	"fmt"
 	"github.com/bitly/go-simplejson"
+	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
@@ -14,35 +12,6 @@ import (
 	"time"
 )
 
-/**
- * @api {All} /api/user/<%=?%> 状态码
- * @apiGroup User
- * @apiName Status
- * @apiParam (错误码) {String} 01020100 拉取省列表成功
- * @apiParam (错误码) {String} 01020101 拉取省列表失败
- * @apiParam (错误码) {String} 01020200 拉取城市列表成功
- * @apiParam (错误码) {String} 01020201 拉取城市列表失败
- * @apiParam (错误码) {String} 01020300 拉取区列表成功
- * @apiParam (错误码) {String} 01020301 拉取区列表失败
- * @apiParam (错误码) {String} 01020400 拉取省详情成功
- * @apiParam (错误码) {String} 01020401 拉取省详情失败
- * @apiParam (错误码) {String} 01020500 拉取城市详情成功
- * @apiParam (错误码) {String} 01020501 拉取城市详情失败
- * @apiParam (错误码) {String} 01020600 拉取区域详情成功
- * @apiParam (错误码) {String} 01020601 拉取区域详情失败
- * @apiParam (错误码) {String} 01020700 拉取指定省份的城市列表成功
- * @apiParam (错误码) {String} 01020701 拉取指定省份的城市列表失败
- * @apiSuccess {String} status 业务状态码
- * @apiSuccess {String} data 业务数据
- * @apiSuccess {String} msg 业务状态描述信息
- * @apiSuccessExample {json} 响应体:
- *     HTTP/1.1 200 OK
- *     {
- *       "status": "",
- *       "data": {},
- *       "msg": ""
- *     }
- */
 type UserController struct {
 }
 
