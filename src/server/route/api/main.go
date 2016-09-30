@@ -14,14 +14,11 @@ func Api() {
 	})
 
 	var (
-		user    = &controller.UserController{}
-		session = &controller.SessionController{}
-		region  = &controller.RegionController{}
-		device  = &controller.DeviceController{}
-		referenceDevice  = &controller.ReferenceDeviceController{}
+		user            = &controller.UserController{}
+		region          = &controller.RegionController{}
+		device          = &controller.DeviceController{}
+		referenceDevice = &controller.ReferenceDeviceController{}
 	)
-
-	api.Post("/session", session.Create) //创建会话（登陆）
 
 	api.UseFunc(func(ctx *iris.Context) {
 		//your authentication logic here...
@@ -34,6 +31,9 @@ func Api() {
 		}
 	})
 
+	api.Post("/user/signin", user.Signin)
+	api.Get("/user/signout", user.Signout)
+	api.Get("/user/verificode", user.SendVerifiCode)
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id", user.Basic)
 
@@ -46,8 +46,7 @@ func Api() {
 	api.Get("/city/:id/district", region.DistrictOfCity)
 	api.Get("/district/:id", region.DistrictDetail)
 
-	api.Get("/device",device.List)
+	api.Get("/device", device.List)
 
-	api.Get("/reference-device",referenceDevice.List)
-
+	api.Get("/reference-device", referenceDevice.List)
 }
