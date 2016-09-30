@@ -14,12 +14,9 @@ func Api() {
 	})
 
 	var (
-		user    = &controller.UserController{}
-		session = &controller.SessionController{}
+		user   = &controller.UserController{}
 		region = &controller.RegionController{}
 	)
-
-	api.Post("/session", session.Create) //创建会话（登陆）
 
 	api.UseFunc(func(ctx *iris.Context) {
 		//your authentication logic here...
@@ -32,16 +29,16 @@ func Api() {
 		}
 	})
 
-	api.Get("/user/signin", user.Signin)
-	//api.Delete("/user/:id/goods", user.Delete)
-	//api.Post("/user", user.Create)
+	api.Post("/user/signin", user.Signin)
+	api.Get("/user/signout", user.Signout)
+	api.Get("/user/verificode", user.SendVerifiCode)
 
-	api.Get("/region/province",region.Province)
+	api.Get("/region/province", region.Province)
 	api.Get("/region/province/:id", region.ProvinceDetail)
-	api.Get("/region/province/:id/city",region.CityOfProvince)
+	api.Get("/region/province/:id/city", region.CityOfProvince)
 	api.Get("/region/city", region.City)
 	api.Get("/region/city/:id", region.CityDetail)
-	api.Get("/region/city/:id/district",region.DistrictOfCity)
+	api.Get("/region/city/:id/district", region.DistrictOfCity)
 	api.Get("/region/district/:id", region.DistrictDetail)
 
 }
