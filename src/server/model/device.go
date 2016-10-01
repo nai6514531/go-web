@@ -14,14 +14,13 @@ type Device struct {
 	FirstPulsePrice   int    `json:"first_pulse_price"`
 	SecondPulsePrice  int    `json:"second_pulse_price"`
 	ThirdPulsePrice   int    `json:"third_pulse_price"`
-	ForthPulsePrice   int    `json:"forth_pulse_price"`
+	FourthPulsePrice  int    `json:"fourth_pulse_price"`
 	FirstPulseName    string `json:"first_pulse_name"`
 	SecondPulseName   string `json:"second_pulse_name"`
 	ThirdPulseName    string `json:"third_pulse_name"`
-	ForthPulseName    string `json:"forth_pulse_name"`
+	FourthPulseName   string `json:"fourth_pulse_name"`
 	Status            int    `json:"status"`
 }
-
 
 func (Device) TableName() string {
 	return "device"

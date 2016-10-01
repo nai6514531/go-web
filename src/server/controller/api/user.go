@@ -10,6 +10,7 @@ import (
 )
 
 type UserController struct {
+
 }
 
 var (
@@ -20,11 +21,18 @@ var (
 
 		"01010200": "拉取用户列表成功!",
 		"01010201": "拉取用户列表失败!",
+
+		"01010300": "拉取用户设备列表成功!",
+		"01010301": "拉取用户设备列表失败!",
+
+		"01010400": "拉取用户指定学校设备列表成功!",
+		"01010401": "拉取用户指定学校设备列表失败!",
+
 	}
 )
 
 /**
- * @api {get} /api/user/signin 用户登陆
+ * @api {post} /api/user/signin 用户登陆
  * @apiName Signin
  * @apiGroup User
  */
@@ -92,4 +100,71 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		result = &enity.Result{"01010200", list, user_msg["01010200"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+}
+/**
+ * @api {get} /api/user/:id/device 用户设备列表
+ * @apiName DeviceList
+ * @apiGroup User
+ */
+func (self *UserController) DeviceList(ctx *iris.Context) {
+	userId, _ := ctx.URLParamInt("id")
+	deviceService := &service.DeviceService{}
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("per_page")
+	result := &enity.Result{}
+	list, err := deviceService.ListByUser(userId, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01010301", nil, user_msg["01010301"]}
+	} else {
+		result = &enity.Result{"01010300", list, user_msg["01010300"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+ * @api {get} /api/user/:id/school/:schoolId/device 用户指定学校设备列表
+ * @apiName DeviceOfSchool
+ * @apiGroup User
+ */
+func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
+	userId, _ := ctx.URLParamInt("id")
+	schoolId, _ := ctx.URLParamInt("school_id")
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("per_page")
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01010401", nil, user_msg["01010401"]}
+	} else {
+		result = &enity.Result{"01010400", list, user_msg["01010400"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+ * @api {get} /api/user/:id/school 用户学校列表
+ * @apiName SchoolList
+ * @apiGroup User
+ */
+func (self *UserController) SchoolList(ctx *iris.Context) {
+
+}
+
+/**
+ * @api {get} /api/user/:id/menu 用户菜单列表
+ * @apiName Menu
+ * @apiGroup User
+ */
+func (self *UserController) Menu(ctx *iris.Context) {
+
+}
+
+/**
+ * @api {get} /api/user/:id/permission 用户权限列表
+ * @apiName Permission
+ * @apiGroup User
+ */
+func (self *UserController) Permission(ctx *iris.Context) {
+
 }
