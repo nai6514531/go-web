@@ -31,6 +31,7 @@ const (
 
 var (
 	user_msg = map[string]string{
+
 		"01010100": "登陆成功",
 		"01010101": "账号不能为空",
 		"01010102": "登陆密码不能为空",
@@ -58,6 +59,12 @@ var (
 
 		"01010500": "拉取用户列表成功!",
 		"01010501": "拉取用户列表失败!",
+
+		"01010600": "拉取用户设备列表成功!",
+		"01010601": "拉取用户设备列表失败!",
+
+		"01010700": "拉取用户指定学校设备列表成功!",
+		"01010701": "拉取用户指定学校设备列表失败!",
 	}
 )
 
@@ -262,7 +269,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 
 /**
  * @api {get} /api/user 子用户列表
- * @apiName Detail
+ * @apiName ListByParent
  * @apiGroup User
  */
 func (self *UserController) ListByParent(ctx *iris.Context) {
@@ -278,4 +285,72 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		result = &enity.Result{"01010500", list, user_msg["01010500"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+ * @api {get} /api/user/:id/device 用户设备列表
+ * @apiName DeviceList
+ * @apiGroup User
+ */
+func (self *UserController) DeviceList(ctx *iris.Context) {
+	userId, _ := ctx.URLParamInt("id")
+	deviceService := &service.DeviceService{}
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("per_page")
+	result := &enity.Result{}
+	list, err := deviceService.ListByUser(userId, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
+	} else {
+		result = &enity.Result{"01010600", list, user_msg["01010600"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+ * @api {get} /api/user/:id/school/:schoolId/device 用户指定学校设备列表
+ * @apiName DeviceOfSchool
+ * @apiGroup User
+ */
+func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
+	userId, _ := ctx.URLParamInt("id")
+	schoolId, _ := ctx.URLParamInt("school_id")
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("per_page")
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
+	} else {
+		result = &enity.Result{"01010700", list, user_msg["01010700"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+ * @api {get} /api/user/:id/school 用户学校列表
+ * @apiName SchoolList
+ * @apiGroup User
+ */
+func (self *UserController) SchoolList(ctx *iris.Context) {
+
+}
+
+/**
+ * @api {get} /api/user/:id/menu 用户菜单列表
+ * @apiName Menu
+ * @apiGroup User
+ */
+func (self *UserController) Menu(ctx *iris.Context) {
+
+}
+
+/**
+ * @api {get} /api/user/:id/permission 用户权限列表
+ * @apiName Permission
+ * @apiGroup User
+ */
+func (self *UserController) Permission(ctx *iris.Context) {
+
 }

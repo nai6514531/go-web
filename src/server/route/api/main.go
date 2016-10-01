@@ -17,6 +17,7 @@ func Api() {
 		user            = &controller.UserController{}
 		region          = &controller.RegionController{}
 		device          = &controller.DeviceController{}
+		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
 	)
 
@@ -36,6 +37,15 @@ func Api() {
 	api.Get("/user/verificode", user.SendVerifiCode)
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id", user.Basic)
+	api.Get("/user/:id/device", user.DeviceList)
+	api.Get("/user/:id/school", user.SchoolList)
+	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
+	api.Get("/user/:id/menu", user.Menu)
+	api.Get("/user/:id/permission", user.Permission)
+	api.Post("/user/signin", user.Signin)
+
+	api.Get("/school")
+	api.Get("/school/:id", school.Basic)
 
 	api.Get("/province", region.Province)
 	api.Get("/province/:id", region.ProvinceDetail)
@@ -47,6 +57,14 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
+	api.Get("/device/:id", device.Basic)
+	api.Delete("/device/:id", device.Delete)
+	api.Post("/device", device.Create)
+	api.Put("/device/:id", device.Update)
+	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
+	api.Patch("/device/:id/status", device.UpdateStatus)
+	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
+
 }
