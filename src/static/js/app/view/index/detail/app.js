@@ -1,7 +1,7 @@
 import React from 'react';
 import './app.less';
 import { Breadcrumb, Button } from 'antd';
-import { DetailTable } from '../table/app';
+import { DeviceForm } from '../device_form/app';
 
 export class Detail extends React.Component {
 	render() {
@@ -16,8 +16,8 @@ export class Detail extends React.Component {
 				<div className="detail-button">
 					<Button type="primary">Primary</Button>
 				</div>
-				<div className="detail-body">
-					<DetailTable/>
+				<div className="detail-form">
+					<DeviceForm/>
 				</div>
 
 			</div>
