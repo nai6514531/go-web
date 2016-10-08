@@ -11,12 +11,16 @@ export class LoginForm extends React.Component {
 		super(props);
 		this.state = {
 			showCaptcha: false,
+			count: 2,
+			getSms: true,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
-
+		this.getCodeSms = this.getCodeSms.bind(this);
 	}
 	error(text) {
-		message.error(text);
+		if(text) {
+			message.error(text);
+		}
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -72,6 +76,27 @@ export class LoginForm extends React.Component {
 	}
 	getCodeSms() {
 		console.log('A');
+		this.setState({
+			getSms: false,
+		})
+		const that = this;
+		console.log(this.state.count);
+		let timer = setInterval(function () {
+			console.log(that);
+			let count = that.state.count;
+			if(count >= 0) {
+				that.setState({
+					time: that.state.count--,
+				})
+				console.log(that.state.count);
+			} else {
+				window.clearInterval(timer);
+				that.setState({
+					getSms: true,
+					count: 3,
+				})
+			}
+		},1000);
 	}
 	getCodeImg() {
 		console.log('B');
@@ -120,7 +145,11 @@ export class LoginForm extends React.Component {
 					})(
 						<div>
 							<Input  placeholder="请输入短信验证码" style={{ width: '60%', marginRight: 8 }}/>
-							<Button type="primary" className="codeSms" onClick={this.getCodeSms}>验证码</Button>
+							{this.state.getSms ?
+								<Button type="primary" className="codeSms" onClick={this.getCodeSms}>验证码</Button>
+								:
+								<Button type="primary" className="codeSms" disabled>{this.state.count} S</Button>
+							}
 						</div>
 					)}
 				</FormItem>
