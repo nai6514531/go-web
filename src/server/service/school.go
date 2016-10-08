@@ -1,12 +1,11 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 type SchoolService struct {
-
 }
 
 func (self *SchoolService) Basic(id int) (*model.School, error) {
@@ -16,4 +15,13 @@ func (self *SchoolService) Basic(id int) (*model.School, error) {
 		return nil, r.Error
 	}
 	return school, nil
+}
+
+func (self *SchoolService) ListByIdList(idList []int) (*[]*model.School, error) {
+	schools := &[]*model.School{}
+	r := common.DB.Where("id IN (?)", idList).Find(schools)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return schools, nil
 }

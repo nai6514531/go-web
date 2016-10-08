@@ -84,3 +84,21 @@ func (self *DeviceService) UpdatePulseName(device model.Device) bool {
 	}
 	return true
 }
+
+func (self *DeviceService) ListSchoolByUser(userId int) (*[]int, error) {
+	var schoolList []int
+	type MyDevice struct {
+		SchoolId int `json:"school_id"`
+	}
+	lists := &[]*MyDevice{}
+	//带去重
+	r := common.DB.Raw("SELECT DISTINCT school_id FROM device WHERE user_id = ? AND deleted_at IS NULL", userId).Scan(lists)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	//赋值到数组
+	for _, list := range *lists {
+		schoolList = append(schoolList, list.SchoolId)
+	}
+	return &schoolList, nil
+}

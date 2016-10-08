@@ -395,9 +395,47 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
  * @api {get} /api/user/:id/school 用户学校列表
  * @apiName SchoolList
  * @apiGroup User
- */
+ 	@apiSuccessExample Success-Response:
+   	HTTP/1.1 200 OK
+	{
+	  "status": "01010700",
+	  "data": [
+	    {
+	      "id": 1001,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "清华大学"
+	    },
+	    {
+	      "id": 1002,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "北京大学"
+	    }
+	  ],
+	  "msg": ""
+	}
+*/
 func (self *UserController) SchoolList(ctx *iris.Context) {
-
+	//获取学校id列表
+	userId, _ := ctx.ParamInt("id")
+	deviceService := &service.DeviceService{}
+	schoolIdList, err := deviceService.ListSchoolByUser(userId)
+	result := &enity.Result{}
+	if err != nil {
+		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+	}
+	//以id列表找学校详情
+	schoolService := &service.SchoolService{}
+	schools, err := schoolService.ListByIdList(*schoolIdList)
+	if err != nil {
+		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+	}
+	//返回
+	result = &enity.Result{"01010800", schools, user_msg["01010800"]}
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
