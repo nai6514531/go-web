@@ -69,10 +69,35 @@ var (
 )
 
 /**
- * @api {post} /api/user/signin 用户登陆
- * @apiName Signin
- * @apiGroup User
- */
+	@api {post} /api/link/signin 用户登陆
+ 	@apiName Signin
+ 	@apiGroup User
+
+ 	@apiSuccessExample Success-Response:
+ 	HTTP/1.1 200 OK
+	{
+	  "status": "01010400",
+	  "data": {
+	    "id": 1,
+	    "created_at": "0001-01-01T00:00:00Z",
+	    "updated_at": "0001-01-01T00:00:00Z",
+	    "deleted_at": null,
+	    "name": "麦芽生活",
+	    "contact": "Table",
+	    "address": "科兴科学园",
+	    "mobile": "13760216425",
+	    "account": "13760216425",
+	    "password": "e10adc3949ba59abbe56e057f20f883e",
+	    "telephone": "",
+	    "email": "",
+	    "parent_id": 0,
+	    "gender": 0,
+	    "age": 0,
+	    "status": 0
+	  },
+	  "msg": "拉取用户详情成功!"
+	}
+*/
 func (self *UserController) Signin(ctx *iris.Context) {
 	/*获取请求参数*/
 	body := simplejson.New()
@@ -157,10 +182,8 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	/*登陆成功*/
-	resultData := make(map[string]interface{})
 	ctx.Session().Set("userid", user.Id)
-	resultData["user"] = user
-	result := &enity.Result{"01010100", resultData, user_msg["01010100"]}
+	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	ctx.JSON(iris.StatusOK, &result)
 	return
 }
@@ -169,7 +192,14 @@ func (self *UserController) Signin(ctx *iris.Context) {
  * @api {get} /api/user/signout 用户注销
  * @apiName Signout
  * @apiGroup User
- */
+ * @apiSuccessExample Success-Response:
+ *  HTTP/1.1 200 OK
+	{
+	  "status": "00100200",
+	  "data": null,
+	  "msg": "注销成功"
+	}
+*/
 func (self *UserController) Signout(ctx *iris.Context) {
 	ctx.SessionDestroy()
 	result := &enity.Result{"00100200", nil, user_msg["00100200"]}
@@ -177,10 +207,18 @@ func (self *UserController) Signout(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/verificode?account=xxx 向特定用户发送验证码
- * @apiName SendVerifiCode
- * @apiGroup User
- */
+	@api {get} /api/link/verificode?account=xxx 向特定用户发送验证码
+	@apiName SendVerifiCode
+	@apiGroup User
+	@apiSuccessExample Success-Response:
+   	HTTP/1.1 200 OK
+  	{
+	  "status": "00100300",
+	  "data": null,
+	  "msg": "发送验证码成功"
+	}
+*/
+
 func (self *UserController) SendVerifiCode(ctx *iris.Context) {
 	account := ctx.URLParam("account")
 
@@ -253,6 +291,31 @@ func (self *UserController) SendVerifiCode(ctx *iris.Context) {
  * @api {get} /api/user/:id 用户详情
  * @apiName Detail
  * @apiGroup User
+ *
+ * @apiSuccessExample Success-Response:
+ *  HTTP/1.1 200 OK
+ *	{
+ *	  "status": "01010400",
+ *	  "data": {
+ *	    "id": 1,
+ *	    "created_at": "0001-01-01T00:00:00Z",
+ *	    "updated_at": "0001-01-01T00:00:00Z",
+ *	    "deleted_at": null,
+ *	    "name": "麦芽生活",
+ *	    "contact": "Table",
+ *	    "address": "科兴科学园",
+ *	    "mobile": "13760216425",
+ *	    "account": "13760216425",
+ *	    "password": "e10adc3949ba59abbe56e057f20f883e",
+ *	    "telephone": "",
+ *	    "email": "",
+ *	    "parent_id": 0,
+ *	    "gender": 0,
+ *	    "age": 0,
+ *	    "status": 0
+ *	  },
+ *	  "msg": "拉取用户详情成功!"
+ *	}
  */
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")

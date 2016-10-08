@@ -31,10 +31,10 @@ func Api() {
 			ctx.Text(401, ctx.PathString()+" is not authorized for you")
 		}
 	})
+	api.Post("/link/signin", user.Signin)
+	api.Get("/link/signout", user.Signout)
+	api.Get("/link/verificode", user.SendVerifiCode)
 
-	api.Post("/user/signin", user.Signin)
-	api.Get("/user/signout", user.Signout)
-	api.Get("/user/verificode", user.SendVerifiCode)
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id", user.Basic)
 	api.Get("/user/:id/device", user.DeviceList)
@@ -42,7 +42,6 @@ func Api() {
 	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
-	api.Post("/user/signin", user.Signin)
 
 	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
