@@ -2,7 +2,7 @@ import React from 'react';
 import './app.less';
 
 import { Head } from './head/app';
-import { LeftMenu } from './menu/app';
+import { BodyPanel } from './body_panel/app';
 
 
 const App = React.createClass({
@@ -10,7 +10,7 @@ const App = React.createClass({
     return (
       <div className="index">
 		  <Head/>
-		  <LeftMenu/>
+		  <BodyPanel/>
       </div>
     );
   }
