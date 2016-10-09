@@ -12,9 +12,10 @@ import {
 	GET_CITY_LIST,
 	GETING_CITY_DETAIL,
 	GET_CITY_DETAIL,
+	GETING_CITY_DISTRICT_LIST,
+	GET_CITY_DISTRICT_LIST,
 
-	GETING_DISTRICT_LIST,
-	GET_DISTRICT_LIST,
+
 	GETING_DISTRICT_DETAIL,
 	GET_DISTRICT_DETAIL,
 } from '../constants/index';
@@ -82,14 +83,14 @@ export default function (state = initialState, action) {
 				city: { detail: action.result, }
 			};
 
-		case GETING_DISTRICT_LIST:
+		case GETING_CITY_DISTRICT_LIST:
 			return {
 				...state,
 			};
-		case GET_DISTRICT_LIST:
+		case GET_CITY_DISTRICT_LIST:
 			return {
 				...state,
-				district: { list: action.result, }
+				city: { district: action.result, }
 			};
 		case GETING_DISTRICT_DETAIL:
 			return {

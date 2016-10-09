@@ -20,12 +20,12 @@ import {
 } from '../constants/index';
 
 
-export function deviceList(id) {
+export function deviceList() {
 	return dispatch => {
 		dispatch({
 			type: GETING_DEVICE_LIST,
 		});
-		list(id).then((result) => {
+		list().then((result) => {
 			dispatch({
 				type: GET_DEVICE_LIST,
 				result,
@@ -52,12 +52,12 @@ export function deviceDetail(id) {
 	};
 }
 
-export function deviceCreate(id, device) {
+export function deviceCreate(device) {
 	return dispatch => {
 		dispatch({
 			type: POSTING_DEVICE_DETAIL,
 		});
-		create(id, device).then((result) => {
+		create(device).then((result) => {
 			dispatch({
 				type: POST_DEVICE_DETAIL,
 				result,
@@ -66,12 +66,12 @@ export function deviceCreate(id, device) {
 	};
 }
 
-export function deviceEdit(id) {
+export function deviceEdit(id, device) {
 	return dispatch => {
 		dispatch({
 			type: PUTING_DEVICE_DETAIL,
 		});
-		edit(id).then((result) => {
+		edit(id, device).then((result) => {
 			dispatch({
 				type: PUT_DEVICE_DETAIL,
 				result,

@@ -1,44 +1,20 @@
-import api from '../library/axios/api';
+import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
 
 const UserService = {
-	list: (id) => {
-		return api.get('/api/user/:' + id).then((response) => {
-			return response.data;
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});;
+	list: () => {
+		return apiGet(`/api/user`);
 	},
 	detail: (id) => {
-		return api.get('/api/user/:' + id).then((response) => {
-			return response.data;
-		});
+		return apiGet(`/api/user/:${id}`);
 	},
-	create: (device) => {
-		return api.post('/api/user', {
-			data: device
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+	create: (user) => {
+		return apiPost(`/api/user`, user);
 	},
-	edit: (id, device) => {
-		return api.put('/api/user/:' + id, {
-			data: device
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+	edit: (id, user) => {
+		return apiPut(`/api/user/:${id}`, user);
 	},
 	remove: (id) => {
-		return api.delete('/api/user/:' + id).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+		return apiDelete(`/api/user/:${id}`);
 	}
 };
 

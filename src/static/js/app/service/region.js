@@ -1,62 +1,34 @@
-import api from '../library/axios/api';
+import { apiGet } from '../library/axios/api';
 
 const RegionService = {
 	province: {
 		list: () => {
-			return api.get('/api/province').then((response) => {
-				return response.data;
-			}).then(function (response) {
-				return response.data;
-			}, function (response) {
-				throw new Error(response.data);
-			});;
+			return apiGet(`/api/province`);
 		},
 		detail: (id) => {
-			return api.get('/api/province/:' + id ).then((response) => {
-				return response.data;
-			});
+			return apiGet(`/api/province/:${id}`);
 		},
 		city: (id) => {
-			return api.get('/api/province/:' + id + '/city').then((response) => {
-				return response.data;
-			});
+			return apiGet(`/api/province/:${id}/city`);
 		},
 		school: (id) => {
-			return api.get('/api/province/:' + id + '/school').then((response) => {
-				return response.data;
-			});
+			return apiGet(`/api/province/:${id}/school`);
 		},
 	},
 	city: {
 		list: () => {
-			return api.get('/api/city').then((response) => {
-				return response.data;
-			}).then(function (response) {
-				return response.data;
-			}, function (response) {
-				throw new Error(response.data);
-			});;
+			return apiGet(`/api/city`);
 		},
 		detail: (id) => {
-			return api.get('/api/city/:' + id).then((response) => {
-				return response.data;
-			});
+			return apiGet(`/api/city/:${id}`);
 		},
+		district: (id) => {
+			return apiGet(`/api/city/:${id}/district`);
+		}
 	},
 	district: {
-		list: (id) => {
-			return api.get('/api/city/:' + id + '/district').then((response) => {
-				return response.data;
-			}).then(function (response) {
-				return response.data;
-			}, function (response) {
-				throw new Error(response.data);
-			});;
-		},
 		detail: (id) => {
-			return api.get('/api/district/:' + id).then((response) => {
-				return response.data;
-			});
+			return apiGet(`/api/district/:${id}`);
 		},
 	}
 };

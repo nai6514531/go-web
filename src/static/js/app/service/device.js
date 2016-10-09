@@ -1,44 +1,20 @@
-import api from '../library/axios/api';
+import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
 
 const DeviceService = {
-	list: (id) => {
-		return api.get('api/device/:' + id).then((response) => {
-			return response.data;
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});;
+	list: () => {
+		return apiGet(`/api/device`);
 	},
 	detail: (id) => {
-		return api.get('/api/device/:' + id).then((response) => {
-			return response.data;
-		});
+		return apiGet(`/api/device/:${id}`);
 	},
 	create: (device) => {
-		return api.post('/api/device', {
-			data: device
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+		return apiPost(`/api/device`,device);
 	},
 	edit: (id, device) => {
-		return api.put('/api/device/:' + id, {
-			data: device
-		}).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+		return apiPut(`/api/device/:${id}`,device);
 	},
 	remove: (id) => {
-		return api.delete('/api/device/:' + id).then(function (response) {
-			return response.data;
-		}, function (response) {
-			throw new Error(response.data);
-		});
+		return apiDelete(`/api/device/:${id}`,device);
 	}
 };
 

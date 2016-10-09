@@ -19,9 +19,10 @@ import {
 	GET_CITY_LIST,
 	GETING_CITY_DETAIL,
 	GET_CITY_DETAIL,
+	GETING_CITY_DISTRICT_LIST,
+	GET_CITY_DISTRICT_LIST,
 
-	GETING_DISTRICT_LIST,
-	GET_DISTRICT_LIST,
+	
 	GETING_DISTRICT_DETAIL,
 	GET_DISTRICT_DETAIL,
 } from '../constants/index';
@@ -58,12 +59,12 @@ export function provinceDetail(id) {
 	};
 }
 
-export function provinceCityList() {
+export function provinceCityList(id) {
 	return dispatch => {
 		dispatch({
 			type: GETING_PROVINCE_CITY_LIST,
 		});
-		province.city().then((result) => {
+		province.city(id).then((result) => {
 			dispatch({
 				type: GET_PROVINCE_CITY_LIST,
 				result,
@@ -72,12 +73,12 @@ export function provinceCityList() {
 	};
 }
 
-export function provinceSchoolList() {
+export function provinceSchoolList(id) {
 	return dispatch => {
 		dispatch({
 			type: GETING_PROVINCE_SCHOOL_LIST,
 		});
-		province.school().then((result) => {
+		province.school(id).then((result) => {
 			dispatch({
 				type: GET_PROVINCE_SCHOOL_LIST,
 				result,
@@ -86,7 +87,7 @@ export function provinceSchoolList() {
 	};
 }
 
-export function cityList(id) {
+export function cityList() {
 	return dispatch => {
 		dispatch({
 			type: GETING_CITY_LIST,
@@ -118,21 +119,21 @@ export function cityDetail(id) {
 	};
 }
 
-export function districtList(id) {
+export function cityDistrictList(id) {
 	return dispatch => {
 		dispatch({
-			type: GETING_DISTRICT_LIST,
+			type: GETING_CITY_DISTRICT_LIST,
 		});
-		district.list(id).then((result) => {
+		city.district(id).then((result) => {
 			dispatch({
-				type: GET_DISTRICT_LIST,
+				type: GET_CITY_DISTRICT_LIST,
 				result,
 			});
 		});
 	};
 }
 
-export function districtDetail(id) {
+export function cityDistrictDetail(id) {
 	return dispatch => {
 		dispatch({
 			type: GETING_DISTRICT_DETAIL,

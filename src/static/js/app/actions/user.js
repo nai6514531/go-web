@@ -20,12 +20,12 @@ import {
 } from '../constants/index';
 
 
-export function userList(id) {
+export function userList() {
 	return dispatch => {
 		dispatch({
 			type: GETING_USER_LIST,
 		});
-		list(id).then((result) => {
+		list().then((result) => {
 			dispatch({
 				type: GET_USER_LIST,
 				result,
@@ -52,12 +52,12 @@ export function userDetail(id) {
 	};
 }
 
-export function userCreate(id, device) {
+export function userCreate(user) {
 	return dispatch => {
 		dispatch({
 			type: POSTING_USER_DETAIL,
 		});
-		create(id, device).then((result) => {
+		create(user).then((result) => {
 			dispatch({
 				type: POST_USER_DETAIL,
 				result,
@@ -66,12 +66,12 @@ export function userCreate(id, device) {
 	};
 }
 
-export function userEdit(id) {
+export function userEdit(id, user) {
 	return dispatch => {
 		dispatch({
 			type: PUTING_USER_DETAIL,
 		});
-		edit(id).then((result) => {
+		edit(id, user).then((result) => {
 			dispatch({
 				type: PUT_USER_DETAIL,
 				result,
