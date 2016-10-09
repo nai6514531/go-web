@@ -68,6 +68,9 @@ var (
 
 		"01010800": "拉取用户学校列表成功!",
 		"01010801": "拉取用户学校列表失败!",
+
+		"01010900": "拉取用户菜单列表成功!",
+		"01010901": "拉取用户菜单列表失败!",
 	}
 )
 
@@ -429,12 +432,16 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	result := &enity.Result{}
 	if err != nil {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	//以id列表找学校详情
 	schoolService := &service.SchoolService{}
 	schools, err := schoolService.ListByIdList(*schoolIdList)
 	if err != nil {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	//返回
 	result = &enity.Result{"01010800", schools, user_msg["01010800"]}
@@ -442,12 +449,69 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/:id/menu 用户菜单列表
- * @apiName Menu
- * @apiGroup User
- */
+ 	@api {get} /api/user/:id/menu 用户菜单列表
+  	@apiName Menu
+  	@apiGroup User
+  	@apiSuccessExample Success-Response:
+ 	HTTP/1.1 200 OK
+	{
+	  "status": "01010900",
+	  "data": [
+	    {
+	      "id": 1,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "代理商管理",
+	      "url": "/#!/agent/",
+	      "parent_id": 0,
+	      "level": 1,
+	      "status": 0
+	    },
+	    {
+	      "id": 2,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "添加代理商",
+	      "url": "/#!/agent/add",
+	      "parent_id": 1,
+	      "level": 2,
+	      "status": 0
+	    },
+	    ...
+	  ],
+	  "msg": "拉取用户菜单列表成功!"
+	}
+*/
 func (self *UserController) Menu(ctx *iris.Context) {
-
+	result := &enity.Result{}
+	//根据userid找角色id列表
+	userId, _ := ctx.ParamInt("id")
+	roleService := &service.RoleService{}
+	roleIds, err := roleService.ListIdByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//根据角色id列表找权限id列表
+	permissionService := &service.PermissionService{}
+	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
+	if err != nil {
+		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//根据权限id列表找menu详情
+	menuService := &service.MenuService{}
+	menuList, err := menuService.ListByPermissionIds(permissionIds)
+	if err != nil {
+		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+	} else {
+		result = &enity.Result{"01010900", menuList, user_msg["01010900"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
