@@ -22,35 +22,35 @@ var (
 		"01030202": "设备id不能小于0!",
 		"01030203": "设备状态不能小于0!",
 
-		"01030300":  "更新设备成功!",
-		"01030301":  "更新设备失败!",
-		"01030302":  "请填写设备编号!",
-		"01030303":  "设备编号格式不对,长度为10位!",
-		"01030304":  "请选择省份!",
-		"01030305":  "请选择学校!",
-		"01030306":  "请填写楼层信息!",
-		"01030307":  "请选择关联设备!",
-		"01030308":  "请填写单脱价格!",
-		"01030309":  "请填写快洗价格!",
-		"010303010": "请填写标准洗价格!",
-		"010303011": "请填写大件洗价格!",
-		"010303012": "请填写大件洗价格!",
+		"01030300": "更新设备成功!",
+		"01030301": "更新设备失败!",
+		"01030302": "请填写设备编号!",
+		"01030303": "设备编号格式不对,长度为10位!",
+		"01030304": "请选择省份!",
+		"01030305": "请选择学校!",
+		"01030306": "请填写楼层信息!",
+		"01030307": "请选择关联设备!",
+		"01030308": "请填写单脱价格!",
+		"01030309": "请填写快洗价格!",
+		"01030310": "请填写标准洗价格!",
+		"01030311": "请填写大件洗价格!",
+		"01030312": "请填写大件洗价格!",
 
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
 
-		"01030500":  "更新设备成功!",
-		"01030501":  "更新设备失败!",
-		"01030502":  "请填写设备编号!",
-		"01030503":  "设备编号格式不对,长度为10位!",
-		"01030504":  "请选择省份!",
-		"01030505":  "请选择学校!",
-		"01030506":  "请填写楼层信息!",
-		"01030507":  "请选择关联设备!",
-		"01030508":  "请填写单脱价格!",
-		"01030509":  "请填写快洗价格!",
-		"010305010": "请填写标准洗价格!",
-		"010305011": "请填写大件洗价格!",
+		"01030500": "更新设备成功!",
+		"01030501": "更新设备失败!",
+		"01030502": "请填写设备编号!",
+		"01030503": "设备编号格式不对,长度为10位!",
+		"01030504": "请选择省份!",
+		"01030505": "请选择学校!",
+		"01030506": "请填写楼层信息!",
+		"01030507": "请选择关联设备!",
+		"01030508": "请填写单脱价格!",
+		"01030509": "请填写快洗价格!",
+		"01030510": "请填写标准洗价格!",
+		"01030511": "请填写大件洗价格!",
 
 		"01030600": "删除设备成功!",
 		"01030601": "删除设备失败!",
@@ -78,28 +78,90 @@ var (
 )
 
 /**
- * @api {get} /api/device/:id 设备详情
- * @apiName Basic
- * @apiGroup Device
- */
+	@api {get} /api/device/:id 设备详情
+	@apiName Basic
+	@apiGroup Device
+  	@apiSuccessExample 成功返回
+	{
+	  "status": "01030100",
+	  "data": {
+	    "id": 3,
+	    "created_at": "0001-01-01T00:00:00Z",
+	    "updated_at": "0001-01-01T00:00:00Z",
+	    "deleted_at": null,
+	    "user_id": 0,
+	    "label": "",
+	    "serial_number": "",
+	    "reference_device_id": 0,
+	    "province_id": 0,
+	    "city_id": 0,
+	    "district_id": 0,
+	    "school_id": 0,
+	    "address": "",
+	    "first_pulse_price": 0,
+	    "second_pulse_price": 0,
+	    "third_pulse_price": 0,
+	    "fourth_pulse_price": 0,
+	    "first_pulse_name": "",
+	    "second_pulse_name": "",
+	    "third_pulse_name": "",
+	    "fourth_pulse_name": "",
+	    "status": 0
+	  },
+	  "msg": "拉取设备详情成功"
+	}
+	@apiParam (错误码) {String} 01030101 拉取设备详情失败
+*/
 func (self *DeviceController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	device, err := deviceService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01030101", nil, user_msg["01030101"]}
+		result = &enity.Result{"01030101", nil, device_msg["01030101"]}
 	} else {
-		result = &enity.Result{"01030100", device, user_msg["01030100"]}
+		result = &enity.Result{"01030100", device, device_msg["01030100"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
- * @api {get} /api/device 设备列表
- * @apiName List
- * @apiGroup Device
- */
+ 	@api {get} /api/device 设备列表
+ 	@apiName List
+	@apiGroup Device
+ 	@apiSuccessExample 成功返回
+ 	{
+	  "status": "01030400",
+	  "data": [
+	    {
+	      "id": 3,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "user_id": 0,
+	      "label": "",
+	      "serial_number": "",
+	      "reference_device_id": 0,
+	      "province_id": 0,
+	      "city_id": 0,
+	      "district_id": 0,
+	      "school_id": 0,
+	      "address": "",
+	      "first_pulse_price": 0,
+	      "second_pulse_price": 0,
+	      "third_pulse_price": 0,
+	      "fourth_pulse_price": 0,
+	      "first_pulse_name": "",
+	      "second_pulse_name": "",
+	      "third_pulse_name": "",
+	      "fourth_pulse_name": "",
+	      "status": 0
+	    }...
+	  ],
+	  "msg": "拉取设备列表成功!"
+	}
+	@apiParam (错误码) {String} 01030401 拉取设备列表失败
+*/
 func (self *DeviceController) List(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("per_page")
@@ -158,7 +220,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	var device model.Device
 	ctx.ReadJSON(&device)
 	if id <= 0 {
-		result = &enity.Result{"010303012", nil, device_msg["010303012"]}
+		result = &enity.Result{"01030312", nil, device_msg["01030312"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -203,12 +265,12 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		return
 	}
 	if device.ThirdPulsePrice <= 0 {
-		result = &enity.Result{"010303010", nil, device_msg["010303010"]}
+		result = &enity.Result{"01030310", nil, device_msg["01030310"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	if device.FourthPulsePrice <= 0 {
-		result = &enity.Result{"010303011", nil, device_msg["010303011"]}
+		result = &enity.Result{"01030311", nil, device_msg["01030311"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -274,12 +336,12 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		return
 	}
 	if device.ThirdPulsePrice <= 0 {
-		result = &enity.Result{"010305010", nil, device_msg["010305010"]}
+		result = &enity.Result{"01030510", nil, device_msg["01030510"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	if device.FourthPulsePrice <= 0 {
-		result = &enity.Result{"010305011", nil, device_msg["010305011"]}
+		result = &enity.Result{"01030511", nil, device_msg["01030511"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -318,10 +380,41 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 }
 
 /**
- * @api {post} /api/device 添加设备
- * @apiName Create
- * @apiGroup Device
- */
+ 	@api {post} /api/device 添加设备
+ 	@apiName Create
+ 	@apiGroup Device
+  	@apiParamExample {json} 请求例子:
+	{
+		"serial_number":"abcdefghiw",
+		"province_id":440000,
+		"school_id":12051,
+		"label":"一楼",
+		"reference_device_id":1,
+		"first_pulse_price":10,
+		"second_pulse_price":20,
+		"third_pulse_price":30,
+		"fourth_pulse_price":40
+	}
+	@apiSuccessExample 成功返回:
+ 	HTTP/1.1 200 OK
+	{
+		"status": "01030700",
+		"data": null,
+		"msg": "添加设备成功!"
+	}
+	@apiParam (错误码) {String} 01030701 添加设备失败
+	@apiParam (错误码) {String} 01030702 请填写设备编号
+	@apiParam (错误码) {String} 01030703 设备编号格式不对,长度为10位!
+	@apiParam (错误码) {String} 01030704 请选择省份
+	@apiParam (错误码) {String} 01030705 请选择学校
+	@apiParam (错误码) {String} 01030706 请填写楼层信息
+	@apiParam (错误码) {String} 01030707 请选择关联设备
+	@apiParam (错误码) {String} 01030708 请填写单脱价格
+	@apiParam (错误码) {String} 01030709 请填写快洗价格
+	@apiParam (错误码) {String} 01030710 请填写标准洗价格
+	@apiParam (错误码) {String} 01030711 请填写大件洗价格
+	@apiParam (错误码) {String} 01030712 请填写大件洗价格
+*/
 func (self *DeviceController) Create(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
