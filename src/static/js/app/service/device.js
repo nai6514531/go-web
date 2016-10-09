@@ -14,7 +14,10 @@ const DeviceService = {
 		return apiPut(`/api/device/:${id}`,device);
 	},
 	remove: (id) => {
-		return apiDelete(`/api/device/:${id}`,device);
+		return apiDelete(`/api/device/:${id}`);
+	},
+	reference: () => {
+		return apiGet(`/api/reference-device`);
 	}
 };
 

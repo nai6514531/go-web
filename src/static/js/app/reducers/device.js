@@ -9,6 +9,9 @@ import {
 	PUT_DEVICE_DETAIL,
 	REMOVING_DEVICE,
 	REMOVE_DEVICE,
+	
+	GET_REF_DEVICE,
+	GETING_REF_DEVICE,
 } from '../constants/index';
 
 const initialState = {
@@ -61,6 +64,16 @@ export default function (state = initialState, action) {
 			return {
 				...state,
 				result: action.result,
+			};
+		case GETING_REF_DEVICE:
+			return {
+				...state,
+				ref_device: action.result,
+			};
+		case GET_REF_DEVICE:
+			return {
+				...state,
+				ref_device: action.result,
 			};
 		default:
 			return state;

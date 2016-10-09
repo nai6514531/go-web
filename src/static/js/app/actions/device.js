@@ -17,6 +17,8 @@ import {
 	PUT_DEVICE_DETAIL,
 	REMOVING_DEVICE,
 	REMOVE_DEVICE,
+	GETING_REF_DEVICE,
+	GET_REF_DEVICE
 } from '../constants/index';
 
 
@@ -93,5 +95,20 @@ export function deviceRemove(id) {
 		});
 	};
 }
+
+export function refDevice() {
+	return dispatch => {
+		dispatch({
+			type: GETING_REF_DEVICE,
+		});
+		reference().then((result) => {
+			dispatch({
+				type: GET_REF_DEVICE,
+				result,
+			});
+		});
+	};
+}
+
 
 
