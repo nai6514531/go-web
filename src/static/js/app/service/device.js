@@ -1,6 +1,5 @@
 import api from '../library/axios/api';
 
-// 根据你的接口封装以下服务
 const DeviceService = {
 	list: (id) => {
 		return api.get('api/device/:' + id).then((response) => {
@@ -16,9 +15,9 @@ const DeviceService = {
 			return response.data;
 		});
 	},
-	create: (card) => {
+	create: (device) => {
 		return api.post('/api/device', {
-			data: card
+			data: device
 		}).then(function (response) {
 			return response.data;
 		}, function (response) {
