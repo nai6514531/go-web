@@ -27,3 +27,8 @@ gulp.task('deve', shell.task([
 gulp.task('prod', shell.task([
 	'godep go run main.go -conf ./config/prod',
 ]));
+
+gulp.task('doc', shell.task([
+	'apidoc -i ./src/server/ -o doc/',
+]));
+

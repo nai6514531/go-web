@@ -56,19 +56,19 @@ var (
 		"01030601": "删除设备失败!",
 		"01030602": "设备id不能小于0!",
 
-		"01030700":  "添加设备成功!",
-		"01030701":  "添加设备失败!",
-		"01030702":  "请填写设备编号!",
-		"01030703":  "设备编号格式不对,长度为10位!",
-		"01030704":  "请选择省份!",
-		"01030705":  "请选择学校!",
-		"01030706":  "请填写楼层信息!",
-		"01030707":  "请选择关联设备!",
-		"01030708":  "请填写单脱价格!",
-		"01030709":  "请填写快洗价格!",
-		"010307010": "请填写标准洗价格!",
-		"010307011": "请填写大件洗价格!",
-		"010307012": "请填写大件洗价格!",
+		"01030700": "添加设备成功!",
+		"01030701": "添加设备失败!",
+		"01030702": "请填写设备编号!",
+		"01030703": "设备编号格式不对,长度为10位!",
+		"01030704": "请选择省份!",
+		"01030705": "请选择学校!",
+		"01030706": "请填写楼层信息!",
+		"01030707": "请选择关联设备!",
+		"01030708": "请填写单脱价格!",
+		"01030709": "请填写快洗价格!",
+		"01030710": "请填写标准洗价格!",
+		"01030711": "请填写大件洗价格!",
+		"01030712": "请填写大件洗价格!",
 
 		"01030800": "更新设备脉冲名成功!",
 		"01030801": "更新设备脉冲名失败!",
@@ -323,7 +323,68 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
  * @apiGroup Device
  */
 func (self *DeviceController) Create(ctx *iris.Context) {
-
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	var device model.Device
+	ctx.ReadJSON(&device)
+	if device.SerialNumber == "" {
+		result = &enity.Result{"01030702", nil, device_msg["01030702"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if len(device.SerialNumber) != 10 {
+		result = &enity.Result{"01030703", nil, device_msg["01030703"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.ProvinceId <= 0 {
+		result = &enity.Result{"01030704", nil, device_msg["01030704"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.SchoolId <= 0 {
+		result = &enity.Result{"01030705", nil, device_msg["01030705"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.Label == "" {
+		result = &enity.Result{"01030706", nil, device_msg["01030706"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.ReferenceDeviceId <= 0 {
+		result = &enity.Result{"01030707", nil, device_msg["01030707"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.FirstPulsePrice <= 0 {
+		result = &enity.Result{"01030708", nil, device_msg["01030708"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.SecondPulsePrice <= 0 {
+		result = &enity.Result{"01030709", nil, device_msg["01030709"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.ThirdPulsePrice <= 0 {
+		result = &enity.Result{"01030710", nil, device_msg["01030710"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.FourthPulsePrice <= 0 {
+		result = &enity.Result{"01030711", nil, device_msg["01030711"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	success := deviceService.Create(&device)
+	if !success {
+		result = &enity.Result{"01030701", nil, device_msg["01030701"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01030700", nil, device_msg["01030700"]}
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**

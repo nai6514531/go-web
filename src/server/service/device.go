@@ -45,6 +45,14 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 	return list, nil
 }
 
+func (self *DeviceService) Create(device *model.Device) bool {
+	r := common.DB.Create(device)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
+}
+
 func (self *DeviceService) Update(device model.Device) bool {
 	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
