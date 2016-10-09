@@ -71,6 +71,9 @@ var (
 
 		"01010900": "拉取用户菜单列表成功!",
 		"01010901": "拉取用户菜单列表失败!",
+
+		"01011000": "拉取用户权限列表成功!",
+		"01011001": "拉取用户权限列表失败!",
 	}
 )
 
@@ -515,10 +518,62 @@ func (self *UserController) Menu(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/:id/permission 用户权限列表
- * @apiName Permission
- * @apiGroup User
- */
+ 	@api {get} /api/user/:id/permission 用户权限列表
+ 	@apiName Permission
+ 	@apiGroup User
+   	@apiSuccessExample Success-Response:
+ 	HTTP/1.1 200 OK
+{
+  "status": "01011000",
+  "data": [
+    {
+      "id": 1,
+      "created_at": "0001-01-01T00:00:00Z",
+      "updated_at": "0001-01-01T00:00:00Z",
+      "deleted_at": null,
+      "name": "代理商管理",
+      "type": 0,
+      "status": 0
+    },
+    {
+      "id": 2,
+      "created_at": "0001-01-01T00:00:00Z",
+      "updated_at": "0001-01-01T00:00:00Z",
+      "deleted_at": null,
+      "name": "添加代理商",
+      "type": 0,
+      "status": 0
+    },
+	...
+  ],
+  "msg": "拉取用户权限列表成功!"
+}
+*/
 func (self *UserController) Permission(ctx *iris.Context) {
-
+	result := &enity.Result{}
+	//根据userid找角色id列表
+	userId, _ := ctx.ParamInt("id")
+	roleService := &service.RoleService{}
+	roleIds, err := roleService.ListIdByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//根据角色id列表找权限id列表
+	permissionService := &service.PermissionService{}
+	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
+	if err != nil {
+		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//根据权限id列表找权限详情
+	permissionList, err := permissionService.ListByIds(permissionIds)
+	if err != nil {
+		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+	} else {
+		result = &enity.Result{"01011000", permissionList, user_msg["01011000"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
 }
