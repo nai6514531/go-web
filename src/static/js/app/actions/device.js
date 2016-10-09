@@ -20,7 +20,7 @@ import {
 } from '../constants/index';
 
 
-export function list(id) {
+export function deviceList(id) {
 	return dispatch => {
 		dispatch({
 			type: GETING_DEVICE_LIST,
@@ -34,7 +34,7 @@ export function list(id) {
 	};
 }
 
-export function detail(id) {
+export function deviceDetail(id) {
 	return dispatch => {
 		dispatch({
 			type: GETING_DEVICE_DETAIL,
@@ -52,7 +52,7 @@ export function detail(id) {
 	};
 }
 
-export function create(id, device) {
+export function deviceCreate(id, device) {
 	return dispatch => {
 		dispatch({
 			type: POSTING_DEVICE_DETAIL,
@@ -66,7 +66,7 @@ export function create(id, device) {
 	};
 }
 
-export function edit(id) {
+export function deviceEdit(id) {
 	return dispatch => {
 		dispatch({
 			type: PUTING_DEVICE_DETAIL,
@@ -80,7 +80,7 @@ export function edit(id) {
 	};
 }
 
-export function remove(id) {
+export function deviceRemove(id) {
 	return dispatch => {
 		dispatch({
 			type: REMOVING_DEVICE,
