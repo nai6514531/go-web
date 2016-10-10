@@ -1,41 +1,31 @@
-import {
-  province,
-  city,
-  district,
-} from '../service/region/RegionService';
-
+import RegionService from '../service/region';
 
 import {
-	GETING_PROVINCE_LIST,
 	GET_PROVINCE_LIST,
-	GETING_PROVINCE_DETAIL,
 	GET_PROVINCE_DETAIL,
-	GETING_PROVINCE_CITY_LIST,
 	GET_PROVINCE_CITY_LIST,
-	GETING_PROVINCE_SCHOOL_LIST,
 	GET_PROVINCE_SCHOOL_LIST,
 
-	GETING_CITY_LIST,
 	GET_CITY_LIST,
-	GETING_CITY_DETAIL,
 	GET_CITY_DETAIL,
-	GETING_CITY_DISTRICT_LIST,
 	GET_CITY_DISTRICT_LIST,
 
-	
-	GETING_DISTRICT_DETAIL,
+
 	GET_DISTRICT_DETAIL,
 } from '../constants/index';
 
 export function provinceList() {
 	return dispatch => {
-		dispatch({
-			type: GETING_PROVINCE_LIST,
-		});
-		province.list().then((result) => {
+		RegionService.province.list().then((result) => {
 			dispatch({
 				type: GET_PROVINCE_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_PROVINCE_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -43,17 +33,16 @@ export function provinceList() {
 
 export function provinceDetail(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_PROVINCE_DETAIL,
-		});
-		province.detail(id).then((result) => {
+		RegionService.province.detail(id).then((result) => {
 			dispatch({
 				type: GET_PROVINCE_DETAIL,
-				result,
+				result: { fetch: true, result },
 			});
-		}).catch(() => {
+		}).catch((msg) => {
 			dispatch({
 				type: GET_PROVINCE_DETAIL,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -61,13 +50,16 @@ export function provinceDetail(id) {
 
 export function provinceCityList(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_PROVINCE_CITY_LIST,
-		});
-		province.city(id).then((result) => {
+		RegionService.province.city(id).then((result) => {
 			dispatch({
 				type: GET_PROVINCE_CITY_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_PROVINCE_CITY_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -75,13 +67,16 @@ export function provinceCityList(id) {
 
 export function provinceSchoolList(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_PROVINCE_SCHOOL_LIST,
-		});
-		province.school(id).then((result) => {
+		RegionService.province.school(id).then((result) => {
 			dispatch({
 				type: GET_PROVINCE_SCHOOL_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_PROVINCE_SCHOOL_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -89,13 +84,16 @@ export function provinceSchoolList(id) {
 
 export function cityList() {
 	return dispatch => {
-		dispatch({
-			type: GETING_CITY_LIST,
-		});
-		city.list(id).then((result) => {
+		RegionService.city.list(id).then((result) => {
 			dispatch({
 				type: GET_CITY_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_CITY_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -103,17 +101,16 @@ export function cityList() {
 
 export function cityDetail(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_CITY_DETAIL,
-		});
-		city.detail(id).then((result) => {
+		RegionService.city.detail(id).then((result) => {
 			dispatch({
 				type: GET_CITY_DETAIL,
-				result,
+				result: { fetch: true, result },
 			});
-		}).catch(() => {
+		}).catch((msg) => {
 			dispatch({
 				type: GET_CITY_DETAIL,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -121,13 +118,16 @@ export function cityDetail(id) {
 
 export function cityDistrictList(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_CITY_DISTRICT_LIST,
-		});
-		city.district(id).then((result) => {
+		RegionService.city.district(id).then((result) => {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_CITY_DISTRICT_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -135,17 +135,16 @@ export function cityDistrictList(id) {
 
 export function cityDistrictDetail(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_DISTRICT_DETAIL,
-		});
-		district.detail(id).then((result) => {
+		RegionService.district.detail(id).then((result) => {
 			dispatch({
 				type: GET_DISTRICT_DETAIL,
-				result,
+				result: { fetch: true, result },
 			});
-		}).catch(() => {
+		}).catch((msg) => {
 			dispatch({
-				type: GET_DISTRICT_DETAIL,
+				type: GET_CITY_DISTRICT_LIST,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
