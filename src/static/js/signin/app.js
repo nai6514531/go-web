@@ -10,12 +10,10 @@ export class LoginForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			showCaptcha: false,
-			count: 2,
-			getSms: true,
-		};
+			url: '',
+		}
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.getCodeSms = this.getCodeSms.bind(this);
+		this.getCaptcha = this.getCaptcha.bind(this);
 	}
 	error(text) {
 		if(text) {
@@ -27,11 +25,10 @@ export class LoginForm extends React.Component {
 		const that = this;
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
-				console.log('Errors in form!!!');
 				return;
 			} else {
 				const { username, password, verificode, captcha } = values;
-				fetch('/api', {
+				fetch('/api/user/signin', {
 					method: 'post',
 					headers: {
 						'Accept': 'application/json',
@@ -54,11 +51,6 @@ export class LoginForm extends React.Component {
 								window.location.href = '/admin';
 								break;
 							}
-							case 7: {
-								that.setState({showCaptcha: true,})
-								that.getCodeImg();
-								break;
-							}
 							default: {
 								tips = response.msg;
 								break;
@@ -67,42 +59,36 @@ export class LoginForm extends React.Component {
 						if(tips){
 							that.error(tips);
 						}
-						console.log('request succeeded with JSON response', response)
 					}).catch(function(error) {
-					console.log('request failed', error)
+						throw new Error(error);
 				});
 			}
 		});
 	}
-	getCodeSms() {
-		console.log('A');
-		this.setState({
-			getSms: false,
-		})
+	getCaptcha(e) {
+		if(e){
+			e.preventDefault();
+		}
 		const that = this;
-		console.log(this.state.count);
-		let timer = setInterval(function () {
-			console.log(that);
-			let count = that.state.count;
-			if(count >= 0) {
-				that.setState({
-					time: that.state.count--,
-				})
-				console.log(that.state.count);
-			} else {
-				window.clearInterval(timer);
-				that.setState({
-					getSms: true,
-					count: 3,
-				})
-			}
-		},1000);
+		fetch('/captcha.png', {
+			method: 'get',
+			headers: {
+				'Content-Type': 'image/png; charset=UTF-8'
+			},
+			credentials: 'same-origin'
+		}).then(checkStatus)
+			.then(function(response) {
+				var timestamp = Date.parse((new Date()).toString());
+				that.setState({ url: `${response.url}?${timestamp}` })
+			}).catch(function(error) {
+			throw new Error(error);
+		});
 	}
-	getCodeImg() {
-		console.log('B');
+	componentWillMount() {
+		this.getCaptcha();
 	}
 	render() {
-		const { getFieldDecorator, getFieldError, isFieldValidating } = this.props.form;
+		const { getFieldDecorator } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
@@ -136,26 +122,6 @@ export class LoginForm extends React.Component {
 				</FormItem>
 				<FormItem
 					{...formItemLayout}
-					label="短信验证码"
-				>
-					{getFieldDecorator('verificode', {
-						rules: [
-							{ required: true, message: '请输入短信验证码' },
-						],
-					})(
-						<div>
-							<Input  placeholder="请输入短信验证码" style={{ width: '60%', marginRight: 8 }}/>
-							{this.state.getSms ?
-								<Button type="primary" className="codeSms" onClick={this.getCodeSms}>验证码</Button>
-								:
-								<Button type="primary" className="codeSms" disabled>{this.state.count} S</Button>
-							}
-						</div>
-					)}
-				</FormItem>
-				{this.state.showCaptcha ?
-				<FormItem
-					{...formItemLayout}
 					label="图形验证码"
 				>
 					{getFieldDecorator('captcha', {
@@ -165,11 +131,11 @@ export class LoginForm extends React.Component {
 					})(
 						<div>
 							<Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
-							<img className="codeImg" onClick={this.getCodeImg} src={require('./logo_mz.jpg')} />
+							<img className="captcha"  src={this.state.url} />
+							<span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
 						</div>
 					)}
 				</FormItem>
-					:''}
 				<FormItem wrapperCol={{ span: 12, offset: 7 }}>
 					<Button type="primary" onClick={this.handleSubmit}>登录</Button>
 				</FormItem>
