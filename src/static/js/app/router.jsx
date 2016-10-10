@@ -4,9 +4,9 @@ import Application from './application.jsx';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { createStore, applyMiddleware } from 'redux';
+import rootReducer from './reducers/index';
 
-export const store = applyMiddleware(thunk)(createStore)(InkyReducers);
-
+export const store = applyMiddleware(thunk)(createStore)(rootReducer);
 
 const router = (
 	<Provider store = {store}>

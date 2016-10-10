@@ -9,7 +9,7 @@ import {
 	PUT_DEVICE_DETAIL,
 	REMOVING_DEVICE,
 	REMOVE_DEVICE,
-	
+
 	GET_REF_DEVICE,
 	GETING_REF_DEVICE,
 } from '../constants/index';

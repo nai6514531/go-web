@@ -1,36 +1,27 @@
-import {
-	list,
-	detail,
-	create,
-	edit,
-	remove,
-} from '../service/device/DeviceService';
+import DeviceService from '../service/device';
 
 import {
-	GETING_DEVICE_LIST,
 	GET_DEVICE_LIST,
-	GETING_DEVICE_DETAIL,
 	GET_DEVICE_DETAIL,
-	POSTING_DEVICE_DETAIL,
 	POST_DEVICE_DETAIL,
-	PUTING_DEVICE_DETAIL,
 	PUT_DEVICE_DETAIL,
-	REMOVING_DEVICE,
 	REMOVE_DEVICE,
-	GETING_REF_DEVICE,
 	GET_REF_DEVICE
 } from '../constants/index';
 
 
 export function deviceList() {
 	return dispatch => {
-		dispatch({
-			type: GETING_DEVICE_LIST,
-		});
-		list().then((result) => {
+		DeviceService.list().then((result) => {
 			dispatch({
 				type: GET_DEVICE_LIST,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_DEVICE_LIST,
+				result: { fetch: false, msg },
+				
 			});
 		});
 	};
@@ -38,17 +29,16 @@ export function deviceList() {
 
 export function deviceDetail(id) {
 	return dispatch => {
-		dispatch({
-			type: GETING_DEVICE_DETAIL,
-		});
-		detail(id).then((result) => {
+		DeviceService.detail(id).then((result) => {
 			dispatch({
 				type: GET_DEVICE_DETAIL,
-				result,
+				result: { fetch: true, result },
 			});
-		}).catch(() => {
+		}).catch((msg) => {
 			dispatch({
 				type: GET_DEVICE_DETAIL,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -56,13 +46,16 @@ export function deviceDetail(id) {
 
 export function deviceCreate(device) {
 	return dispatch => {
-		dispatch({
-			type: POSTING_DEVICE_DETAIL,
-		});
-		create(device).then((result) => {
+		DeviceService.create(device).then((result) => {
 			dispatch({
 				type: POST_DEVICE_DETAIL,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: POST_DEVICE_DETAIL,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -70,13 +63,16 @@ export function deviceCreate(device) {
 
 export function deviceEdit(id, device) {
 	return dispatch => {
-		dispatch({
-			type: PUTING_DEVICE_DETAIL,
-		});
-		edit(id, device).then((result) => {
+		DeviceService.edit(id, device).then((result) => {
 			dispatch({
 				type: PUT_DEVICE_DETAIL,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: PUT_DEVICE_DETAIL,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -84,13 +80,16 @@ export function deviceEdit(id, device) {
 
 export function deviceRemove(id) {
 	return dispatch => {
-		dispatch({
-			type: REMOVING_DEVICE,
-		});
-		remove(id).then((result) => {
+		DeviceService.edit(id).then((result) => {
 			dispatch({
 				type: REMOVE_DEVICE,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: REMOVE_DEVICE,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
@@ -98,13 +97,16 @@ export function deviceRemove(id) {
 
 export function refDevice() {
 	return dispatch => {
-		dispatch({
-			type: GETING_REF_DEVICE,
-		});
-		reference().then((result) => {
+		DeviceService.reference().then((result) => {
 			dispatch({
 				type: GET_REF_DEVICE,
-				result,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_REF_DEVICE,
+				result: { fetch: false, msg },
+
 			});
 		});
 	};
