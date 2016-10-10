@@ -1,233 +1,27 @@
-@detail-body-width: 96%;
-
-.index{
-  position: relative;
-}
-.detail{
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 999;
-}
-.content {
-  width: 46%;
-  height: 80%;
-  position: absolute;
-  left: 27%;
-  top: 10%;
-}
-.detail .layer{
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: #000;
-  opacity: 0.3;
-}
-
-.detail_body {
-  width: 100%;
-  height: 100%;
-  -webkit-transform-style: preserve-3d;
-  -webkit-transition: all 1s;
-}
-
-.detail_body .flip {
-  width: 100%;
-  height: 100%;
-  opacity: 1;
-  position: absolute;
-  background: #fff;
-}
-
-
-.detail_body .list{
-  -webkit-transform:rotateY(0) translateZ(1px);
-  background: #fff;
-  .head{
-    width: @detail-body-width;
-    margin: 0 auto;
-    padding-bottom: 0.2rem;
-    padding-top: 0.2rem;
-    border-bottom: 1px solid #ebebeb;
-    overflow: hidden;
-    img{
-      width: 40%;
-      float: left;
-      padding: 5px;
-      border: 1px solid #dddddd;
-      display: block;
-      margin-right: 0.3rem;
-      background: #fff;
-    }
-    .msg{
-      width: 50%;
-      float: left;
-      p.p1{
-        font-size: 0.4rem;
-        padding-top: 0.4rem;
-        color: #ff5000;
-      }
-      p.p2{
-        font-size: 0.3rem;
-        padding-top: 0.1rem;
-        color: #000;
-      }
-      p.p3{
-        font-size: 0.25rem;
-        padding-top: 0.1rem;
-        color: #666666;
-      }
-    }
+.detail {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  .detail-head {
+	border-bottom: 1px solid #ddd;
+	margin: 0.3rem;
+	padding: 0.3rem;
   }
-  .choice{
-    width: @detail-body-width;
-    margin: 0 auto;
-    padding-bottom: 0.2rem;
-    padding-top: 0.3rem;
-    border-bottom: 1px solid #ebebeb;
-    h3{
-      font-size: 0.35rem;
-      padding-bottom: 0.2rem;
-    }
-    .list{
-      overflow: hidden;
-      div{
-        float: left;
-        width: 0.9rem;
-        height: 0.5rem;
-        line-height: 0.5rem;
-        font-size: 0.25rem;
-        border-radius: 5px;
-        text-align: center;
-        border: 1px solid #c9c9c9;
-        color: #777777;
-        margin-right: 0.25rem;
-      }
-      .active{
-        color: #fff;
-        background: #ff5000;
-        
-      }
-    }
+  .detail-button {
+	margin: 0.3rem;
   }
-  .acount{
-    border-bottom: 0px;
+  .detail-body {
+	margin: 0.3rem;
   }
-  .foot{
-    width: 100%;
-    height: 1rem;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    .cost{
-      float: left;
-      width: 60%;
-      text-indent: 0.4rem;
-      height: 1rem;
-      line-height: 1rem;
-      background: #eeeeee;
-      font-size: 0.4rem;
-    }
-    .btn{
-      width: 40%;
-      height: 1rem;
-      background: #ff5000;
-      color: #fff;
-      float: left;
-      font-size: 0.3rem;
-      text-align: center;
-      line-height: 1rem;
-    }
+  .detail-form {
+	overflow: auto;
+	padding: 0.5rem;
+	margin-bottom: 1.5rem;
+	button {
+	  margin: 0.2rem;
+	}
   }
-  .closeBtn{
-    width: 0.5rem;
-    height: 0.5rem;
-    line-height: 0.5rem;
-    font-size: 0.3rem;
-    border-radius: 50%;
-    text-align: center;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    background: url('../../../../../img/app/close.jpg') no-repeat;
-    background-size: 100%;
+  .detail-filter {
+	padding: 0.3rem;
   }
 }
-
-
-.detail_body .wechat {
-  text-align: center;
-  -webkit-transform:rotateY(180deg) translateZ(1px);
-  .body{
-    position: relative;
-    overflow: hidden;
-    p.p1{
-      margin-top: 4%;
-      line-height: 0.5rem;
-      font-size: 0.3rem;
-      img{
-        display: inline-block;
-        vertical-align: middle;
-        margin-right: 0.2rem;
-      }
-    }
-    p.p2{
-      color: #ff5000;
-      font-size: 0.4rem;
-      margin-top: 2%;
-      margin-bottom: 4%;
-    }
-    p.p3{
-      font-size: 0.3rem;
-      color: #666;
-      margin-top: 4%;
-    }
-    p.p4{
-      font-size: 0.25rem;
-      color: #666;
-      margin-top: 2%;
-    }
-    .btn{
-      width: 0.5rem;
-      height: 0.5rem;
-      line-height: 0.5rem;
-      font-size: 0.3rem;
-      border-radius: 50%;
-      text-align: center;
-      position: absolute;
-      right: 5px;
-      top: 5px;
-      background: url('../../../../../img/app/close.jpg') no-repeat;
-      background-size: 100%;
-    }
-  }
-}
-
-.toWechat {
-  -webkit-animation: toWechat 0.2s linear forwards;
-}
-@-webkit-keyframes toWechat {
-  0% {
-    -webkit-transform: rotateY(0);
-  }
-  100% {
-    -webkit-transform: rotateY(180deg);
-  }
-}
-.toList {
-  -webkit-animation: toList 0.2s linear forwards;
-}
-@-webkit-keyframes toList {
-  0% {
-    -webkit-transform: rotateY(180deg);
-  }
-  100% {
-    -webkit-transform: rotateY(0);
-  }
-}
-
-
