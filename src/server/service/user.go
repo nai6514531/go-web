@@ -20,10 +20,28 @@ func (self *UserService) FindByAccount(name string) (*model.User, error) {
 	return user, nil
 }
 
+//通过手机号码查找user表
+func (self *UserService) FindByMobile(mobile string) (*model.User, error) {
+	user := &model.User{}
+	r := common.DB.Where("mobile = ?", mobile).First(user)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return user, nil
+}
+
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
 	r := common.DB.Create(user)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
+}
+
+func (self *UserService) Update(user *model.User) bool {
+	r := common.DB.Model(&model.User{}).Where("id = ?", user.Id).Updates(user)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

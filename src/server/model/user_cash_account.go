@@ -1,4 +1,4 @@
-""package model
+package model
 
 /**
   用户信息
