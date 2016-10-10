@@ -15,3 +15,11 @@ func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccoun
 	}
 	return true
 }
+
+func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) bool {
+	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
+}

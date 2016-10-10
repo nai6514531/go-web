@@ -68,26 +68,39 @@ var (
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
 
-		"01010500": "拉取用户详情成功!",
-		"01010501": "拉取用户详情失败!",
+		"01010500": "修改用户记录成功!",
+		"01010501": "登陆账号不能为空!",
+		"01010502": "名称不能为空!",
+		"01010503": "联系人不能为空!",
+		"01010504": "密码不能为空!",
+		"01010505": "密码不能少于6位!",
+		"01010506": "联系人手机不能为空!",
+		"01010507": "登陆账号已被注册!",
+		"01010508": "请填写正确的type值1-实时分账，2-财务结算!",
+		"01010509": "结算账号不能为空",
+		"01010510": "修改用户记录失败",
+		"01010511": "修改用户结算账号失败",
 
-		"01010600": "拉取用户列表成功!",
-		"01010601": "拉取用户列表失败!",
+		"01010600": "拉取用户详情成功!",
+		"01010601": "拉取用户详情失败!",
 
-		"01010700": "拉取用户设备列表成功!",
-		"01010701": "拉取用户设备列表失败!",
+		"01010700": "拉取用户列表成功!",
+		"01010701": "拉取用户列表失败!",
 
-		"01010800": "拉取用户指定学校设备列表成功!",
-		"01010801": "拉取用户指定学校设备列表失败!",
+		"01010800": "拉取用户设备列表成功!",
+		"01010801": "拉取用户设备列表失败!",
 
-		"01010900": "拉取用户学校列表成功!",
-		"01010901": "拉取用户学校列表失败!",
+		"01010900": "拉取用户指定学校设备列表成功!",
+		"01010901": "拉取用户指定学校设备列表失败!",
 
-		"01011000": "拉取用户菜单列表成功!",
-		"01011001": "拉取用户菜单列表失败!",
+		"01011000": "拉取用户学校列表成功!",
+		"01011001": "拉取用户学校列表失败!",
 
-		"01011100": "拉取用户权限列表成功!",
-		"01011101": "拉取用户权限列表失败!",
+		"01011100": "拉取用户菜单列表成功!",
+		"01011101": "拉取用户菜单列表失败!",
+
+		"01011200": "拉取用户权限列表成功!",
+		"01011201": "拉取用户权限列表失败!",
 	}
 )
 
@@ -99,7 +112,7 @@ var (
  	@apiSuccessExample Success-Response:
  	HTTP/1.1 200 OK
 	{
-	  "status": "01010500",
+	  "status": "01010600",
 	  "data": {
 	    "id": 1,
 	    "created_at": "0001-01-01T00:00:00Z",
@@ -427,6 +440,130 @@ func (self *UserController) Create(ctx *iris.Context) {
 }
 
 /**
+	@api {put} /api/user/:id 更新一个用户
+	@apiName Update
+	@apiGroup User
+	@apiSuccessExample Success-Response:
+   	HTTP/1.1 200 OK
+	{
+	  "status": "01010500",
+	  "data": null,
+	  "msg": "更新用户记录成功!"
+	}
+	@apiParamExample {json} 请求例子:
+	{
+		"user":{
+			"account":"aazz啊啊啊啊aa",
+			"name":"卖座网",
+			"contact":"mainland",
+			"password":"123516",
+			"mobile":"1802338046这种1啊啊啊啊26",
+			"telephone":"0766-2885411",
+			"email":"317808023@qq.com"
+		},
+		"cash":{
+			"type":1,
+			"real_name":"伍明煜",
+			"bank_name":"中国银行",
+			"account":"44444441200001111",
+			"mobile":"18023380455",
+			"city_id":3333,
+			"province_id":2222
+		}
+	}
+*/
+func (self *UserController) Update(ctx *iris.Context) {
+	/*获取请求参数*/
+	type Body struct {
+		User model.User            `json:"user"`
+		Cash model.UserCashAccount `json:"cash"`
+	}
+	var body Body
+	userId, _ := ctx.ParamInt("id")
+	userService := &service.UserService{}
+	userCashAccountService := &service.UserCashAccountService{}
+	result := &enity.Result{}
+	ctx.ReadJSON(&body)
+
+	//user信息校验
+	if body.User.Account == "" {
+		result = &enity.Result{"01010501", nil, user_msg["01010501"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if body.User.Name == "" {
+		result = &enity.Result{"01010502", nil, user_msg["01010502"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if body.User.Contact == "" {
+		result = &enity.Result{"01010503", nil, user_msg["01010503"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if body.User.Password == "" {
+		result = &enity.Result{"01010504", nil, user_msg["01010504"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if len(body.User.Password) < 6 {
+		result = &enity.Result{"01010505", nil, user_msg["01010505"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if body.User.Mobile == "" {
+		result = &enity.Result{"01010506", nil, user_msg["01010506"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//判断登陆名是否已经存在
+	currentUser, _ := userService.FindByAccount(body.User.Account)
+	if currentUser != nil { //可以找到
+		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//判断手机号码是否已经存在
+	currentUser, _ = userService.FindByMobile(body.User.Mobile)
+	if currentUser != nil { //可以找到
+		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//cash内容判断
+	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
+		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if body.Cash.Account == "" {
+		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	//更新到user表
+	body.User.Id = userId
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey")) //设置session userId作为parentid
+	ok := userService.Update(&body.User)
+	if !ok {
+		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//更新结算账号信息
+	body.Cash.UserId = userId //cash记录的userid设置为新插入条目的id
+	ok = userCashAccountService.UpdateByUserId(&body.Cash)
+	if !ok {
+		result = &enity.Result{"01010511", nil, user_msg["01010511"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
+	ctx.JSON(iris.StatusOK, &result)
+}
+
+/**
  * @api {get} /api/user/:id 用户详情
  * @apiName Detail
  * @apiGroup User
@@ -434,7 +571,7 @@ func (self *UserController) Create(ctx *iris.Context) {
  * @apiSuccessExample Success-Response:
  *  HTTP/1.1 200 OK
  *	{
- *	  "status": "01010500",
+ *	  "status": "01010600",
  *	  "data": {
  *	    "id": 1,
  *	    "created_at": "0001-01-01T00:00:00Z",
@@ -462,9 +599,9 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01010501", nil, user_msg["01010501"]}
+		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
 	} else {
-		result = &enity.Result{"01010500", user, user_msg["01010500"]}
+		result = &enity.Result{"01010600", user, user_msg["01010600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -482,9 +619,9 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := userService.SubList(parentId, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
+		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
 	} else {
-		result = &enity.Result{"01010600", list, user_msg["01010600"]}
+		result = &enity.Result{"01010700", list, user_msg["01010700"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -502,9 +639,9 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
+		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
 	} else {
-		result = &enity.Result{"01010700", list, user_msg["01010700"]}
+		result = &enity.Result{"01010800", list, user_msg["01010800"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -523,9 +660,9 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
 	} else {
-		result = &enity.Result{"01010800", list, user_msg["01010800"]}
+		result = &enity.Result{"01010900", list, user_msg["01010900"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -537,7 +674,7 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
  	@apiSuccessExample Success-Response:
    	HTTP/1.1 200 OK
 	{
-	  "status": "01010800",
+	  "status": "01010900",
 	  "data": [
 	    {
 	      "id": 1001,
@@ -564,7 +701,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	schoolIdList, err := deviceService.ListSchoolByUser(userId)
 	result := &enity.Result{}
 	if err != nil {
-		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -572,12 +709,12 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	schoolService := &service.SchoolService{}
 	schools, err := schoolService.ListByIdList(*schoolIdList)
 	if err != nil {
-		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//返回
-	result = &enity.Result{"01010900", schools, user_msg["01010900"]}
+	result = &enity.Result{"01011000", schools, user_msg["01011000"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -588,7 +725,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
   	@apiSuccessExample Success-Response:
  	HTTP/1.1 200 OK
 	{
-	  "status": "01011000",
+	  "status": "01011100",
 	  "data": [
 	    {
 	      "id": 1,
@@ -624,7 +761,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	roleService := &service.RoleService{}
 	roleIds, err := roleService.ListIdByUserId(userId)
 	if err != nil {
-		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -632,7 +769,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	permissionService := &service.PermissionService{}
 	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
 	if err != nil {
-		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -640,9 +777,9 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	menuService := &service.MenuService{}
 	menuList, err := menuService.ListByPermissionIds(permissionIds)
 	if err != nil {
-		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
 	} else {
-		result = &enity.Result{"01011000", menuList, user_msg["01011000"]}
+		result = &enity.Result{"01011100", menuList, user_msg["01011100"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -654,7 +791,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
    	@apiSuccessExample Success-Response:
  	HTTP/1.1 200 OK
 {
-  "status": "01011100",
+  "status": "01011200",
   "data": [
     {
       "id": 1,
@@ -686,7 +823,7 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	roleService := &service.RoleService{}
 	roleIds, err := roleService.ListIdByUserId(userId)
 	if err != nil {
-		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+		result = &enity.Result{"01011201", nil, user_msg["01011201"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -694,16 +831,16 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	permissionService := &service.PermissionService{}
 	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
 	if err != nil {
-		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+		result = &enity.Result{"01011201", nil, user_msg["01011201"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//根据权限id列表找权限详情
 	permissionList, err := permissionService.ListByIds(permissionIds)
 	if err != nil {
-		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+		result = &enity.Result{"01011201", nil, user_msg["01011201"]}
 	} else {
-		result = &enity.Result{"01011100", permissionList, user_msg["01011100"]}
+		result = &enity.Result{"01011200", permissionList, user_msg["01011200"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }

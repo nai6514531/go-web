@@ -37,6 +37,7 @@ func Api() {
 
 	api.Get("/user", user.ListByParent)
 	api.Post("/user", user.Create)
+	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
 	api.Get("/user/:id/device", user.DeviceList)
 	api.Get("/user/:id/school", user.SchoolList)
