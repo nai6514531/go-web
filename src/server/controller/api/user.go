@@ -139,10 +139,9 @@ func (self *UserController) Signin(ctx *iris.Context) {
 
 	/*请先申请一个图片验证码*/
 	captchaKey := viper.GetString("server.captcha.Key")
-	fmt.Println(captchaKey)
-	captchaCache := ctx.Session().Get(captchaKey)
-	fmt.Println(captchaCache)
-	if captchaCache == "" { //-1不存在
+	captchaCache := ctx.Session().GetString(captchaKey)
+	fmt.Println("图片验证码：" + captchaCache)
+	if captchaCache == "" { //不存在
 		result := &enity.Result{"01010104", nil, user_msg["01010104"]}
 		ctx.JSON(iris.StatusOK, &result)
 		return
