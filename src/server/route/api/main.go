@@ -23,7 +23,7 @@ func Api() {
 
 	api.UseFunc(func(ctx *iris.Context) {
 		//your authentication logic here...
-		println("from ", ctx.PathString())
+		println("from ", ctx.MethodString(), ctx.PathString())
 		authorized := true
 		if authorized {
 			ctx.Next()
@@ -36,6 +36,7 @@ func Api() {
 	api.Get("/link/verificode", user.SendVerifiCode)
 
 	api.Get("/user", user.ListByParent)
+	api.Post("/user", user.Create)
 	api.Get("/user/:id", user.Basic)
 	api.Get("/user/:id/device", user.DeviceList)
 	api.Get("/user/:id/school", user.SchoolList)
