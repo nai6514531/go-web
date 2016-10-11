@@ -48,10 +48,11 @@ var (
 		"01010505": "密码不能少于6位!",
 		"01010506": "联系人手机不能为空!",
 		"01010507": "登陆账号已被注册!",
-		"01010508": "请填写正确的type值1-实时分账，2-财务结算!",
-		"01010509": "结算账号不能为空",
-		"01010510": "修改用户记录失败",
-		"01010511": "修改用户结算账号失败",
+		"01010508": "手机号码已被使用!",
+		"01010509": "请填写正确的type值1-实时分账，2-财务结算!",
+		"01010510": "结算账号不能为空",
+		"01010511": "修改用户记录失败",
+		"01010512": "修改用户结算账号失败",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -388,26 +389,26 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 	//判断登陆名是否已经存在
 	currentUser, _ := userService.FindByAccount(body.User.Account)
-	if currentUser != nil { //可以找到
+	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//判断手机号码是否已经存在
 	currentUser, _ = userService.FindByMobile(body.User.Mobile)
-	if currentUser != nil { //可以找到
-		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
+	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
+		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//cash内容判断
 	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
-		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
+		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	if body.Cash.Account == "" {
-		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
+		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -415,17 +416,17 @@ func (self *UserController) Update(ctx *iris.Context) {
 	//更新到user表
 	body.User.Id = userId
 	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey")) //设置session userId作为parentid
-	ok := userService.Update(&body.User)
-	if !ok {
-		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
+	err := userService.Update(&body.User)
+	if err != nil {
+		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//更新结算账号信息
 	body.Cash.UserId = userId //cash记录的userid设置为新插入条目的id
-	ok = userCashAccountService.UpdateByUserId(&body.Cash)
-	if !ok {
-		result = &enity.Result{"01010511", nil, user_msg["01010511"]}
+	err = userCashAccountService.UpdateByUserId(&body.Cash)
+	if err != nil {
+		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
