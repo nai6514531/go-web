@@ -482,12 +482,37 @@ func (self *UserController) Basic(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user 子用户列表
- * @apiName ListByParent
- * @apiGroup User
- */
+	@api {get} /api/user?page=xxx&per_page=xxx 子用户列表
+	@apiName ListByParent
+	@apiGroup User
+ 	@apiSuccessExample Success-Response:
+   	HTTP/1.1 200 OK
+	{
+	  "status": "01010700",
+	  "data": [
+	    {
+	      "id": 14,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "苏打生活",
+	      "contact": "Table",
+	      "address": "科兴科学园",
+	      "mobile": "13148496853",
+	      "account": "13148496853",
+	      "password": "e10adc3949ba59abbe56e057f20f883e",
+	      "telephone": "",
+	      "email": "",
+	      "parent_id": 20,
+	      "gender": 0,
+	      "age": 0,
+	      "status": 0
+	    }...
+	  "msg": "拉取用户列表成功!"
+	}
+*/
 func (self *UserController) ListByParent(ctx *iris.Context) {
-	parentId, _ := ctx.URLParamInt("parent_id")
+	parentId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("per_page")
 	userService := &service.UserService{}
