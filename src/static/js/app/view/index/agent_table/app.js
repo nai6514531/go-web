@@ -107,7 +107,7 @@ class AgentTable extends React.Component {
 	}
 	getList(){
 		this.props.userList();
-		this.props.userDetail();
+		this.props.userDetail(20);
 	}
 	showList(){
 		console.log(this.props.list);
