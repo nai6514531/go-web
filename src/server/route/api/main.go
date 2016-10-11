@@ -19,6 +19,7 @@ func Api() {
 		device          = &controller.DeviceController{}
 		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
+		sync            = &controller.SyncController{}
 	)
 
 	api.UseFunc(func(ctx *iris.Context) {
@@ -65,5 +66,10 @@ func Api() {
 	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
+
+	api.Get("/sync/user", sync.SyncUser)
+	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
+	api.Get("/sync/device", sync.SyncDevice)
+	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 
 }

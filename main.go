@@ -15,6 +15,8 @@ func main() {
 
 	common.SetUpDB()
 
+	common.SetUpMNDB()
+
 	common.SetUpRedis()
 
 	//common.SetUpRateLimiter()

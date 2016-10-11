@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/service"
 )
 
 type ReferenceDeviceController struct {

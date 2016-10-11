@@ -9,7 +9,6 @@ import (
 )
 
 type WebController struct {
-
 }
 
 func (self *WebController) Index(ctx *iris.Context) {
