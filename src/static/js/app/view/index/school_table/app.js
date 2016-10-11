@@ -1,6 +1,8 @@
 import React from 'react';
 import './app.less';
 import { Table } from 'antd';
+import { SchoolFilter } from '../school_filter/app'
+import { Link } from 'react-router';
 
 const columns = [{
 	title: '序号',
@@ -18,7 +20,7 @@ const columns = [{
 	title: '操作',
 	dataIndex: 'action',
 	key: 'action',
-	render: () => <a href="#">查看模块</a>,
+	render: () => <Link to="/agent/device/list">查看模块</Link>,
 }];
 
 const dataSource = [{
@@ -29,7 +31,7 @@ const dataSource = [{
 }
 ];
 
-export class SchoolTable extends React.Component {
+export default class SchoolTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -62,13 +64,19 @@ export class SchoolTable extends React.Component {
 	render() {
 		return (
 			<div className="table">
-				<Table columns={columns}
-					   rowKey={record => record.registered}
-					   dataSource={dataSource}
-					   pagination={this.state.pagination}
-					   loading={this.state.loading}
-					   onChange={this.handleTableChange}
-				/>
+
+				{this.props.children ? this.props.children :
+					<div>
+						<SchoolFilter/>
+						<Table columns={columns}
+							   rowKey={record => record.registered}
+							   dataSource={dataSource}
+							   pagination={this.state.pagination}
+							   loading={this.state.loading}
+							   onChange={this.handleTableChange}
+						/>
+					</div>
+				}
 			</div>
 		);
 	}

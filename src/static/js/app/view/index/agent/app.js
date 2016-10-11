@@ -1,9 +1,8 @@
 import React from 'react';
 import './app.less';
 import { Breadcrumb, Button } from 'antd';
-import { DeviceForm } from '../device_form/app';
 
-export class Detail extends React.Component {
+export default class Agent extends React.Component {
 	render() {
 		return (
 			<div className="detail">
@@ -13,19 +12,15 @@ export class Detail extends React.Component {
 						<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</div>
-				<div className="detail-button">
-					<Button type="primary">Primary</Button>
-				</div>
 				<div className="detail-form">
-					<DeviceForm/>
+					{this.props.children}
 				</div>
-
 			</div>
 		);
 	}
 }
 
 
-Detail.propTypes = {
+Agent.propTypes = {
 	title: React.PropTypes.string,
 };
