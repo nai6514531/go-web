@@ -22,16 +22,8 @@ func Api() {
 		referenceDevice = &controller.ReferenceDeviceController{}
 	)
 
-	api.UseFunc(func(ctx *iris.Context) {
-		//your authentication logic here...
-		println("from ", ctx.MethodString(), ctx.PathString())
-		authorized := true
-		if authorized {
-			ctx.Next()
-		} else {
-			ctx.Text(401, ctx.PathString()+" is not authorized for you")
-		}
-	})
+	api.UseFunc(common.CheckApiRoot)
+
 	api.Post("/link/signin", user.Signin)
 	api.Get("/link/signout", user.Signout)
 	//api.Get("/link/verificode", user.SendVerifiCode)
