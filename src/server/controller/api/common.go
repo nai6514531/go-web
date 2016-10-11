@@ -36,7 +36,7 @@ func (self *CommonController) CheckHasLogin(ctx *iris.Context) {
 func (self *CommonController) CheckUserId(ctx *iris.Context) {
 	optUserId, _ := ctx.ParamInt("id") //要操作的用户id
 	result := &enity.Result{}
-	myUserId := ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey"))
+	myUserId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
 	//根据要操作的用户id查找到其父用户id
 	userService := &service.UserService{}
 	user, err := userService.Basic(optUserId)
