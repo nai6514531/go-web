@@ -68,5 +68,5 @@ func Api() {
 	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
-
+	api.Get("/reference-device/:id", referenceDevice.Basic)
 }
