@@ -114,10 +114,10 @@ var (
 */
 func (self *UserController) Signin(ctx *iris.Context) {
 	//每次调用返回时都清一次图片验证码
-	// var returnCleanCaptcha = func(re *enity.Result) {
-
-	// 	ctx.JSON(iris.StatusOK, re)
-	// }
+	var returnCleanCaptcha = func(re *enity.Result) {
+		ctx.Session().Delete(viper.GetString("server.captcha.Key"))
+		ctx.JSON(iris.StatusOK, re)
+	}
 
 	/*获取请求参数*/
 	body := simplejson.New()
@@ -129,17 +129,17 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	/*判断不能为空*/
 	if account == "" {
 		result := &enity.Result{"01010101", nil, user_msg["01010101"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 	if password == "" {
 		result := &enity.Result{"01010102", nil, user_msg["01010102"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 	if captcha == "" {
 		result := &enity.Result{"01010103", nil, user_msg["01010103"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 
@@ -148,13 +148,13 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	captchaCache := ctx.Session().GetString(captchaKey)
 	if captchaCache == "" { //不存在
 		result := &enity.Result{"01010104", nil, user_msg["01010104"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 	/*图片验证码错误*/
 	if captchaCache != captcha {
 		result := &enity.Result{"01010105", nil, user_msg["01010105"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 	/*账号不存在*/
@@ -162,21 +162,21 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	user, err := userService.FindByAccount(account)
 	if err != nil {
 		result := &enity.Result{"01010109", nil, user_msg["01010109"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 
 	/*登陆密码错误*/
 	if user.Password != password {
 		result := &enity.Result{"01010110", nil, user_msg["01010110"]}
-		ctx.JSON(iris.StatusOK, &result)
+		returnCleanCaptcha(result)
 		return
 	}
 
 	/*登陆成功*/
 	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
-	ctx.JSON(iris.StatusOK, &result)
+	returnCleanCaptcha(result)
 	return
 }
 
