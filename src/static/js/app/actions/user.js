@@ -6,6 +6,12 @@ import {
 	POST_USER_DETAIL,
 	PUT_USER_DETAIL,
 	REMOVE_USER,
+	GET_USER_SCHOOL,
+	GET_USER_SCHOOL_DEVICE,
+	GET_USER_PERMISSION,
+	USER_LOGOUT,
+	GET_USER_MENU,
+	GET_USER_DEVICE,
 } from '../constants/index';
 
 
@@ -93,5 +99,110 @@ export function userRemove(id) {
 		});
 	};
 }
+
+export function userSchool(id) {
+	return dispatch => {
+		UserService.school(id).then((result) => {
+			dispatch({
+				type: GET_USER_SCHOOL,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_USER_SCHOOL,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
+export function schoolDevice(id) {
+	return dispatch => {
+		UserService.schoolDevice(id).then((result) => {
+			dispatch({
+				type: GET_USER_SCHOOL_DEVICE,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_USER_SCHOOL_DEVICE,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
+export function userPermission(id) {
+	return dispatch => {
+		UserService.permission(id).then((result) => {
+			dispatch({
+				type: GET_USER_PERMISSION,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_USER_PERMISSION,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
+
+export function userLogout(id) {
+	return dispatch => {
+		UserService.logout().then((result) => {
+			dispatch({
+				type: USER_LOGOUT,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: USER_LOGOUT,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
+
+export function userMenu(id) {
+	return dispatch => {
+		UserService.menu(id).then((result) => {
+			dispatch({
+				type: GET_USER_MENU,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_USER_MENU,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
+export function userDevice(id) {
+	return dispatch => {
+		UserService.device(id).then((result) => {
+			dispatch({
+				type: GET_USER_DEVICE,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_USER_DEVICE,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
 
 
