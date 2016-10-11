@@ -18,15 +18,17 @@ var (
 	}
 )
 
-//所有api需要经过的中间件
-func (self *CommonController) CheckApiRoot(ctx *iris.Context) {
-	//your authentication logic here...
-	println("from ", ctx.MethodString(), ctx.PathString())
-	authorized := true
-	if authorized {
+//调用api前判断是否已经登陆
+func (self *CommonController) CheckHasLogin(ctx *iris.Context) {
+	userIdSess := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	result := &enity.Result{}
+	if userIdSess >= 0 {
 		ctx.Next()
+		return
 	} else {
-		ctx.Text(401, ctx.PathString()+" is not authorized for you")
+		result = &enity.Result{"01010001", nil, common_msg["01010001"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 }
 
