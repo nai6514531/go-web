@@ -181,7 +181,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/signout 用户注销
+ * @api {post} /api/user/signout 用户注销
  * @apiName Signout
  * @apiGroup User
  * @apiSuccessExample Success-Response:

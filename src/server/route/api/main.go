@@ -31,7 +31,7 @@ func Api() {
 	)
 
 	link.Post("/signin", user.Signin)
-	link.Get("/signout", user.Signout)
+	link.Post("/signout", user.Signout)
 	//api.Get("/link/verificode", user.SendVerifiCode)
 
 	api.UseFunc(common.CheckHasLogin)
