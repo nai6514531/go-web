@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import './app.less';
-
+import md5 from 'md5';
 import { Button, Form, Input, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
@@ -37,7 +37,7 @@ export class LoginForm extends React.Component {
 					},
 					body: JSON.stringify({
 						account: account,
-						password: password,
+						password: md5(password),
 						verificode: verificode,
 						captcha: captcha,
 					}),
@@ -49,7 +49,7 @@ export class LoginForm extends React.Component {
 						let tips = '';
 						switch (newCode) {
 							case 0: {
-								window.location.href = '/admin';
+								window.location.href = '/';
 								break;
 							}
 							default: {
