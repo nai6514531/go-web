@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
+import { apiGet, apiPost, apiPut, apiDelete, apiPatch } from '../library/axios/api';
 
 const DeviceService = {
 	list: () => {
@@ -18,7 +18,16 @@ const DeviceService = {
 	},
 	reference: () => {
 		return apiGet(`/api/reference-device`);
-	}
+	},
+	status: (id, device) => {
+		return apiPatch(`/api/device/:${id}/status`, device);
+	},
+	pulseName: (id, device) => {
+		return apiPatch(`/api/device/:${id}/pulse-name`, device);
+	},
+	serialNumber: (id, device) => {
+		return apiPut(`/api/device/:${id}/serial-number`, device);
+	},
 };
 
 export default DeviceService;

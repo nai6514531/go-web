@@ -63,3 +63,10 @@ export function apiDelete(url) {
 		return handleResponse(promise, resolve, reject);
 	});
 }
+
+export function apiPatch(url, data) {
+	return new Promise((resolve, reject) => {
+		const promise = api.patch(url, {data});
+		return handleResponse(promise, resolve, reject);
+	});
+}

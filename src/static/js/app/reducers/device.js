@@ -4,7 +4,9 @@ import {
 	POST_DEVICE_DETAIL,
 	PUT_DEVICE_DETAIL,
 	REMOVE_DEVICE,
-
+	PATCH_DEVICE_STATUS,
+	DEVICE_PULSE_NAME,
+	DEVICE_SERIAL_NUMBER,
 	GET_REF_DEVICE,
 } from '../constants/index';
 
@@ -35,6 +37,21 @@ export default function (state = initialState, action) {
 				detail: action.result,
 			};
 		case REMOVE_DEVICE:
+			return {
+				...state,
+				result: action.result,
+			};
+		case PATCH_DEVICE_STATUS:
+			return {
+				...state,
+				status: action.result,
+			};
+		case DEVICE_PULSE_NAME:
+			return {
+				...state,
+				result: action.result,
+			};
+		case DEVICE_SERIAL_NUMBER:
 			return {
 				...state,
 				result: action.result,
