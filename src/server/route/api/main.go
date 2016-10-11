@@ -8,7 +8,15 @@ import (
 func Api() {
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
-		println("Middleware for all party's routes!")
+		println("Middleware for all /api!")
+		println("from ", ctx.MethodString(), ctx.PathString())
+		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
+		ctx.Next()
+	})
+
+	link := iris.Party("/api/link", func(ctx *iris.Context) {
+		println("Middleware for all /api/link")
+		println("from ", ctx.MethodString(), ctx.PathString())
 		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
 		ctx.Next()
 	})
@@ -22,11 +30,11 @@ func Api() {
 		referenceDevice = &controller.ReferenceDeviceController{}
 	)
 
-	api.UseFunc(common.CheckApiRoot)
-
-	api.Post("/link/signin", user.Signin)
-	api.Get("/link/signout", user.Signout)
+	link.Post("/signin", user.Signin)
+	link.Post("/signout", user.Signout)
 	//api.Get("/link/verificode", user.SendVerifiCode)
+
+	api.UseFunc(common.CheckHasLogin)
 
 	api.Get("/user", user.ListByParent)
 	api.Post("/user", user.Create)
@@ -60,5 +68,5 @@ func Api() {
 	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
-
+	api.Get("/reference-device/:id", referenceDevice.Basic)
 }

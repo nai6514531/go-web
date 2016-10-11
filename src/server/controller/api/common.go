@@ -18,15 +18,17 @@ var (
 	}
 )
 
-//所有api需要经过的中间件
-func (self *CommonController) CheckApiRoot(ctx *iris.Context) {
-	//your authentication logic here...
-	println("from ", ctx.MethodString(), ctx.PathString())
-	authorized := true
-	if authorized {
+//调用api前判断是否已经登陆
+func (self *CommonController) CheckHasLogin(ctx *iris.Context) {
+	userIdSess := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	result := &enity.Result{}
+	if userIdSess >= 0 {
 		ctx.Next()
+		return
 	} else {
-		ctx.Text(401, ctx.PathString()+" is not authorized for you")
+		result = &enity.Result{"01010001", nil, common_msg["01010001"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 }
 
@@ -34,7 +36,7 @@ func (self *CommonController) CheckApiRoot(ctx *iris.Context) {
 func (self *CommonController) CheckUserId(ctx *iris.Context) {
 	optUserId, _ := ctx.ParamInt("id") //要操作的用户id
 	result := &enity.Result{}
-	myUserId := ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey"))
+	myUserId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
 	//根据要操作的用户id查找到其父用户id
 	userService := &service.UserService{}
 	user, err := userService.Basic(optUserId)
