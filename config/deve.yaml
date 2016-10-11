@@ -26,7 +26,7 @@ server:
       max-retry: 3
   session:
     user:
-      key: "USER"
+      user-id-key: "userid"
     cookie: "sess"
     expires: 3600
     redis:
@@ -38,9 +38,6 @@ server:
       max-active: 50
       max-age-seconds: 3600
       idle-timeout: 60
-  auth:
-    session:
-      userIdKey: "userId"
   db:
     dialect: "mysql"
     host: "192.168.1.204"

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -114,6 +113,12 @@ var (
 	}
 */
 func (self *UserController) Signin(ctx *iris.Context) {
+	//每次调用返回时都清一次图片验证码
+	// var returnCleanCaptcha = func(re *enity.Result) {
+
+	// 	ctx.JSON(iris.StatusOK, re)
+	// }
+
 	/*获取请求参数*/
 	body := simplejson.New()
 	ctx.ReadJSON(body)
@@ -141,7 +146,6 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	/*请先申请一个图片验证码*/
 	captchaKey := viper.GetString("server.captcha.Key")
 	captchaCache := ctx.Session().GetString(captchaKey)
-	fmt.Println("图片验证码：" + captchaCache)
 	if captchaCache == "" { //不存在
 		result := &enity.Result{"01010104", nil, user_msg["01010104"]}
 		ctx.JSON(iris.StatusOK, &result)
@@ -170,7 +174,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	/*登陆成功*/
-	ctx.Session().Set(viper.GetString("server.auth.session.userIdKey"), user.Id)
+	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	ctx.JSON(iris.StatusOK, &result)
 	return
@@ -290,7 +294,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 
 	//插入user到user表
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
 	ok := userService.Create(&body.User)
 	if !ok {
 		result = &enity.Result{"01010410", nil, user_msg["01010410"]}
@@ -415,7 +419,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 
 	//更新到user表
 	body.User.Id = userId
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.auth.session.userIdKey")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
 	err := userService.Update(&body.User)
 	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}

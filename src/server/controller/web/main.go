@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/afocus/captcha"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -9,12 +10,11 @@ import (
 )
 
 type WebController struct {
-
 }
 
 func (self *WebController) Index(ctx *iris.Context) {
-	session_user_key := viper.GetString("server.session.user.key")
-	if ctx.Session().Get(session_user_key) != nil {
+	userIdSess := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	if userIdSess >= 0 {
 		ctx.Render("index.html", map[string]interface{}{"title": "首页"})
 	} else {
 		ctx.Render("signin.html", map[string]interface{}{"title": "登录"})
@@ -39,4 +39,5 @@ func (self *WebController) Captcha(ctx *iris.Context) {
 	img, _captcha := _cap.Create(4, captcha.NUM)
 	png.Encode(ctx.Response.BodyWriter(), img)
 	ctx.Session().Set(captchaKey, _captcha)
+	fmt.Println(_captcha)
 }
