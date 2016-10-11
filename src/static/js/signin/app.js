@@ -19,6 +19,7 @@ export class LoginForm extends React.Component {
 		if(text) {
 			message.error(text);
 		}
+		this.getCaptcha();
 	}
 	handleSubmit(e) {
 		e.preventDefault();
