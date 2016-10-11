@@ -3,6 +3,27 @@ import './app.less';
 import { Table, Button } from 'antd';
 import { Link } from 'react-router';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as UserActions from '../../../actions/user';
+
+
+function mapStateToProps(state) {
+	console.log(state);
+	const { user: { list, detail } } = state;
+	return { list, detail };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		userList,
+		userDetail,
+	} = bindActionCreators(UserActions, dispatch);
+	return {
+		userList,
+		userDetail,
+	};
+}
 
 const columns = [{
 	title: '序号',
@@ -54,7 +75,7 @@ const dataSource = [{
 }
 ];
 
-export default class AgentTable extends React.Component {
+class AgentTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -84,10 +105,20 @@ export default class AgentTable extends React.Component {
 	componentDidMount() {
 		// this.fetch();
 	}
+	getList(){
+		this.props.userList();
+		this.props.userDetail();
+	}
+	showList(){
+		console.log(this.props.list);
+		console.log(this.props.detail);
+	}
 	render() {
 		return (
 			<div className="table">
 				<div className="detail-button">
+					<button onClick={this.getList.bind(this)}>CLICK ME</button>
+					<button onClick={this.showList.bind(this)}>LIST</button>
 					<Button type="primary">
 						<Link to='/agent/new'>
 							添加新代理商
@@ -110,3 +141,5 @@ export default class AgentTable extends React.Component {
 AgentTable.propTypes = {
 	handleTableChange: React.PropTypes.func,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(AgentTable);

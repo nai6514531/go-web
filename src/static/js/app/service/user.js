@@ -26,7 +26,7 @@ const UserService = {
 		return apiGet(`/api/user/:${id}/permission`);
 	},
 	logout: () => {
-		return apiGet(`/api/user/signout`);
+		return apiPost(`/api/user/signout`);
 	},
 	menu: (id) => {
 		return apiGet(`/api/user/:${id}/menu`);

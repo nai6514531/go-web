@@ -3,6 +3,25 @@ import './app.less';
 import { Table, Button } from 'antd';
 import { Link } from 'react-router';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as DeviceActions from '../../../actions/device';
+
+function mapStateToProps(state) {
+	console.log(state);
+	const { device: { list } } = state;
+	return { list };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		deviceList,
+	} = bindActionCreators(DeviceActions, dispatch);
+	return {
+		deviceList,
+	};
+}
+
 const columns = [{
 	title: '序号',
 	dataIndex: 'index',
@@ -68,7 +87,7 @@ const dataSource = [{
 }
 ];
 
-export default class DeviceTable extends React.Component {
+class DeviceTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -98,12 +117,20 @@ export default class DeviceTable extends React.Component {
 	componentDidMount() {
 		// this.fetch();
 	}
+	getList() {
+		this.props.deviceList();
+	}
+	getStatus() {
+		console.log(this.props.list);
+	}
 	render() {
 		return (
 			<div className="table">
 				{this.props.children ? this.props.children :
 					<div>
 						<div className="detail-button">
+							<button onClick={this.getList.bind(this)}>CLICK </button>
+							<button onClick={this.getStatus.bind(this)}>GET LIST</button>
 							<Button type="primary">
 								<Link to="/agent/device/list/new">
 									添加新设备
@@ -128,3 +155,5 @@ export default class DeviceTable extends React.Component {
 DeviceTable.propTypes = {
 	handleTableChange: React.PropTypes.func,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(DeviceTable);

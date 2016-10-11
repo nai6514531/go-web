@@ -189,7 +189,7 @@ export function userMenu(id) {
 
 export function userDevice(id) {
 	return dispatch => {
-		UserService.device(id).then((result) => {
+		UserService.dev(id).then((result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
 				result: { fetch: true, result },

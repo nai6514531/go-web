@@ -1,0 +1,24 @@
+import SchoolService from '../service/school';
+
+import {
+	GET_SCHOOL_DETAIL,
+} from '../constants/index';
+
+
+export function schoolDetail() {
+	return dispatch => {
+		SchoolService.list().then((result) => {
+			dispatch({
+				type: GET_SCHOOL_DETAIL,
+				result: { fetch: true, result },
+			});
+		}).catch((msg) => {
+			dispatch({
+				type: GET_SCHOOL_DETAIL,
+				result: { fetch: false, msg },
+
+			});
+		});
+	};
+}
+
