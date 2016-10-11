@@ -1,15 +1,19 @@
 import React from 'react';
 import './app.less';
 
-import { Head } from './head/app';
-import { BodyPanel } from './body_panel/app';
+import Head from './head/app';
+import { LeftMenu } from './menu/app';
 
 const App = React.createClass({
   render() {
-    return (
+	  console.log(this.props);
+	  return (
       <div className="index">
 		  <Head/>
-		  <BodyPanel/>
+		  <div className="body-panel">
+			  <LeftMenu/>
+			  {this.props.children}
+		  </div>
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import './app.less';
 
-export class Head extends React.Component {
+export default class Head extends React.Component {
 	render() {
 		return (
 			<div className="head">

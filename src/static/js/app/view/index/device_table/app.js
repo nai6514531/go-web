@@ -1,6 +1,7 @@
 import React from 'react';
 import './app.less';
-import { Table } from 'antd';
+import { Table, Button } from 'antd';
+import { Link } from 'react-router';
 
 const columns = [{
 	title: '序号',
@@ -44,7 +45,7 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-      		<a href="#">修改</a>
+			<Link to="/agent/device/list/new">修改</Link>
 			<span className="ant-divider" />
 			<a href="#">删除</a>
 			<span className="ant-divider" />
@@ -67,7 +68,7 @@ const dataSource = [{
 }
 ];
 
-export class DeviceTable extends React.Component {
+export default class DeviceTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -100,13 +101,24 @@ export class DeviceTable extends React.Component {
 	render() {
 		return (
 			<div className="table">
-				<Table columns={columns}
-					   rowKey={record => record.registered}
-					   dataSource={dataSource}
-					   pagination={this.state.pagination}
-					   loading={this.state.loading}
-					   onChange={this.handleTableChange}
-				/>
+				{this.props.children ? this.props.children :
+					<div>
+						<div className="detail-button">
+							<Button type="primary">
+								<Link to="/agent/device/list/new">
+									添加新设备
+								</Link>
+							</Button>
+						</div>
+						<Table columns={columns}
+							   rowKey={record => record.registered}
+							   dataSource={dataSource}
+							   pagination={this.state.pagination}
+							   loading={this.state.loading}
+							   onChange={this.handleTableChange}
+						/>
+					</div>
+				}
 			</div>
 		);
 	}

@@ -1,6 +1,8 @@
 import React from 'react';
 import './app.less';
-import { Table } from 'antd';
+import { Table, Button } from 'antd';
+import { Link } from 'react-router';
+
 
 const columns = [{
 	title: '序号',
@@ -32,11 +34,11 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-      		<a href="#">修改</a>
+			<Link to='/agent/new'>修改</Link>
 			<span className="ant-divider" />
-			<a href="#">下级代理商</a>
+			<Link to='/agent'>下级代理商</Link>
 			<span className="ant-divider" />
-			<a href="#">设备管理</a>
+			<Link to='/agent/device'>设备管理</Link>
 		</span>
 	),
 }];
@@ -52,7 +54,7 @@ const dataSource = [{
 }
 ];
 
-export class DetailTable extends React.Component {
+export default class AgentTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -85,6 +87,13 @@ export class DetailTable extends React.Component {
 	render() {
 		return (
 			<div className="table">
+				<div className="detail-button">
+					<Button type="primary">
+						<Link to='/agent/new'>
+							添加新代理商
+						</Link>
+					</Button>
+				</div>
 				<Table columns={columns}
 					   rowKey={record => record.registered}
 					   dataSource={dataSource}
@@ -98,6 +107,6 @@ export class DetailTable extends React.Component {
 }
 
 
-DetailTable.propTypes = {
+AgentTable.propTypes = {
 	handleTableChange: React.PropTypes.func,
 };
