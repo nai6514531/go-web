@@ -14,6 +14,7 @@ func Api() {
 	})
 
 	var (
+		common          = &controller.CommonController{}
 		user            = &controller.UserController{}
 		region          = &controller.RegionController{}
 		device          = &controller.DeviceController{}
@@ -37,13 +38,13 @@ func Api() {
 
 	api.Get("/user", user.ListByParent)
 	api.Post("/user", user.Create)
-	api.Put("/user/:id", user.Update)
-	api.Get("/user/:id", user.Basic)
-	api.Get("/user/:id/device", user.DeviceList)
-	api.Get("/user/:id/school", user.SchoolList)
-	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
-	api.Get("/user/:id/menu", user.Menu)
-	api.Get("/user/:id/permission", user.Permission)
+	api.Put("/user/:id", common.CheckUserId, user.Update)
+	api.Get("/user/:id", common.CheckUserId, user.Basic)
+	api.Get("/user/:id/device", common.CheckUserId, user.DeviceList)
+	api.Get("/user/:id/school", common.CheckUserId, user.SchoolList)
+	api.Get("/user/:id/school/:schoolId/device", common.CheckUserId, user.DeviceOfSchool)
+	api.Get("/user/:id/menu", common.CheckUserId, user.Menu)
+	api.Get("/user/:id/permission", common.CheckUserId, user.Permission)
 
 	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
