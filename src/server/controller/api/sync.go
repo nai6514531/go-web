@@ -21,6 +21,18 @@ func (self *SyncController) SyncUser(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
+func (self *SyncController) SyncUserRole(ctx *iris.Context) {
+	syncService := &service.SyncService{}
+	boo := syncService.SyncUserRole()
+	result := &enity.Result{}
+	if !boo {
+		result = &enity.Result{"1", nil, "同步后台用户角色数据失败!"}
+	} else {
+		result = &enity.Result{"0", nil, "同步后台用户角色数据成功!"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
 func (self *SyncController) SyncUserCashAccount(ctx *iris.Context) {
 	syncService := &service.SyncService{}
 	boo := syncService.SyncUserCashAccount()

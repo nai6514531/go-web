@@ -41,6 +41,42 @@ func (self *SyncService) SyncUser() bool {
 	return boo
 }
 
+func (self *SyncService) SyncUserRole() bool {
+	list := &[]*muniu.BoxAdmin{}
+	syncService := &SyncService{}
+	userRoleRelService := &UserRoleRelService{}
+	r := common.MNDB.Find(list)
+	if r.Error != nil {
+		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
+		return false
+	}
+	boo := true
+	for _, boxAdmin := range *list {
+		if boxAdmin.LocalId > 0 {
+			roleId := 0
+			userType, _ := strconv.Atoi(boxAdmin.UserType)
+			if userType == 0 {
+				roleId = 1
+			} else if userType == 2 || userType == 4 {
+				roleId = 2
+			} else if userType == 5 {
+				roleId = 4
+			} else {
+				roleId = userType
+			}
+			userRoleRel, err := userRoleRelService.BasicByUserIdAndRoleId(boxAdmin.LocalId, roleId)
+			if userRoleRel == nil && err != nil {
+				boo = syncService.AddUserRoleRel(boxAdmin.LocalId, roleId)
+				if !boo {
+					common.Logger.Warningln("AddUserRoleRef:", boxAdmin.LocalId, roleId)
+					break
+				}
+			}
+		}
+	}
+	return boo
+}
+
 func (self *SyncService) SyncUserCashAccount() bool {
 	list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
@@ -288,6 +324,18 @@ func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 		Mobile:   boxAdmin.ContactNum,
 	}
 	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
+}
+
+func (self *SyncService) AddUserRoleRel(userId int, roleId int) bool {
+	userRoleRel := &model.UserRoleRel{
+		UserId: userId,
+		RoleId: roleId,
+	}
+	r := common.DB.Create(userRoleRel)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

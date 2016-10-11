@@ -35,6 +35,12 @@ func Api() {
 	link.Post("/signout", user.Signout)
 	//api.Get("/link/verificode", user.SendVerifiCode)
 
+	api.Get("/sync/user", sync.SyncUser)
+	api.Get("/sync/user-role", sync.SyncUserRole)
+	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
+	api.Get("/sync/device", sync.SyncDevice)
+	api.Get("/sync/daily-bill", sync.SyncDailyBill)
+
 	api.UseFunc(common.CheckHasLogin)
 
 	api.Get("/user", user.ListByParent)
@@ -70,10 +76,5 @@ func Api() {
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
-
-	api.Get("/sync/user", sync.SyncUser)
-	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
-	api.Get("/sync/device", sync.SyncDevice)
-	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 
 }

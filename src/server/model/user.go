@@ -14,9 +14,9 @@ type User struct {
 	Telephone string `json:"telephone"` //服务电话
 	Email     string `json:"email"`     //邮箱
 	ParentId  int    `json:"parent_id"` //父id
-	Gender    int `json:"gender"`    //性别
-	Age       int `json:"age"`       //年龄
-	Status    int `json:"status"`    //状态
+	Gender    int    `json:"gender"`    //性别
+	Age       int    `json:"age"`       //年龄
+	Status    int    `json:"status"`    //状态
 }
 
 func (User) TableName() string {
