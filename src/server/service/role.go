@@ -38,6 +38,6 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 			roleIDs = append(roleIDs, roleRel.RoleId)
 		}
 	}
-	ids := functions.IntDuplicate(roleIDs) //数组去重
+	ids := functions.Uniq(roleIDs) //数组去重
 	return ids, nil
 }
