@@ -44,7 +44,7 @@ func (self *SyncService) SyncUser() bool {
 func (self *SyncService) SyncUserCashAccount() bool {
 	list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
-	userCasHAccountService := &UserCasHAccountService{}
+	userCashAccountService := &UserCashAccountService{}
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
@@ -53,7 +53,7 @@ func (self *SyncService) SyncUserCashAccount() bool {
 	boo := true
 	for _, boxAdmin := range *list {
 		if boxAdmin.LocalId > 0 {
-			userCashAccount, err := userCasHAccountService.BasicByUserId(boxAdmin.LocalId)
+			userCashAccount, err := userCashAccountService.BasicByUserId(boxAdmin.LocalId)
 			if userCashAccount == nil && err != nil {
 				boo = syncService.AddUserCashAccount(boxAdmin)
 				if !boo {

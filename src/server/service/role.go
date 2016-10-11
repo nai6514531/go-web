@@ -2,8 +2,8 @@ package service
 
 import (
 	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
-	"maizuo.com/soda-manager/src/server/toolfunc/slicetool"
 )
 
 type RoleService struct {
@@ -38,6 +38,6 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 			roleIDs = append(roleIDs, roleRel.RoleId)
 		}
 	}
-	ids := slicetool.IntDuplicate(roleIDs) //数组去重
+	ids := functions.IntDuplicate(roleIDs) //数组去重
 	return ids, nil
 }

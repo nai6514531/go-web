@@ -1,4 +1,4 @@
-package slicetool
+package functions
 
 //int数组去重
 func IntDuplicate(ls []int) []int {

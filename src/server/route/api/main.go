@@ -8,12 +8,21 @@ import (
 func Api() {
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
-		println("Middleware for all party's routes!")
+		println("Middleware for all /api!")
+		println("from ", ctx.MethodString(), ctx.PathString())
+		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
+		ctx.Next()
+	})
+
+	link := iris.Party("/api/link", func(ctx *iris.Context) {
+		println("Middleware for all /api/link")
+		println("from ", ctx.MethodString(), ctx.PathString())
 		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
 		ctx.Next()
 	})
 
 	var (
+		common          = &controller.CommonController{}
 		user            = &controller.UserController{}
 		region          = &controller.RegionController{}
 		device          = &controller.DeviceController{}
@@ -22,27 +31,21 @@ func Api() {
 		sync            = &controller.SyncController{}
 	)
 
-	api.UseFunc(func(ctx *iris.Context) {
-		//your authentication logic here...
-		println("from ", ctx.PathString())
-		authorized := true
-		if authorized {
-			ctx.Next()
-		} else {
-			ctx.Text(401, ctx.PathString()+" is not authorized for you")
-		}
-	})
-	api.Post("/link/signin", user.Signin)
-	api.Get("/link/signout", user.Signout)
-	api.Get("/link/verificode", user.SendVerifiCode)
+	link.Post("/signin", user.Signin)
+	link.Post("/signout", user.Signout)
+	//api.Get("/link/verificode", user.SendVerifiCode)
+
+	api.UseFunc(common.CheckHasLogin)
 
 	api.Get("/user", user.ListByParent)
-	api.Get("/user/:id", user.Basic)
-	api.Get("/user/:id/device", user.DeviceList)
-	api.Get("/user/:id/school", user.SchoolList)
-	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
-	api.Get("/user/:id/menu", user.Menu)
-	api.Get("/user/:id/permission", user.Permission)
+	api.Post("/user", user.Create)
+	api.Put("/user/:id", common.CheckUserId, user.Update)
+	api.Get("/user/:id", common.CheckUserId, user.Basic)
+	api.Get("/user/:id/device", common.CheckUserId, user.DeviceList)
+	api.Get("/user/:id/school", common.CheckUserId, user.SchoolList)
+	api.Get("/user/:id/school/:schoolId/device", common.CheckUserId, user.DeviceOfSchool)
+	api.Get("/user/:id/menu", common.CheckUserId, user.Menu)
+	api.Get("/user/:id/permission", common.CheckUserId, user.Permission)
 
 	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
@@ -66,6 +69,7 @@ func Api() {
 	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
+	api.Get("/reference-device/:id", referenceDevice.Basic)
 
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)

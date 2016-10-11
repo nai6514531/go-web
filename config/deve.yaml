@@ -26,7 +26,7 @@ server:
       max-retry: 3
   session:
     user:
-      key: "USER"
+      user-id-key: "userid"
     cookie: "sess"
     expires: 3600
     redis:

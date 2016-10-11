@@ -2,8 +2,8 @@ package service
 
 import (
 	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
-	"maizuo.com/soda-manager/src/server/toolfunc/slicetool"
 )
 
 type PermissionService struct {
@@ -20,7 +20,7 @@ func (self *PermissionService) ListIdsByRoleIds(roleIds []int) ([]int, error) {
 	for _, theStruct := range *theStructList {
 		permissionIds = append(permissionIds, theStruct.PermissionId)
 	}
-	ids := slicetool.IntDuplicate(permissionIds) //数组去重
+	ids := functions.IntDuplicate(permissionIds) //数组去重
 	return ids, nil
 }
 

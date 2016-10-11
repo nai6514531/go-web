@@ -1,18 +1,19 @@
 import React from 'react';
-
 import './app.less';
 
-import Detail from './detail/app.jsx';
-import Slick from './home/app.jsx';
-import Alert from './alert/app.jsx';
+import Head from './head/app';
+import { LeftMenu } from './menu/app';
 
 const App = React.createClass({
   render() {
-    return (
+	  console.log(this.props);
+	  return (
       <div className="index">
-        <Detail />
-        <Slick />
-        <Alert />
+		  <Head/>
+		  <div className="body-panel">
+			  <LeftMenu/>
+			  {this.props.children}
+		  </div>
       </div>
     );
   }
