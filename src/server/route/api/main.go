@@ -28,11 +28,18 @@ func Api() {
 		device          = &controller.DeviceController{}
 		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
+		sync            = &controller.SyncController{}
 	)
 
 	link.Post("/signin", user.Signin)
 	link.Post("/signout", user.Signout)
 	//api.Get("/link/verificode", user.SendVerifiCode)
+
+	api.Get("/sync/user", sync.SyncUser)
+	api.Get("/sync/user-role", sync.SyncUserRole)
+	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
+	api.Get("/sync/device", sync.SyncDevice)
+	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 
 	api.UseFunc(common.CheckHasLogin)
 
@@ -59,14 +66,15 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
-	api.Get("/device/:id", device.Basic)
-	api.Delete("/device/:id", device.Delete)
+	api.Get("/device/:id", common.CheckDeviceId, device.Basic)
+	api.Delete("/device/:id", common.CheckDeviceId, device.Delete)
 	api.Post("/device", device.Create)
-	api.Put("/device/:id", device.Update)
-	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
-	api.Patch("/device/:id/status", device.UpdateStatus)
-	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
+	api.Put("/device/:id", common.CheckDeviceId, device.Update)
+	api.Put("/device/:id/serial-number", common.CheckDeviceId, device.UpdateBySerialNumber)
+	api.Patch("/device/:id/status", common.CheckDeviceId, device.UpdateStatus)
+	api.Patch("/device/:id/pulse-name", common.CheckDeviceId, device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
+
 }

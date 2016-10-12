@@ -1,12 +1,11 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 type RegionService struct {
-
 }
 
 func (self *RegionService) Basic(id int) (*model.Region, error) {
@@ -62,7 +61,6 @@ func (self *RegionService) DistrictsOfCity(parentId int) (*[]*model.Region, erro
 	}
 	return list, r.Error
 }
-
 
 func (self *RegionService) SchoolOfProvince(provinceId int) (*[]*model.School, error) {
 	list := &[]*model.School{}

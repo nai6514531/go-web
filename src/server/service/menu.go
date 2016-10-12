@@ -21,7 +21,7 @@ func (self *MenuService) ListByPermissionIds(permissionIds []int) (*[]*model.Men
 	for _, permissionMenuRel := range *permissionMenuRelList {
 		menuIds = append(menuIds, permissionMenuRel.MenuId)
 	}
-	menuIdsDuplicate := functions.IntDuplicate(permissionIds) //数组去重
+	menuIdsDuplicate := functions.Uniq(permissionIds) //数组去重
 	//菜单id列表查详情
 	menuList := &[]*model.Menu{}
 	r = common.DB.Where("id IN (?)", menuIdsDuplicate).Find(menuList)

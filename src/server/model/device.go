@@ -19,6 +19,8 @@ type Device struct {
 	SecondPulseName   string `json:"second_pulse_name"`
 	ThirdPulseName    string `json:"third_pulse_name"`
 	FourthPulseName   string `json:"fourth_pulse_name"`
+	Password          string `json:"password"`
+	Step              int    `json:"step"`
 	Status            int    `json:"status"`
 }
 

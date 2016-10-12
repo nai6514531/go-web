@@ -17,6 +17,15 @@ func (self *DeviceService) Basic(id int) (*model.Device, error) {
 	return device, nil
 }
 
+func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Device, error) {
+	device := &model.Device{}
+	r := common.DB.Where("serial_number = ?", serialNumber).First(device)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return device, nil
+}
+
 func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Find(list)

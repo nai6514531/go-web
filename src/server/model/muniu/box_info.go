@@ -1,0 +1,21 @@
+package muniu
+
+type BoxInfo struct {
+	DeviceNo   string  `json:"device_no" gorm:"column:DEVICENO"`
+	CompanyId  int     `json:"company_id" gorm:"column:COMPANYID"`
+	Status     string  `json:"status" gorm:"column:STATUS"`
+	Password   string  `json:"password" gorm:"column:PASSWORD"`
+	Location   int     `json:"location" gorm:"column:LOCATION"`
+	InsertTime string  `json:"insert_time" gorm:"column:INSERTTIME"`
+	UpdateTime string  `json:"update_time" gorm:"column:UPDATETIME"`
+	Address    string  `json:"address" gorm:"column:ADDRESS"`
+	Price_601  float64 `json:"price_601" gorm:"column:PRICE_601"`
+	Price_602  float64 `json:"price_602" gorm:"column:PRICE_602"`
+	Price_603  float64 `json:"price_603" gorm:"column:PRICE_603"`
+	Price_604  float64 `json:"price_604" gorm:"column:PRICE_604"`
+	DeviceType string  `json:"device_type" gorm:"column:DEVICETYPE"`
+}
+
+func (BoxInfo) TableName() string {
+	return "box_info"
+}

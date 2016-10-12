@@ -1,7 +1,7 @@
 package functions
 
 //int数组去重
-func IntDuplicate(ls []int) []int {
+func Uniq(ls []int) []int {
 	intInSlice := func(i int, list []int) bool {
 		for _, v := range list {
 			if v == i {
@@ -10,11 +10,11 @@ func IntDuplicate(ls []int) []int {
 		}
 		return false
 	}
-	var intDuplicate []int
+	var Uniq []int
 	for _, v := range ls {
-		if !intInSlice(v, intDuplicate) {
-			intDuplicate = append(intDuplicate, v)
+		if !intInSlice(v, Uniq) {
+			Uniq = append(Uniq, v)
 		}
 	}
-	return intDuplicate
+	return Uniq
 }

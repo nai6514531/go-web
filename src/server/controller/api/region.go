@@ -60,13 +60,12 @@ var (
 
 		"01020700": "拉取指定省份的城市列表成功!",
 		"01020701": "拉取指定省份的城市列表失败!",
-
 	}
 )
 
 type RegionController struct {
-
 }
+
 /**
  * @api {get} /api/province 获取省份列表
  * @apiName Province
@@ -108,7 +107,7 @@ func (self *RegionController) Province(ctx *iris.Context) {
 	list, err := regionService.Province()
 	if err != nil {
 		result = &enity.Result{"01020101", nil, region_msg["01020101"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020100", list, region_msg["01020100"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -155,7 +154,7 @@ func (self *RegionController) City(ctx *iris.Context) {
 	list, err := regionService.City()
 	if err != nil {
 		result = &enity.Result{"01020201", nil, region_msg["01020101"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020200", list, region_msg["01020200"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -196,14 +195,14 @@ func (self *RegionController) City(ctx *iris.Context) {
  *        msg: "获取区域列表成功!"
  *     }
  */
-func (self *RegionController)DistrictOfCity(ctx *iris.Context) {
+func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	districts, err := regionService.DistrictsOfCity(id)
 	if err != nil {
 		result = &enity.Result{"01020301", nil, region_msg["01020301"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020300", districts, region_msg["01020300"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -242,14 +241,14 @@ func (self *RegionController)DistrictOfCity(ctx *iris.Context) {
  *        msg: "获取省份详情成功!"
  *     }
  */
-func (self *RegionController)ProvinceDetail(ctx *iris.Context) {
+func (self *RegionController) ProvinceDetail(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
 		result = &enity.Result{"01020401", nil, region_msg["01020401"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020400", province, region_msg["01020400"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -288,14 +287,14 @@ func (self *RegionController)ProvinceDetail(ctx *iris.Context) {
  *        msg: "获取城市详情成功!"
  *     }
  */
-func (self *RegionController)CityDetail(ctx *iris.Context) {
+func (self *RegionController) CityDetail(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
 		result = &enity.Result{"01020501", nil, region_msg["01020501"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020500", province, region_msg["01020500"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -334,14 +333,14 @@ func (self *RegionController)CityDetail(ctx *iris.Context) {
  *        msg: "获取区域详情成功!"
  *     }
  */
-func (self *RegionController)DistrictDetail(ctx *iris.Context) {
+func (self *RegionController) DistrictDetail(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
 		result = &enity.Result{"01020601", nil, region_msg["01020601"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020600", province, region_msg["01020600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -382,14 +381,14 @@ func (self *RegionController)DistrictDetail(ctx *iris.Context) {
  *        msg: "获取省份城市列表成功!"
  *     }
  */
-func (self *RegionController)CityOfProvince(ctx *iris.Context) {
+func (self *RegionController) CityOfProvince(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	list, err := regionService.CitiesOfProvince(id)
 	if err != nil {
 		result = &enity.Result{"01020701", nil, region_msg["01020701"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020700", list, region_msg["01020700"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -422,14 +421,14 @@ func (self *RegionController)CityOfProvince(ctx *iris.Context) {
  *        msg: "获取省份学校列表成功!"
  *     }
  */
-func (self *RegionController)SchoolOfProvince(ctx *iris.Context) {
+func (self *RegionController) SchoolOfProvince(ctx *iris.Context) {
 	regionService := &service.RegionService{}
 	id, _ := ctx.ParamInt("id")
 	result := &enity.Result{}
 	list, err := regionService.SchoolOfProvince(id)
 	if err != nil {
 		result = &enity.Result{"01020801", nil, region_msg["01020801"]}
-	}else{
+	} else {
 		result = &enity.Result{"01020800", list, region_msg["01020800"]}
 	}
 	ctx.JSON(iris.StatusOK, result)

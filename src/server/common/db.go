@@ -31,6 +31,8 @@ func SetUpDB() {
 	database := viper.GetString("server.db.database")
 	host := viper.GetString("server.db.host")
 	port := viper.GetString("server.db.port")
+	maxIdle := viper.GetInt("server.db.max-idle")
+	maxOpen := viper.GetInt("server.db.max-open")
 
 	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
 
@@ -41,15 +43,42 @@ func SetUpDB() {
 
 	db.LogMode(isDevelopment)
 
-	//db.SetLogger(initLog())
-
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(10)
+	db.DB().SetMaxIdleConns(maxIdle)
+	db.DB().SetMaxOpenConns(maxOpen)
 
 	DB = db
 
 }
 
+func SetUpMNDB() {
+
+	isDevelopment := viper.GetBool("isDevelopment")
+	dialect := viper.GetString("server.mndb.dialect")
+	user := viper.GetString("server.mndb.user")
+	password := viper.GetString("server.mndb.password")
+	database := viper.GetString("server.mndb.database")
+	host := viper.GetString("server.mndb.host")
+	port := viper.GetString("server.mndb.port")
+	maxIdle := viper.GetInt("server.mndb.max-idle")
+	maxOpen := viper.GetInt("server.mndb.max-open")
+
+	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
+
+	db, err := gorm.Open(dialect, url)
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	db.LogMode(isDevelopment)
+
+	db.DB().SetMaxIdleConns(maxIdle)
+	db.DB().SetMaxOpenConns(maxOpen)
+
+	MNDB = db
+
+}
+
 var (
-	DB *gorm.DB
+	DB   *gorm.DB
+	MNDB *gorm.DB
 )

@@ -9,6 +9,23 @@ import (
 type UserCashAccountService struct {
 }
 
+func (self *UserCashAccountService) Basic(id int) (*model.UserCashAccount, error) {
+	userCashAccount := &model.UserCashAccount{}
+	r := common.DB.Where("id = ?", id).First(userCashAccount)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return userCashAccount, nil
+}
+
+func (self *UserCashAccountService) BasicByUserId(userId int) (*model.UserCashAccount, error) {
+	userCashAccount := &model.UserCashAccount{}
+	r := common.DB.Where("user_id = ?", userId).First(userCashAccount)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return userCashAccount, nil
+}
 func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
 	r := common.DB.Create(userCashAccount)
 	if r.RowsAffected <= 0 || r.Error != nil {

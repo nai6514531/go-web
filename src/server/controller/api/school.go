@@ -2,8 +2,8 @@ package controller
 
 import (
 	"github.com/kataras/iris"
-	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/service"
 )
 
 type SchoolController struct {
@@ -11,8 +11,8 @@ type SchoolController struct {
 
 var (
 	school_msg = map[string]string{
-		"01050100":"拉取学校详情成功",
-		"01050101":"拉取学校详情失败",
+		"01050100": "拉取学校详情成功",
+		"01050101": "拉取学校详情失败",
 	}
 )
 

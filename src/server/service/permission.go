@@ -20,7 +20,7 @@ func (self *PermissionService) ListIdsByRoleIds(roleIds []int) ([]int, error) {
 	for _, theStruct := range *theStructList {
 		permissionIds = append(permissionIds, theStruct.PermissionId)
 	}
-	ids := functions.IntDuplicate(permissionIds) //数组去重
+	ids := functions.Uniq(permissionIds) //数组去重
 	return ids, nil
 }
 

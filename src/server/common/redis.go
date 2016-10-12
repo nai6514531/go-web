@@ -1,10 +1,10 @@
 package common
 
 import (
-	"github.com/spf13/viper"
-	"time"
 	"fmt"
+	"github.com/spf13/viper"
 	"gopkg.in/redis.v4"
+	"time"
 )
 
 func SetUpRedis() {
@@ -13,16 +13,16 @@ func SetUpRedis() {
 	password := viper.GetString("server.redis.password")
 	database := viper.GetInt("server.redis.database")
 	//maxIdle := viper.GetInt("server.redis.maxidle")
-	maxActive := viper.GetInt("server.redis.maxactive")
-	idleTimeout := time.Duration(viper.GetInt("server.redis.idletimeout")) * time.Second
+	maxActive := viper.GetInt("server.redis.max-active")
+	idleTimeout := time.Duration(viper.GetInt("server.redis.idle-timeout")) * time.Second
 
 	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password, // no password set
-		DB:       database, // use default DB
-		MaxRetries:3,
-		IdleTimeout:idleTimeout,
-		PoolSize:maxActive,
+		Addr:        addr,
+		Password:    password, // no password set
+		DB:          database, // use default DB
+		MaxRetries:  3,
+		IdleTimeout: idleTimeout,
+		PoolSize:    maxActive,
 	})
 
 	pong, err := client.Ping().Result()
