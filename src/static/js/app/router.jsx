@@ -11,7 +11,7 @@ import  App  from './view/index/app.jsx';
 import Agent from './view/index/agent/app';
 import Cash from './view/index/cash/app';
 import AgentTable from './view/index/agent_table/app';
-import { UserForm } from './view/index/agent_form/app';
+import  UserForm from './view/index/agent_form/app';
 import SchoolTable from  './view/index/school_table/app';
 import DeviceTable from  './view/index/device_table/app';
 import { DeviceForm } from './view/index/device_form/app';

@@ -1,7 +1,37 @@
 import React from 'react';
 import './app.less';
 
-export default class Head extends React.Component {
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as UserActions from '../../../actions/user';
+
+
+function mapStateToProps(state) {
+	const { user: { detail, result } } = state;
+	return { detail, result };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		userLogout,
+		userDetail,
+	} = bindActionCreators(UserActions, dispatch);
+	return {
+		userLogout,
+		userDetail,
+	};
+}
+
+class Head extends React.Component {
+	onClick(e) {
+		e.preventDefault();
+		// this.props.userDetail(327);
+		this.props.userLogout();
+	}
+	showMe() {
+		console.log('result',this.props.result);
+		console.log('detail',this.props.detail);
+	}
 	render() {
 		return (
 			<div className="head">
@@ -12,7 +42,8 @@ export default class Head extends React.Component {
 				<div className = "right">
 					<span>用户名</span>
 					<span>用户身份</span>
-					<a href="#">退出</a>
+					<button onClick={this.showMe.bind(this)}>show me</button>
+					<a href="#" onClick={this.onClick.bind(this)}>退出</a>
 				</div>
 			</div>
 		);
@@ -23,3 +54,5 @@ export default class Head extends React.Component {
 Head.propTypes = {
 	title: React.PropTypes.string,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(Head);

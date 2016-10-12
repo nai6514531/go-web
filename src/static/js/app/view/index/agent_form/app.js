@@ -5,8 +5,27 @@ const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as UserActions from '../../../actions/user';
 
-export class UserForm extends React.Component {
+
+function mapStateToProps(state) {
+	const { user: { result } } = state;
+	return { result };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		userCreate,
+		userEdit,
+	} = bindActionCreators(UserActions, dispatch);
+	return {
+		userCreate,
+		userEdit,
+	};
+}
+class UserForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -42,6 +61,35 @@ export class UserForm extends React.Component {
 		} else {
 			this.setState({ alipay: false });
 		}
+	}
+	handleClick(e){
+		e.preventDefault();
+		const data = {
+			"user": {
+				"account": "aazz啊",
+				"name": "soda",
+				"contact": "iris",
+				"password": "123516",
+				"mobile": "1802338046这种1啊啊啊啊26",
+				"telephone": "0766-2885411",
+				"email": "317808023@qq.com"
+			},
+			"cash": {
+				"type": 1,
+				"real_name": "伍明煜",
+				"bank_name": "中国银行",
+				"account": "44444441200001111",
+				"mobile": "18023380455",
+				"city_id": 3333,
+				"province_id": 2222
+			}
+		}
+		// this.props.userCreate(data);
+		this.props.userEdit(327,data);
+	}
+	handleShow(e){
+		e.preventDefault();
+		console.log(this.props.result);
 	}
 	render() {
 		const address = [{
@@ -217,6 +265,8 @@ export class UserForm extends React.Component {
 				<FormItem wrapperCol={{ span: 12, offset: 7 }}>
 					<Button type="ghost" onClick={this.handleReset}>取消</Button>
 					<Button type="primary" onClick={this.handleSubmit}>保存</Button>
+					<Button type="ghost" onClick={this.handleClick.bind(this)}>Click Me</Button>
+					<Button type="ghost" onClick={this.handleShow.bind(this)}>SHOW ME</Button>
 				</FormItem>
 			</Form>
 		);
@@ -228,3 +278,5 @@ UserForm = createForm()(UserForm);
 UserForm.propTypes = {
 	title: React.PropTypes.string,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(UserForm);

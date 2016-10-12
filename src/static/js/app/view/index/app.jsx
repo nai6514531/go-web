@@ -2,7 +2,7 @@ import React from 'react';
 import './app.less';
 
 import Head from './head/app';
-import { LeftMenu } from './menu/app';
+import  LeftMenu  from './menu/app';
 
 const App = React.createClass({
   render() {

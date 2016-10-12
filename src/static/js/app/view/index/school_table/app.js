@@ -4,6 +4,29 @@ import { Table } from 'antd';
 import { SchoolFilter } from '../school_filter/app'
 import { Link } from 'react-router';
 
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as UserActions from '../../../actions/user';
+
+
+function mapStateToProps(state) {
+	const { user: { school, school_device, device } } = state;
+	return { school, school_device, device };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		userSchool,
+		schoolDevice,
+		userDevice,
+	} = bindActionCreators(UserActions, dispatch);
+	return {
+		userSchool,
+		schoolDevice,
+		userDevice,
+	};
+}
+
 const columns = [{
 	title: '序号',
 	dataIndex: 'index',
@@ -31,7 +54,7 @@ const dataSource = [{
 }
 ];
 
-export default class SchoolTable extends React.Component {
+class SchoolTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -61,10 +84,22 @@ export default class SchoolTable extends React.Component {
 	componentDidMount() {
 		// this.fetch();
 	}
+	handleClick(){
+		// this.props.userSchool(327);
+		// this.props.schoolDevice(327, 1001);
+		console.log(this.props);
+		this.props.userDevice(327);
+	}
+	showMe(){
+		// console.log(this.props.school);
+		// console.log(this.props.school_device);
+		console.log(this.props.device);
+	}
 	render() {
 		return (
 			<div className="table">
-
+				<button onClick={this.handleClick.bind(this)}>CLICK ME</button>
+				<button onClick={this.showMe.bind(this)}>SHOW ME</button>
 				{this.props.children ? this.props.children :
 					<div>
 						<SchoolFilter/>
@@ -86,3 +121,5 @@ export default class SchoolTable extends React.Component {
 SchoolTable.propTypes = {
 	handleTableChange: React.PropTypes.func,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(SchoolTable);

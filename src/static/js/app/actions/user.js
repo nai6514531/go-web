@@ -117,9 +117,9 @@ export function userSchool(id) {
 	};
 }
 
-export function schoolDevice(id) {
+export function schoolDevice(id, school_id) {
 	return dispatch => {
-		UserService.schoolDevice(id).then((result) => {
+		UserService.schoolDevice(id, school_id).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: true, result },
@@ -152,7 +152,7 @@ export function userPermission(id) {
 }
 
 
-export function userLogout(id) {
+export function userLogout() {
 	return dispatch => {
 		UserService.logout().then((result) => {
 			dispatch({
@@ -189,7 +189,7 @@ export function userMenu(id) {
 
 export function userDevice(id) {
 	return dispatch => {
-		UserService.dev(id).then((result) => {
+		UserService.device(id).then((result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
 				result: { fetch: true, result },

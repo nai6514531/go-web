@@ -4,7 +4,26 @@ import { Menu, Icon } from 'antd';
 const MenuItem = Menu.Item;
 import { Link } from 'react-router';
 
-export class LeftMenu extends React.Component {
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as UserActions from '../../../actions/user';
+
+
+function mapStateToProps(state) {
+	const { user: { menu } } = state;
+	return { menu };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		userMenu,
+	} = bindActionCreators(UserActions, dispatch);
+	return {
+		userMenu,
+	};
+}
+
+class LeftMenu extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -17,9 +36,17 @@ export class LeftMenu extends React.Component {
 		console.log('click ', e);
 		this.setState({ current: e.key });
 	}
+	onClick() {
+		this.props.userMenu(327);
+	}
+	showMe() {
+		console.log(this.props.menu);
+	}
 	render() {
 		return (
 			<div className="menu">
+				<button onClick={this.onClick.bind(this)}>Click me</button>
+				<button onClick={this.showMe.bind(this)}>Show me</button>
 				<Menu
 					mode="inline"
 					selectedKeys={[this.state.current]}
@@ -46,3 +73,5 @@ export class LeftMenu extends React.Component {
 LeftMenu.propTypes = {
 	title: React.PropTypes.string,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(LeftMenu);
