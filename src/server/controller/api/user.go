@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -509,6 +510,9 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	user, err := userService.Basic(id)
 	re := make(map[string]interface{})
 	re["user"] = user
+
+	userIds, _ := userService.SubChildIdsByUserId(id)
+	fmt.Println(userIds)
 	//带上角色信息
 	roleService := &service.RoleService{}
 	roleids, _ := roleService.ListIdByUserId(id)
@@ -532,23 +536,32 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	  "status": "01010700",
 	  "data": [
 	    {
-	      "id": 14,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
-	      "name": "苏打生活",
-	      "contact": "Table",
-	      "address": "科兴科学园",
-	      "mobile": "13148496853",
-	      "account": "13148496853",
-	      "password": "e10adc3949ba59abbe56e057f20f883e",
-	      "telephone": "",
-	      "email": "",
-	      "parent_id": 20,
-	      "gender": 0,
-	      "age": 0,
-	      "status": 0
+	      "user": {
+	        "id": 14,
+	        "created_at": "0001-01-01T00:00:00Z",
+	        "updated_at": "0001-01-01T00:00:00Z",
+	        "deleted_at": null,
+	        "name": "苏打生活",
+	        "contact": "Table",
+	        "address": "科兴科学园",
+	        "mobile": "13148496853",
+	        "account": "13148496853",
+	        "password": "e10adc3949ba59abbe56e057f20f883e",
+	        "telephone": "",
+	        "email": "",
+	        "parent_id": 20,
+	        "gender": 0,
+	        "age": 0,
+	        "status": 0
+	      },
+	      "device": {
+	        "sum": 0,
+	        "user-ids": [
+	          14
+	        ]
+	      }
 	    }...
+	  ],
 	  "msg": "拉取用户列表成功!"
 	}
 */
@@ -557,12 +570,42 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("per_page")
 	userService := &service.UserService{}
+	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	list, err := userService.SubList(parentId, page, perPage)
+	userList, err := userService.SubList(parentId, page, perPage)
+	//在子列表中将自身的用户详情也加上
+	meUser, _ := userService.Basic(parentId)
+	meAndChildList := []*model.User{}
+	meAndChildList[0] = meUser
+	meAndChildList = append(meAndChildList, *userList...)
+
+	//为每一条user记录计算其设备数量
+	type MyResult struct {
+		User   model.User  `json:"user"`
+		Device interface{} `json:"device"`
+	}
+	myResultList := &[]MyResult{}
+	myResult := MyResult{}
+	var userIds []int
+
+	for _, v := range meAndChildList {
+		myResult.User = *v
+		userIds, _ = userService.SubChildIdsByUserId(v.Id) //计算每一条用户记录有多少个设备
+		userIds = append(userIds, v.Id)                    //把自己也算上
+
+		sum, _ := deviceService.SumByUserIds(userIds) //根据userid列表算出设备总数
+		device := make(map[string]interface{})
+		device["sum"] = sum
+		device["user-ids"] = userIds
+		myResult.Device = device
+
+		*myResultList = append(*myResultList, myResult)
+	}
+
 	if err != nil {
 		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
 	} else {
-		result = &enity.Result{"01010700", list, user_msg["01010700"]}
+		result = &enity.Result{"01010700", myResultList, user_msg["01010700"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
