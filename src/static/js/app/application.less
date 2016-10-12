@@ -1,4 +1,50 @@
-*{
-  margin: 0;
-  padding: 0;
+@dark-bg-color: #404040;
+
+.application {
+  & > .application-main {
+	min-height: 600px;
+	margin: 0 0 0 (200px + 32px);
+	padding: 36px 32px 0 32px;
+	font-size: 14px;
+	& > * > header {
+	  margin: 28px 0;
+	  border-bottom: 1px solid #eee;
+	  font-size: 1.17em;
+	  font-weight: bold;
+	}
+  }
+  & > aside {
+	background-color: @dark-bg-color;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	width: 200px + 32px;
+	padding: 16px;
+	h2 {
+	  padding: 36px 0;
+	  font-size: 14px;
+	  text-align: center;
+	  a {
+		color: #eee;
+		text-shadow: 0 -1px 1px #111;
+		img {
+		  width: 60%;
+		}
+	  }
+	}
+	nav {
+	  hr {
+		border: none;
+		border-bottom: 1px dashed #777;
+	  }
+	}
+	footer {
+	  position: absolute;
+	  left: 0;
+	  right: 0;
+	  bottom: 0;
+	  padding: 36px 0;
+	  text-align: center;
+	}
+  }
 }
