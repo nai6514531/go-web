@@ -12,6 +12,8 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
+	BE_FALSE,
+	BE_TRUE,
 } from '../constants/index';
 
 

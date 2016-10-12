@@ -36,16 +36,38 @@ class LeftMenu extends React.Component {
 		console.log('click ', e);
 		this.setState({ current: e.key });
 	}
-	onClick() {
-		this.props.userMenu(327);
+	componentDidMount() {
+		this.props.userMenu(20);
 	}
 	showMe() {
 		console.log(this.props.menu);
 	}
 	render() {
+		const menu = this.props.menu;
+		let menu_list = '';
+		const data = [
+			{
+				url: '/agent',
+				name: '代理商管理',
+			},
+			{
+				url: '/cash',
+				name: '结算管理',
+			}
+		];
+		if(menu && menu.fetch == true){
+			menu_list = data.map((item, key) => {
+				return (
+					<MenuItem key = {key}>
+						<Link to= {item.url} >
+							<span>{item.name}</span>
+						</Link>
+					</MenuItem>
+				);
+			})
+		}
 		return (
 			<div className="menu">
-				<button onClick={this.onClick.bind(this)}>Click me</button>
 				<button onClick={this.showMe.bind(this)}>Show me</button>
 				<Menu
 					mode="inline"
@@ -53,16 +75,7 @@ class LeftMenu extends React.Component {
 					style={{ width: 240 }}
 					onClick={this.handleClick}
 				>
-					<MenuItem key="1">
-						<Link to= '/agent' >
-							<span>代理商管理</span>
-						</Link>
-					</MenuItem>
-					<MenuItem key="2">
-						<Link to= '/cash' >
-							<span>结算管理</span>
-						</Link>
-					</MenuItem>
+					{menu_list}
 				</Menu>
 			</div>
 		);

@@ -35,12 +35,14 @@ class UserForm extends React.Component {
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleReset = this.handleReset.bind(this);
-
 	}
 	componentWillMount() {
 		this.props.form.setFieldsValue({
 			type: 'current',
 		});
+		if( this.props.addNew == false) {
+			this.props.userDetail(20);		
+		}
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -107,6 +109,7 @@ class UserForm extends React.Component {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
 		};
+		const initialValue = '';
 
 		return (
 			<Form horizontal>
@@ -117,6 +120,7 @@ class UserForm extends React.Component {
 						rules: [
 							{ required: true, message: '请输入代理商名称' },
 						],
+						initialValue: 'AA',
 					})(
 						<Input placeholder="请输入代理商名称" />
 					)}

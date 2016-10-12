@@ -33,23 +33,25 @@ class Head extends React.Component {
 		console.log('detail',this.props.detail);
 	}
 	componentDidMount(){
-		this.props.userDetail(327);
+		this.props.userDetail(20);
 	}
 	render() {
 		let account = '';
+		let role = '';
 		const detail = this.props.detail;
 		if(detail && detail.fetch == true) {
-			account = detail.result.data.account;
+			account = detail.result.data.user.account;
+			role =  detail.result.data.role[0].name;
 		}
 		return (
 			<div className="head">
 				<div className = "left">
 					<img src="#" alt="logo"/>
-					<h1>XX 管理系统</h1>
+					<h1>苏打生活管理系统</h1>
 				</div>
 				<div className = "right">
 					<span>{account}</span>
-					<span>用户身份</span>
+					<span>{role}</span>
 					<button onClick={this.showMe.bind(this)}>show me</button>
 					<a href="#" onClick={this.logout.bind(this)}>退出</a>
 				</div>

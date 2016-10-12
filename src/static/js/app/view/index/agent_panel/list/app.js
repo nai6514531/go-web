@@ -24,44 +24,6 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 
-const columns = [{
-	title: '序号',
-	dataIndex: 'index',
-	key: 'index',
-}, {
-	title: '代理商名称',
-	dataIndex: 'user',
-	key: 'user',
-}, {
-	title: '联系人',
-	dataIndex: 'contact',
-	key: 'contact',
-}, {
-	title: '手机',
-	dataIndex: 'mobile',
-	key: 'mobile',
-}, {
-	title: '地址',
-	dataIndex: 'address',
-	key: 'address',
-}, {
-	title: '模块数量',
-	dataIndex: 'number',
-	key: 'number',
-}, {
-	title: '操作',
-	dataIndex: 'action',
-	key: 'action',
-	render: (text, record) => (
-		<span>
-			<Link to='/agent/new'>修改</Link>
-			<span className="ant-divider" />
-			<Link to='/agent'>下级代理商</Link>
-			<span className="ant-divider" />
-			<Link to='/agent/device'>设备管理</Link>
-		</span>
-	),
-}];
 
 class AgentTable extends React.Component {
 	constructor(props) {
@@ -104,7 +66,46 @@ class AgentTable extends React.Component {
 		console.log(this.props.detail);
 	}
 	render() {
+		const columns = [{
+			title: '序号',
+			dataIndex: 'index',
+			key: 'index',
+		}, {
+			title: '代理商名称',
+			dataIndex: 'user',
+			key: 'user',
+		}, {
+			title: '联系人',
+			dataIndex: 'contact',
+			key: 'contact',
+		}, {
+			title: '手机',
+			dataIndex: 'mobile',
+			key: 'mobile',
+		}, {
+			title: '地址',
+			dataIndex: 'address',
+			key: 'address',
+		}, {
+			title: '模块数量',
+			dataIndex: 'number',
+			key: 'number',
+		}, {
+			title: '操作',
+			dataIndex: 'action',
+			key: 'action',
+			render: (text, record) => (
+				<span>
+			<Link to='/agent/new'>修改</Link>
+			<span className="ant-divider" />
+			<Link to='/agent'>下级代理商</Link>
+			<span className="ant-divider" />
+			<Link to='/agent/device'>设备管理</Link>
+		</span>
+			),
+		}];
 		const list = this.props.list;
+		console.log(list);
 		let data = '';
 		let dataSource = new Array;
 		if(list && list.fetch == true) {
