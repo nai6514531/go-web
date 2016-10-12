@@ -41,3 +41,13 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 	ids := functions.Uniq(roleIDs) //数组去重
 	return ids, nil
 }
+
+//通过角色id列表拉取角色详情列表
+func (self *RoleService) ListByRoleIds(roleIDs []int) (*[]*model.Role, error) {
+	roleList := &[]*model.Role{}
+	r := common.DB.Where("id IN (?)", roleIDs).Find(roleList) //找出user所属的所有组
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return roleList, nil
+}

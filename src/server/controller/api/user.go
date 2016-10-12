@@ -92,22 +92,34 @@ var (
 	{
 	  "status": "01010600",
 	  "data": {
-	    "id": 1,
-	    "created_at": "0001-01-01T00:00:00Z",
-	    "updated_at": "0001-01-01T00:00:00Z",
-	    "deleted_at": null,
-	    "name": "麦芽生活",
-	    "contact": "Table",
-	    "address": "科兴科学园",
-	    "mobile": "13760216425",
-	    "account": "13760216425",
-	    "password": "e10adc3949ba59abbe56e057f20f883e",
-	    "telephone": "",
-	    "email": "",
-	    "parent_id": 0,
-	    "gender": 0,
-	    "age": 0,
-	    "status": 0
+	    "role": [
+	      {
+	        "id": 1,
+	        "created_at": "0001-01-01T00:00:00Z",
+	        "updated_at": "0001-01-01T00:00:00Z",
+	        "deleted_at": null,
+	        "name": "系统管理员",
+	        "description": ""
+	      }
+	    ],
+	    "user": {
+	      "id": 20,
+	      "created_at": "0001-01-01T00:00:00Z",
+	      "updated_at": "0001-01-01T00:00:00Z",
+	      "deleted_at": null,
+	      "name": "卖座网",
+	      "contact": "mainland",
+	      "address": "科技园",
+	      "mobile": "18023380466",
+	      "account": "soda",
+	      "password": "e10adc3949ba59abbe56e057f20f883e",
+	      "telephone": "",
+	      "email": "",
+	      "parent_id": 1,
+	      "gender": 0,
+	      "age": 0,
+	      "status": 0
+	    }
 	  },
 	  "msg": "登陆成功!"
 	}
@@ -175,13 +187,21 @@ func (self *UserController) Signin(ctx *iris.Context) {
 
 	/*登陆成功*/
 	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
-	result := &enity.Result{"01010100", user, user_msg["01010100"]}
+	//带上角色信息
+	re := make(map[string]interface{})
+	re["user"] = user
+	roleService := &service.RoleService{}
+	roleids, _ := roleService.ListIdByUserId(user.Id)
+	roleList, _ := roleService.ListByRoleIds(roleids)
+	re["role"] = roleList
+
+	result := &enity.Result{"01010100", re, user_msg["01010100"]}
 	returnCleanCaptcha(result)
 	return
 }
 
 /**
- * @api {post} /api/user/signout 用户注销
+ * @api {post} /api/link/signout 用户注销
  * @apiName Signout
  * @apiGroup User
  * @apiSuccessExample Success-Response:
@@ -439,44 +459,63 @@ func (self *UserController) Update(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/:id 用户详情
- * @apiName Detail
- * @apiGroup User
- *
- * @apiSuccessExample Success-Response:
- *  HTTP/1.1 200 OK
- *	{
- *	  "status": "01010600",
- *	  "data": {
- *	    "id": 1,
- *	    "created_at": "0001-01-01T00:00:00Z",
- *	    "updated_at": "0001-01-01T00:00:00Z",
- *	    "deleted_at": null,
- *	    "name": "麦芽生活",
- *	    "contact": "Table",
- *	    "address": "科兴科学园",
- *	    "mobile": "13760216425",
- *	    "account": "13760216425",
- *	    "password": "e10adc3949ba59abbe56e057f20f883e",
- *	    "telephone": "",
- *	    "email": "",
- *	    "parent_id": 0,
- *	    "gender": 0,
- *	    "age": 0,
- *	    "status": 0
- *	  },
- *	  "msg": "拉取用户详情成功!"
- *	}
- */
+* @api {get} /api/user/:id 用户详情
+* @apiName Detail
+* @apiGroup User
+*
+* @apiSuccessExample Success-Response:
+*  HTTP/1.1 200 OK
+*	{
+ "status": "01010600",
+ "data": {
+   "role": [
+     {
+       "id": 1,
+       "created_at": "0001-01-01T00:00:00Z",
+       "updated_at": "0001-01-01T00:00:00Z",
+       "deleted_at": null,
+       "name": "系统管理员",
+       "description": ""
+     }
+   ],
+   "user": {
+     "id": 20,
+     "created_at": "0001-01-01T00:00:00Z",
+     "updated_at": "0001-01-01T00:00:00Z",
+     "deleted_at": null,
+     "name": "卖座网",
+     "contact": "mainland",
+     "address": "科技园",
+     "mobile": "18023380466",
+     "account": "soda",
+     "password": "e10adc3949ba59abbe56e057f20f883e",
+     "telephone": "",
+     "email": "",
+     "parent_id": 1,
+     "gender": 0,
+     "age": 0,
+     "status": 0
+   }
+ },
+ "msg": "拉取用户详情成功!"
+*	}
+*/
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
+	re := make(map[string]interface{})
+	re["user"] = user
+	//带上角色信息
+	roleService := &service.RoleService{}
+	roleids, _ := roleService.ListIdByUserId(id)
+	roleList, _ := roleService.ListByRoleIds(roleids)
+	re["role"] = roleList
 	if err != nil {
 		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
 	} else {
-		result = &enity.Result{"01010600", user, user_msg["01010600"]}
+		result = &enity.Result{"01010600", re, user_msg["01010600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
