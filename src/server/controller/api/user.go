@@ -8,7 +8,6 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
-	"strconv"
 )
 
 type UserController struct {
@@ -188,7 +187,6 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	/*登陆成功*/
-	ctx.SetCookieKV("user-id", strconv.Itoa(user.Id)) //设置userid到cookie
 	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
 	//带上角色信息
 	re := make(map[string]interface{})
