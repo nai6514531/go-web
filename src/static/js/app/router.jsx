@@ -8,10 +8,10 @@ import rootReducer from './reducers/index';
 
 export const store = applyMiddleware(thunk)(createStore)(rootReducer);
 import  App  from './view/index/app.jsx';
-import Agent from './view/index/agent/app';
+import Agent from './view/index/agent_panel/agent/app';
 import Cash from './view/index/cash/app';
-import AgentTable from './view/index/agent_table/app';
-import  UserForm from './view/index/agent_form/app';
+import AgentTable from './view/index/agent_panel/list/app';
+import  UserForm from './view/index/agent_panel/edit/app';
 import SchoolTable from  './view/index/school_table/app';
 import DeviceTable from  './view/index/device_table/app';
 import { DeviceForm } from './view/index/device_form/app';

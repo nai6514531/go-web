@@ -5,11 +5,10 @@ import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
+import * as UserActions from '../../../../actions/user';
 
 
 function mapStateToProps(state) {
-	console.log(state);
 	const { user: { list, detail } } = state;
 	return { list, detail };
 }
@@ -64,17 +63,6 @@ const columns = [{
 	),
 }];
 
-const dataSource = [{
-	key: '1',
-	index: '1',
-	user: '木牛智能',
-	contact: 'Laura',
-	mobile: '12312341234',
-	address: '深圳南山',
-	number: '1234',
-}
-];
-
 class AgentTable extends React.Component {
 	constructor(props) {
 		super(props);
@@ -103,6 +91,8 @@ class AgentTable extends React.Component {
 		this.setState({ loading: true });
 	}
 	componentDidMount() {
+		const pager = { page : 1, per_page: 10}
+		this.props.userList(pager);
 		// this.fetch();
 	}
 	getList(){
@@ -114,6 +104,23 @@ class AgentTable extends React.Component {
 		console.log(this.props.detail);
 	}
 	render() {
+		const list = this.props.list;
+		let data = '';
+		let dataSource = new Array;
+		if(list && list.fetch == true) {
+			data = list.result.data[0];
+			console.log(data);
+			dataSource = [{
+				key: '1',
+				index: '1',
+				user: data.name,
+				contact: data.contact,
+				mobile: data.mobile,
+				address: data.address,
+				number: '1234',
+			}
+			];
+		}
 		return (
 			<div className="table">
 				<div className="detail-button">

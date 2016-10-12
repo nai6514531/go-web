@@ -1,8 +1,10 @@
 import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
 
 const UserService = {
-	list: () => {
-		return apiGet(`/api/user`);
+	list: (pager) => {
+		const page = pager.page;
+		const per_page = pager.per_page;
+		return apiGet(`/api/user?${page}&${per_page}`);
 	},
 	detail: (id) => {
 		return apiGet(`/api/user/${id}`);
@@ -26,7 +28,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/permission`);
 	},
 	logout: () => {
-		return apiGet(`/api/user/signout`);
+		return apiPost(`/api/link/signout`);
 	},
 	menu: (id) => {
 		return apiGet(`/api/user/${id}/menu`);

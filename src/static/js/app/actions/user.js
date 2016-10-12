@@ -15,9 +15,9 @@ import {
 } from '../constants/index';
 
 
-export function userList() {
+export function userList(pager) {
 	return dispatch => {
-		UserService.list().then((result) => {
+		UserService.list(pager).then((result) => {
 			dispatch({
 				type: GET_USER_LIST,
 				result: { fetch: true, result },

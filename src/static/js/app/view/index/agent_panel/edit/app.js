@@ -7,22 +7,24 @@ const RadioGroup = Radio.Group;
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
+import * as UserActions from '../../../../actions/user';
 
 
 function mapStateToProps(state) {
-	const { user: { result } } = state;
-	return { result };
+	const { user: { result, detail } } = state;
+	return { result, detail };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
 		userCreate,
 		userEdit,
+		userDetail,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		userCreate,
 		userEdit,
+		userDetail,
 	};
 }
 class UserForm extends React.Component {
