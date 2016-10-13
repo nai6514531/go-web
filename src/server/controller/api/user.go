@@ -541,6 +541,11 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	roleids, _ := roleService.ListIdByUserId(id)
 	roleList, _ := roleService.ListByRoleIds(roleids)
 	re["role"] = roleList
+	//带上账号信息
+	userCashAccountService := &service.UserCashAccountService{}
+	cash, _ := userCashAccountService.BasicByUserId(id)
+	re["cash"] = cash
+
 	if err != nil {
 		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
 	} else {
