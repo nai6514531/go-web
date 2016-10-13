@@ -1,7 +1,7 @@
 import React from 'react';
 import './../school_device/app.less';
 import { Table, Breadcrumb } from 'antd';
-import { SchoolFilter } from '../../index/school_filter/app'
+import SchoolFilter from '../../index/school_filter/app'
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -53,6 +53,7 @@ const dataSource = [{
 	number: '1234',
 }
 ];
+const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class SchoolTable extends React.Component {
 	constructor(props) {
@@ -113,7 +114,7 @@ class SchoolTable extends React.Component {
 								<div>
 									<SchoolFilter/>
 									<Table columns={columns}
-										   rowKey={record => record.registered}
+										   rowKey={record => record.key}
 										   dataSource={dataSource}
 										   pagination={this.state.pagination}
 										   loading={this.state.loading}
@@ -125,7 +126,7 @@ class SchoolTable extends React.Component {
 				</div>
 			</div>
 		</div>
-			
+
 		);
 	}
 }

@@ -8,7 +8,7 @@ const RadioGroup = Radio.Group;
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as UserActions from '../../../actions/user';
-import * as regionActions from '../../../actions/region'
+import * as regionActions from '../../../actions/region';
 
 
 function mapStateToProps(state) {
@@ -24,7 +24,6 @@ function mapDispatchToProps(dispatch) {
 	} = bindActionCreators(UserActions, dispatch);
 	const {
 		provinceList,
-		provinceCityList,
 		cityList,
 	} = bindActionCreators(regionActions, dispatch);
 	return {
@@ -32,7 +31,6 @@ function mapDispatchToProps(dispatch) {
 		userEdit,
 		userDetail,
 		provinceList,
-		provinceCityList,
 		cityList,
 	};
 }
