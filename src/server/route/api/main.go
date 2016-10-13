@@ -44,6 +44,7 @@ func Api() {
 	api.UseFunc(common.CheckHasLogin)
 
 	api.Get("/user", user.ListByParent)
+	api.Get("/user/:id/user-device-info", user.BasicWithDeviceInfo)
 	api.Post("/user", user.Create)
 	api.Put("/user/:id", common.CheckUserId, user.Update)
 	api.Get("/user/:id", common.CheckUserId, user.Basic)
