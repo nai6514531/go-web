@@ -208,6 +208,18 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
 	cash, _ := userCashAccountService.BasicByUserId(user.Id)
 	userJson["cash"] = cash
+	//带上menu信息
+	roleIds, _ := roleService.ListIdByUserId(user.Id) //根据用户找角色id列表
+	permissionService := &service.PermissionService{} //根据角色id列表找权限id列表
+	permissionIds, _ := permissionService.ListIdsByRoleIds(roleIds)
+	menuService := &service.MenuService{} //根据权限id列表找menu详情
+	menuList, _ := menuService.ListByPermissionIds(permissionIds)
+	menuListV := []model.Menu{}
+	for _, v := range *menuList {
+		menuListV = append(menuListV, *v)
+	}
+	userJson["menu"] = menuListV
+
 	//将登陆后的用户全部信息写到session中 all-info-key
 	jsonString, _ := json.Marshal(userJson)
 	ctx.Session().Set(viper.GetString("server.session.user.all-info-key"), string(jsonString))
