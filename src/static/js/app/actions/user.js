@@ -12,15 +12,14 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
-	BE_FALSE,
-	BE_TRUE,
+	GETING_USER_LIST,
 } from '../constants/index';
 
 
 export function userList(pager) {
 	return dispatch => {
 		dispatch({
-			type: GET_USER_LIST,
+			type: GETING_USER_LIST,
 			result: { loading: true },
 		});
 		UserService.list(pager).then((result) => {
@@ -161,6 +160,7 @@ export function userPermission(id) {
 export function userLogout() {
 	return dispatch => {
 		UserService.logout().then((result) => {
+			console.log('IMLOGOUT');
 			dispatch({
 				type: USER_LOGOUT,
 				result: { fetch: true, result },

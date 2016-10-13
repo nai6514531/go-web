@@ -95,34 +95,28 @@ class AgentTable extends React.Component {
 		this.props.userList(pager);
 		// this.fetch();
 	}
-	getList(){
-		this.props.userList();
-		this.props.userDetail(20);
-	}
-	showList(){
-		console.log(this.props.list);
-		console.log(this.props.detail);
-	}
 	render() {
 		const list = this.props.list;
-		console.log('list',list);
-		console.log(this.props);
-		const loading = false;
+		console.log('list:',list);
+		let loading = false;
 		let data = '';
-		let dataSource = new Array;
-		if(list && list.fetch == true) {
-			data = list.result.data[0];
-			console.log(data);
-			dataSource = [{
-				key: '1',
-				index: '1',
-				user: data.name,
-				contact: data.contact,
-				mobile: data.mobile,
-				address: data.address,
-				number: '1234',
+		let dataSource = [];
+		if(list){
+			loading = true;
+			if(list.fetch == true){
+				data = list.result.data.list[0];
+				loading = false;
+				dataSource = [{
+					key: '1',
+					index: '1',
+					user: data.user.name,
+					contact: data.user.contact,
+					mobile: data.user.mobile,
+					address: data.user.address,
+					number: data.device.sum,
+				}
+				];
 			}
-			];
 		}
 		return (
 		<div className="index">
@@ -136,8 +130,6 @@ class AgentTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 							<div className="detail-button">
-								<button onClick={this.getList.bind(this)}>CLICK ME</button>
-								<button onClick={this.showList.bind(this)}>LIST</button>
 								<Button type="primary">
 									<Link to='/user/edit'>
 										添加新代理商
@@ -148,7 +140,7 @@ class AgentTable extends React.Component {
 								   rowKey={record => record.key}
 								   dataSource={dataSource}
 								   pagination={this.state.pagination}
-								   loading={loading?loading : false}
+								   loading={loading ? loading : false}
 								   onChange={this.handleTableChange}
 							/>
 						</div>

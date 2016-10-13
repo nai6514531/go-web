@@ -30,22 +30,20 @@ class Head extends React.Component {
 	showMe() {
 		console.log('result',this.props.result);
 		console.log('detail',this.props.detail);
+		var x = document.cookie;
+		console.log('cookie:',x);
 	}
 	componentDidMount(){
 		this.props.userDetail(20);
 	}
 	render() {
-		let account = '';
-		let role = '';
-		const detail = this.props.detail;
-		if(detail && detail.fetch == true) {
-			account = detail.result.data.user.account;
-			role =  detail.result.data.role[0].name;
-		}
+		const data = JSON.parse(document.getElementById('main').dataset.user);
+		const account = data.user.account;
+		const role = data.role[0].name;
 		return (
 			<div className="head">
 				<div className = "left">
-					<img src="#" alt="logo"/>
+					<img src={require('./logo.png')} alt="logo"/>
 					<h1>苏打生活管理系统</h1>
 				</div>
 				<div className = "right">

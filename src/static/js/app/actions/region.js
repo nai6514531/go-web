@@ -84,7 +84,7 @@ export function provinceSchoolList(id) {
 
 export function cityList() {
 	return dispatch => {
-		RegionService.city.list(id).then((result) => {
+		RegionService.city.list().then((result) => {
 			dispatch({
 				type: GET_CITY_LIST,
 				result: { fetch: true, result },

@@ -10,6 +10,7 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
+	GETING_USER_LIST,
 } from '../constants/index';
 
 const initialState = {
@@ -18,6 +19,7 @@ const initialState = {
 
 export default function (state = initialState, action) {
 	switch (action.type) {
+		case GETING_USER_LIST:
 		case GET_USER_LIST:
 			return {
 				...state,
