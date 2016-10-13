@@ -208,6 +208,18 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
 	cash, _ := userCashAccountService.BasicByUserId(user.Id)
 	userJson["cash"] = cash
+	//带上menu信息
+	roleIds, _ := roleService.ListIdByUserId(user.Id) //根据用户找角色id列表
+	permissionService := &service.PermissionService{} //根据角色id列表找权限id列表
+	permissionIds, _ := permissionService.ListIdsByRoleIds(roleIds)
+	menuService := &service.MenuService{} //根据权限id列表找menu详情
+	menuList, _ := menuService.ListByPermissionIds(permissionIds)
+	menuListV := []model.Menu{}
+	for _, v := range *menuList {
+		menuListV = append(menuListV, *v)
+	}
+	userJson["menu"] = menuListV
+
 	//将登陆后的用户全部信息写到session中 all-info-key
 	jsonString, _ := json.Marshal(userJson)
 	ctx.Session().Set(viper.GetString("server.session.user.all-info-key"), string(jsonString))
@@ -296,16 +308,6 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Password == "" {
-		result = &enity.Result{"01010404", nil, user_msg["01010404"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if len(body.User.Password) < 6 {
-		result = &enity.Result{"01010405", nil, user_msg["01010405"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	if body.User.Mobile == "" {
 		result = &enity.Result{"01010406", nil, user_msg["01010406"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -332,6 +334,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 
 	//插入user到user表
 	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
+	body.User.Password = "123456"                                                                 //设置密码为123456
 	ok := userService.Create(&body.User)
 	if !ok {
 		result = &enity.Result{"01010410", nil, user_msg["01010410"]}
