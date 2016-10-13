@@ -2,7 +2,9 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strings"
@@ -167,14 +169,32 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("per_page")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	list, err := deviceService.List(page, perPage)
-	listTotalNum, _ := deviceService.Count()
-	if err != nil {
-		result = &enity.Result{"01030401", nil, device_msg["01030401"]}
-	} else {
-		result = &enity.Result{"01030400", &enity.ListResult{listTotalNum, list}, device_msg["01030400"]}
+	//获取当前用户的角色
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	//查出该用户的角色id列表
+	roleService := &service.RoleService{}
+	roleIds, _ := roleService.ListIdByUserId(userId)
+	//判断是否包含管理员角色
+	if functions.FindIndex(roleIds, 1) == -1 { //如果不是系统管理员,根据用户角色id列出设备
+		list, err := deviceService.ListByUser(userId, page, perPage)
+		listTotalNum, _ := deviceService.CountByUser(userId)
+		if err != nil {
+			result = &enity.Result{"01030401", nil, device_msg["01030401"]}
+		} else {
+			result = &enity.Result{"01030400", &enity.ListResult{listTotalNum, list}, device_msg["01030400"]}
+		}
+		ctx.JSON(iris.StatusOK, result)
+	} else { //如果是系统管理员,列出所有设备
+		list, err := deviceService.List(page, perPage)
+		listTotalNum, _ := deviceService.Count()
+		if err != nil {
+			result = &enity.Result{"01030401", nil, device_msg["01030401"]}
+		} else {
+			result = &enity.Result{"01030400", &enity.ListResult{listTotalNum, list}, device_msg["01030400"]}
+		}
+		ctx.JSON(iris.StatusOK, result)
 	}
-	ctx.JSON(iris.StatusOK, result)
+
 }
 
 /**
