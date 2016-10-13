@@ -75,7 +75,7 @@ func (self *UserService) SubList(id int, page int, perPage int) (*[]*model.User,
 func (self *UserService) ChildIdsByUserId(parentId int) ([]int, error) {
 	var childIds []int
 	list := &[]*model.User{}
-	r := common.DB.Where("parent_id = ?", parentId).Find(list)
+	r := common.DB.Where("parent_id = ? AND id != ?", parentId, parentId).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

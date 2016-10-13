@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/viper"
 	"image/color"
 	"image/png"
-	"strconv"
 )
 
 type WebController struct {
@@ -15,9 +14,9 @@ type WebController struct {
 
 func (self *WebController) Index(ctx *iris.Context) {
 	userIdSess := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
-	ctx.SetCookieKV("user-id", strconv.Itoa(userIdSess)) //设置userid到cookie
+	userSess := ctx.Session().GetString(viper.GetString("server.session.user.all-info-key"))
 	if userIdSess >= 0 {
-		ctx.Render("index.html", map[string]interface{}{"title": "首页"})
+		ctx.Render("index.html", map[string]interface{}{"title": "首页", "user": userSess})
 	} else {
 		ctx.Render("signin.html", map[string]interface{}{"title": "登录"})
 	}

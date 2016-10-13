@@ -168,10 +168,11 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := deviceService.List(page, perPage)
+	listTotalNum, _ := deviceService.Count()
 	if err != nil {
 		result = &enity.Result{"01030401", nil, device_msg["01030401"]}
 	} else {
-		result = &enity.Result{"01030400", list, device_msg["01030400"]}
+		result = &enity.Result{"01030400", &enity.ListResult{listTotalNum, list}, device_msg["01030400"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
