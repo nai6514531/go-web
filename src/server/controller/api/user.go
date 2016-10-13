@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -190,15 +191,27 @@ func (self *UserController) Signin(ctx *iris.Context) {
 
 	/*登陆成功*/
 	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
-	//带上角色信息
-	re := make(map[string]interface{})
-	re["user"] = user
+	//带上用户信息
+	userJson := make(map[string]interface{}) //登陆后传递到前端的用户信息json
+	userJson["user"] = *user
 	roleService := &service.RoleService{}
+	//带上角色信息
 	roleids, _ := roleService.ListIdByUserId(user.Id)
 	roleList, _ := roleService.ListByRoleIds(roleids)
-	re["role"] = roleList
+	roleListV := []model.Role{}
+	for _, v := range *roleList {
+		roleListV = append(roleListV, *v)
+	}
+	userJson["role"] = roleListV
+	//带上支付账号信息
+	userCashAccountService := &service.UserCashAccountService{}
+	cash, _ := userCashAccountService.BasicByUserId(user.Id)
+	userJson["cash"] = cash
+	//将登陆后的用户全部信息写到session中 all-info-key
+	jsonString, _ := json.Marshal(userJson)
+	ctx.Session().Set(viper.GetString("server.session.user.all-info-key"), string(jsonString))
 
-	result := &enity.Result{"01010100", re, user_msg["01010100"]}
+	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	returnCleanCaptcha(result)
 	return
 }
