@@ -460,13 +460,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 }
 
 /**
-* @api {get} /api/user/:id 用户详情
-* @apiName Detail
-* @apiGroup User
-*
-* @apiSuccessExample Success-Response:
-*  HTTP/1.1 200 OK
-*	{
+	@api {get} /api/user/:id 用户详情
+	@apiName Detail
+	@apiGroup User
+
+ @apiSuccessExample Success-Response:
+  HTTP/1.1 200 OK
+	{
  "status": "01010600",
  "data": {
    "role": [
@@ -603,17 +603,11 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	}
 
 	//为返回json中带上共多少条的条目
-	type JsonRe struct {
-		Total int64      `json:"total"`
-		List  []MyResult `json:"list"`
-	}
 	listTotalNum, _ := userService.CountByParentId(parentId)
-	jsonRe := &JsonRe{listTotalNum, *myResultList}
-
 	if err != nil {
 		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
 	} else {
-		result = &enity.Result{"01010700", jsonRe, user_msg["01010700"]}
+		result = &enity.Result{"01010700", &enity.ListResult{listTotalNum, *myResultList}, user_msg["01010700"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -630,10 +624,12 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("per_page")
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
+	listTotalNum, _ := deviceService.CountByUser(userId) //计算总数
 	if err != nil {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
 	} else {
-		result = &enity.Result{"01010800", list, user_msg["01010800"]}
+		result = &enity.Result{"01010800", &enity.ListResult{listTotalNum, list}, user_msg["01010800"]}
+
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -651,10 +647,11 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
+	listTotalNum, _ := deviceService.CountByByUserAndSchool(userId, schoolId) //计算总数
 	if err != nil {
 		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
 	} else {
-		result = &enity.Result{"01010900", list, user_msg["01010900"]}
+		result = &enity.Result{"01010900", &enity.ListResult{listTotalNum, list}, user_msg["01010900"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
