@@ -70,3 +70,38 @@ func (self *UserService) SubList(id int, page int, perPage int) (*[]*model.User,
 	}
 	return list, nil
 }
+
+//根据父用户id列出所有子用户ids
+func (self *UserService) ChildIdsByUserId(parentId int) ([]int, error) {
+	var childIds []int
+	list := &[]*model.User{}
+	r := common.DB.Where("parent_id = ?", parentId).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	if r.RowsAffected <= 0 { //没有找到
+		return nil, nil
+	}
+	for _, v := range *list {
+		childIds = append(childIds, v.Id)
+	}
+	return childIds, nil
+}
+
+//根据父用户递归列出所有（子子子。。）用户ids
+func (self *UserService) SubChildIdsByUserId(parentId int) ([]int, error) {
+	var childIds []int
+	ids, _ := self.ChildIdsByUserId(parentId)
+	if ids == nil { //没有找到
+		return nil, nil
+	} else {
+		childIds = append(childIds, ids...)
+		for _, v := range ids {
+			ids, _ := self.SubChildIdsByUserId(v)
+			if ids != nil {
+				childIds = append(childIds, ids...)
+			}
+		}
+		return childIds, nil
+	}
+}
