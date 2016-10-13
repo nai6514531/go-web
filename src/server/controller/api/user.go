@@ -39,6 +39,7 @@ var (
 		"01010409": "结算账号不能为空",
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
+		"01010412": "新增用户角色记录失败",
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登陆账号不能为空!",
@@ -346,6 +347,18 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//插入一条用户角色记录（暂时所有调用此的api都是代理商角色）
+	userRoleRel := &model.UserRoleRel{}
+	userRoleRel.UserId = user.Id
+	userRoleRel.RoleId = 2 //统一为用户角色
+	userRoleRelSevice := &service.UserRoleRelService{}
+	ok = userRoleRelSevice.Create(userRoleRel)
+	if !ok {
+		result = &enity.Result{"01010412", nil, user_msg["01010412"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	result = &enity.Result{"01010400", nil, user_msg["01010400"]}
 	ctx.JSON(iris.StatusOK, &result)
 }

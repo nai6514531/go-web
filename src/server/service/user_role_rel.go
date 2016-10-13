@@ -25,3 +25,11 @@ func (self *UserRoleRelService) BasicByUserIdAndRoleId(userId int, roleId int) (
 	}
 	return userRoleRel, nil
 }
+
+func (self *UserRoleRelService) Create(userRoleRel *model.UserRoleRel) bool {
+	r := common.DB.Create(userRoleRel)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
+}
