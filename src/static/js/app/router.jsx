@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, Route, IndexRoute, hashHistory, IndexRedirect } from 'react-router';
+import { Router, Route, IndexRoute, hashHistory } from 'react-router';
 import Application from './application.jsx';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
@@ -7,49 +7,49 @@ import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './reducers/index';
 
 export const store = applyMiddleware(thunk)(createStore)(rootReducer);
-import  App  from './view/index/app.jsx';
-import Agent from './view/index/agent_panel/agent/app';
-import Cash from './view/index/cash/app';
-import AgentTable from './view/index/agent_panel/list/app';
-import  UserForm from './view/index/agent_panel/edit/app';
-import SchoolTable from  './view/index/school_table/app';
-import DeviceTable from  './view/index/device_table/app';
-import { DeviceForm } from './view/index/device_form/app';
 
-const rootRoute = {
-	childRoutes: [ {
-		path: '/',
-		component: Application,
-		getIndexRoute(location, callback) {
-			require.ensure([], function (require) {
-				callback(null, require('./view/index/app.jsx').default);
-			})
-		},
-		childRoutes: [
-			require('./view/index/index'),
-		]
-	} ]
-}
 
 const router = (
 	<Provider store = {store}>
-		<Router history={hashHistory} >
-			<Route component={Application}>
-				<Route path="/" component={App}>
-					<IndexRedirect to="agent" />
-					<Route path="agent" component={ Agent }>
-						<IndexRoute component= {AgentTable}/>
-						<Route path="new" component={UserForm}/>
-						<Route path="device" component={SchoolTable}>
-							<Route path="list" component={DeviceTable}>
-								<Route path="new" component={DeviceForm}/>
-							</Route>
-						</Route>
-					</Route>
-					<Route path="cash" component={Cash}/>
-				</Route>
-			</Route>
-		</Router>
+	<Router history={hashHistory}>
+	<Route path="/" component={ Application }>
+		<IndexRoute getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/home/app.jsx').default);
+			});
+		}} />
+		<Route path="/user" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/list/app').default);
+			});
+		}} />
+		<Route path="/user/edit(/:id)" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/edit/app').default);
+			});
+		}} />
+		<Route path="/user/device" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/device/app').default);
+			});
+		}} />
+		<Route path="/user/device/school" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/school_device/app').default);
+			});
+		}} />
+		<Route path="/user/device/edit" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/device_edit/app').default);
+			});
+		}} />
+		<Route path="/settlement" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/settlement/list/app.jsx').default);
+			});
+		}} />
+	</Route>
+</Router>
 	</Provider>
 );
 

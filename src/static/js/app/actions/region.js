@@ -21,10 +21,10 @@ export function provinceList() {
 				type: GET_PROVINCE_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_PROVINCE_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -38,10 +38,10 @@ export function provinceDetail(id) {
 				type: GET_PROVINCE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_PROVINCE_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -55,10 +55,10 @@ export function provinceCityList(id) {
 				type: GET_PROVINCE_CITY_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_PROVINCE_CITY_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -72,10 +72,10 @@ export function provinceSchoolList(id) {
 				type: GET_PROVINCE_SCHOOL_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_PROVINCE_SCHOOL_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -89,10 +89,10 @@ export function cityList() {
 				type: GET_CITY_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_CITY_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -106,10 +106,10 @@ export function cityDetail(id) {
 				type: GET_CITY_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_CITY_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -123,10 +123,10 @@ export function cityDistrictList(id) {
 				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -140,10 +140,10 @@ export function cityDistrictDetail(id) {
 				type: GET_DISTRICT_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});

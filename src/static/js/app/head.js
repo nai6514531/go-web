@@ -1,9 +1,8 @@
 import React from 'react';
-import './app.less';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
+import * as UserActions from './actions/user';
 
 
 function mapStateToProps(state) {

@@ -1,6 +1,6 @@
 import React from 'react';
-import './app.less';
-import { Table, Button } from 'antd';
+import './../device/app.less';
+import { Table, Button, Breadcrumb } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -125,28 +125,37 @@ class DeviceTable extends React.Component {
 	}
 	render() {
 		return (
-			<div className="table">
-				{this.props.children ? this.props.children :
-					<div>
-						<div className="detail-button">
-							<button onClick={this.getList.bind(this)}>CLICK </button>
-							<button onClick={this.getStatus.bind(this)}>GET LIST</button>
-							<Button type="primary">
-								<Link to="/agent/device/list/new">
-									添加新设备
-								</Link>
-							</Button>
-						</div>
-						<Table columns={columns}
-							   rowKey={record => record.registered}
-							   dataSource={dataSource}
-							   pagination={this.state.pagination}
-							   loading={this.state.loading}
-							   onChange={this.handleTableChange}
-						/>
-					</div>
-				}
+		<div className="detail">
+			<div className="detail-head">
+				<Breadcrumb separator=">">
+					<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+					<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
+				</Breadcrumb>
 			</div>
+			<div className="detail-form">
+				<div className="table">
+						<div>
+							<div className="detail-button">
+								<button onClick={this.getList.bind(this)}>CLICK </button>
+								<button onClick={this.getStatus.bind(this)}>GET LIST</button>
+								<Button type="primary">
+									<Link to="/agent/device/list/new">
+										添加新设备
+									</Link>
+								</Button>
+							</div>
+							<Table columns={columns}
+								   rowKey={record => record.registered}
+								   dataSource={dataSource}
+								   pagination={this.state.pagination}
+								   loading={this.state.loading}
+								   onChange={this.handleTableChange}
+							/>
+						</div>
+				</div>
+			</div>
+		</div>
+			
 		);
 	}
 }

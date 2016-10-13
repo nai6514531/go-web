@@ -1,20 +1,20 @@
 import React from 'react';
+import { Menu } from 'antd';
+import Sider from './sider.jsx';
 import './application.less';
+import Head from './head';
 
-import '../../css/normalize/normalize.css';
-import '../../css/animate/animate.css';
-import 'lib-flexible';       //响应式布局js
-//import 'antd/dist/antd.min.css';
-
-class Application extends React.Component {
+const Application = React.createClass({
 	render() {
 		const { location, children } = this.props;
-		return (
-			<div className="app-main">
+		return (<div className="application">
+			<Head/>
+			<Sider location={location} />
+			<div className="application-main">
 				{children}
 			</div>
-		);
+		</div>);
 	}
-}
+});
 
 export default Application;

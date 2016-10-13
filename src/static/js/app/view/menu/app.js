@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
+import * as UserActions from '../../actions/user';
 
 
 function mapStateToProps(state) {

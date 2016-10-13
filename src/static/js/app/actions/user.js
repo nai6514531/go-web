@@ -19,15 +19,19 @@ import {
 
 export function userList(pager) {
 	return dispatch => {
+		dispatch({
+			type: GET_USER_LIST,
+			result: { loading: true },
+		});
 		UserService.list(pager).then((result) => {
 			dispatch({
 				type: GET_USER_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -41,10 +45,10 @@ export function userDetail(id) {
 				type: GET_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -58,10 +62,10 @@ export function userCreate(user) {
 				type: POST_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: POST_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -75,10 +79,10 @@ export function userEdit(id, user) {
 				type: PUT_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: PUT_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -92,10 +96,10 @@ export function userRemove(id) {
 				type: REMOVE_USER,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: REMOVE_USER,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -109,10 +113,10 @@ export function userSchool(id) {
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -126,10 +130,10 @@ export function schoolDevice(id, school_id) {
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -143,10 +147,10 @@ export function userPermission(id) {
 				type: GET_USER_PERMISSION,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_PERMISSION,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -161,10 +165,10 @@ export function userLogout() {
 				type: USER_LOGOUT,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: USER_LOGOUT,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -179,10 +183,10 @@ export function userMenu(id) {
 				type: GET_USER_MENU,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_MENU,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -196,10 +200,10 @@ export function userDevice(id) {
 				type: GET_USER_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});

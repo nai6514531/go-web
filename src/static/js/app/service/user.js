@@ -4,6 +4,7 @@ const UserService = {
 	list: (pager) => {
 		const page = pager.page;
 		const per_page = pager.per_page;
+		console.log (page,per_page);
 		return apiGet(`/api/user?${page}&${per_page}`);
 	},
 	detail: (id) => {
