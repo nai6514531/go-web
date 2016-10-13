@@ -525,57 +525,59 @@ func (self *UserController) Basic(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user?page=xxx&per_page=xxx 子用户列表
+	@api {get} /api/user?parent_id=xx&page=xxx&per_page=xxx 子用户列表
 	@apiName ListByParent
 	@apiGroup User
  	@apiSuccessExample Success-Response:
    	HTTP/1.1 200 OK
 	{
-	  "status": "01010700",
-	  "data": [
-	    {
-	      "user": {
-	        "id": 14,
-	        "created_at": "0001-01-01T00:00:00Z",
-	        "updated_at": "0001-01-01T00:00:00Z",
-	        "deleted_at": null,
-	        "name": "苏打生活",
-	        "contact": "Table",
-	        "address": "科兴科学园",
-	        "mobile": "13148496853",
-	        "account": "13148496853",
-	        "password": "e10adc3949ba59abbe56e057f20f883e",
-	        "telephone": "",
-	        "email": "",
-	        "parent_id": 20,
-	        "gender": 0,
-	        "age": 0,
-	        "status": 0
-	      },
-	      "device": {
-	        "sum": 0,
-	        "user-ids": [
-	          14
-	        ]
-	      }
-	    }...
-	  ],
+	  	"status": "01010700",
+		"data": {
+		    "total": 5,
+		    "list": [
+		      	{
+			        "user": {
+			          "id": 14,
+			          "created_at": "0001-01-01T00:00:00Z",
+			          "updated_at": "0001-01-01T00:00:00Z",
+			          "deleted_at": null,
+			          "name": "苏打生活",
+			          "contact": "Table",
+			          "address": "科兴科学园",
+			          "mobile": "13148496853",
+			          "account": "13148496853",
+			          "password": "e10adc3949ba59abbe56e057f20f883e",
+			          "telephone": "",
+			          "email": "",
+			          "parent_id": 20,
+			          "gender": 0,
+			          "age": 0,
+			          "status": 0
+			        },
+			        "device": {
+			          "sum": 0,
+			          "user-ids": [
+			            14
+			          ]
+			        }
+		      	}...
+		    ]
+		}
 	  "msg": "拉取用户列表成功!"
 	}
 */
 func (self *UserController) ListByParent(ctx *iris.Context) {
-	parentId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("per_page")
+	parentId, _ := ctx.URLParamInt("parent_id")
+	if parentId <= 0 { //如果parentid没有传进来就用session中的用户id
+		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	}
+
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	userList, err := userService.SubList(parentId, page, perPage)
-	//在子列表中将自身的用户详情也加上
-	meUser, _ := userService.Basic(parentId)
-	meAndChildList := []*model.User{}
-	meAndChildList[0] = meUser
-	meAndChildList = append(meAndChildList, *userList...)
 
 	//为每一条user记录计算其设备数量
 	type MyResult struct {
@@ -586,7 +588,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	myResult := MyResult{}
 	var userIds []int
 
-	for _, v := range meAndChildList {
+	for _, v := range *userList {
 		myResult.User = *v
 		userIds, _ = userService.SubChildIdsByUserId(v.Id) //计算每一条用户记录有多少个设备
 		userIds = append(userIds, v.Id)                    //把自己也算上
@@ -600,10 +602,18 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		*myResultList = append(*myResultList, myResult)
 	}
 
+	//为返回json中带上共多少条的条目
+	type JsonRe struct {
+		Total int64      `json:"total"`
+		List  []MyResult `json:"list"`
+	}
+	listTotalNum, _ := userService.CountByParentId(parentId)
+	jsonRe := &JsonRe{listTotalNum, *myResultList}
+
 	if err != nil {
 		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
 	} else {
-		result = &enity.Result{"01010700", myResultList, user_msg["01010700"]}
+		result = &enity.Result{"01010700", jsonRe, user_msg["01010700"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
