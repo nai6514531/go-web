@@ -366,6 +366,9 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//修改设备的用户为当前用户id
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	device.UserId = userId
 	success := deviceService.UpdateBySerialNumber(device)
 	if !success {
 		result = &enity.Result{"01030501", nil, device_msg["01030501"]}
