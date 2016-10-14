@@ -50,7 +50,7 @@ class SchoolFilter extends React.Component {
 		this.props.provinceList();
 	}
 	selectProvince(province_id, province_name) {
-		this.props.provinceSchoolList(id);
+		this.props.provinceSchoolList(province_id);
 		this.setState({
 			province_id: province_id,
 			province_name: province_name,
