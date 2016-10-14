@@ -1,9 +1,9 @@
 import React from 'react';
 import './../school_device/app.less';
-import { Table, Breadcrumb } from 'antd';
-import SchoolFilter from '../../common/school_filter/app'
+import { Table, Breadcrumb, Form, Select, Button } from 'antd';
+const FormItem = Form.Item;
+const Option = Select.Option;
 import { Link } from 'react-router';
-
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as UserActions from '../../../actions/user';
@@ -43,7 +43,7 @@ const columns = [{
 	title: '操作',
 	dataIndex: 'action',
 	key: 'action',
-	render: (text, record) => <Link to={"/user/device/school/" + record.id}>查看模块</Link>,
+	render: (text, record) => <Link to={"/user/device/school/" + record.key}>查看模块</Link>,
 }];
 
 
@@ -111,7 +111,7 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter/>
+									<SchoolFilter school={school} schoolDevice={this.props.schoolDevice}/>
 									<Table columns={columns}
 										   dataSource={dataSource}
 										   pagination={this.state.pagination}
@@ -128,7 +128,56 @@ class SchoolTable extends React.Component {
 		);
 	}
 }
+class SchoolFilter extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+	handleSubmit(e) {
+		e.preventDefault();
+		const id = user_data.user.id;
+		const school_id = parseInt(this.props.form.getFieldsValue().school);
+		this.props.schoolDevice(id, school_id);
+	}
+	render() {
+		const school = this.props.school;
+		let school_node = [];
+		if(school){
+			if(school.fetch == true){
+				const data = school.result.data;
+				school_node = data.map(function (item, key) {
+					const id = item.id.toString();
+					return <Option key={key} value={id}>{item.name}</Option>;
+				})
+			}
+		}
+		const { getFieldDecorator } = this.props.form;
+		return (
+			<div className="school_filter">
+				<Form inline onSubmit={this.handleSubmit}>
+					<FormItem
+						id="select"
+						labelCol={{ span: 6 }}
+						wrapperCol={{ span: 14 }}
+					>
+						{getFieldDecorator('school', {
+							rules: [
+								{ required: true, message: '请选择学校' },
+							],
+						})(
+							<Select id="school" style={{ width: 200 }} >
+								{school_node}
+							</Select>
+						)}
 
+					</FormItem>
+					<Button type="primary" htmlType="submit">筛选</Button>
+				</Form>
+			</div>
+		);
+	}
+}
+SchoolFilter = Form.create()(SchoolFilter);
 
 SchoolTable.propTypes = {
 	handleTableChange: React.PropTypes.func,

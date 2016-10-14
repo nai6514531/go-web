@@ -48,6 +48,7 @@ class SchoolFilter extends React.Component {
 	}
 	componentWillMount() {
 		this.props.provinceList();
+		// this.props.provinceSchoolList(110000);
 	}
 	selectProvince(province_id, province_name) {
 		this.props.provinceSchoolList(province_id);
@@ -61,10 +62,12 @@ class SchoolFilter extends React.Component {
 			school_id: school_id,
 			school_name: school_name,
 		});
-		this.refs.findNode.classList.toggle('box_show');
+		this.refs.box.classList.toggle('box_show');
+		this.refs.mask.classList.toggle('box_show');
 	}
 	showBox() {
-		this.refs.findNode.classList.toggle('box_show');
+		this.refs.box.classList.toggle('box_show');
+		this.refs.mask.classList.toggle('box_show');
 	}
 	render() {
 		const province_list = this.props.province_list;
@@ -75,7 +78,7 @@ class SchoolFilter extends React.Component {
 			if(province_list.fetch == true){
 				province_node = province_list.result.data.map(function(item, key){
 					return (
-						<button key={key} onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</button>
+						<Button key={key} onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</Button>
 					)
 				})
 			}
@@ -95,19 +98,26 @@ class SchoolFilter extends React.Component {
 		// 只做省学校级联,不做button,是否需要 button 由外部决定
 		return (
 			<div className="filter">
-				<div ref='findNode' className="box">
+				<div  ref="mask" className="mask box_show"></div>
+				<div ref="box" className="box box_show" >
 					<div className="province">
 						{province_node}
 					</div>
 					<div className="school">
-						{school_node}
+						{school_node ? school_node : '请先选择省份'}
 					</div>
 				</div>
 				<div onClick = {this.showBox.bind(this)} className="show">
-					{this.state.province_name}
-					{this.state.school_name}
-					<button onClick={this.handleFilter}>筛选</button>
+					{this.state.province_id ?
+						<div>
+							<span>{this.state.province_name}</span>
+							<span>{this.state.school_name}</span>
+						</div>
+						:
+						<span>请选择学校</span>
+					}
 				</div>
+				<Button type="primary" onClick={this.handleFilter}>筛选</Button>
 			</div>
 		);
 	}
