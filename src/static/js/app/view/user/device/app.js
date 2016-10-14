@@ -1,7 +1,7 @@
 import React from 'react';
 import './../school_device/app.less';
 import { Table, Breadcrumb } from 'antd';
-import SchoolFilter from '../../index/school_filter/app'
+import SchoolFilter from '../../common/school_filter/app'
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -43,16 +43,10 @@ const columns = [{
 	title: '操作',
 	dataIndex: 'action',
 	key: 'action',
-	render: () => <Link to="/agent/device/list">查看模块</Link>,
+	render: (text, record) => <Link to={"/user/device/school/" + record.id}>查看模块</Link>,
 }];
 
-const dataSource = [{
-	key: '1',
-	index: '1',
-	school: '清华大学',
-	number: '1234',
-}
-];
+
 const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class SchoolTable extends React.Component {
@@ -84,19 +78,26 @@ class SchoolTable extends React.Component {
 	}
 	componentDidMount() {
 		// this.fetch();
-	}
-	handleClick(){
-		// this.props.userSchool(327);
-		// this.props.schoolDevice(327, 1001);
-		console.log(this.props);
-		this.props.userDevice(327);
-	}
-	showMe(){
-		// console.log(this.props.school);
-		// console.log(this.props.school_device);
-		console.log(this.props.device);
+		const id = user_data.user.id;
+		this.props.userSchool(id);
 	}
 	render() {
+		const school = this.props.school;
+		let dataSource = [];
+		if(school){
+			if(school.fetch == true){
+        		const data = school.result.data;
+				dataSource = data.map(function (item,key) {
+					console.log(item);
+					return {
+						key: item.id,
+						index: key,
+						school: item.name,
+						number: '1234',
+					}
+				})
+			}
+		}
 		return (
 		<div className="index">
 			<div className="body-panel">
@@ -109,12 +110,9 @@ class SchoolTable extends React.Component {
 					</div>
 					<div className="detail-form">
 						<div className="table">
-							<button onClick={this.handleClick.bind(this)}>CLICK ME</button>
-							<button onClick={this.showMe.bind(this)}>SHOW ME</button>
 								<div>
 									<SchoolFilter/>
 									<Table columns={columns}
-										   rowKey={record => record.key}
 										   dataSource={dataSource}
 										   pagination={this.state.pagination}
 										   loading={this.state.loading}

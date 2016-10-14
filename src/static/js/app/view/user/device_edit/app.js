@@ -5,7 +5,39 @@ const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
-export class DeviceForm extends React.Component {
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as DeviceActions from '../../../actions/device';
+import * as RegionActions from '../../../actions/region';
+
+
+function mapStateToProps(state) {
+	const { device: { detail, status, result, ref_device }, region: {province_list, province_school} } = state;
+	return { detail, status, result, ref_device, province_list, province_school };
+}
+
+function mapDispatchToProps(dispatch) {
+	const {
+		deviceDetail,
+		deviceEdit,
+		pulseName,
+		refDevice,
+	} = bindActionCreators(DeviceActions, dispatch);
+	const {
+		provinceList,
+		provinceSchoolList,
+	} = bindActionCreators(RegionActions, dispatch);
+	return {
+		deviceDetail,
+		deviceEdit,
+		pulseName,
+		refDevice,
+		provinceList,
+		provinceSchoolList,
+	};
+}
+
+class DeviceForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -19,9 +51,17 @@ export class DeviceForm extends React.Component {
 		this.handleOk = this.handleOk.bind(this);
 	}
 	componentWillMount() {
-		this.props.form.setFieldsValue({
-			type: 'current',
-		});
+		const device_id = this.props.params.id;
+		if(device_id) {
+			this.props.deviceDetail(device_id);
+		}
+		// 获取关联设备列表
+		this.props.refDevice();
+		//获取省份列表
+		this.props.provinceList();
+		// 获取省份对应城市列表
+		
+
 	}
 	showModal() {
 		this.setState({
@@ -62,6 +102,19 @@ export class DeviceForm extends React.Component {
 		this.props.form.resetFields();
 	}
 	render() {
+		// 关联设备列表
+		const ref_device = this.props.ref_device;
+		let ref_device_node = [];
+		if(ref_device) {
+			if(ref_device.fetch == true){
+				ref_device_node = ref_device.result.data.map(function (item, key) {
+					return (
+						<Radio value={item.id}>{item.name}</Radio>
+					)
+				})
+			}
+		}
+		// 省份列表
 		const address = [{
 			value: 'guangdong',
 			label: '广东',
@@ -70,6 +123,26 @@ export class DeviceForm extends React.Component {
 				label: '深圳',
 			}],
 		}];
+		console.log('device',this.props.detail);
+		const detail = this.props.detail;
+		let initialValue = {};
+		if(detail) {
+			if(detail.fetch == true){
+				const device = detail.result.data;
+				initialValue = {
+					'serial_number': device.serial_number,
+					'school': device.school_id,
+					'province': device.province_id,
+					'address': device.address,
+					'reference_device': device.reference_device_id,
+					'first_pulse_price': device.first_pulse_price,
+					'second_pulse_price': device.second_pulse_price,
+					'third_pulse_price': device.third_pulse_price,
+					'fourth_pulse_price': device.fourth_pulse_price,
+
+				}
+			}
+		}
 		const { getFieldDecorator, getFieldError, isFieldValidating } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 7 },
@@ -84,6 +157,7 @@ export class DeviceForm extends React.Component {
 						<Breadcrumb separator=">">
 							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
 							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
+							<Breadcrumb.Item href="#">添加</Breadcrumb.Item>
 						</Breadcrumb>
 					</div>
 					<div className="detail-form">
@@ -97,6 +171,16 @@ export class DeviceForm extends React.Component {
 									],
 								})(
 									<Input placeholder="请输入设备编号" />
+								)}
+							</FormItem>
+							<FormItem
+								{...formItemLayout}
+								label="省份"
+							>
+								{getFieldDecorator('province', {
+									rules: [{ required: true, type: 'array',message: '请选择省份' }],
+								})(
+									<Cascader options={address} />
 								)}
 							</FormItem>
 							<FormItem
@@ -130,7 +214,7 @@ export class DeviceForm extends React.Component {
 									],
 								})(
 									<RadioGroup>
-										<Radio value="washer">洗衣机</Radio>
+										{ref_device_node}
 									</RadioGroup>
 								)}
 							</FormItem>
@@ -220,3 +304,5 @@ DeviceForm = createForm()(DeviceForm);
 DeviceForm.propTypes = {
 	title: React.PropTypes.string,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(DeviceForm);

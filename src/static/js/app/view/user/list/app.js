@@ -54,11 +54,15 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-			<Link to='/user/edit/20'>修改</Link>
-			<span className="ant-divider" />
-			<Link to='/user'>下级代理商</Link>
-			<span className="ant-divider" />
-			<Link to='/user/device'>设备管理</Link>
+			<Link to={'/user/edit/' + record.key}>修改</Link>
+			{record.show_action?
+				<span>
+					<span className="ant-divider" />
+					<Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link>
+					<span className="ant-divider" />
+					<Link to='/user/device/list'>设备管理</Link>
+				</span>
+			:''}
 		</span>
 	),
 }];
@@ -70,7 +74,9 @@ class AgentTable extends React.Component {
 			dataSource: [],
 			pagination: {},
 			loading: false,
+			child: false,
 		};
+		this.showChild = this.showChild.bind(this);
 	}
 	handleTableChange(pagination, filters, sorter) {
 		const pager = this.state.pagination;
@@ -95,27 +101,58 @@ class AgentTable extends React.Component {
 		this.props.userList(pager);
 		// this.fetch();
 	}
+	showChild() {
+		console.log('showchild');
+		
+		this.setState({
+			child: true,
+		})
+	}
 	render() {
+		console.log('params',this.props.params.id);
+		const id = this.props.params.id;
 		const list = this.props.list;
 		console.log('list:',list);
 		let loading = false;
 		let data = '';
 		let dataSource = [];
+		const that = this;
 		if(list){
-			loading = true;
+			// loading = true;
 			if(list.fetch == true){
-				data = list.result.data.list[0];
 				loading = false;
-				dataSource = [{
-					key: '1',
-					index: '1',
-					user: data.user.name,
-					contact: data.user.contact,
-					mobile: data.user.mobile,
-					address: data.user.address,
-					number: data.device.sum,
+				if(id) {
+					data = list.result.data.list;
+					dataSource = data.map(function (item, key) {
+						return (
+							{
+								key: item.user.id,
+								index: key,
+								user: item.user.name,
+								contact: item.user.contact,
+								mobile: item.user.mobile,
+								address: item.user.address,
+								number: item.device.sum,
+								action: that.showChild,
+								show_action: !that.state.child,
+							}
+						)
+					})
+				} else {
+					data = list.result.data.list[0];
+					dataSource = [{
+						key: data.user.id,
+						index: '1',
+						user: data.user.name,
+						contact: data.user.contact,
+						mobile: data.user.mobile,
+						address: data.user.address,
+						number: data.device.sum,
+						action: that.showChild,
+						show_action: !that.state.child,
+					}
+					];
 				}
-				];
 			}
 		}
 		return (
@@ -131,7 +168,7 @@ class AgentTable extends React.Component {
 						<div className="table">
 							<div className="detail-button">
 								<Button type="primary">
-									<Link to='/user/edit'>
+									<Link to='/user/edit/new'>
 										添加新代理商
 									</Link>
 								</Button>

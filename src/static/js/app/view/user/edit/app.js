@@ -53,6 +53,10 @@ class UserForm extends React.Component {
 		}
 		this.props.provinceList();
 		this.props.cityList();
+		const id = this.props.params.id;
+		if(id && id !== 'new') {
+			this.props.userDetail(id);
+		}
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -60,8 +64,6 @@ class UserForm extends React.Component {
 			if (errors) {
 				return;
 			}
-			console.log(values);
-			let data = {};
 			let cash_value = {};
 			const base_value = {
 				"user": {
@@ -94,12 +96,11 @@ class UserForm extends React.Component {
 					}
 				}
 			}
-			data = Object.assign({}, base_value, cash_value);
-			console.log('USER',data);
-			if(this.props.params.id) {
-				this.props.userEdit(user_data.user.id,data);
-			} else {
+			const data = Object.assign({}, base_value, cash_value);
+			if(this.props.params.id == 'new') {
 				this.props.userCreate(data);
+			} else {
+				this.props.userEdit(this.props.params.id, data);
 			}
 		});
 	}
@@ -124,31 +125,38 @@ class UserForm extends React.Component {
 			}
 		}
 		const id = this.props.params.id;
+		const detail = this.props.detail;
 		let initialValue = {};
-		if(id) {
-			const base_values = {
-				name: user_data.user.name,
-				contact: user_data.user.contact,
-				address: user_data.user.address,
-				mobile : user_data.user.mobile,
-				telephone: user_data.user.telephone,
-				type: user_data.cash.type.toString(),
-			}
-			if(user_data.cash.type == 1){
-				const cash_values = {
-					real_name: user_data.cash.real_name,
-					bank_name: user_data.cash.bank_name,
-					account: user_data.cash.acccount,
-					bank_mobile: user_data.cash.mobile,
-					city: user_data.cash.city_id,
+		if(id && id !== 'new' && detail) {
+			if(detail.fetch == true){
+				const data = detail.result.data;
+				const base_values = {
+					name: data.user.name,
+					contact: data.user.contact,
+					address: data.user.address,
+					mobile : data.user.mobile,
+					telephone: data.user.telephone,
+				}
+				let cash_values = {};
+				if(data.cash && data.cash.type == 1){
+					cash_values = {
+						type: data.cash.type.toString(),
+						real_name: data.cash.real_name,
+						bank_name: data.cash.bank_name,
+						account: data.cash.account,
+						bank_mobile: data.cash.mobile,
+						city: [data.cash.province_id,data.cash.city_id],
+					}
+				} else if (data.cash && data.cash.type == 2){
+					cash_values = {
+						type: data.cash.type.toString(),
+						alipay_account: '',
+						alipay_name: '',
+					}
 				}
 				initialValue = Object.assign({}, base_values, cash_values);
 			} else {
-				const cash_values = {
-					alipay_account: '',
-					alipay_name: '',
-				}
-				initialValue = Object.assign({}, base_values, cash_values);
+				console.log('拉取用户详情失败');
 			}
 		}
 		const province_list = this.props.province_list;
@@ -346,7 +354,7 @@ class UserForm extends React.Component {
 									>
 										{getFieldDecorator('city', {
 											rules: [{ required: true, type: 'array',message: '请选择城市' }],
-											initialValue: [330000,331100],
+											initialValue: initialValue.type,
 										})(
 											<Cascader options={address} />
 										)}

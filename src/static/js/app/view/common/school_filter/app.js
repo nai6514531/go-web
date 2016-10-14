@@ -35,37 +35,31 @@ class SchoolFilter extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			province: '',
-			school: '',
+			province_id: '',
+			province_name: '',
+			school_id: '',
+			school_name: '',
 		};
-		this.onChange = this.onChange.bind(this);
 		this.handleFilter = this.handleFilter.bind(this);
 	}
 	handleFilter() {
-		console.log(this.state.value);
-		this.props.schoolDevice();
-	}
-	onChange(value) {
-		this.setState({value: value})
-		console.log(this.state.value);
-		if(this.state.value.length == 1){
-			this.props.provinceSchoolList(this.state.value);
-		}
+		const id = user_data.user.id;
+		this.props.schoolDevice(id, this.state.school_id);
 	}
 	componentWillMount() {
 		this.props.provinceList();
 	}
-	selectProvince(id, province) {
+	selectProvince(province_id, province_name) {
 		this.props.provinceSchoolList(id);
 		this.setState({
-			province: province,
+			province_id: province_id,
+			province_name: province_name,
 		});
 	}
-	selectSchool(school_id, school) {
-		const id = user_data.user.id;
-		this.props.schoolDevice(id,school_id);
+	selectSchool(school_id, school_name) {
 		this.setState({
-			school: school,
+			school_id: school_id,
+			school_name: school_name,
 		});
 		this.refs.findNode.classList.toggle('box_show');
 	}
@@ -80,7 +74,6 @@ class SchoolFilter extends React.Component {
 		if(province_list) {
 			if(province_list.fetch == true){
 				province_node = province_list.result.data.map(function(item, key){
-					// console.log(item);
 					return (
 						<button key={key} onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</button>
 					)
@@ -93,14 +86,13 @@ class SchoolFilter extends React.Component {
 		if(province_school) {
 			if(province_school.fetch == true){
 				school_node = province_school.result.data.map(function(item, key){
-					// console.log(item);
 					return (
 						<span key={key} onClick={that.selectSchool.bind(that,item.id,item.name)}>{item.name}</span>
 					)
 				})
 			}
 		}
-
+		// 只做省学校级联,不做button,是否需要 button 由外部决定
 		return (
 			<div className="filter">
 				<div ref='findNode' className="box">
@@ -112,8 +104,9 @@ class SchoolFilter extends React.Component {
 					</div>
 				</div>
 				<div onClick = {this.showBox.bind(this)} className="show">
-					{this.state.province}
-					{this.state.school}
+					{this.state.province_name}
+					{this.state.school_name}
+					<button onClick={this.handleFilter}>筛选</button>
 				</div>
 			</div>
 		);

@@ -27,15 +27,6 @@ class Head extends React.Component {
 		this.props.userLogout();
 		window.location.href = '/';
 	}
-	showMe() {
-		console.log('result',this.props.result);
-		console.log('detail',this.props.detail);
-		var x = document.cookie;
-		console.log('cookie:',x);
-	}
-	componentDidMount(){
-		this.props.userDetail(20);
-	}
 	render() {
 		const data = JSON.parse(document.getElementById('main').dataset.user);
 		const account = data.user.account;
@@ -49,7 +40,6 @@ class Head extends React.Component {
 				<div className = "right">
 					<span>{account}</span>
 					<span>{role}</span>
-					<button onClick={this.showMe.bind(this)}>show me</button>
 					<a href="#" onClick={this.logout.bind(this)}>退出</a>
 				</div>
 			</div>
