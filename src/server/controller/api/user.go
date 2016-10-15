@@ -798,8 +798,18 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//带上每个学校的设备总数
+	result_with_device := &[]*enity.SchoolDeviceResult{}
+	for _, school := range *schools {
+		//以用户学校为条件查找数量
+		sum, _ := deviceService.CountByByUserAndSchool(userId, school.Id)
+		device_result := map[string]interface{}{
+			"total": sum,
+		}
+		*result_with_device = append(*result_with_device, &enity.SchoolDeviceResult{*school, device_result})
+	}
 	//返回
-	result = &enity.Result{"01011100", schools, user_msg["01011100"]}
+	result = &enity.Result{"01011100", result_with_device, user_msg["01011100"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 

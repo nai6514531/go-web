@@ -67,7 +67,7 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
-	api.Get("/device/:id", common.CheckDeviceId, device.Basic)
+	api.Get("/device/:id", device.Basic)
 	api.Delete("/device/:id", common.CheckDeviceId, device.Delete)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", common.CheckDeviceId, device.Update)
