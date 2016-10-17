@@ -5,8 +5,8 @@ package model
 */
 type UserGroupRel struct {
 	Model
-	UserId  int `json:"user_id"`
-	GroupId int `json:"group_id"`
+	UserId  int `json:"userId"`
+	GroupId int `json:"groupId"`
 }
 
 func (UserGroupRel) TableName() string {

@@ -2,12 +2,12 @@ package model
 
 type DailyBillDetail struct {
 	Model
-	UserId       int    `json:"user_id"`
-	SerialNumber string `json:"serial_number"`
+	UserId       int    `json:"userId"`
+	SerialNumber string `json:"serialNumber"`
 	Amount       int    `json:"amount"`
-	PulseType    int    `json:"pulse_type"`
+	PulseType    int    `json:"pulseType"`
 	Status       int    `json:"status"`
-	BillAt       string `json:"bill_at"`
+	BillAt       string `json:"billAt"`
 }
 
 func (DailyBillDetail) TableName() string {

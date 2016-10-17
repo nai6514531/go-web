@@ -25,6 +25,8 @@ func main() {
 
 	//common.SetUpSecure()
 
+	common.SetUpCommon()
+
 	server.SetUpServer()
 
 }

@@ -13,7 +13,7 @@ type User struct {
 	Password  string `json:"password"`  //密码
 	Telephone string `json:"telephone"` //服务电话
 	Email     string `json:"email"`     //邮箱
-	ParentId  int    `json:"parent_id"` //父id
+	ParentId  int    `json:"parentId"` //父id
 	Gender    int    `json:"gender"`    //性别
 	Age       int    `json:"age"`       //年龄
 	Status    int    `json:"status"`    //状态

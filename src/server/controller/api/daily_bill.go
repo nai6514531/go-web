@@ -1,12 +1,9 @@
 package controller
 
 import (
-	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
-	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
-	"encoding/json"
 )
 
 type DailyBillController struct {

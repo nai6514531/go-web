@@ -2,14 +2,14 @@ package model
 
 type UserCashAccount struct {
 	Model
-	UserId     int    `json:"user_id"`
+	UserId     int    `json:"userId"`
 	Type       int    `json:"type"`
-	RealName   string `json:"real_name"`
-	BankName   string `json:"bank_name"`
+	RealName   string `json:"realName"`
+	BankName   string `json:"bankName"`
 	Account    string `json:"account"`
 	Mobile     string `json:"mobile"`
-	CityId     int    `json:"city_id"`
-	ProvinceId int    `json:"province_id"`
+	CityId     int    `json:"cityId"`
+	ProvinceId int    `json:"provinceId"`
 }
 
 func (UserCashAccount) TableName() string {

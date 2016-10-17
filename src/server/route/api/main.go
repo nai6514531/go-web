@@ -2,27 +2,13 @@ package api
 
 import (
 	"github.com/kataras/iris"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/controller/api"
 )
 
 func Api() {
 
-	api := iris.Party("/api", func(ctx *iris.Context) {
-		println("Middleware for all /api!")
-		println("from ", ctx.MethodString(), ctx.PathString())
-		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
-		ctx.Next()
-	})
-
-	link := iris.Party("/api/link", func(ctx *iris.Context) {
-		println("Middleware for all /api/link")
-		println("from ", ctx.MethodString(), ctx.PathString())
-		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
-		ctx.Next()
-	})
-
 	var (
-		common          = &controller.CommonController{}
 		user            = &controller.UserController{}
 		region          = &controller.RegionController{}
 		device          = &controller.DeviceController{}
@@ -32,9 +18,13 @@ func Api() {
 		sync            = &controller.SyncController{}
 	)
 
-	link.Post("/signin", user.Signin)
-	link.Post("/signout", user.Signout)
-	//api.Get("/link/verificode", user.SendVerifiCode)
+	api := iris.Party("/api", func(ctx *iris.Context) {
+		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
+		ctx.Next()
+	})
+
+	api.Post("/signin", user.Signin)
+	api.Post("/signout", user.Signout)
 
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-role", sync.SyncUserRole)
@@ -43,18 +33,18 @@ func Api() {
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
 
-	api.UseFunc(common.CheckHasLogin)
+	api.UseFunc(common.RequireSignin)
 
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/user-device-info", user.BasicWithDeviceInfo)
 	api.Post("/user", user.Create)
-	api.Put("/user/:id", common.CheckUserId, user.Update)
-	api.Get("/user/:id", common.CheckUserId, user.Basic)
-	api.Get("/user/:id/device", common.CheckUserId, user.DeviceList)
-	api.Get("/user/:id/school", common.CheckUserId, user.SchoolList)
-	api.Get("/user/:id/school/:schoolId/device", common.CheckUserId, user.DeviceOfSchool)
-	api.Get("/user/:id/menu", common.CheckUserId, user.Menu)
-	api.Get("/user/:id/permission", common.CheckUserId, user.Permission)
+	api.Put("/user/:id", user.Update)
+	api.Get("/user/:id", user.Basic)
+	api.Get("/user/:id/device", user.DeviceList)
+	api.Get("/user/:id/school", user.SchoolList)
+	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
+	api.Get("/user/:id/menu", user.Menu)
+	api.Get("/user/:id/permission", user.Permission)
 
 	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
@@ -69,13 +59,13 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
-	api.Get("/device/:id", common.CheckDeviceId, device.Basic)
-	api.Delete("/device/:id", common.CheckDeviceId, device.Delete)
+	api.Get("/device/:id", device.Basic)
+	api.Delete("/device/:id", device.Delete)
 	api.Post("/device", device.Create)
-	api.Put("/device/:id", common.CheckDeviceId, device.Update)
+	api.Put("/device/:id", device.Update)
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
-	api.Patch("/device/:id/status", common.CheckDeviceId, device.UpdateStatus)
-	api.Patch("/device/:id/pulse-name", common.CheckDeviceId, device.UpdatePulseName)
+	api.Patch("/device/:id/status", device.UpdateStatus)
+	api.Patch("/device/:id/pulse-name", device.UpdatePulseName)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)

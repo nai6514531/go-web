@@ -4,6 +4,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
+	"strconv"
 )
 
 type MenuService struct {
@@ -29,4 +30,25 @@ func (self *MenuService) ListByPermissionIds(permissionIds []int) (*[]*model.Men
 		return nil, r.Error
 	}
 	return menuList, nil
+}
+
+func (self *MenuService) ListByUserId(userId int) (*[]*model.Menu, error) {
+	list := []*model.Menu{}
+	_userId := strconv.Itoa(userId);
+	sql := "select m.id,m.name,m.url  from menu m, role_permission_rel rpr,permission_menu_rel pmr " +
+		"where rpr.role_id in (" +
+		"select r.id from role r,user_role_rel urr where urr.user_id =" + _userId + " and r.id=urr.role_id" +
+		") " +
+		"and rpr.permission_id =pmr.permission_id and pmr.menu_id = m.id"
+	rows, err := common.DB.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		menu := &model.Menu{}
+		common.DB.ScanRows(rows, menu)
+		list = append(list, menu)
+	}
+	return &list, nil
 }

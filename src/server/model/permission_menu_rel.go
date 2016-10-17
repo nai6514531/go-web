@@ -2,8 +2,8 @@ package model
 
 type PermissionMenuRel struct {
 	Model
-	PermissionId int `json:"permission_id"`
-	MenuId       int `json:"menu_id"`
+	PermissionId int `json:"permissionId"`
+	MenuId       int `json:"menuId"`
 	Status       int `json:"status"`
 }
 

@@ -20,12 +20,16 @@ const api = axios.create({
 			return Promise.reject(e);
 		}
 		if (data) {
-			data.status = parseInt(data.status.substr(-2));
-			if (data.status == '01010001') {
-				alert(data.msg);
-				window.location.href = '/';
+			if (parseInt(data.status) < 0) {
+				data.status = parseInt(data.status);
+				if (data.status == -1) {
+					alert(data.msg);
+					window.location.href = '/';
+				}
+			} else {
+				data.status = parseInt(data.status.substr(-2));
+				return data;
 			}
-			return data;
 		} else {
 			return alert('服务器返回数据异常!');
 		}

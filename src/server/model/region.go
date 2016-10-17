@@ -3,10 +3,10 @@ package model
 type Region struct {
 	Model
 	Name      string `json:"name"`
-	ParentId  int    `json:"parent_id"`
+	ParentId  int    `json:"parentId"`
 	Code      string `json:"code"`
 	Level     int    `json:"level"`
-	LevelName string `json:"level_name"`
+	LevelName string `json:"levelName"`
 }
 
 func (Region) TableName() string {

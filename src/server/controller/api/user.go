@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -16,14 +15,14 @@ type UserController struct {
 var (
 	user_msg = map[string]string{
 
-		"01010100": "登陆成功",
+		"01010100": "登录成功",
 		"01010101": "账号不能为空",
-		"01010102": "登陆密码不能为空",
+		"01010102": "密码不能为空",
 		"01010103": "图片验证码不能为空",
-		"01010104": "请先申请发送一个图片验证码",
+		"01010104": "图片验证码已过期",
 		"01010105": "图片验证码错误",
 		"01010109": "账号不存在",
-		"01010110": "登陆密码错误",
+		"01010110": "密码错误",
 
 		"00100200": "注销成功",
 
@@ -82,57 +81,57 @@ var (
 )
 
 /**
-	@api {post} /api/link/signin 用户登陆
- 	@apiName Signin
- 	@apiGroup User
-	@apiParamExample 发送请求:
-	{
-		"account":"18023380466",
-		"password":"e10adc3949ba59abbe56e057f20f883e",
-		"verificode":"056639",
-		"captcha":"123456"
-	}
- 	@apiSuccessExample Success-Response:
- 	HTTP/1.1 200 OK
-	{
-	  "status": "01010600",
-	  "data": {
-	    "role": [
-	      {
-	        "id": 1,
-	        "created_at": "0001-01-01T00:00:00Z",
-	        "updated_at": "0001-01-01T00:00:00Z",
-	        "deleted_at": null,
-	        "name": "系统管理员",
-	        "description": ""
-	      }
-	    ],
-	    "user": {
-	      "id": 20,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
-	      "name": "卖座网",
-	      "contact": "mainland",
-	      "address": "科技园",
-	      "mobile": "18023380466",
-	      "account": "soda",
-	      "password": "e10adc3949ba59abbe56e057f20f883e",
-	      "telephone": "",
-	      "email": "",
-	      "parent_id": 1,
-	      "gender": 0,
-	      "age": 0,
-	      "status": 0
-	    }
-	  },
-	  "msg": "登陆成功!"
-	}
+ * @api {post} /api/signin 用户登陆
+ * @apiName Signin
+ * @apiGroup User
+ * @apiParamExample 发送请求:
+ * {
+ * 	"account":"18023380466",
+ * 	"password":"e10adc3949ba59abbe56e057f20f883e",
+ * 	"verificode":"056639",
+ * 	"captcha":"123456"
+ * }
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *   "status": "01010600",
+ *   "data": {
+ *     "role": [
+ *       {
+ * 	"id": 1,
+ * 	"created_at": "0001-01-01T00:00:00Z",
+ * 	"updated_at": "0001-01-01T00:00:00Z",
+ * 	"deleted_at": null,
+ * 	"name": "系统管理员",
+ * 	"description": ""
+ *       }
+ *     ],
+ *     "user": {
+ *       "id": 20,
+ *       "created_at": "0001-01-01T00:00:00Z",
+ *       "updated_at": "0001-01-01T00:00:00Z",
+ *       "deleted_at": null,
+ *       "name": "卖座网",
+ *       "contact": "mainland",
+ *       "address": "科技园",
+ *       "mobile": "18023380466",
+ *       "account": "soda",
+ *       "password": "e10adc3949ba59abbe56e057f20f883e",
+ *       "telephone": "",
+ *       "email": "",
+ *       "parent_id": 1,
+ *       "gender": 0,
+ *       "age": 0,
+ *       "status": 0
+ *     }
+ *   },
+ *   "msg": "登陆成功!"
+ * }
 */
 func (self *UserController) Signin(ctx *iris.Context) {
 	//每次调用返回时都清一次图片验证码
 	var returnCleanCaptcha = func(re *enity.Result) {
-		ctx.Session().Delete(viper.GetString("server.captcha.Key"))
+		ctx.Session().Delete(viper.GetString("server.captcha.key"))
 		ctx.JSON(iris.StatusOK, re)
 	}
 
@@ -160,10 +159,10 @@ func (self *UserController) Signin(ctx *iris.Context) {
 		return
 	}
 
-	/*请先申请一个图片验证码*/
 	captchaKey := viper.GetString("server.captcha.Key")
 	captchaCache := ctx.Session().GetString(captchaKey)
-	if captchaCache == "" { //不存在
+	if captchaCache == "" {
+		//不存在
 		result := &enity.Result{"01010104", nil, user_msg["01010104"]}
 		returnCleanCaptcha(result)
 		return
@@ -191,56 +190,24 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	/*登陆成功*/
-	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
-	//带上用户信息
-	userJson := make(map[string]interface{}) //登陆后传递到前端的用户信息json
-	userJson["user"] = *user
-	roleService := &service.RoleService{}
-	//带上角色信息
-	roleids, _ := roleService.ListIdByUserId(user.Id)
-	roleList, _ := roleService.ListByRoleIds(roleids)
-	roleListV := []model.Role{}
-	for _, v := range *roleList {
-		roleListV = append(roleListV, *v)
-	}
-	userJson["role"] = roleListV
-	//带上支付账号信息
-	userCashAccountService := &service.UserCashAccountService{}
-	cash, _ := userCashAccountService.BasicByUserId(user.Id)
-	userJson["cash"] = cash
-	//带上menu信息
-	roleIds, _ := roleService.ListIdByUserId(user.Id) //根据用户找角色id列表
-	permissionService := &service.PermissionService{} //根据角色id列表找权限id列表
-	permissionIds, _ := permissionService.ListIdsByRoleIds(roleIds)
-	menuService := &service.MenuService{} //根据权限id列表找menu详情
-	menuList, _ := menuService.ListByPermissionIds(permissionIds)
-	menuListV := []model.Menu{}
-	for _, v := range *menuList {
-		menuListV = append(menuListV, *v)
-	}
-	userJson["menu"] = menuListV
-
-	//将登陆后的用户全部信息写到session中 all-info-key
-	jsonString, _ := json.Marshal(userJson)
-	ctx.Session().Set(viper.GetString("server.session.user.all-info-key"), string(jsonString))
+	ctx.Session().Set(viper.GetString("server.session.user.id"), user.Id)
 
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	returnCleanCaptcha(result)
-	return
 }
 
 /**
- * @api {post} /api/link/signout 用户注销
+ * @api {post} /api/signout 用户注销
  * @apiName Signout
  * @apiGroup User
  * @apiSuccessExample Success-Response:
  *  HTTP/1.1 200 OK
-	{
-	  "status": "00100200",
-	  "data": null,
-	  "msg": "注销成功"
-	}
-*/
+ *	{
+ *	  "status": "00100200",
+ *	  "data": null,
+ *	  "msg": "注销成功"
+ *	}
+ */
 func (self *UserController) Signout(ctx *iris.Context) {
 	ctx.SessionDestroy()
 	result := &enity.Result{"00100200", nil, user_msg["00100200"]}
@@ -248,38 +215,38 @@ func (self *UserController) Signout(ctx *iris.Context) {
 }
 
 /**
-	@api {post} /api/user 新建一个用户
-	@apiName Create
-	@apiGroup User
-	@apiSuccessExample Success-Response:
-   	HTTP/1.1 200 OK
-	{
-	  "status": "01010400",
-	  "data": null,
-	  "msg": "添加用户记录成功!"
-	}
-	@apiParamExample {json} 请求例子:
-	{
-		"user":{
-			"account":"aazz啊啊啊啊aa",
-			"name":"卖座网",
-			"contact":"mainland",
-			"password":"123516",
-			"mobile":"1802338046这种1啊啊啊啊26",
-			"telephone":"0766-2885411",
-			"email":"317808023@qq.com"
-		},
-		"cash":{
-			"type":1,
-			"real_name":"伍明煜",
-			"bank_name":"中国银行",
-			"account":"44444441200001111",
-			"mobile":"18023380455",
-			"city_id":3333,
-			"province_id":2222
-		}
-	}
-*/
+ * @api {post} /api/user 新建一个用户
+ * @apiName Create
+ * @apiGroup User
+ * @apiSuccessExample Success-Response:
+    * HTTP/1.1 200 OK
+ * {
+ *   "status": "01010400",
+ *   "data": null,
+ *   "msg": "添加用户记录成功!"
+ * }
+ * @apiParamExample {json} 请求例子:
+ * {
+ * 	"user":{
+ * 		"account":"aazz啊啊啊啊aa",
+ * 		"name":"卖座网",
+ * 		"contact":"mainland",
+ * 		"password":"123516",
+ * 		"mobile":"1802338046这种1啊啊啊啊26",
+ * 		"telephone":"0766-2885411",
+ * 		"email":"317808023@qq.com"
+ * 	},
+ * 	"cash":{
+ * 		"type":1,
+ * 		"real_name":"伍明煜",
+ * 		"bank_name":"中国银行",
+ * 		"account":"44444441200001111",
+ * 		"mobile":"18023380455",
+ * 		"city_id":3333,
+ * 		"province_id":2222
+ * 	}
+ * }
+ */
 func (self *UserController) Create(ctx *iris.Context) {
 	/*获取请求参数*/
 	type Body struct {
@@ -315,13 +282,15 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 	//判断登陆名是否已经存在
 	currentUser, _ := userService.FindByAccount(body.User.Account)
-	if currentUser != nil { //可以找到
+	if currentUser != nil {
+		//可以找到
 		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
+	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -445,20 +414,23 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 	//判断登陆名是否已经存在
 	currentUser, _ := userService.FindByAccount(body.User.Account)
-	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
+	if (currentUser != nil) && (currentUser.Id != userId) {
+		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//判断手机号码是否已经存在
 	currentUser, _ = userService.FindByMobile(body.User.Mobile)
-	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
+	if (currentUser != nil) && (currentUser.Id != userId) {
+		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
+	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -491,47 +463,47 @@ func (self *UserController) Update(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user/:id 用户详情
-	@apiName Detail
-	@apiGroup User
-
- @apiSuccessExample Success-Response:
-  HTTP/1.1 200 OK
-	{
- "status": "01010600",
- "data": {
-   "role": [
-     {
-       "id": 1,
-       "created_at": "0001-01-01T00:00:00Z",
-       "updated_at": "0001-01-01T00:00:00Z",
-       "deleted_at": null,
-       "name": "系统管理员",
-       "description": ""
-     }
-   ],
-   "user": {
-     "id": 20,
-     "created_at": "0001-01-01T00:00:00Z",
-     "updated_at": "0001-01-01T00:00:00Z",
-     "deleted_at": null,
-     "name": "卖座网",
-     "contact": "mainland",
-     "address": "科技园",
-     "mobile": "18023380466",
-     "account": "soda",
-     "password": "e10adc3949ba59abbe56e057f20f883e",
-     "telephone": "",
-     "email": "",
-     "parent_id": 1,
-     "gender": 0,
-     "age": 0,
-     "status": 0
-   }
- },
- "msg": "拉取用户详情成功!"
-*	}
-*/
+ * @api {get} /api/user/:id 用户详情
+ * @apiName Detail
+ * @apiGroup User
+ *
+ *  @apiSuccessExample Success-Response:
+ *   HTTP/1.1 200 OK
+ * 	{
+ *  "status": "01010600",
+ *  "data": {
+ *    "role": [
+ *      {
+ *        "id": 1,
+ *        "created_at": "0001-01-01T00:00:00Z",
+ *        "updated_at": "0001-01-01T00:00:00Z",
+ *        "deleted_at": null,
+ *        "name": "系统管理员",
+ *        "description": ""
+ *      }
+ *    ],
+ *    "user": {
+ *      "id": 20,
+ *      "created_at": "0001-01-01T00:00:00Z",
+ *      "updated_at": "0001-01-01T00:00:00Z",
+ *      "deleted_at": null,
+ *      "name": "卖座网",
+ *      "contact": "mainland",
+ *      "address": "科技园",
+ *      "mobile": "18023380466",
+ *      "account": "soda",
+ *      "password": "e10adc3949ba59abbe56e057f20f883e",
+ *      "telephone": "",
+ *      "email": "",
+ *      "parent_id": 1,
+ *      "gender": 0,
+ *      "age": 0,
+ *      "status": 0
+ *    	}
+ *	},
+ *	 "msg": "拉取用户详情成功!"
+ *	}
+ */
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
@@ -603,7 +575,8 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("per_page")
 	parentId, _ := ctx.URLParamInt("parent_id")
-	if parentId <= 0 { //如果parentid没有传进来就用session中的用户id
+	if parentId <= 0 {
+		//如果parentid没有传进来就用session中的用户id
 		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
 	}
 
