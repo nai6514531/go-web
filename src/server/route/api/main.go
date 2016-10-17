@@ -46,6 +46,7 @@ func Api() {
 	api.UseFunc(common.CheckHasLogin)
 
 	api.Get("/user", user.ListByParent)
+	api.Get("/user/:id/user-device-info", user.BasicWithDeviceInfo)
 	api.Post("/user", user.Create)
 	api.Put("/user/:id", common.CheckUserId, user.Update)
 	api.Get("/user/:id", common.CheckUserId, user.Basic)
@@ -72,7 +73,7 @@ func Api() {
 	api.Delete("/device/:id", common.CheckDeviceId, device.Delete)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", common.CheckDeviceId, device.Update)
-	api.Put("/device/:id/serial-number", common.CheckDeviceId, device.UpdateBySerialNumber)
+	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
 	api.Patch("/device/:id/status", common.CheckDeviceId, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", common.CheckDeviceId, device.UpdatePulseName)
 

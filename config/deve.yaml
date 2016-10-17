@@ -27,6 +27,7 @@ server:
   session:
     user:
       user-id-key: "userid"
+      all-info-key: "USER"
     cookie: "sess"
     expires: 3600
     redis:

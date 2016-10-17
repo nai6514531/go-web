@@ -29,8 +29,9 @@ function handleResponse(promise, resolve, reject) {
 		let code = data.status;
 		code = code.substring(code.length-2);
 		code = parseInt(code);
+		data.loading = false;
 		if (code !== 0) {
-			reject(data.msg);
+			reject(data);
 		} else {
 			resolve(data);
 		}

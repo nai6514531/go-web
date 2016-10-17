@@ -18,3 +18,13 @@ func Uniq(ls []int) []int {
 	}
 	return Uniq
 }
+
+//在数组中查找,找到返回index 没找到返回-1
+func FindIndex(ls []int, value int) int {
+	for k, v := range ls {
+		if value == v {
+			return k
+		}
+	}
+	return -1
+}

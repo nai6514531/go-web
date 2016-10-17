@@ -35,6 +35,16 @@ func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error)
 	return list, nil
 }
 
+func (self *DeviceService) Count() (int64, error) {
+	var count int64
+	r := common.DB.Model(&model.Device{}).Count(&count)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+
+	return count, nil
+}
+
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
@@ -45,6 +55,15 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 	return list, nil
 }
 
+func (self *DeviceService) CountByUser(userId int) (int64, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Where("user_id = ?", userId).Find(list)
+	if (r.Error != nil) || (r.RowsAffected <= 0) {
+		return 0, r.Error
+	}
+	return r.RowsAffected, nil
+}
+
 func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
@@ -52,6 +71,15 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 		return nil, r.Error
 	}
 	return list, nil
+}
+
+func (self *DeviceService) CountByByUserAndSchool(userId int, schoolId int) (int64, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
+	if (r.Error != nil) || (r.RowsAffected <= 0) {
+		return 0, r.Error
+	}
+	return r.RowsAffected, nil
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
@@ -118,4 +146,17 @@ func (self *DeviceService) ListSchoolByUser(userId int) (*[]int, error) {
 		schoolList = append(schoolList, list.SchoolId)
 	}
 	return &schoolList, nil
+}
+
+//通过用户列表计算一个有多少个设备
+func (self *DeviceService) SumByUserIds(userIds []int) (int64, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Where("user_id IN (?)", userIds).Find(list)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	if r.RowsAffected <= 0 {
+		return 0, nil
+	}
+	return r.RowsAffected, nil
 }

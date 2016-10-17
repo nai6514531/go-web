@@ -1,24 +1,29 @@
 import React from 'react';
-import './app.less';
-import { Table, Button } from 'antd';
+import './../device/app.less';
+import { Table, Button, Breadcrumb } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
+import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
 	console.log(state);
-	const { device: { list } } = state;
-	return { list };
+	const { device: { list }, user: {school_device} } = state;
+	return { list, school_device };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
 		deviceList,
 	} = bindActionCreators(DeviceActions, dispatch);
+	const {
+		schoolDevice,
+	} = bindActionCreators(UserActions, dispatch);
 	return {
 		deviceList,
+		schoolDevice,
 	};
 }
 
@@ -64,7 +69,7 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-			<Link to="/agent/device/list/new">修改</Link>
+			<Link to={"/user/device/edit/" + record.key}>修改</Link>
 			<span className="ant-divider" />
 			<a href="#">删除</a>
 			<span className="ant-divider" />
@@ -73,19 +78,9 @@ const columns = [{
 	),
 }];
 
-const dataSource = [{
-	key: '1',
-	index: '1',
-	serial_number: 'ABCD',
-	reference_device: '洗衣机',
-	status: '空闲',
-	address: '深圳南山',
-	first_pulse_price: '1',
-	second_pulse_price: '2',
-	third_pulse_price: '3',
-	fourth_pulse_name: '4',
-}
-];
+
+
+const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class DeviceTable extends React.Component {
 	constructor(props) {
@@ -116,37 +111,71 @@ class DeviceTable extends React.Component {
 	}
 	componentDidMount() {
 		// this.fetch();
-	}
-	getList() {
-		this.props.deviceList();
-	}
-	getStatus() {
-		console.log(this.props.list);
+		const id = user_data.user.id;
+		const school_id = this.props.params.id;
+		this.props.schoolDevice(id, school_id);
 	}
 	render() {
+		const school_device = this.props.school_device;
+		console.log('school_device',school_device);
+		let dataSource = [];
+		let loading = false;
+		if(school_device) {
+			loading = true;
+			if(school_device.fetch == true){
+				loading = false;
+				const data = school_device.result.data.list;
+				dataSource = data.map(function (item, key) {
+					return {
+						key: item.id,
+						index: key,
+						serial_number: item.serial_number,
+						reference_device: '洗衣机',
+						status: item.status,
+						address: item.address,
+						first_pulse_price: item.first_pulse_price,
+						second_pulse_price: item.second_pulse_price,
+						third_pulse_price: item.third_pulse_price,
+						fourth_pulse_name: item.fourth_pulse_name,
+					}
+				})
+			}
+		}
+		let pagination = {
+			pageSize: 10,
+			current: 1,
+		}
 		return (
-			<div className="table">
-				{this.props.children ? this.props.children :
-					<div>
-						<div className="detail-button">
-							<button onClick={this.getList.bind(this)}>CLICK </button>
-							<button onClick={this.getStatus.bind(this)}>GET LIST</button>
-							<Button type="primary">
-								<Link to="/agent/device/list/new">
-									添加新设备
-								</Link>
-							</Button>
-						</div>
-						<Table columns={columns}
-							   rowKey={record => record.registered}
-							   dataSource={dataSource}
-							   pagination={this.state.pagination}
-							   loading={this.state.loading}
-							   onChange={this.handleTableChange}
-						/>
-					</div>
-				}
+		<div className="detail">
+			<div className="detail-head">
+				<Breadcrumb separator=">">
+					<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+					<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
+					<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
+				</Breadcrumb>
 			</div>
+			<div className="detail-form">
+				<div className="table">
+						<div>
+							<div className="detail-button">
+								<Button type="primary">
+									<Link to="/user/device/edit">
+										添加新设备
+									</Link>
+								</Button>
+							</div>
+							<Table columns={columns}
+								   rowKey={record => record.key}
+								   dataSource={dataSource}
+								   pagination={pagination}
+								   loading={loading}
+								   onChange={this.handleTableChange}
+							/>
+						</div>
+				</div>
+			</div>
+		</div>
+
 		);
 	}
 }

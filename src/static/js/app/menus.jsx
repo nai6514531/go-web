@@ -11,7 +11,7 @@ const Menus = [
 					{
 						"route": "/user",
 						"name": "代理商列表",
-						"path": "/user/list"
+						"path": "/user/index/agent_panel"
 					},
 					{
 						"route": "/trello/create",

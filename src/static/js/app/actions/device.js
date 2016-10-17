@@ -20,10 +20,10 @@ export function deviceList() {
 				type: GET_DEVICE_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_DEVICE_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -37,10 +37,10 @@ export function deviceDetail(id) {
 				type: GET_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_DEVICE_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -54,10 +54,10 @@ export function deviceCreate(device) {
 				type: POST_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: POST_DEVICE_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -71,10 +71,10 @@ export function deviceEdit(id, device) {
 				type: PUT_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: PUT_DEVICE_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -88,10 +88,10 @@ export function deviceRemove(id) {
 				type: REMOVE_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: REMOVE_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -105,10 +105,10 @@ export function deviceStatus(id, device) {
 				type: PATCH_DEVICE_STATUS,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: PATCH_DEVICE_STATUS,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -122,10 +122,10 @@ export function pulseName(id, device) {
 				type: DEVICE_PULSE_NAME,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: DEVICE_PULSE_NAME,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -139,10 +139,10 @@ export function serialNumber(id, device) {
 				type: DEVICE_SERIAL_NUMBER,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: DEVICE_SERIAL_NUMBER,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -156,10 +156,10 @@ export function refDevice() {
 				type: GET_REF_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_REF_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});

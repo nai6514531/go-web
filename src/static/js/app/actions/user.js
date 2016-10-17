@@ -12,20 +12,25 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
+	GETING_USER_LIST,
 } from '../constants/index';
 
 
-export function userList() {
+export function userList(pager) {
 	return dispatch => {
-		UserService.list().then((result) => {
+		dispatch({
+			type: GETING_USER_LIST,
+			result: { loading: true },
+		});
+		UserService.list(pager).then((result) => {
 			dispatch({
 				type: GET_USER_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_LIST,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -39,10 +44,10 @@ export function userDetail(id) {
 				type: GET_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -56,10 +61,10 @@ export function userCreate(user) {
 				type: POST_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: POST_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -73,10 +78,10 @@ export function userEdit(id, user) {
 				type: PUT_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: PUT_USER_DETAIL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -90,10 +95,10 @@ export function userRemove(id) {
 				type: REMOVE_USER,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: REMOVE_USER,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -107,27 +112,27 @@ export function userSchool(id) {
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
 	};
 }
 
-export function schoolDevice(id) {
+export function schoolDevice(id, school_id) {
 	return dispatch => {
-		UserService.schoolDevice(id).then((result) => {
+		UserService.schoolDevice(id, school_id).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -141,10 +146,10 @@ export function userPermission(id) {
 				type: GET_USER_PERMISSION,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_PERMISSION,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -152,17 +157,18 @@ export function userPermission(id) {
 }
 
 
-export function userLogout(id) {
+export function userLogout() {
 	return dispatch => {
 		UserService.logout().then((result) => {
+			console.log('IMLOGOUT');
 			dispatch({
 				type: USER_LOGOUT,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: USER_LOGOUT,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -177,10 +183,10 @@ export function userMenu(id) {
 				type: GET_USER_MENU,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_MENU,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});
@@ -189,15 +195,15 @@ export function userMenu(id) {
 
 export function userDevice(id) {
 	return dispatch => {
-		UserService.dev(id).then((result) => {
+		UserService.device(id).then((result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((msg) => {
+		}).catch((result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
-				result: { fetch: false, msg },
+				result: { fetch: false, result },
 
 			});
 		});

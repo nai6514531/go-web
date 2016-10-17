@@ -20,42 +20,42 @@ export default function (state = initialState, action) {
 		case GET_PROVINCE_LIST:
 			return {
 				...state,
-				province: { list: action.result, }
+				province_list: action.result,
 			};
 		case GET_PROVINCE_DETAIL:
 			return {
 				...state,
-				province: { detail: action.result, }
+				province_detail: action.result,
 			};
 		case GET_PROVINCE_CITY_LIST:
 			return {
 				...state,
-				province: { city: action.result, }
+				province_city: action.result,
 			};
 		case GET_PROVINCE_SCHOOL_LIST:
 			return {
 				...state,
-				province: { school: action.result, }
+				province_school: action.result,
 			};
 		case GET_CITY_LIST:
 			return {
 				...state,
-				city: { list: action.result, }
+				city_list: action.result,
 			};
 		case GET_CITY_DETAIL:
 			return {
 				...state,
-				city: { detail: action.result, }
+				city_detail: action.result,
 			};
 		case GET_CITY_DISTRICT_LIST:
 			return {
 				...state,
-				city: { district: action.result, }
+				city_district: action.result,
 			};
 		case GET_DISTRICT_DETAIL:
 			return {
 				...state,
-				district: { detail: action.result, }
+				district_detail: action.result,
 			};
 
 		default:
