@@ -49,7 +49,7 @@ export default function (state = initialState, action) {
 		case DEVICE_PULSE_NAME:
 			return {
 				...state,
-				result: action.result,
+				pulse_name: action.result,
 			};
 		case DEVICE_SERIAL_NUMBER:
 			return {

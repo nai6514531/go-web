@@ -31,7 +31,7 @@ function mapDispatchToProps(dispatch) {
 }
 const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
-class SchoolFilter extends React.Component {
+class SchoolSelect extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -45,10 +45,10 @@ class SchoolFilter extends React.Component {
 	handleFilter() {
 		const id = user_data.user.id;
 		this.props.schoolDevice(id, this.state.school_id);
+		// <Button type="primary" onClick={this.handleFilter}>筛选</Button>
 	}
 	componentWillMount() {
 		this.props.provinceList();
-		// this.props.provinceSchoolList(110000);
 	}
 	selectProvince(province_id, province_name) {
 		this.props.provinceSchoolList(province_id);
@@ -64,6 +64,7 @@ class SchoolFilter extends React.Component {
 		});
 		this.refs.box.classList.toggle('box_show');
 		this.refs.mask.classList.toggle('box_show');
+		this.props.handleSelect(this.state.province_id, school_id);
 	}
 	showBox() {
 		this.refs.box.classList.toggle('box_show');
@@ -72,7 +73,6 @@ class SchoolFilter extends React.Component {
 	render() {
 		const province_list = this.props.province_list;
 		let province_node = '';
-		// console.log('province_list',province_list);
 		const that = this;
 		if(province_list) {
 			if(province_list.fetch == true){
@@ -84,7 +84,6 @@ class SchoolFilter extends React.Component {
 			}
 		}
 		const province_school = this.props.province_school;
-		// console.log('province_school',province_school);
 		let school_node = '';
 		if(province_school) {
 			if(province_school.fetch == true){
@@ -95,7 +94,6 @@ class SchoolFilter extends React.Component {
 				})
 			}
 		}
-		// 只做省学校级联,不做button,是否需要 button 由外部决定
 		return (
 			<div className="filter">
 				<div  ref="mask" className="mask box_show"></div>
@@ -117,15 +115,14 @@ class SchoolFilter extends React.Component {
 						<span>请选择学校</span>
 					}
 				</div>
-				<Button type="primary" onClick={this.handleFilter}>筛选</Button>
 			</div>
 		);
 	}
 }
 
 
-SchoolFilter.propTypes = {
+SchoolSelect.propTypes = {
 	title: React.PropTypes.string,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(SchoolFilter);
+export default connect(mapStateToProps, mapDispatchToProps)(SchoolSelect);

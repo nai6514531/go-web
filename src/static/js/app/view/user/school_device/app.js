@@ -165,7 +165,6 @@ class DeviceTable extends React.Component {
 								</Button>
 							</div>
 							<Table columns={columns}
-								   rowKey={record => record.key}
 								   dataSource={dataSource}
 								   pagination={pagination}
 								   loading={loading}
