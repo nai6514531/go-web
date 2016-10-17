@@ -9,21 +9,20 @@ import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
-	console.log(state);
-	const { device: { list }, user: {school_device} } = state;
-	return { list, school_device };
+	const { device: { list }, user: {schoolDevice} } = state;
+	return { list, schoolDevice };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
-		deviceList,
+		getDeviceList,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
-		schoolDevice,
+		getSchoolDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
-		deviceList,
-		schoolDevice,
+		getDeviceList,
+		getSchoolDevice,
 	};
 }
 
@@ -33,12 +32,12 @@ const columns = [{
 	key: 'index',
 }, {
 	title: '编号',
-	dataIndex: 'serial_number',
-	key: 'serial_number',
+	dataIndex: 'serialNumber',
+	key: 'serialNumber',
 }, {
 	title: '关联设备类型',
-	dataIndex: 'reference_device',
-	key: 'reference_device',
+	dataIndex: 'referenceDevice',
+	key: 'referenceDevice',
 }, {
 	title: '状态',
 	dataIndex: 'status',
@@ -49,20 +48,20 @@ const columns = [{
 	key: 'address',
 }, {
 	title: '单脱',
-	dataIndex: 'first_pulse_price',
-	key: 'first_pulse_price',
+	dataIndex: 'firstPulsePrice',
+	key: 'firstPulsePrice',
 }, {
 	title: '快洗',
-	dataIndex: 'second_pulse_price',
-	key: 'second_pulse_price',
+	dataIndex: 'secondPulsePrice',
+	key: 'secondPulsePrice',
 }, {
 	title: '标准洗',
-	dataIndex: 'third_pulse_price',
-	key: 'third_pulse_price',
+	dataIndex: 'thirdPulsePrice',
+	key: 'thirdPulsePrice',
 }, {
 	title: '大物洗',
-	dataIndex: 'fourth_pulse_name',
-	key: 'fourth_pulse_name',
+	dataIndex: 'fourthPulseName',
+	key: 'fourthPulseName',
 }, {
 	title: '操作',
 	dataIndex: 'action',
@@ -80,7 +79,6 @@ const columns = [{
 
 
 
-const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class DeviceTable extends React.Component {
 	constructor(props) {
@@ -111,32 +109,32 @@ class DeviceTable extends React.Component {
 	}
 	componentDidMount() {
 		// this.fetch();
-		const id = user_data.user.id;
-		const school_id = this.props.params.id;
-		this.props.schoolDevice(id, school_id);
+		const id = USER.id;
+		const schoolId = this.props.params.id;
+		this.props.getSchoolDevice(id, schoolId);
 	}
 	render() {
-		const school_device = this.props.school_device;
-		console.log('school_device',school_device);
+		const schoolDevice = this.props.schoolDevice;
+		console.log('schoolDevice',schoolDevice);
 		let dataSource = [];
 		let loading = false;
-		if(school_device) {
+		if(schoolDevice) {
 			loading = true;
-			if(school_device.fetch == true){
+			if(schoolDevice.fetch == true){
 				loading = false;
-				const data = school_device.result.data.list;
+				const data = schoolDevice.result.data.list;
 				dataSource = data.map(function (item, key) {
 					return {
 						key: item.id,
 						index: key,
-						serial_number: item.serial_number,
-						reference_device: '洗衣机',
+						serialNumber: item.serialNumber,
+						referenceDevice: '洗衣机',
 						status: item.status,
 						address: item.address,
-						first_pulse_price: item.first_pulse_price,
-						second_pulse_price: item.second_pulse_price,
-						third_pulse_price: item.third_pulse_price,
-						fourth_pulse_name: item.fourth_pulse_name,
+						firstPulsePrice: item.firstPulsePrice,
+						secondPulsePrice: item.secondPulsePrice,
+						thirdPulsePrice: item.thirdPulsePrice,
+						fourthPulseName: item.fourthPulseName,
 					}
 				})
 			}

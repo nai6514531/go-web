@@ -15,12 +15,12 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
 	const {
-		userList,
-		userDetail,
+		getUserList,
+		getUserDetail,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
-		userList,
-		userDetail,
+		getUserList,
+		getUserDetail,
 	};
 }
 
@@ -55,7 +55,7 @@ const columns = [{
 	render: (text, record) => (
 		<span>
 			<Link to={'/user/edit/' + record.key}>修改</Link>
-			{record.show_action?
+			{record.showAction?
 				<span>
 					<span className="ant-divider" />
 					<Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link>
@@ -97,8 +97,8 @@ class AgentTable extends React.Component {
 		this.setState({ loading: true });
 	}
 	componentDidMount() {
-		const pager = { page : 1, per_page: 10}
-		this.props.userList(pager);
+		const pager = { page : 1, perPpage: 10}
+		this.props.getUserList(pager);
 		// this.fetch();
 	}
 	showChild() {
@@ -134,7 +134,7 @@ class AgentTable extends React.Component {
 								address: item.user.address,
 								number: item.device.sum,
 								action: that.showChild,
-								show_action: !that.state.child,
+								showAction: !that.state.child,
 							}
 						)
 					})
@@ -149,7 +149,7 @@ class AgentTable extends React.Component {
 						address: data.user.address,
 						number: data.device.sum,
 						action: that.showChild,
-						show_action: !that.state.child,
+						showAction: !that.state.child,
 					}
 					];
 				}

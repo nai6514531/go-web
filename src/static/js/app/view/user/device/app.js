@@ -10,20 +10,20 @@ import * as UserActions from '../../../actions/user';
 
 
 function mapStateToProps(state) {
-	const { user: { school, school_device, device } } = state;
-	return { school, school_device, device };
+	const { user: { school, schoolDevice, device } } = state;
+	return { school, schoolDevice, device };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
-		userSchool,
-		schoolDevice,
-		userDevice,
+		getUserSchool,
+		getSchoolDevice,
+		getUserDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
-		userSchool,
-		schoolDevice,
-		userDevice,
+		getUserSchool,
+		getSchoolDevice,
+		getUserDevice,
 	};
 }
 
@@ -46,8 +46,6 @@ const columns = [{
 	render: (text, record) => <Link to={"/user/device/school/" + record.key}>查看模块</Link>,
 }];
 
-
-const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class SchoolTable extends React.Component {
 	constructor(props) {
@@ -78,8 +76,8 @@ class SchoolTable extends React.Component {
 	}
 	componentDidMount() {
 		// this.fetch();
-		const id = user_data.user.id;
-		this.props.userSchool(id);
+		const id = USER.id;
+		this.props.getUserSchool(id);
 	}
 	render() {
 		const school = this.props.school;
@@ -111,7 +109,7 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter school={school} schoolDevice={this.props.schoolDevice}/>
+									<SchoolFilter school={school} getSchoolDevice={this.props.getSchoolDevice}/>
 									<Table columns={columns}
 										   dataSource={dataSource}
 										   pagination={this.state.pagination}
@@ -135,17 +133,17 @@ class SchoolFilter extends React.Component {
 	}
 	handleSubmit(e) {
 		e.preventDefault();
-		const id = user_data.user.id;
-		const school_id = parseInt(this.props.form.getFieldsValue().school);
-		this.props.schoolDevice(id, school_id);
+		const id = USER.id;
+		const schoolId = parseInt(this.props.form.getFieldsValue().school);
+		this.props.getSchoolDevice(id, schoolId);
 	}
 	render() {
 		const school = this.props.school;
-		let school_node = [];
+		let schoolNode = [];
 		if(school){
 			if(school.fetch == true){
 				const data = school.result.data;
-				school_node = data.map(function (item, key) {
+				schoolNode = data.map(function (item, key) {
 					const id = item.id.toString();
 					return <Option key={key} value={id}>{item.name}</Option>;
 				})
@@ -153,7 +151,7 @@ class SchoolFilter extends React.Component {
 		}
 		const { getFieldDecorator } = this.props.form;
 		return (
-			<div className="school_filter">
+			<div className="school-filter">
 				<Form inline onSubmit={this.handleSubmit}>
 					<FormItem
 						id="select"
@@ -166,7 +164,7 @@ class SchoolFilter extends React.Component {
 							],
 						})(
 							<Select id="school" style={{ width: 200 }} >
-								{school_node}
+								{schoolNode}
 							</Select>
 						)}
 

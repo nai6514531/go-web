@@ -2,19 +2,19 @@ import RegionService from '../service/region';
 
 import {
 	GET_PROVINCE_LIST,
-	GET_PROVINCE_DETAIL,
+	GET_PROVINCEDETAIL,
 	GET_PROVINCE_CITY_LIST,
 	GET_PROVINCE_SCHOOL_LIST,
 
 	GET_CITY_LIST,
-	GET_CITY_DETAIL,
-	GET_CITY_DISTRICT_LIST,
+	GET_CITYDETAIL,
+	GET_CITYDISTRICT_LIST,
 
 
-	GET_DISTRICT_DETAIL,
+	GETDISTRICTDETAIL,
 } from '../constants/index';
 
-export function provinceList() {
+export function getProvinceList() {
 	return dispatch => {
 		RegionService.province.list().then((result) => {
 			dispatch({
@@ -31,16 +31,16 @@ export function provinceList() {
 	};
 }
 
-export function provinceDetail(id) {
+export function getProvinceDetail(id) {
 	return dispatch => {
 		RegionService.province.detail(id).then((result) => {
 			dispatch({
-				type: GET_PROVINCE_DETAIL,
+				type: GET_PROVINCEDETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_PROVINCE_DETAIL,
+				type: GET_PROVINCEDETAIL,
 				result: { fetch: false, result },
 
 			});
@@ -48,7 +48,7 @@ export function provinceDetail(id) {
 	};
 }
 
-export function provinceCityList(id) {
+export function getProvinceCityList(id) {
 	return dispatch => {
 		RegionService.province.city(id).then((result) => {
 			dispatch({
@@ -65,7 +65,7 @@ export function provinceCityList(id) {
 	};
 }
 
-export function provinceSchoolList(id) {
+export function getProvinceSchoolList(id) {
 	return dispatch => {
 		RegionService.province.school(id).then((result) => {
 			dispatch({
@@ -82,7 +82,7 @@ export function provinceSchoolList(id) {
 	};
 }
 
-export function cityList() {
+export function getCityList() {
 	return dispatch => {
 		RegionService.city.list().then((result) => {
 			dispatch({
@@ -99,16 +99,16 @@ export function cityList() {
 	};
 }
 
-export function cityDetail(id) {
+export function getCityDetail(id) {
 	return dispatch => {
 		RegionService.city.detail(id).then((result) => {
 			dispatch({
-				type: GET_CITY_DETAIL,
+				type: GET_CITYDETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITY_DETAIL,
+				type: GET_CITYDETAIL,
 				result: { fetch: false, result },
 
 			});
@@ -116,16 +116,16 @@ export function cityDetail(id) {
 	};
 }
 
-export function cityDistrictList(id) {
+export function getCityDistrictList(id) {
 	return dispatch => {
 		RegionService.city.district(id).then((result) => {
 			dispatch({
-				type: GET_CITY_DISTRICT_LIST,
+				type: GET_CITYDISTRICT_LIST,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITY_DISTRICT_LIST,
+				type: GET_CITYDISTRICT_LIST,
 				result: { fetch: false, result },
 
 			});
@@ -133,16 +133,16 @@ export function cityDistrictList(id) {
 	};
 }
 
-export function cityDistrictDetail(id) {
+export function getCityDistrictDetail(id) {
 	return dispatch => {
 		RegionService.district.detail(id).then((result) => {
 			dispatch({
-				type: GET_DISTRICT_DETAIL,
+				type: GETDISTRICTDETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITY_DISTRICT_LIST,
+				type: GET_CITYDISTRICT_LIST,
 				result: { fetch: false, result },
 
 			});
