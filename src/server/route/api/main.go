@@ -28,6 +28,7 @@ func Api() {
 		device          = &controller.DeviceController{}
 		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
+		dailyBill       = &controller.DailyBillController{}
 		sync            = &controller.SyncController{}
 	)
 
@@ -40,6 +41,7 @@ func Api() {
 	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
+	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
 
 	api.UseFunc(common.CheckHasLogin)
 
@@ -76,5 +78,9 @@ func Api() {
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
+
+	api.Get("/daily-bill", dailyBill.List)
+	api.Get("/daily-bill-detail", dailyBill.DetailList)
+	api.Get("/daily-bill/no-settlement-user", dailyBill.List)
 
 }

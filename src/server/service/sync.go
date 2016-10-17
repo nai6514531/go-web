@@ -5,6 +5,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"strconv"
+	"time"
 )
 
 type SyncService struct {
@@ -56,11 +57,11 @@ func (self *SyncService) SyncUserRole() bool {
 			roleId := 0
 			userType, _ := strconv.Atoi(boxAdmin.UserType)
 			if userType == 0 {
-				roleId = 1
+				roleId = 1 //管理员
 			} else if userType == 2 || userType == 4 {
-				roleId = 2
+				roleId = 2 //普通后台用户
 			} else if userType == 5 {
-				roleId = 4
+				roleId = 4 //客服
 			} else {
 				roleId = userType
 			}
@@ -164,6 +165,52 @@ func (self *SyncService) SyncDailyBill() bool {
 		}
 	}
 	return boo
+}
+
+func (self *SyncService) SyncDailyBillDetail() bool {
+	list := &[]*muniu.BoxWash{}
+	//最近15个月
+	billAt := time.Now().AddDate(0, -15, 0).Format("2006-01-02")
+	r := common.MNDB.Where("companyid>0 and date(inserttime)> ?", billAt).Order("localid desc").Find(list)
+	syncService := &SyncService{}
+	dailyBillDetailService := &DailyBillDetailService{}
+	if r.Error != nil {
+		common.Logger.Warningln("common.MNDB.Find BoxWash List:", r.Error.Error())
+		return false
+	}
+	hasDeleted, err := dailyBillDetailService.DeleteByBillAt(billAt)
+	if !hasDeleted || err != nil {
+		return false
+	}
+	boo := true
+	for _, boxWash := range *list {
+		boo = syncService.AddDailyBillDetail(boxWash)
+		if !boo {
+			common.Logger.Warningln("AddDailyBillDetail:", boxWash.UserId, boxWash.DeviceId)
+			break
+		}
+	}
+	return boo
+}
+
+func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) bool {
+	//2016-03-14T00:00:10+08:00
+	insertTime, _ := time.Parse(time.RFC3339, boxWash.InsertTime)
+	billAt := insertTime.Format("2006-01-02 15:04:05");
+	pulseType, _ := strconv.Atoi(boxWash.Type)
+	dailyBillDetail := &model.DailyBillDetail{
+		UserId:       boxWash.UserId,
+		SerialNumber: boxWash.DeviceId,
+		Amount:       int(boxWash.Price * 100),
+		PulseType:    pulseType,
+		BillAt:       billAt,
+		Status:       boxWash.Status,
+	}
+	r := common.DB.Create(dailyBillDetail)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	return true
 }
 
 func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) bool {
@@ -298,6 +345,7 @@ func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
 
 func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 	payType, _ := strconv.Atoi(boxAdmin.PayType)
+	payType += 1
 	userCashAccount := &model.UserCashAccount{
 		UserId:   boxAdmin.LocalId,
 		Type:     payType,
@@ -315,6 +363,7 @@ func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 
 func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 	payType, _ := strconv.Atoi(boxAdmin.PayType)
+	payType += 1
 	userCashAccount := &model.UserCashAccount{
 		UserId:   boxAdmin.LocalId,
 		Type:     payType,

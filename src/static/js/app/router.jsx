@@ -14,9 +14,19 @@ const router = (<Router history={hashHistory}>
 				callback(null, require('./view/user/list/app.jsx').default);
 			});
 		}} />
+		<Route path="/user/edit" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/user/list/app.jsx').default);
+			});
+		}} />
 		<Route path="/settlement" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
 				callback(null, require('./view/settlement/list/app.jsx').default);
+			});
+		}} />
+		<Route path="/settlement/daily-bill-detail/:user_id/:bill_at" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
 			});
 		}} />
 	</Route>
