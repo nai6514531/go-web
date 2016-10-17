@@ -45,7 +45,7 @@ const router = (
 		}} />
 		<Route path="/user/edit" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/list/app.jsx').default);
+				callback(null, require('./view/user/list/app.js').default);
 			});
 		}} />
 		<Route path="/settlement" getComponent={(location, callback) => {
