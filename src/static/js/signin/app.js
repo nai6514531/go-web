@@ -29,7 +29,7 @@ export class LoginForm extends React.Component {
 				return;
 			} else {
 				const { account, password, verificode, captcha } = values;
-				fetch('/api/link/signin', {
+				fetch('/api/signin', {
 					method: 'post',
 					headers: {
 						'Accept': 'application/json',

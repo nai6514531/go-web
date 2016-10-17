@@ -4,9 +4,25 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
+	"strconv"
 )
 
 type RoleService struct {
+}
+
+func (self *RoleService) BasicByUserId(userId int) (*model.Role, error) {
+	_userId := strconv.Itoa(userId);
+	sql := "select r.id,r.name  from role r,user_role_rel urr where urr.user_id =" + _userId + " and r.id=urr.role_id"
+	rows, err := common.DB.Raw(sql).Rows()
+	role := &model.Role{}
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		common.DB.ScanRows(rows, role)
+	}
+	return role, nil
 }
 
 //通过用户id查找角色id列表
@@ -27,7 +43,8 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 	if r.Error != nil {
 		return nil, r.Error
 	}
-	for _, groupRel := range *groupRelList { //对user的每一组找出对应的所有角色
+	for _, groupRel := range *groupRelList {
+		//对user的每一组找出对应的所有角色
 		roleRelList := &[]*model.GroupRoleRel{}
 		r = common.DB.Where("group_id = ?", groupRel.GroupId).Find(roleRelList)
 		if r.Error != nil {

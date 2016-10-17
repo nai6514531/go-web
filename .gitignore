@@ -70,7 +70,8 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-/src/server/config/prod.yaml
+/config/prod.yaml
+/config/local.yaml
 /src/build/
 /node_modules/
 /log/

@@ -1,58 +1,223 @@
 import React from 'react';
-import {Button, Table, Icon, Popconfirm} from 'antd';
+import {Button, Table, Icon, Popconfirm, Select, DatePicker} from 'antd';
+const Option = Select.Option;
 import './app.less';
+import DailyBillService from '../../../service/daily_bill';
+import moment from 'moment';
 const App = React.createClass({
 	getInitialState() {
 		return {
 			columns: [{
-				title: 'ID',
+				title: '账单ID',
 				dataIndex: 'id',
 				key: 'id',
 				sorter: (a, b) => +a.id - +b.id
 			}, {
-				title: 'API_KEY',
-				dataIndex: 'api_key',
-				key: 'api_key'
+				title: '代理商',
+				dataIndex: 'userName',
+				key: 'userName'
 			}, {
-				title: 'TOKEN',
-				dataIndex: 'token',
-				key: 'token'
+				title: '金额',
+				dataIndex: 'totalAmount',
+				key: 'totalAmount',
+				render: (total_amount) => {
+					return total_amount / 100;
+				}
+			}, {
+				title: '订单量',
+				dataIndex: 'orderCount',
+				key: 'orderCount'
+			}, {
+				title: '收款方式',
+				dataIndex: 'accountName',
+				key: 'accountName'
+			}, {
+				title: '账期',
+				dataIndex: 'billAt',
+				key: 'billAt',
+				render: (bill_at) => {
+					return moment(bill_at).format('YYYY-MM-DD')
+				}
+			}, {
+				title: '结账时期',
+				dataIndex: 'settledAt',
+				key: 'settledAt',
+				render: (settled_at) => {
+					return settled_at == '' ? '' : settled_at;
+				}
+			}, {
+				title: '状态',
+				dataIndex: 'status',
+				key: 'status',
+				render: (status) => {
+					if (status == 0) {
+						return <div className="status highlight">未结账</div>
+					} else {
+						return <div className="status">已结账</div>
+					}
+				}
 			}, {
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
-				render: (id) => {
+				render: (id, record) => {
 					return <span>
-                            <a href={'#/trello/' + id}>修改</a>
-                            <span> | </span>
-                            <Popconfirm title="确定删除吗?" onConfirm={this.remove.bind(this, id)}>
-                              <a>删除</a>
+                            <Popconfirm title="申请提现吗?" onConfirm={this.remove.bind(this, id)}>
+                              <a>申请提现</a>
                             </Popconfirm>
+							<span> | </span>
+							<Popconfirm title="确认结账吗?" onConfirm={this.remove.bind(this, id)}>
+                              <a>结账</a>
+                            </Popconfirm>
+							<span> | </span>
+							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                           </span>
 				}
 			}],
-			list: []
+			list: [],
+			total: 0,
+			loading: false,
+			cashAccountType: 0,
+			status: 0,
+			hasApplied: 0,
+			billAt: ''
 		};
 	},
-	list() {
-
+	list(data) {
+		var self = this;
+		this.setState({
+			loading: true,
+		});
+		DailyBillService.list(data)
+			.then((data) => {
+				self.setState({
+					loading: false,
+				});
+				if (data && data.status == 0) {
+					this.setState({
+						total: data.data.total,
+						list: data.data.list.map((item) => {
+							item.key = item.id;
+							return item;
+						})
+					});
+				} else {
+					alert(data.msg);
+				}
+			})
+			.catch((e)=> {
+				self.setState({
+					loading: false,
+				});
+			})
 	},
 	remove(id) {
 
 	},
-	componentWillMount() {
-		this.list();
+	handleFilter(){
+		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		this.list({
+			cashAccountType: cashAccountType,
+			status: status,
+			hasApplied: hasApplied,
+			billAt: billAt
+		});
 	},
-	render() {
+	componentWillMount() {
+		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		this.list({
+			cashAccountType: cashAccountType,
+			status: status,
+			hasApplied: hasApplied,
+			billAt: billAt
+		});
+	},
+	handleCashAccountTypeChange(value){
+		this.setState({
+			cashAccountType: value
+		})
+	},
+	handleStatusChange(value){
+		this.setState({
+			status: value
+		})
+	},
+	handleHasAppliedChange(value){
+		this.setState({
+			hasApplied: value
+		})
+	},
+	handleBillAtChange(date, dateString){
+		this.setState({
+			billAt: dateString
+		})
+	},
+	initializePagination(){
+		var self = this;
+		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(page, pageSize) {
+				self.list({
+					cashAccountType: cashAccountType,
+					status: status,
+					hasApplied: hasApplied,
+					billAt: billAt,
+					page: page,
+					pageSize: pageSize
+				});
+			},
+			onChange(page) {
+				self.list({
+					cashAccountType: cashAccountType,
+					status: status,
+					hasApplied: hasApplied,
+					billAt: billAt,
+					page: this.current,
+					pageSize: this.pageSize
+				});
+			},
+		};
+	},
+	render(){
 		const {list, columns} = this.state;
+		const pagination = this.initializePagination();
 		return (<section className="view-settlement-list">
 			<header>
 				账单列表
 			</header>
-			<div className="control">
-				<a href="#/trello/create"><Button type="solid"><Icon type="plus"/> 添加</Button></a>
+			<div className="filter">
+				<Select className="item"
+						defaultValue="0"
+						style={{width: 120}}
+						onChange={this.handleCashAccountTypeChange}>
+					<Option value="0">请选择提现方式</Option>
+					<Option value="1">支付宝</Option>
+					<Option value="2">微信</Option>
+					<Option value="3">银行</Option>
+				</Select>
+				<Select
+					className="item"
+					defaultValue="0"
+					style={{width: 120}}
+					onChange={this.handleStatusChange}>
+					<Option value="0">请选择结算状态</Option>
+					<Option value="1">已结算</Option>
+					<Option value="2">未结算</Option>
+				</Select>
+				<Select className="item"
+						defaultValue="0"
+						style={{width: 140}}
+						onChange={this.handleHasAppliedChange}>
+					<Option value="0">请选择提现状态</Option>
+					<Option value="1">已申请提现</Option>
+					<Option value="2">未申请提现</Option>
+				</Select>
+				<DatePicker onChange={this.handleBillAtChange} className="item"/>
+				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
 			</div>
-			<Table dataSource={list} columns={columns} bordered/>
+			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
 		</section>);
 	}
 });
