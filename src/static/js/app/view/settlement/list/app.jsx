@@ -158,14 +158,14 @@ const App = React.createClass({
 		return {
 			total: total,
 			showSizeChanger: true,
-			onShowSizeChange(page, pageSize) {
+			onShowSizeChange(page, perPage) {
 				self.list({
 					cashAccountType: cashAccountType,
 					status: status,
 					hasApplied: hasApplied,
 					billAt: billAt,
 					page: page,
-					pageSize: pageSize
+					perPage: perPage
 				});
 			},
 			onChange(page) {
@@ -175,7 +175,7 @@ const App = React.createClass({
 					hasApplied: hasApplied,
 					billAt: billAt,
 					page: this.current,
-					pageSize: this.pageSize
+					perPage: this.pageSize
 				});
 			},
 		};
