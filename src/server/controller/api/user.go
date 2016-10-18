@@ -99,18 +99,18 @@ var (
  *     "role": [
  *       {
  * 	"id": 1,
- * 	"created_at": "0001-01-01T00:00:00Z",
- * 	"updated_at": "0001-01-01T00:00:00Z",
- * 	"deleted_at": null,
+ * 	"createdAt": "0001-01-01T00:00:00Z",
+ * 	"updatedAt": "0001-01-01T00:00:00Z",
+ * 	"deletedAt": null,
  * 	"name": "系统管理员",
  * 	"description": ""
  *       }
  *     ],
  *     "user": {
  *       "id": 20,
- *       "created_at": "0001-01-01T00:00:00Z",
- *       "updated_at": "0001-01-01T00:00:00Z",
- *       "deleted_at": null,
+ *       "createdAt": "0001-01-01T00:00:00Z",
+ *       "updatedAt": "0001-01-01T00:00:00Z",
+ *       "deletedAt": null,
  *       "name": "卖座网",
  *       "contact": "mainland",
  *       "address": "科技园",
@@ -119,7 +119,7 @@ var (
  *       "password": "e10adc3949ba59abbe56e057f20f883e",
  *       "telephone": "",
  *       "email": "",
- *       "parent_id": 1,
+ *       "parentId": 1,
  *       "gender": 0,
  *       "age": 0,
  *       "status": 0
@@ -238,12 +238,12 @@ func (self *UserController) Signout(ctx *iris.Context) {
  * 	},
  * 	"cash":{
  * 		"type":1,
- * 		"real_name":"伍明煜",
- * 		"bank_name":"中国银行",
+ * 		"realName":"伍明煜",
+ * 		"bankName":"中国银行",
  * 		"account":"44444441200001111",
  * 		"mobile":"18023380455",
- * 		"city_id":3333,
- * 		"province_id":2222
+ * 		"cityId":3333,
+ * 		"provinceId":2222
  * 	}
  * }
  */
@@ -302,7 +302,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 
 	//插入user到user表
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	body.User.Password = "123456"                                                                 //设置密码为123456
 	ok := userService.Create(&body.User)
 	if !ok {
@@ -359,12 +359,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 		},
 		"cash":{
 			"type":1,
-			"real_name":"伍明煜",
-			"bank_name":"中国银行",
+			"realName":"伍明煜",
+			"bankName":"中国银行",
 			"account":"44444441200001111",
 			"mobile":"18023380455",
-			"city_id":3333,
-			"province_id":2222
+			"cityId":3333,
+			"provinceId":2222
 		}
 	}
 */
@@ -443,7 +443,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 
 	//更新到user表
 	body.User.Id = userId
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	err := userService.Update(&body.User)
 	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
@@ -475,18 +475,18 @@ func (self *UserController) Update(ctx *iris.Context) {
  *    "role": [
  *      {
  *        "id": 1,
- *        "created_at": "0001-01-01T00:00:00Z",
- *        "updated_at": "0001-01-01T00:00:00Z",
- *        "deleted_at": null,
+ *        "createdAt": "0001-01-01T00:00:00Z",
+ *        "updatedAt": "0001-01-01T00:00:00Z",
+ *        "deletedAt": null,
  *        "name": "系统管理员",
  *        "description": ""
  *      }
  *    ],
  *    "user": {
  *      "id": 20,
- *      "created_at": "0001-01-01T00:00:00Z",
- *      "updated_at": "0001-01-01T00:00:00Z",
- *      "deleted_at": null,
+ *      "createdAt": "0001-01-01T00:00:00Z",
+ *      "updatedAt": "0001-01-01T00:00:00Z",
+ *      "deletedAt": null,
  *      "name": "卖座网",
  *      "contact": "mainland",
  *      "address": "科技园",
@@ -495,7 +495,7 @@ func (self *UserController) Update(ctx *iris.Context) {
  *      "password": "e10adc3949ba59abbe56e057f20f883e",
  *      "telephone": "",
  *      "email": "",
- *      "parent_id": 1,
+ *      "parentId": 1,
  *      "gender": 0,
  *      "age": 0,
  *      "status": 0
@@ -530,7 +530,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user?parent_id=xx&page=xxx&per_page=xxx 子用户列表
+	@api {get} /api/user?parentId=xx&page=xxx&per_page=xxx 子用户列表
 	@apiName ListByParent
 	@apiGroup User
  	@apiSuccessExample Success-Response:
@@ -543,9 +543,9 @@ func (self *UserController) Basic(ctx *iris.Context) {
 		      	{
 			        "user": {
 			          "id": 14,
-			          "created_at": "0001-01-01T00:00:00Z",
-			          "updated_at": "0001-01-01T00:00:00Z",
-			          "deleted_at": null,
+			          "createdAt": "0001-01-01T00:00:00Z",
+			          "updatedAt": "0001-01-01T00:00:00Z",
+			          "deletedAt": null,
 			          "name": "苏打生活",
 			          "contact": "Table",
 			          "address": "科兴科学园",
@@ -554,7 +554,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 			          "password": "e10adc3949ba59abbe56e057f20f883e",
 			          "telephone": "",
 			          "email": "",
-			          "parent_id": 20,
+			          "parentId": 20,
 			          "gender": 0,
 			          "age": 0,
 			          "status": 0
@@ -573,11 +573,11 @@ func (self *UserController) Basic(ctx *iris.Context) {
 */
 func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
-	parentId, _ := ctx.URLParamInt("parent_id")
+	perPage, _ := ctx.URLParamInt("perPage")
+	parentId, _ := ctx.URLParamInt("parentId")
 	if parentId <= 0 {
 		//如果parentid没有传进来就用session中的用户id
-		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	}
 
 	userService := &service.UserService{}
@@ -630,9 +630,9 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	  "data": {
 	    "user": {
 	      "id": 2,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "2016-10-10T22:51:25+08:00",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "2016-10-10T22:51:25+08:00",
+	      "deletedAt": null,
 	      "name": "木牛智能",
 	      "contact": "杨吉雄",
 	      "address": "深圳光明下村",
@@ -641,7 +641,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	      "password": "e10adc3949ba59abbe56e057f20f883e",
 	      "telephone": "",
 	      "email": "",
-	      "parent_id": 1,
+	      "parentId": 1,
 	      "gender": 0,
 	      "age": 0,
 	      "status": 0
@@ -690,7 +690,7 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	userId, _ := ctx.URLParamInt("id")
 	deviceService := &service.DeviceService{}
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
 	listTotalNum, _ := deviceService.CountByUser(userId) //计算总数
@@ -710,9 +710,9 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
  */
 func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	userId, _ := ctx.URLParamInt("id")
-	schoolId, _ := ctx.URLParamInt("school_id")
+	schoolId, _ := ctx.URLParamInt("schoolId")
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
@@ -736,16 +736,16 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	  "data": [
 	    {
 	      "id": 1001,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "清华大学"
 	    },
 	    {
 	      "id": 1002,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "北京大学"
 	    }
 	  ],
@@ -787,23 +787,23 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	  "data": [
 	    {
 	      "id": 1,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "代理商管理",
 	      "url": "/#!/agent/",
-	      "parent_id": 0,
+	      "parentId": 0,
 	      "level": 1,
 	      "status": 0
 	    },
 	    {
 	      "id": 2,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "添加代理商",
 	      "url": "/#!/agent/add",
-	      "parent_id": 1,
+	      "parentId": 1,
 	      "level": 2,
 	      "status": 0
 	    },
@@ -853,18 +853,18 @@ func (self *UserController) Menu(ctx *iris.Context) {
   "data": [
     {
       "id": 1,
-      "created_at": "0001-01-01T00:00:00Z",
-      "updated_at": "0001-01-01T00:00:00Z",
-      "deleted_at": null,
+      "createdAt": "0001-01-01T00:00:00Z",
+      "updatedAt": "0001-01-01T00:00:00Z",
+      "deletedAt": null,
       "name": "代理商管理",
       "type": 0,
       "status": 0
     },
     {
       "id": 2,
-      "created_at": "0001-01-01T00:00:00Z",
-      "updated_at": "0001-01-01T00:00:00Z",
-      "deleted_at": null,
+      "createdAt": "0001-01-01T00:00:00Z",
+      "updatedAt": "0001-01-01T00:00:00Z",
+      "deletedAt": null,
       "name": "添加代理商",
       "type": 0,
       "status": 0

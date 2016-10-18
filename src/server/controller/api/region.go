@@ -73,13 +73,13 @@ type RegionController struct {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -88,14 +88,14 @@ type RegionController struct {
  *	   data: [
  *	       {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *	       }
  *        ],
  *        msg: "拉取省列表成功!"
@@ -120,13 +120,13 @@ func (self *RegionController) Province(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -135,14 +135,14 @@ func (self *RegionController) Province(ctx *iris.Context) {
  *	   data: [
  *	       {
  *	           id: 340500,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "铜陵市",
- *	           parent_id: 340000,
+ *	           parentId: 340000,
  *	           code: "0555",
  *	           level: 2,
- *	           level_name: "市"
+ *	           levelName: "市"
  *	       }
  *        ],
  *        msg: "拉取城市列表成功!"
@@ -167,13 +167,13 @@ func (self *RegionController) City(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -182,14 +182,14 @@ func (self *RegionController) City(ctx *iris.Context) {
  *	   data: [
  *	       {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *	       }
  *        ],
  *        msg: "获取区域列表成功!"
@@ -215,13 +215,13 @@ func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -229,14 +229,14 @@ func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
  *	   status: "01020400",
  *	   data: {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *        },
  *        msg: "获取省份详情成功!"
  *     }
@@ -261,13 +261,13 @@ func (self *RegionController) ProvinceDetail(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -275,14 +275,14 @@ func (self *RegionController) ProvinceDetail(ctx *iris.Context) {
  *	   status: "01020500",
  *	   data: {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *        },
  *        msg: "获取城市详情成功!"
  *     }
@@ -307,13 +307,13 @@ func (self *RegionController) CityDetail(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -321,14 +321,14 @@ func (self *RegionController) CityDetail(ctx *iris.Context) {
  *	   status: "01020600",
  *	   data: {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *        },
  *        msg: "获取区域详情成功!"
  *     }
@@ -353,13 +353,13 @@ func (self *RegionController) DistrictDetail(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {Int} parent_id  父级ID
+ * @apiSuccess {Int} parentId  父级ID
  * @apiSuccess {String} code  邮政编码
  * @apiSuccess {Int} level  级别
- * @apiSuccess {String} level_name  级别名
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} levelName  级别名
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -368,14 +368,14 @@ func (self *RegionController) DistrictDetail(ctx *iris.Context) {
  *	   data: [
  *	       {
  *	           id: 110000,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "北京市",
- *	           parent_id: 0,
+ *	           parentId: 0,
  *	           code: "010",
  *	           level: 1,
- *	           level_name: "市"
+ *	           levelName: "市"
  *	       }
  *        ],
  *        msg: "获取省份城市列表成功!"
@@ -401,9 +401,9 @@ func (self *RegionController) CityOfProvince(ctx *iris.Context) {
  *
  * @apiSuccess {Int} id ID
  * @apiSuccess {String} name  名称
- * @apiSuccess {String} created_at  创建时间
- * @apiSuccess {String} updated_at  更新时间
- * @apiSuccess {String} deleted_at  删除时间
+ * @apiSuccess {String} createdAt  创建时间
+ * @apiSuccess {String} updatedAt  更新时间
+ * @apiSuccess {String} deletedAt  删除时间
  *
  * @apiSuccessExample Success-Response:
  *     HTTP/1.1 200 OK
@@ -412,9 +412,9 @@ func (self *RegionController) CityOfProvince(ctx *iris.Context) {
  *	   data: [
  *	       {
  *	           id: 11001,
- *	           created_at: "0001-01-01T00:00:00Z",
- *	           updated_at: "0001-01-01T00:00:00Z",
- *	           deleted_at: null,
+ *	           createdAt: "0001-01-01T00:00:00Z",
+ *	           updatedAt: "0001-01-01T00:00:00Z",
+ *	           deletedAt: null,
  *	           name: "武汉大学"
  *	       }
  *        ],

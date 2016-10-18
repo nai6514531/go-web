@@ -10,5 +10,5 @@ type CommonKit struct {
 }
 
 func (CommonKit)GetUserId() (int) {
-	return iris.Context{}.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	return iris.Context{}.Session().GetInt(viper.GetString("server.session.user.id"))
 }

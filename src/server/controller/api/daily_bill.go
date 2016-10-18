@@ -25,7 +25,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	total, err := dailyBillService.TotalByAccountType()
 	if err != nil {
 		result = &enity.Result{"01060102", nil, daily_bill_msg["01060102"]}
@@ -46,8 +46,8 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	dailyBillDetailService := &service.DailyBillDetailService{}
 	result := &enity.Result{}
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
-	userId, _ := ctx.URLParamInt("user_id")
+	perPage, _ := ctx.URLParamInt("perPage")
+	userId, _ := ctx.URLParamInt("userId")
 	billAt := ctx.URLParam("bill_at")
 	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt)
 	if err != nil {

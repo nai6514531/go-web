@@ -166,11 +166,11 @@ func (self *DeviceController) Basic(ctx *iris.Context) {
 */
 func (self *DeviceController) List(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	//获取当前用户的角色
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//查出该用户的角色id列表
 	roleService := &service.RoleService{}
 	roleIds, _ := roleService.ListIdByUserId(userId)
@@ -367,7 +367,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		return
 	}
 	//修改设备的用户为当前用户id
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	device.UserId = userId
 	success := deviceService.UpdateBySerialNumber(device)
 	if !success {
