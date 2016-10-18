@@ -83,11 +83,10 @@ class AgentTable extends React.Component {
 	}
 	componentDidMount() {
 		const pager = { page : this.state.page, perPage: this.state.perPage};
-		if(this.state.child) {
+		if(this.props.params.id) {
 			this.props.getUserList(pager);
 		} else {
 			this.props.getUserDetail(USER.id);
-			// this.setState({pagination:{}})
 		}
 	}
 	showChild() {
@@ -97,7 +96,6 @@ class AgentTable extends React.Component {
 	}
 	componentWillUpdate(nextProps, nextState) {
 		if(nextState.child == true && this.state.child == false) {
-			console.log('get child list');
 			const pager = { page : this.state.page, perPage: this.state.perPage};
 			this.props.getUserList(pager);
 		}
@@ -136,13 +134,13 @@ class AgentTable extends React.Component {
 		}
 	}
 	render() {
-		const { list, detail } = this.props;
+		const { list, detail, params: {id} } = this.props;
 		const pagination = this.initializePagination();
 		let loading = true;
 		let data = '';
 		let dataSource = [];
 		const self = this;
-		if(this.state.child) {
+		if(id) {
 			if(list){
 				if(list.fetch == true){
 					data = list.result.data.list;

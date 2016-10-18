@@ -58,11 +58,13 @@ class UserForm extends React.Component {
 		}
 	}
 	componentWillReceiveProps(nextProps) {
-		const type = nextProps.detail.cash.type;
-		if(type && type == 1){
-			this.setState({ alipay: false });
-		} else {
-			this.setState({ alipay: true });
+		if(nextProps.detail && nextProps.detail.fetch == true){
+			const type = nextProps.detail.cash.type;
+			if(type && type == 1){
+				this.setState({ alipay: false });
+			} else {
+				this.setState({ alipay: true });
+			}
 		}
 	}
 	handleSubmit(e) {
