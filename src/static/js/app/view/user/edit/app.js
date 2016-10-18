@@ -12,29 +12,28 @@ import * as regionActions from '../../../actions/region';
 
 
 function mapStateToProps(state) {
-	const { user: { result, detail }, region: { province_list, province_city, city_list } }= state;
-	return { result, detail, province_list, province_city, city_list };
+	const { user: { result, detail }, region: { provinceList, provinceCity, cityList } }= state;
+	return { result, detail, provinceList, provinceCity, cityList };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
-		userCreate,
-		userEdit,
-		userDetail,
+		postUserDetail,
+		putUserDetail,
+		getUserDetail,
 	} = bindActionCreators(UserActions, dispatch);
 	const {
-		provinceList,
-		cityList,
+		getProvinceList,
+		getCityList,
 	} = bindActionCreators(regionActions, dispatch);
 	return {
-		userCreate,
-		userEdit,
-		userDetail,
-		provinceList,
-		cityList,
+		postUserDetail,
+		putUserDetail,
+		getUserDetail,
+		getProvinceList,
+		getCityList,
 	};
 }
-const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class UserForm extends React.Component {
 	constructor(props) {
@@ -46,16 +45,16 @@ class UserForm extends React.Component {
 		this.handleReset = this.handleReset.bind(this);
 	}
 	componentWillMount() {
-		if(user_data.cash.type == 1) {
-			this.setState({ alipay: false });
-		} else {
-			this.setState({ alipay: true });
-		}
-		this.props.provinceList();
-		this.props.cityList();
+		// if(user_data.cash.type == 1) {
+		// 	this.setState({ alipay: false });
+		// } else {
+		// 	this.setState({ alipay: true });
+		// }
+		this.props.getProvinceList();
+		this.props.getCityList();
 		const id = this.props.params.id;
 		if(id && id !== 'new') {
-			this.props.userDetail(id);
+			this.props.getUserDetail(id);
 		}
 	}
 	handleSubmit(e) {
@@ -64,8 +63,8 @@ class UserForm extends React.Component {
 			if (errors) {
 				return;
 			}
-			let cash_value = {};
-			const base_value = {
+			let cashValue = {};
+			const baseValue = {
 				"user": {
 					"account": values.mobile,
 					"name": values.name,
@@ -77,30 +76,30 @@ class UserForm extends React.Component {
 				}
 			}
 			if(values.type == 1) {
-				cash_value = {
+				cashValue = {
 					"cash": {
 						"type": parseInt(values.type),
-						"real_name": values.real_name,
-						"bank_name": values.bank_name,
+						"realName": values.realName,
+						"bankName": values.bankName,
 						"account": values.account,
-						"mobile": values.bank_mobile,
-						"city_id": values.city[1],
-						"province_id":  values.city[0]
+						"mobile": values.bankMobile,
+						"cityId": values.city[1],
+						"provinceId":  values.city[0]
 					}
 				}
 			} else {
-				cash_value = {
+				cashValue = {
 					"cash": {
-						"real_name": values.alipay_name,
-						"account": values.alipay_account,
+						"realName": values.alipayName,
+						"account": values.alipayAccount,
 					}
 				}
 			}
-			const data = Object.assign({}, base_value, cash_value);
+			const data = Object.assign({}, baseValue, cashValue);
 			if(this.props.params.id == 'new') {
-				this.props.userCreate(data);
+				this.props.postUserDetail(data);
 			} else {
-				this.props.userEdit(this.props.params.id, data);
+				this.props.putUserDetail(this.props.params.id, data);
 			}
 		});
 	}
@@ -130,46 +129,46 @@ class UserForm extends React.Component {
 		if(id && id !== 'new' && detail) {
 			if(detail.fetch == true){
 				const data = detail.result.data;
-				const base_values = {
+				const baseValues = {
 					name: data.user.name,
 					contact: data.user.contact,
 					address: data.user.address,
 					mobile : data.user.mobile,
 					telephone: data.user.telephone,
 				}
-				let cash_values = {};
+				let cashValues = {};
 				if(data.cash && data.cash.type == 1){
-					cash_values = {
+					cashValues = {
 						type: data.cash.type.toString(),
-						real_name: data.cash.real_name,
-						bank_name: data.cash.bank_name,
+						realName: data.cash.realName,
+						bankName: data.cash.bankName,
 						account: data.cash.account,
-						bank_mobile: data.cash.mobile,
-						city: [data.cash.province_id,data.cash.city_id],
+						bankMobile: data.cash.mobile,
+						city: [data.cash.provinceId,data.cash.cityId],
 					}
 				} else if (data.cash && data.cash.type == 2){
-					cash_values = {
+					cashValues = {
 						type: data.cash.type.toString(),
-						alipay_account: '',
-						alipay_name: '',
+						alipayAccount: '',
+						alipayName: '',
 					}
 				}
-				initialValue = Object.assign({}, base_values, cash_values);
+				initialValue = Object.assign({}, baseValues, cashValues);
 			} else {
 				console.log('拉取用户详情失败');
 			}
 		}
-		const province_list = this.props.province_list;
-		const city_list = this.props.city_list;
+		const provinceList = this.props.getProvinceList;
+		const cityList = this.props.getCityList;
 		// 待优化
 		let address = [];
-		if(province_list && city_list) {
-			if(province_list.fetch == true){
-				address = province_list.result.data.map(function(item, key){
-					const data = city_list.result.data;
+		if(provinceList && cityList) {
+			if(provinceList.fetch == true){
+				address = provinceList.result.data.map(function(item, key){
+					const data = cityList.result.data;
 					let children = [];
 					for (let i = 0; i < data.length; i++){
-						if( data[i].parent_id == item.id) {
+						if( data[i].parentId == item.id) {
 							children[i] = {
 								'value': data[i].id,
 								'label': data[i].name,
@@ -271,11 +270,11 @@ class UserForm extends React.Component {
 									<FormItem
 										{...formItemLayout}
 										label="支付宝账号">
-										{getFieldDecorator('alipay_account', {
+										{getFieldDecorator('alipayAccount', {
 											rules: [
 												{required: true, message: '请输入支付宝账号'},
 											],
-											initialValue: initialValue.alipay_account,
+											initialValue: initialValue.alipayAccount,
 
 										})(
 											<Input placeholder="请输入支付宝账号"/>
@@ -284,11 +283,11 @@ class UserForm extends React.Component {
 									<FormItem
 										{...formItemLayout}
 										label="支付宝姓名">
-										{getFieldDecorator('alipay_name', {
+										{getFieldDecorator('alipayName', {
 											rules: [
 												{required: true, message: '请输入支付宝姓名'},
 											],
-											initialValue: initialValue.alipay_name,
+											initialValue: initialValue.alipayName,
 
 										})(
 											<Input placeholder="请输入支付宝姓名"/>
@@ -299,11 +298,11 @@ class UserForm extends React.Component {
 									<FormItem
 										{...formItemLayout}
 										label="转账户名">
-										{getFieldDecorator('real_name', {
+										{getFieldDecorator('realName', {
 											rules: [
 												{required: true, message: '请输入转账户名'},
 											],
-											initialValue: initialValue.real_name,
+											initialValue: initialValue.realName,
 
 										})(
 											<Input placeholder="请输入转账户名"/>
@@ -312,11 +311,11 @@ class UserForm extends React.Component {
 									<FormItem
 										{...formItemLayout}
 										label="开户行">
-										{getFieldDecorator('bank_name', {
+										{getFieldDecorator('bankName', {
 											rules: [
 												{required: true, message: '请输入开户行'},
 											],
-											initialValue: initialValue.bank_name,
+											initialValue: initialValue.bankName,
 
 										})(
 											<Input placeholder="请输入开户行"/>
@@ -338,11 +337,11 @@ class UserForm extends React.Component {
 									<FormItem
 										{...formItemLayout}
 										label="短信通知手机号">
-										{getFieldDecorator('bank_mobile', {
+										{getFieldDecorator('bankMobile', {
 											rules: [
 												{required: true, min: 11, message: '请输入11位短信通知手机号'},
 											],
-											initialValue: initialValue.bank_mobile,
+											initialValue: initialValue.bankMobile,
 
 										})(
 											<Input placeholder="请输入短信通知手机号"/>

@@ -53,7 +53,7 @@ export default function (state = initialState, action) {
 		case GET_USER_SCHOOL_DEVICE:
 			return {
 				...state,
-				school_device: action.result,
+				schoolDevice: action.result,
 			};
 		case GET_USER_PERMISSION:
 			return {

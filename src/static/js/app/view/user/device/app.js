@@ -1,29 +1,29 @@
 import React from 'react';
 import './../school_device/app.less';
-import { Table, Breadcrumb } from 'antd';
-import SchoolFilter from '../../common/school_filter/app'
+import { Table, Breadcrumb, Form, Select, Button } from 'antd';
+const FormItem = Form.Item;
+const Option = Select.Option;
 import { Link } from 'react-router';
-
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as UserActions from '../../../actions/user';
 
 
 function mapStateToProps(state) {
-	const { user: { school, school_device, device } } = state;
-	return { school, school_device, device };
+	const { user: { school, schoolDevice, device } } = state;
+	return { school, schoolDevice, device };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
-		userSchool,
-		schoolDevice,
-		userDevice,
+		getUserSchool,
+		getSchoolDevice,
+		getUserDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
-		userSchool,
-		schoolDevice,
-		userDevice,
+		getUserSchool,
+		getSchoolDevice,
+		getUserDevice,
 	};
 }
 
@@ -43,11 +43,9 @@ const columns = [{
 	title: '操作',
 	dataIndex: 'action',
 	key: 'action',
-	render: (text, record) => <Link to={"/user/device/school/" + record.id}>查看模块</Link>,
+	render: (text, record) => <Link to={"/user/device/school/" + record.key}>查看模块</Link>,
 }];
 
-
-const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class SchoolTable extends React.Component {
 	constructor(props) {
@@ -78,8 +76,8 @@ class SchoolTable extends React.Component {
 	}
 	componentDidMount() {
 		// this.fetch();
-		const id = user_data.user.id;
-		this.props.userSchool(id);
+		const id = USER.id;
+		this.props.getUserSchool(id);
 	}
 	render() {
 		const school = this.props.school;
@@ -111,7 +109,7 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter/>
+									<SchoolFilter school={school} getSchoolDevice={this.props.getSchoolDevice}/>
 									<Table columns={columns}
 										   dataSource={dataSource}
 										   pagination={this.state.pagination}
@@ -128,7 +126,56 @@ class SchoolTable extends React.Component {
 		);
 	}
 }
+class SchoolFilter extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+	handleSubmit(e) {
+		e.preventDefault();
+		const id = USER.id;
+		const schoolId = parseInt(this.props.form.getFieldsValue().school);
+		this.props.getSchoolDevice(id, schoolId);
+	}
+	render() {
+		const school = this.props.school;
+		let schoolNode = [];
+		if(school){
+			if(school.fetch == true){
+				const data = school.result.data;
+				schoolNode = data.map(function (item, key) {
+					const id = item.id.toString();
+					return <Option key={key} value={id}>{item.name}</Option>;
+				})
+			}
+		}
+		const { getFieldDecorator } = this.props.form;
+		return (
+			<div className="school-filter">
+				<Form inline onSubmit={this.handleSubmit}>
+					<FormItem
+						id="select"
+						labelCol={{ span: 6 }}
+						wrapperCol={{ span: 14 }}
+					>
+						{getFieldDecorator('school', {
+							rules: [
+								{ required: true, message: '请选择学校' },
+							],
+						})(
+							<Select id="school" style={{ width: 200 }} >
+								{schoolNode}
+							</Select>
+						)}
 
+					</FormItem>
+					<Button type="primary" htmlType="submit">筛选</Button>
+				</Form>
+			</div>
+		);
+	}
+}
+SchoolFilter = Form.create()(SchoolFilter);
 
 SchoolTable.propTypes = {
 	handleTableChange: React.PropTypes.func,

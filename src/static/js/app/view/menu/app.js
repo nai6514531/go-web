@@ -16,10 +16,10 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
 	const {
-		userMenu,
+		getUserMenu,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
-		userMenu,
+		getUserMenu,
 	};
 }
 
@@ -37,14 +37,14 @@ class LeftMenu extends React.Component {
 		this.setState({ current: e.key });
 	}
 	componentDidMount() {
-		this.props.userMenu(20);
+		this.props.getUserMenu(20);
 	}
 	showMe() {
 		console.log(this.props.menu);
 	}
 	render() {
 		const menu = this.props.menu;
-		let menu_list = '';
+		let menuList = '';
 		const data = [
 			{
 				url: '/agent',
@@ -56,7 +56,7 @@ class LeftMenu extends React.Component {
 			}
 		];
 		if(menu && menu.fetch == true){
-			menu_list = data.map((item, key) => {
+			menuList = data.map((item, key) => {
 				return (
 					<MenuItem key = {key}>
 						<Link to= {item.url} >
@@ -75,7 +75,7 @@ class LeftMenu extends React.Component {
 					style={{ width: 240 }}
 					onClick={this.handleClick}
 				>
-					{menu_list}
+					{menuList}
 				</Menu>
 			</div>
 		);

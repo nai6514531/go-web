@@ -16,7 +16,7 @@ import {
 } from '../constants/index';
 
 
-export function userList(pager) {
+export function getUserList(pager) {
 	return dispatch => {
 		dispatch({
 			type: GETING_USER_LIST,
@@ -37,7 +37,7 @@ export function userList(pager) {
 	};
 }
 
-export function userDetail(id) {
+export function getUserDetail(id) {
 	return dispatch => {
 		UserService.detail(id).then((result) => {
 			dispatch({
@@ -54,7 +54,7 @@ export function userDetail(id) {
 	};
 }
 
-export function userCreate(user) {
+export function postUserDetail(user) {
 	return dispatch => {
 		UserService.create(user).then((result) => {
 			dispatch({
@@ -71,7 +71,7 @@ export function userCreate(user) {
 	};
 }
 
-export function userEdit(id, user) {
+export function putUserDetail(id, user) {
 	return dispatch => {
 		UserService.edit(id, user).then((result) => {
 			dispatch({
@@ -88,7 +88,7 @@ export function userEdit(id, user) {
 	};
 }
 
-export function userRemove(id) {
+export function deleteUser(id) {
 	return dispatch => {
 		UserService.remove(id).then((result) => {
 			dispatch({
@@ -105,7 +105,7 @@ export function userRemove(id) {
 	};
 }
 
-export function userSchool(id) {
+export function getUserSchool(id) {
 	return dispatch => {
 		UserService.school(id).then((result) => {
 			dispatch({
@@ -122,7 +122,7 @@ export function userSchool(id) {
 	};
 }
 
-export function schoolDevice(id, school_id) {
+export function getSchoolDevice(id, school_id) {
 	return dispatch => {
 		UserService.schoolDevice(id, school_id).then((result) => {
 			dispatch({
@@ -139,7 +139,7 @@ export function schoolDevice(id, school_id) {
 	};
 }
 
-export function userPermission(id) {
+export function getUserPermission(id) {
 	return dispatch => {
 		UserService.permission(id).then((result) => {
 			dispatch({
@@ -176,7 +176,7 @@ export function userLogout() {
 }
 
 
-export function userMenu(id) {
+export function getUserMenu(id) {
 	return dispatch => {
 		UserService.menu(id).then((result) => {
 			dispatch({
@@ -193,7 +193,7 @@ export function userMenu(id) {
 	};
 }
 
-export function userDevice(id) {
+export function getUserDevice(id) {
 	return dispatch => {
 		UserService.device(id).then((result) => {
 			dispatch({

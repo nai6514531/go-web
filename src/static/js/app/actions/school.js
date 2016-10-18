@@ -1,20 +1,20 @@
 import SchoolService from '../service/school';
 
 import {
-	GET_SCHOOL_DETAIL,
+	GET_SCHOOLDETAIL,
 } from '../constants/index';
 
 
-export function schoolDetail() {
+export function getSchoolDetail() {
 	return dispatch => {
 		SchoolService.list().then((result) => {
 			dispatch({
-				type: GET_SCHOOL_DETAIL,
+				type: GET_SCHOOLDETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_SCHOOL_DETAIL,
+				type: GET_SCHOOLDETAIL,
 				result: { fetch: false, result },
 
 			});

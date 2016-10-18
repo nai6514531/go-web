@@ -28,9 +28,8 @@ class Head extends React.Component {
 		window.location.href = '/';
 	}
 	render() {
-		const data = JSON.parse(document.getElementById('main').dataset.user);
-		const account = data.user.account;
-		const role = data.role[0].name;
+		const account = USER.account;
+		const role = USER.role.name;
 		return (
 			<div className="head">
 				<div className = "left">
