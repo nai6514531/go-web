@@ -1,8 +1,9 @@
 import { apiGet, apiPost, apiPut, apiDelete, apiPatch } from '../library/axios/api';
 
 const DeviceService = {
-	list: () => {
-		return apiGet(`/api/device`);
+	list: (pager) => {
+		const { page, perPage } = pager;
+		return apiGet(`/api/device?page=${page}&perPage=${perPage}`);
 	},
 	detail: (id) => {
 		return apiGet(`/api/device/${id}`);

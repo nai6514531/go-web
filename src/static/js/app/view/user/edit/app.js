@@ -57,6 +57,14 @@ class UserForm extends React.Component {
 			this.props.getUserDetail(id);
 		}
 	}
+	componentWillReceiveProps(nextProps) {
+		const type = nextProps.detail.cash.type;
+		if(type && type == 1){
+			this.setState({ alipay: false });
+		} else {
+			this.setState({ alipay: true });
+		}
+	}
 	handleSubmit(e) {
 		e.preventDefault();
 		this.props.form.validateFields((errors, values) => {

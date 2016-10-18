@@ -2,10 +2,8 @@ import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
 
 const UserService = {
 	list: (pager) => {
-		const page = pager.page;
-		const per_page = pager.per_page;
-		console.log (page)
-		return apiGet(`/api/user?${page}&${per_page}`);
+		const { page, perPage } = pager;
+		return apiGet(`/api/user?page=${page}&perPage=${perPage}`);
 	},
 	detail: (id) => {
 		return apiGet(`/api/user/${id}`);

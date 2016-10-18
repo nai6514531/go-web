@@ -13,9 +13,9 @@ import {
 } from '../constants/index';
 
 
-export function getDeviceList() {
+export function getDeviceList(pager) {
 	return dispatch => {
-		DeviceService.list().then((result) => {
+		DeviceService.list(pager).then((result) => {
 			dispatch({
 				type: GETDEVICE_LIST,
 				result: { fetch: true, result },

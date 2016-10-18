@@ -8,7 +8,6 @@ import rootReducer from './reducers/index';
 
 export const store = applyMiddleware(thunk)(createStore)(rootReducer);
 
-
 const router = (
 	<Provider store = {store}>
 	<Router history={hashHistory}>
