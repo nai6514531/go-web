@@ -59,6 +59,7 @@ var (
 
 		"01010700": "拉取用户列表成功!",
 		"01010701": "拉取用户列表失败!",
+		"01010702": "拉取用户总数失败!",
 
 		"01010800": "获取用户详情含设备数成功!",
 		"01010801": "获取用户详情含设备数失败!",
@@ -509,22 +510,15 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
-	re := make(map[string]interface{})
-	re["user"] = user
-	//带上角色信息
-	roleService := &service.RoleService{}
-	roleids, _ := roleService.ListIdByUserId(id)
-	roleList, _ := roleService.ListByRoleIds(roleids)
-	re["role"] = roleList
-	//带上账号信息
 	userCashAccountService := &service.UserCashAccountService{}
-	cash, _ := userCashAccountService.BasicByUserId(id)
-	re["cash"] = cash
-
+	cashAccount, _ := userCashAccountService.BasicByUserId(id)
+	user.CashAccount = cashAccount
+	deviceTotal, _ := userService.TotalOfDevice(id)
+	user.DeviceTotal = deviceTotal
 	if err != nil {
 		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
 	} else {
-		result = &enity.Result{"01010600", re, user_msg["01010600"]}
+		result = &enity.Result{"01010600", user, user_msg["01010600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -574,47 +568,22 @@ func (self *UserController) Basic(ctx *iris.Context) {
 func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
-	parentId, _ := ctx.URLParamInt("parentId")
-	if parentId <= 0 {
-		//如果parentid没有传进来就用session中的用户id
-		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	}
-
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
-	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userList, err := userService.SubList(parentId, page, perPage)
-
-	//为每一条user记录计算其设备数量
-	type MyResult struct {
-		User   model.User  `json:"user"`
-		Device interface{} `json:"device"`
-	}
-	myResultList := &[]MyResult{}
-	myResult := MyResult{}
-	var userIds []int
-
-	for _, v := range *userList {
-		myResult.User = *v
-		userIds, _ = userService.SubChildIdsByUserId(v.Id) //计算每一条用户记录有多少个设备
-		userIds = append(userIds, v.Id)                    //把自己也算上
-
-		sum, _ := deviceService.SumByUserIds(userIds) //根据userid列表算出设备总数
-		device := make(map[string]interface{})
-		device["sum"] = sum
-		device["user-ids"] = userIds
-		myResult.Device = device
-
-		*myResultList = append(*myResultList, myResult)
-	}
-
-	//为返回json中带上共多少条的条目
-	listTotalNum, _ := userService.CountByParentId(parentId)
+	list, err := userService.SubList(userId, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
-	} else {
-		result = &enity.Result{"01010700", &enity.ListResult{listTotalNum, *myResultList}, user_msg["01010700"]}
 	}
+	total, err := userService.TotalByParentId(userId)
+	if err != nil {
+		result = &enity.Result{"01010702", nil, user_msg["01010702"]}
+	}
+	for _, user := range *list {
+		deviceTotal, _ := userService.TotalOfDevice(userId)
+		user.DeviceTotal = deviceTotal
+	}
+	result = &enity.Result{"01010700", &enity.Pagination{total, list}, user_msg["01010700"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -693,11 +662,11 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("perPage")
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
-	listTotalNum, _ := deviceService.CountByUser(userId) //计算总数
+	total, _ := deviceService.TotalByUser(userId)
 	if err != nil {
 		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
 	} else {
-		result = &enity.Result{"01010900", &enity.ListResult{listTotalNum, list}, user_msg["01010900"]}
+		result = &enity.Result{"01010900", &enity.Pagination{total, list}, user_msg["01010900"]}
 
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -716,11 +685,11 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
-	listTotalNum, _ := deviceService.CountByByUserAndSchool(userId, schoolId) //计算总数
+	total, _ := deviceService.TotalByByUserAndSchool(userId, schoolId) //计算总数
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 	} else {
-		result = &enity.Result{"01011000", &enity.ListResult{listTotalNum, list}, user_msg["01011000"]}
+		result = &enity.Result{"01011000", &enity.Pagination{total, list}, user_msg["01011000"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }

@@ -31,6 +31,26 @@ func (self *UserService) FindByMobile(mobile string) (*model.User, error) {
 	return user, nil
 }
 
+func (self *UserService) TotalByParentId(parentId int) (int, error) {
+	user := &model.User{}
+	var total int64
+	r := common.DB.Model(user).Where("parent_id = ?", parentId).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return int(total), nil
+}
+
+func (self *UserService) TotalOfDevice(userId int) (int, error) {
+	device := &model.Device{}
+	var total int
+	r := common.DB.Model(device).Where("user_id = ?", userId).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return total, nil
+}
+
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
@@ -62,9 +82,9 @@ func (self *UserService) Basic(id int) (*model.User, error) {
 	return user, nil
 }
 
-func (self *UserService) SubList(id int, page int, perPage int) (*[]*model.User, error) {
+func (self *UserService) SubList(parentId int, page int, perPage int) (*[]*model.User, error) {
 	list := &[]*model.User{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("parent_id = ?", id).Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("parent_id = ?", parentId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

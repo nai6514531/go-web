@@ -35,51 +35,52 @@ func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error)
 	return list, nil
 }
 
-func (self *DeviceService) Count() (int64, error) {
-	var count int64
-	r := common.DB.Model(&model.Device{}).Count(&count)
+func (self *DeviceService) Total() (int, error) {
+	var total int
+	r := common.DB.Model(&model.Device{}).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
+	return total, nil
+}
 
-	return count, nil
+func (self *DeviceService) TotalByUser(userId int) (int, error) {
+	device := &model.Device{}
+	var total int
+	r := common.DB.Model(device).Where("user_id = ?", userId).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return total, nil
 }
 
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	return list, nil
-}
-
-func (self *DeviceService) CountByUser(userId int) (int64, error) {
-	list := &[]*model.Device{}
-	r := common.DB.Where("user_id = ?", userId).Find(list)
-	if (r.Error != nil) || (r.RowsAffected <= 0) {
-		return 0, r.Error
-	}
-	return r.RowsAffected, nil
 }
 
 func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	return list, nil
 }
 
-func (self *DeviceService) CountByByUserAndSchool(userId int, schoolId int) (int64, error) {
-	list := &[]*model.Device{}
-	r := common.DB.Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
-	if (r.Error != nil) || (r.RowsAffected <= 0) {
+func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int, error) {
+	device := &model.Device{}
+	var total int
+	r := common.DB.Model(device).Where("user_id = ? and school_id = ?", userId, schoolId).Count(&total)
+	if r.Error != nil {
 		return 0, r.Error
 	}
-	return r.RowsAffected, nil
+	return total, nil
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
