@@ -59,7 +59,7 @@ class UserForm extends React.Component {
 	}
 	componentWillReceiveProps(nextProps) {
 		if(nextProps.detail && nextProps.detail.fetch == true){
-			const type = nextProps.detail.cash.type;
+			const type = nextProps.detail.result.data.cashAccount.type;
 			if(type && type == 1){
 				this.setState({ alipay: false });
 			} else {
@@ -136,29 +136,32 @@ class UserForm extends React.Component {
 		const id = this.props.params.id;
 		const detail = this.props.detail;
 		let initialValue = {};
+		console.log('detail',detail);
 		if(id && id !== 'new' && detail) {
+			console.log('detail show');
 			if(detail.fetch == true){
+				console.log('fetch true');
 				const data = detail.result.data;
 				const baseValues = {
-					name: data.user.name,
-					contact: data.user.contact,
-					address: data.user.address,
-					mobile : data.user.mobile,
-					telephone: data.user.telephone,
+					name: data.name,
+					contact: data.contact,
+					address: data.address,
+					mobile : data.mobile,
+					telephone: data.telephone,
 				}
 				let cashValues = {};
-				if(data.cash && data.cash.type == 1){
+				if(data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
-						type: data.cash.type.toString(),
-						realName: data.cash.realName,
-						bankName: data.cash.bankName,
-						account: data.cash.account,
-						bankMobile: data.cash.mobile,
-						city: [data.cash.provinceId,data.cash.cityId],
+						type: data.cashAccount.type.toString(),
+						realName: data.cashAccount.realName,
+						bankName: data.cashAccount.bankName,
+						account: data.cashAccount.account,
+						bankMobile: data.cashAccount.mobile,
+						city: [data.cashAccount.provinceId,data.cashAccount.cityId],
 					}
-				} else if (data.cash && data.cash.type == 2){
+				} else if (data.cashAccount && data.cashAccount.type == 2){
 					cashValues = {
-						type: data.cash.type.toString(),
+						type: data.cashAccount.type.toString(),
 						alipayAccount: '',
 						alipayName: '',
 					}
@@ -171,28 +174,28 @@ class UserForm extends React.Component {
 		const provinceList = this.props.getProvinceList;
 		const cityList = this.props.getCityList;
 		// 待优化
-		let address = [];
-		if(provinceList && cityList) {
-			if(provinceList.fetch == true){
-				address = provinceList.result.data.map(function(item, key){
-					const data = cityList.result.data;
-					let children = [];
-					for (let i = 0; i < data.length; i++){
-						if( data[i].parentId == item.id) {
-							children[i] = {
-								'value': data[i].id,
-								'label': data[i].name,
-							}
-						}
-					}
-					return {
-						'value': item.id,
-						'label': item.name,
-						'children' : children,
-					}
-				})
-			}
-		}
+		
+		// if(provinceList && cityList) {
+		// 	if(provinceList.fetch == true){
+		// 		address = provinceList.result.data.map(function(item, key){
+		// 			const data = cityList.result.data;
+		// 			let children = [];
+		// 			for (let i = 0; i < data.length; i++){
+		// 				if( data[i].parentId == item.id) {
+		// 					children[i] = {
+		// 						'value': data[i].id,
+		// 						'label': data[i].name,
+		// 					}
+		// 				}
+		// 			}
+		// 			return {
+		// 				'value': item.id,
+		// 				'label': item.name,
+		// 				'children' : children,
+		// 			}
+		// 		})
+		// 	}
+		// }
 		const { getFieldDecorator, getFieldError, isFieldValidating } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 7 },
@@ -357,18 +360,6 @@ class UserForm extends React.Component {
 											<Input placeholder="请输入短信通知手机号"/>
 										)}
 									</FormItem>
-									<FormItem
-										{...formItemLayout}
-										label="城市"
-									>
-										{getFieldDecorator('city', {
-											rules: [{ required: true, type: 'array',message: '请选择城市' }],
-											initialValue: initialValue.type,
-										})(
-											<Cascader options={address} />
-										)}
-									</FormItem>
-
 								</div>
 							}
 							<FormItem
