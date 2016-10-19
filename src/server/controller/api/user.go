@@ -445,41 +445,44 @@ func (self *UserController) Update(ctx *iris.Context) {
  *
  *  @apiSuccessExample Success-Response:
  *   HTTP/1.1 200 OK
- * 	{
- *  "status": "01010600",
- *  "data": {
- *    "role": [
- *      {
- *        "id": 1,
- *        "createdAt": "0001-01-01T00:00:00Z",
- *        "updatedAt": "0001-01-01T00:00:00Z",
- *        "deletedAt": null,
- *        "name": "系统管理员",
- *        "description": ""
- *      }
- *    ],
- *    "user": {
- *      "id": 20,
- *      "createdAt": "0001-01-01T00:00:00Z",
- *      "updatedAt": "0001-01-01T00:00:00Z",
- *      "deletedAt": null,
- *      "name": "卖座网",
- *      "contact": "mainland",
- *      "address": "科技园",
- *      "mobile": "18023380466",
- *      "account": "soda",
- *      "password": "e10adc3949ba59abbe56e057f20f883e",
- *      "telephone": "",
- *      "email": "",
- *      "parentId": 1,
- *      "gender": 0,
- *      "age": 0,
- *      "status": 0
- *    	}
- *	},
- *	 "msg": "拉取用户详情成功!"
- *	}
- */
+	{
+	  "status": "01010600",
+	  "data": {
+	    "id": 20,
+	    "createdAt": "2016-10-19T15:29:12+08:00",
+	    "updatedAt": "2016-10-19T15:21:25+08:00",
+	    "deletedAt": null,
+	    "name": "卖座网",
+	    "contact": "mainland",
+	    "address": "科技园",
+	    "mobile": "18023380461",
+	    "account": "soda",
+	    "password": "e10adc3949ba59abbe56e057f20f883e",
+	    "telephone": "0766-2885411",
+	    "email": "317808023@qq.com",
+	    "parentId": 20,
+	    "gender": 0,
+	    "age": 0,
+	    "status": 0,
+	    "deviceTotal": 2,
+	    "cashAccount": {
+	      "id": 938,
+	      "createdAt": "2016-10-19T17:12:01+08:00",
+	      "updatedAt": "2016-10-19T15:17:42+08:00",
+	      "deletedAt": null,
+	      "userId": 20,
+	      "type": 1,
+	      "realName": "伍明煜",
+	      "bankName": "中国银行",
+	      "account": "44444441200001111",
+	      "mobile": "18023380455",
+	      "cityId": 340500,
+	      "provinceId": 340000
+	    }
+	  },
+	  "msg": "拉取用户详情成功!"
+	}
+*/
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
@@ -499,7 +502,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user?parentId=xx&page=xxx&per_page=xxx 子用户列表
+	@api {get} /api/user?page=xxx&per_page=xxx 子用户列表
 	@apiName ListByParent
 	@apiGroup User
  	@apiSuccessExample Success-Response:
@@ -545,6 +548,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("perPage")
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
+	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := userService.SubList(userId, page, perPage)
 	if err != nil {
@@ -555,7 +559,9 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		result = &enity.Result{"01010702", nil, user_msg["01010702"]}
 	}
 	for _, user := range *list {
-		deviceTotal, _ := userService.TotalOfDevice(userId)
+		userIds, _ := userService.SubChildIdsByUserId(user.Id) //获取所有子子。。用户id列表
+		userIds = append(userIds, user.Id)                     //把自己也加上
+		deviceTotal, _ := deviceService.TotalByUserIds(userIds)
 		user.DeviceTotal = deviceTotal
 	}
 	result = &enity.Result{"01010700", &enity.Pagination{total, list}, user_msg["01010700"]}
@@ -615,7 +621,7 @@ func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
 	//带上总设备数的信息
 	userIds, _ := userService.SubChildIdsByUserId(id) //计算每一条用户记录有多少个设备
 	userIds = append(userIds, id)                     //把自己也算上
-	sum, _ := deviceService.SumByUserIds(userIds)     //根据userid列表算出设备总数
+	sum, _ := deviceService.TotalByUserIds(userIds)   //根据userid列表算出设备总数
 	device := map[string]interface{}{
 		"sum":      sum,
 		"user-ids": userIds,
