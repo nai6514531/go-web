@@ -111,7 +111,8 @@ class DeviceTable extends React.Component {
 		// this.fetch();
 		const id = USER.id;
 		const schoolId = this.props.params.id;
-		this.props.getSchoolDevice(id, schoolId);
+		const pager = { page:1, perPage:10 };
+		this.props.getSchoolDevice(id, schoolId, pager);
 	}
 	render() {
 		const schoolDevice = this.props.schoolDevice;

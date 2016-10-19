@@ -77,9 +77,35 @@ class SchoolTable extends React.Component {
 	componentDidMount() {
 		// this.fetch();
 		const id = USER.id;
-		this.props.getUserSchool(id);
+		const pager = {page:1,perPage:10};
+		this.props.getUserSchool(id,pager);
+	}
+	initializePagination() {
+		let total = 1;
+		if (this.props.list && this.props.list.fetch == true) {
+			total = this.props.list.result.data.total;
+		}
+		const self = this;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(current, pageSize) {
+				const pager = { page : current, perPage: pageSize};
+				self.setState(pager);
+				self.props.getUserList(pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
+				console.log('Current: ', current, '; PageSize: ', pageSize);
+			},
+			onChange(current) {
+				const pager = { page : self.state.page, perPage: self.state.perPage};
+				self.props.getUserList(pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码
+				console.log('Current: ', current);
+			},
+		}
 	}
 	render() {
+		const pagination = this.initializePagination();
 		const school = this.props.school;
 		let dataSource = [];
 		if(school){
@@ -112,7 +138,7 @@ class SchoolTable extends React.Component {
 									<SchoolFilter school={school} getSchoolDevice={this.props.getSchoolDevice}/>
 									<Table columns={columns}
 										   dataSource={dataSource}
-										   pagination={this.state.pagination}
+										   pagination={pagination}
 										   loading={this.state.loading}
 										   onChange={this.handleTableChange}
 									/>
@@ -133,9 +159,9 @@ class SchoolFilter extends React.Component {
 	}
 	handleSubmit(e) {
 		e.preventDefault();
-		const id = USER.id;
 		const schoolId = parseInt(this.props.form.getFieldsValue().school);
-		this.props.getSchoolDevice(id, schoolId);
+		const pager = {page:1,perPage:10};
+		this.props.getSchoolDevice(USER.id, schoolId, pager);
 	}
 	render() {
 		const school = this.props.school;

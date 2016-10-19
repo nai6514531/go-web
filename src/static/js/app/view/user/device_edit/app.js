@@ -22,7 +22,7 @@ function mapDispatchToProps(dispatch) {
 		getDeviceDetail,
 		putDeviceDetail,
 		patchPulseName,
-		putRefDevice,
+		getRefDevice,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
 		getProvinceList,
@@ -32,7 +32,7 @@ function mapDispatchToProps(dispatch) {
 		getDeviceDetail,
 		putDeviceDetail,
 		patchPulseName,
-		putRefDevice,
+		getRefDevice,
 		getProvinceList,
 		getProvinceSchoolList,
 	};
@@ -139,9 +139,9 @@ class DeviceForm extends React.Component {
 	}
 	render() {
 		// 关联设备列表
-		const pulseName = this.props.patchPulseName;
+		const pulseName = this.props.pulseName;
 		console.log('pulseName',pulseName);
-		const refDevice = this.props.getRefDevice;
+		const refDevice = this.props.refDevice;
 		let refDeviceNode = [];
 		if(refDevice) {
 			if(refDevice.fetch == true){
@@ -207,8 +207,10 @@ class DeviceForm extends React.Component {
 									<Input placeholder="请输入设备编号" />
 								)}
 							</FormItem>
-							<span>省份学校</span>
-							<SchoolSelect handleSelect={this.handleSelect}/>
+							<div className="select-school">
+								<span className="select-title">省份学校:</span>
+								<SchoolSelect handleSelect={this.handleSelect}/>
+							</div>
 							<FormItem
 								{...formItemLayout}
 								label="楼层信息" >
@@ -227,7 +229,7 @@ class DeviceForm extends React.Component {
 							>
 								{getFieldDecorator('referenceDevice', {
 									rules: [
-										{ required: true, message: '请选择关联设备类型' },
+										{ message: '请选择关联设备类型' },
 									],
 									initialValue: initialValue.referenceDevice,
 								})(
