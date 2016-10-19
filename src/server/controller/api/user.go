@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
@@ -378,53 +379,31 @@ func (self *UserController) Update(ctx *iris.Context) {
 	ctx.ReadJSON(&user)
 	user.Id = userId
 	//user信息校验
-	if user.Account == "" {
-		result = &enity.Result{"01010501", nil, user_msg["01010501"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if user.Name == "" {
-		result = &enity.Result{"01010502", nil, user_msg["01010502"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if user.Contact == "" {
-		result = &enity.Result{"01010503", nil, user_msg["01010503"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if user.Mobile == "" {
-		result = &enity.Result{"01010506", nil, user_msg["01010506"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	//判断登陆名是否已经存在
-	currentUser, _ := userService.FindByAccount(user.Account)
-	if (currentUser != nil) && (currentUser.Id != userId) {
-		//可以找到,并且不为将要修改的那一条记录
-		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if user.Account != "" { //如果有登陆账号传入
+		currentUser, _ := userService.FindByAccount(user.Account)
+		if (currentUser != nil) && (currentUser.Id != userId) {
+			//可以找到,并且不为将要修改的那一条记录
+			result = &enity.Result{"01010507", nil, user_msg["01010507"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
 	//判断手机号码是否已经存在
-	currentUser, _ = userService.FindByMobile(user.Mobile)
-	if (currentUser != nil) && (currentUser.Id != userId) {
-		//可以找到,并且不为将要修改的那一条记录
-		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if user.Mobile != "" {
+		currentUser, _ := userService.FindByMobile(user.Mobile)
+		if (currentUser != nil) && (currentUser.Id != userId) {
+			//可以找到,并且不为将要修改的那一条记录
+			result = &enity.Result{"01010508", nil, user_msg["01010508"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
-	mymap := user.CashAccount.(map[string]interface{})
+
 	//cashAccount
-	cashAccount := &model.UserCashAccount{
-		UserId:     userId,
-		Type:       int(mymap["type"].(float64)),
-		RealName:   mymap["realName"].(string),
-		BankName:   mymap["bankName"].(string),
-		Account:    mymap["account"].(string),
-		CityId:     int(mymap["cityId"].(float64)),
-		ProvinceId: int(mymap["provinceId"].(float64)),
-	}
+	cashAccount := &model.UserCashAccount{}
+	mapstructure.Decode(user.CashAccount, cashAccount)
+	cashAccount.UserId = userId
 	fmt.Println(cashAccount)
 	// //cash内容判断
 	if (cashAccount.Type != 1) && (cashAccount.Type != 2) {
@@ -735,17 +714,13 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		return
 	}
 	//带上每个学校的设备总数
-	result_with_device := &[]*enity.SchoolDeviceResult{}
 	for _, school := range *schools {
 		//以用户学校为条件查找数量
-		total, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
-		device_result := map[string]interface{}{
-			"total": total,
-		}
-		*result_with_device = append(*result_with_device, &enity.SchoolDeviceResult{*school, device_result})
+		deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
+		school.DeviceTotal = deviceTotal
 	}
 	//返回
-	result = &enity.Result{"01011100", result_with_device, user_msg["01011100"]}
+	result = &enity.Result{"01011100", schools, user_msg["01011100"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
