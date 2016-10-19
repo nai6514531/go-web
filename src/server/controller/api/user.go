@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -349,72 +350,56 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 	@apiParamExample {json} 请求例子:
 	{
-		"user":{
-			"account":"aazz啊啊啊啊aa",
-			"name":"卖座网",
-			"contact":"mainland",
-			"password":"123516",
-			"mobile":"1802338046这种1啊啊啊啊26",
-			"telephone":"0766-2885411",
-			"email":"317808023@qq.com"
-		},
-		"cash":{
-			"type":1,
-			"realName":"伍明煜",
-			"bankName":"中国银行",
-			"account":"44444441200001111",
-			"mobile":"18023380455",
-			"cityId":3333,
-			"provinceId":2222
+	    "account":"wumingyu",
+	    "name":"卖座网",
+	    "contact":"mainland",
+	    "mobile":"18023380461116",
+	    "telephone":"0766-2885411",
+	    "email":"317808023@qq.com",
+		"cashAccount":{
+		    "type":1,
+		    "realName":"伍明煜",
+		    "bankName":"中国银行",
+		    "account":"44444441200001111",
+		    "mobile":"18023380455",
+		    "cityId":3333,
+		    "provinceId":2222
 		}
 	}
 */
 func (self *UserController) Update(ctx *iris.Context) {
 	/*获取请求参数*/
-	type Body struct {
-		User model.User            `json:"user"`
-		Cash model.UserCashAccount `json:"cash"`
-	}
-	var body Body
+	var user model.User
 	userId, _ := ctx.ParamInt("id")
+	//parentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	userService := &service.UserService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	result := &enity.Result{}
-	ctx.ReadJSON(&body)
-
+	ctx.ReadJSON(&user)
+	user.Id = userId
 	//user信息校验
-	if body.User.Account == "" {
+	if user.Account == "" {
 		result = &enity.Result{"01010501", nil, user_msg["01010501"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Name == "" {
+	if user.Name == "" {
 		result = &enity.Result{"01010502", nil, user_msg["01010502"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Contact == "" {
+	if user.Contact == "" {
 		result = &enity.Result{"01010503", nil, user_msg["01010503"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Password == "" {
-		result = &enity.Result{"01010504", nil, user_msg["01010504"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if len(body.User.Password) < 6 {
-		result = &enity.Result{"01010505", nil, user_msg["01010505"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if body.User.Mobile == "" {
+	if user.Mobile == "" {
 		result = &enity.Result{"01010506", nil, user_msg["01010506"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//判断登陆名是否已经存在
-	currentUser, _ := userService.FindByAccount(body.User.Account)
+	currentUser, _ := userService.FindByAccount(user.Account)
 	if (currentUser != nil) && (currentUser.Id != userId) {
 		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
@@ -422,38 +407,47 @@ func (self *UserController) Update(ctx *iris.Context) {
 		return
 	}
 	//判断手机号码是否已经存在
-	currentUser, _ = userService.FindByMobile(body.User.Mobile)
+	currentUser, _ = userService.FindByMobile(user.Mobile)
 	if (currentUser != nil) && (currentUser.Id != userId) {
 		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+	mymap := user.CashAccount.(map[string]interface{})
+	//cashAccount
+	cashAccount := &model.UserCashAccount{
+		UserId:     userId,
+		Type:       int(mymap["type"].(float64)),
+		RealName:   mymap["realName"].(string),
+		BankName:   mymap["bankName"].(string),
+		Account:    mymap["account"].(string),
+		CityId:     int(mymap["cityId"].(float64)),
+		ProvinceId: int(mymap["provinceId"].(float64)),
+	}
+	fmt.Println(cashAccount)
+	// //cash内容判断
+	if (cashAccount.Type != 1) && (cashAccount.Type != 2) {
 		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.Cash.Account == "" {
+	if cashAccount.Account == "" {
 		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 
 	//更新到user表
-	body.User.Id = userId
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
-	err := userService.Update(&body.User)
+	err := userService.Update(&user)
 	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//更新结算账号信息
-	body.Cash.UserId = userId //cash记录的userid设置为新插入条目的id
-	err = userCashAccountService.UpdateByUserId(&body.Cash)
+	err = userCashAccountService.UpdateByUserId(cashAccount)
 	if err != nil {
 		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
 		ctx.JSON(iris.StatusOK, result)

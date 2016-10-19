@@ -20,7 +20,7 @@ type User struct {
 	Role        interface{} `json:"role,omitempty" gorm:"-"`
 	Menu        interface{} `json:"menu,omitempty" gorm:"-"`
 	DeviceTotal int         `json:"deviceTotal,omitempty" gorm:"-"`
-	CashAccount interface{}         `json:"cashAccount,omitempty" gorm:"-"`
+	CashAccount interface{} `json:"cashAccount,omitempty" gorm:"-"`
 }
 
 func (User) TableName() string {

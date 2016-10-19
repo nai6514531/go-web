@@ -62,7 +62,8 @@ func (self *UserService) Create(user *model.User) bool {
 }
 
 func (self *UserService) Update(user *model.User) error {
-	r := common.DB.Model(&model.User{}).Where("id = ?", user.Id).Updates(user)
+	r := common.DB.Model(&model.User{}).Updates(user)
+	// r := common.DB.Model(&model.User{}).Where("id = ?", user.Id).Updates(user)
 	//先判断err因为err不为空的时候，RowsAffected也一定小于等于0
 	if r.Error != nil { //唯一索引等错误
 		return r.Error
