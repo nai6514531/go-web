@@ -85,7 +85,7 @@ func (self *ReferenceDeviceController) Basic(ctx *iris.Context) {
 */
 func (self *ReferenceDeviceController) List(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	referenceDeviceService := &service.ReferenceDeviceService{}
 	result := &enity.Result{}
 	list, err := referenceDeviceService.List(page, perPage)

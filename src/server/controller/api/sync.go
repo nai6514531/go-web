@@ -68,3 +68,15 @@ func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
+
+func (self *SyncController) SyncDailyBillDetail(ctx *iris.Context) {
+	syncService := &service.SyncService{}
+	boo := syncService.SyncDailyBillDetail()
+	result := &enity.Result{}
+	if !boo {
+		result = &enity.Result{"1", nil, "同步账单数据详情失败!"}
+	} else {
+		result = &enity.Result{"0", nil, "同步账单数据详情成功!"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -16,14 +15,14 @@ type UserController struct {
 var (
 	user_msg = map[string]string{
 
-		"01010100": "登陆成功",
+		"01010100": "登录成功",
 		"01010101": "账号不能为空",
-		"01010102": "登陆密码不能为空",
+		"01010102": "密码不能为空",
 		"01010103": "图片验证码不能为空",
-		"01010104": "请先申请发送一个图片验证码",
+		"01010104": "图片验证码已过期",
 		"01010105": "图片验证码错误",
 		"01010109": "账号不存在",
-		"01010110": "登陆密码错误",
+		"01010110": "密码错误",
 
 		"00100200": "注销成功",
 
@@ -60,6 +59,7 @@ var (
 
 		"01010700": "拉取用户列表成功!",
 		"01010701": "拉取用户列表失败!",
+		"01010702": "拉取用户总数失败!",
 
 		"01010800": "获取用户详情含设备数成功!",
 		"01010801": "获取用户详情含设备数失败!",
@@ -82,57 +82,57 @@ var (
 )
 
 /**
-	@api {post} /api/link/signin 用户登陆
- 	@apiName Signin
- 	@apiGroup User
-	@apiParamExample 发送请求:
-	{
-		"account":"18023380466",
-		"password":"e10adc3949ba59abbe56e057f20f883e",
-		"verificode":"056639",
-		"captcha":"123456"
-	}
- 	@apiSuccessExample Success-Response:
- 	HTTP/1.1 200 OK
-	{
-	  "status": "01010600",
-	  "data": {
-	    "role": [
-	      {
-	        "id": 1,
-	        "created_at": "0001-01-01T00:00:00Z",
-	        "updated_at": "0001-01-01T00:00:00Z",
-	        "deleted_at": null,
-	        "name": "系统管理员",
-	        "description": ""
-	      }
-	    ],
-	    "user": {
-	      "id": 20,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
-	      "name": "卖座网",
-	      "contact": "mainland",
-	      "address": "科技园",
-	      "mobile": "18023380466",
-	      "account": "soda",
-	      "password": "e10adc3949ba59abbe56e057f20f883e",
-	      "telephone": "",
-	      "email": "",
-	      "parent_id": 1,
-	      "gender": 0,
-	      "age": 0,
-	      "status": 0
-	    }
-	  },
-	  "msg": "登陆成功!"
-	}
+ * @api {post} /api/signin 用户登陆
+ * @apiName Signin
+ * @apiGroup User
+ * @apiParamExample 发送请求:
+ * {
+ * 	"account":"18023380466",
+ * 	"password":"e10adc3949ba59abbe56e057f20f883e",
+ * 	"verificode":"056639",
+ * 	"captcha":"123456"
+ * }
+ * @apiSuccessExample Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ *   "status": "01010600",
+ *   "data": {
+ *     "role": [
+ *       {
+ * 	"id": 1,
+ * 	"createdAt": "0001-01-01T00:00:00Z",
+ * 	"updatedAt": "0001-01-01T00:00:00Z",
+ * 	"deletedAt": null,
+ * 	"name": "系统管理员",
+ * 	"description": ""
+ *       }
+ *     ],
+ *     "user": {
+ *       "id": 20,
+ *       "createdAt": "0001-01-01T00:00:00Z",
+ *       "updatedAt": "0001-01-01T00:00:00Z",
+ *       "deletedAt": null,
+ *       "name": "卖座网",
+ *       "contact": "mainland",
+ *       "address": "科技园",
+ *       "mobile": "18023380466",
+ *       "account": "soda",
+ *       "password": "e10adc3949ba59abbe56e057f20f883e",
+ *       "telephone": "",
+ *       "email": "",
+ *       "parentId": 1,
+ *       "gender": 0,
+ *       "age": 0,
+ *       "status": 0
+ *     }
+ *   },
+ *   "msg": "登陆成功!"
+ * }
 */
 func (self *UserController) Signin(ctx *iris.Context) {
 	//每次调用返回时都清一次图片验证码
 	var returnCleanCaptcha = func(re *enity.Result) {
-		ctx.Session().Delete(viper.GetString("server.captcha.Key"))
+		ctx.Session().Delete(viper.GetString("server.captcha.key"))
 		ctx.JSON(iris.StatusOK, re)
 	}
 
@@ -160,10 +160,10 @@ func (self *UserController) Signin(ctx *iris.Context) {
 		return
 	}
 
-	/*请先申请一个图片验证码*/
 	captchaKey := viper.GetString("server.captcha.Key")
 	captchaCache := ctx.Session().GetString(captchaKey)
-	if captchaCache == "" { //不存在
+	if captchaCache == "" {
+		//不存在
 		result := &enity.Result{"01010104", nil, user_msg["01010104"]}
 		returnCleanCaptcha(result)
 		return
@@ -191,56 +191,24 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	}
 
 	/*登陆成功*/
-	ctx.Session().Set(viper.GetString("server.session.user.user-id-key"), user.Id)
-	//带上用户信息
-	userJson := make(map[string]interface{}) //登陆后传递到前端的用户信息json
-	userJson["user"] = *user
-	roleService := &service.RoleService{}
-	//带上角色信息
-	roleids, _ := roleService.ListIdByUserId(user.Id)
-	roleList, _ := roleService.ListByRoleIds(roleids)
-	roleListV := []model.Role{}
-	for _, v := range *roleList {
-		roleListV = append(roleListV, *v)
-	}
-	userJson["role"] = roleListV
-	//带上支付账号信息
-	userCashAccountService := &service.UserCashAccountService{}
-	cash, _ := userCashAccountService.BasicByUserId(user.Id)
-	userJson["cash"] = cash
-	//带上menu信息
-	roleIds, _ := roleService.ListIdByUserId(user.Id) //根据用户找角色id列表
-	permissionService := &service.PermissionService{} //根据角色id列表找权限id列表
-	permissionIds, _ := permissionService.ListIdsByRoleIds(roleIds)
-	menuService := &service.MenuService{} //根据权限id列表找menu详情
-	menuList, _ := menuService.ListByPermissionIds(permissionIds)
-	menuListV := []model.Menu{}
-	for _, v := range *menuList {
-		menuListV = append(menuListV, *v)
-	}
-	userJson["menu"] = menuListV
-
-	//将登陆后的用户全部信息写到session中 all-info-key
-	jsonString, _ := json.Marshal(userJson)
-	ctx.Session().Set(viper.GetString("server.session.user.all-info-key"), string(jsonString))
+	ctx.Session().Set(viper.GetString("server.session.user.id"), user.Id)
 
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	returnCleanCaptcha(result)
-	return
 }
 
 /**
- * @api {post} /api/link/signout 用户注销
+ * @api {post} /api/signout 用户注销
  * @apiName Signout
  * @apiGroup User
  * @apiSuccessExample Success-Response:
  *  HTTP/1.1 200 OK
-	{
-	  "status": "00100200",
-	  "data": null,
-	  "msg": "注销成功"
-	}
-*/
+ *	{
+ *	  "status": "00100200",
+ *	  "data": null,
+ *	  "msg": "注销成功"
+ *	}
+ */
 func (self *UserController) Signout(ctx *iris.Context) {
 	ctx.SessionDestroy()
 	result := &enity.Result{"00100200", nil, user_msg["00100200"]}
@@ -248,38 +216,38 @@ func (self *UserController) Signout(ctx *iris.Context) {
 }
 
 /**
-	@api {post} /api/user 新建一个用户
-	@apiName Create
-	@apiGroup User
-	@apiSuccessExample Success-Response:
-   	HTTP/1.1 200 OK
-	{
-	  "status": "01010400",
-	  "data": null,
-	  "msg": "添加用户记录成功!"
-	}
-	@apiParamExample {json} 请求例子:
-	{
-		"user":{
-			"account":"aazz啊啊啊啊aa",
-			"name":"卖座网",
-			"contact":"mainland",
-			"password":"123516",
-			"mobile":"1802338046这种1啊啊啊啊26",
-			"telephone":"0766-2885411",
-			"email":"317808023@qq.com"
-		},
-		"cash":{
-			"type":1,
-			"real_name":"伍明煜",
-			"bank_name":"中国银行",
-			"account":"44444441200001111",
-			"mobile":"18023380455",
-			"city_id":3333,
-			"province_id":2222
-		}
-	}
-*/
+ * @api {post} /api/user 新建一个用户
+ * @apiName Create
+ * @apiGroup User
+ * @apiSuccessExample Success-Response:
+    * HTTP/1.1 200 OK
+ * {
+ *   "status": "01010400",
+ *   "data": null,
+ *   "msg": "添加用户记录成功!"
+ * }
+ * @apiParamExample {json} 请求例子:
+ * {
+ * 	"user":{
+ * 		"account":"aazz啊啊啊啊aa",
+ * 		"name":"卖座网",
+ * 		"contact":"mainland",
+ * 		"password":"123516",
+ * 		"mobile":"1802338046这种1啊啊啊啊26",
+ * 		"telephone":"0766-2885411",
+ * 		"email":"317808023@qq.com"
+ * 	},
+ * 	"cash":{
+ * 		"type":1,
+ * 		"realName":"伍明煜",
+ * 		"bankName":"中国银行",
+ * 		"account":"44444441200001111",
+ * 		"mobile":"18023380455",
+ * 		"cityId":3333,
+ * 		"provinceId":2222
+ * 	}
+ * }
+ */
 func (self *UserController) Create(ctx *iris.Context) {
 	/*获取请求参数*/
 	type Body struct {
@@ -315,13 +283,15 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 	//判断登陆名是否已经存在
 	currentUser, _ := userService.FindByAccount(body.User.Account)
-	if currentUser != nil { //可以找到
+	if currentUser != nil {
+		//可以找到
 		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
+	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -333,7 +303,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 
 	//插入user到user表
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	body.User.Password = "123456"                                                                 //设置密码为123456
 	ok := userService.Create(&body.User)
 	if !ok {
@@ -390,12 +360,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 		},
 		"cash":{
 			"type":1,
-			"real_name":"伍明煜",
-			"bank_name":"中国银行",
+			"realName":"伍明煜",
+			"bankName":"中国银行",
 			"account":"44444441200001111",
 			"mobile":"18023380455",
-			"city_id":3333,
-			"province_id":2222
+			"cityId":3333,
+			"provinceId":2222
 		}
 	}
 */
@@ -445,20 +415,23 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 	//判断登陆名是否已经存在
 	currentUser, _ := userService.FindByAccount(body.User.Account)
-	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
+	if (currentUser != nil) && (currentUser.Id != userId) {
+		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010507", nil, user_msg["01010507"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//判断手机号码是否已经存在
 	currentUser, _ = userService.FindByMobile(body.User.Mobile)
-	if (currentUser != nil) && (currentUser.Id != userId) { //可以找到,并且不为将要修改的那一条记录
+	if (currentUser != nil) && (currentUser.Id != userId) {
+		//可以找到,并且不为将要修改的那一条记录
 		result = &enity.Result{"01010508", nil, user_msg["01010508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) { //1-实时分账，2-财务结算
+	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -471,7 +444,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 
 	//更新到user表
 	body.User.Id = userId
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key")) //设置session userId作为parentid
+	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	err := userService.Update(&body.User)
 	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
@@ -491,74 +464,67 @@ func (self *UserController) Update(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user/:id 用户详情
-	@apiName Detail
-	@apiGroup User
-
- @apiSuccessExample Success-Response:
-  HTTP/1.1 200 OK
-	{
- "status": "01010600",
- "data": {
-   "role": [
-     {
-       "id": 1,
-       "created_at": "0001-01-01T00:00:00Z",
-       "updated_at": "0001-01-01T00:00:00Z",
-       "deleted_at": null,
-       "name": "系统管理员",
-       "description": ""
-     }
-   ],
-   "user": {
-     "id": 20,
-     "created_at": "0001-01-01T00:00:00Z",
-     "updated_at": "0001-01-01T00:00:00Z",
-     "deleted_at": null,
-     "name": "卖座网",
-     "contact": "mainland",
-     "address": "科技园",
-     "mobile": "18023380466",
-     "account": "soda",
-     "password": "e10adc3949ba59abbe56e057f20f883e",
-     "telephone": "",
-     "email": "",
-     "parent_id": 1,
-     "gender": 0,
-     "age": 0,
-     "status": 0
-   }
- },
- "msg": "拉取用户详情成功!"
-*	}
-*/
+ * @api {get} /api/user/:id 用户详情
+ * @apiName Detail
+ * @apiGroup User
+ *
+ *  @apiSuccessExample Success-Response:
+ *   HTTP/1.1 200 OK
+ * 	{
+ *  "status": "01010600",
+ *  "data": {
+ *    "role": [
+ *      {
+ *        "id": 1,
+ *        "createdAt": "0001-01-01T00:00:00Z",
+ *        "updatedAt": "0001-01-01T00:00:00Z",
+ *        "deletedAt": null,
+ *        "name": "系统管理员",
+ *        "description": ""
+ *      }
+ *    ],
+ *    "user": {
+ *      "id": 20,
+ *      "createdAt": "0001-01-01T00:00:00Z",
+ *      "updatedAt": "0001-01-01T00:00:00Z",
+ *      "deletedAt": null,
+ *      "name": "卖座网",
+ *      "contact": "mainland",
+ *      "address": "科技园",
+ *      "mobile": "18023380466",
+ *      "account": "soda",
+ *      "password": "e10adc3949ba59abbe56e057f20f883e",
+ *      "telephone": "",
+ *      "email": "",
+ *      "parentId": 1,
+ *      "gender": 0,
+ *      "age": 0,
+ *      "status": 0
+ *    	}
+ *	},
+ *	 "msg": "拉取用户详情成功!"
+ *	}
+ */
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
-	re := make(map[string]interface{})
-	re["user"] = user
-	//带上角色信息
-	roleService := &service.RoleService{}
-	roleids, _ := roleService.ListIdByUserId(id)
-	roleList, _ := roleService.ListByRoleIds(roleids)
-	re["role"] = roleList
-	//带上账号信息
 	userCashAccountService := &service.UserCashAccountService{}
-	cash, _ := userCashAccountService.BasicByUserId(id)
-	re["cash"] = cash
-
+	cashAccount, _ := userCashAccountService.BasicByUserId(id)
+	user.CashAccount = cashAccount
+	deviceTotal, _ := userService.TotalOfDevice(id)
+	user.DeviceTotal = deviceTotal
 	if err != nil {
 		result = &enity.Result{"01010601", nil, user_msg["01010601"]}
 	} else {
-		result = &enity.Result{"01010600", re, user_msg["01010600"]}
+		result = &enity.Result{"01010600", user, user_msg["01010600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
-	@api {get} /api/user?parent_id=xx&page=xxx&per_page=xxx 子用户列表
+	@api {get} /api/user?parentId=xx&page=xxx&per_page=xxx 子用户列表
 	@apiName ListByParent
 	@apiGroup User
  	@apiSuccessExample Success-Response:
@@ -571,9 +537,9 @@ func (self *UserController) Basic(ctx *iris.Context) {
 		      	{
 			        "user": {
 			          "id": 14,
-			          "created_at": "0001-01-01T00:00:00Z",
-			          "updated_at": "0001-01-01T00:00:00Z",
-			          "deleted_at": null,
+			          "createdAt": "0001-01-01T00:00:00Z",
+			          "updatedAt": "0001-01-01T00:00:00Z",
+			          "deletedAt": null,
 			          "name": "苏打生活",
 			          "contact": "Table",
 			          "address": "科兴科学园",
@@ -582,7 +548,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 			          "password": "e10adc3949ba59abbe56e057f20f883e",
 			          "telephone": "",
 			          "email": "",
-			          "parent_id": 20,
+			          "parentId": 20,
 			          "gender": 0,
 			          "age": 0,
 			          "status": 0
@@ -601,47 +567,23 @@ func (self *UserController) Basic(ctx *iris.Context) {
 */
 func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
-	parentId, _ := ctx.URLParamInt("parent_id")
-	if parentId <= 0 { //如果parentid没有传进来就用session中的用户id
-		parentId = ctx.Session().GetInt(viper.GetString("server.session.user.user-id-key"))
-	}
-
+	perPage, _ := ctx.URLParamInt("perPage")
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
-	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userList, err := userService.SubList(parentId, page, perPage)
-
-	//为每一条user记录计算其设备数量
-	type MyResult struct {
-		User   model.User  `json:"user"`
-		Device interface{} `json:"device"`
-	}
-	myResultList := &[]MyResult{}
-	myResult := MyResult{}
-	var userIds []int
-
-	for _, v := range *userList {
-		myResult.User = *v
-		userIds, _ = userService.SubChildIdsByUserId(v.Id) //计算每一条用户记录有多少个设备
-		userIds = append(userIds, v.Id)                    //把自己也算上
-
-		sum, _ := deviceService.SumByUserIds(userIds) //根据userid列表算出设备总数
-		device := make(map[string]interface{})
-		device["sum"] = sum
-		device["user-ids"] = userIds
-		myResult.Device = device
-
-		*myResultList = append(*myResultList, myResult)
-	}
-
-	//为返回json中带上共多少条的条目
-	listTotalNum, _ := userService.CountByParentId(parentId)
+	list, err := userService.SubList(userId, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01010701", nil, user_msg["01010701"]}
-	} else {
-		result = &enity.Result{"01010700", &enity.ListResult{listTotalNum, *myResultList}, user_msg["01010700"]}
 	}
+	total, err := userService.TotalByParentId(userId)
+	if err != nil {
+		result = &enity.Result{"01010702", nil, user_msg["01010702"]}
+	}
+	for _, user := range *list {
+		deviceTotal, _ := userService.TotalOfDevice(userId)
+		user.DeviceTotal = deviceTotal
+	}
+	result = &enity.Result{"01010700", &enity.Pagination{total, list}, user_msg["01010700"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -657,9 +599,9 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	  "data": {
 	    "user": {
 	      "id": 2,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "2016-10-10T22:51:25+08:00",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "2016-10-10T22:51:25+08:00",
+	      "deletedAt": null,
 	      "name": "木牛智能",
 	      "contact": "杨吉雄",
 	      "address": "深圳光明下村",
@@ -668,7 +610,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	      "password": "e10adc3949ba59abbe56e057f20f883e",
 	      "telephone": "",
 	      "email": "",
-	      "parent_id": 1,
+	      "parentId": 1,
 	      "gender": 0,
 	      "age": 0,
 	      "status": 0
@@ -717,14 +659,14 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	userId, _ := ctx.URLParamInt("id")
 	deviceService := &service.DeviceService{}
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
-	listTotalNum, _ := deviceService.CountByUser(userId) //计算总数
+	total, _ := deviceService.TotalByUser(userId)
 	if err != nil {
 		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
 	} else {
-		result = &enity.Result{"01010900", &enity.ListResult{listTotalNum, list}, user_msg["01010900"]}
+		result = &enity.Result{"01010900", &enity.Pagination{total, list}, user_msg["01010900"]}
 
 	}
 	ctx.JSON(iris.StatusOK, result)
@@ -737,17 +679,17 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
  */
 func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	userId, _ := ctx.URLParamInt("id")
-	schoolId, _ := ctx.URLParamInt("school_id")
+	schoolId, _ := ctx.URLParamInt("schoolId")
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
-	listTotalNum, _ := deviceService.CountByByUserAndSchool(userId, schoolId) //计算总数
+	total, _ := deviceService.TotalByByUserAndSchool(userId, schoolId) //计算总数
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 	} else {
-		result = &enity.Result{"01011000", &enity.ListResult{listTotalNum, list}, user_msg["01011000"]}
+		result = &enity.Result{"01011000", &enity.Pagination{total, list}, user_msg["01011000"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -763,16 +705,16 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	  "data": [
 	    {
 	      "id": 1001,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "清华大学"
 	    },
 	    {
 	      "id": 1002,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "北京大学"
 	    }
 	  ],
@@ -824,23 +766,23 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	  "data": [
 	    {
 	      "id": 1,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "代理商管理",
 	      "url": "/#!/agent/",
-	      "parent_id": 0,
+	      "parentId": 0,
 	      "level": 1,
 	      "status": 0
 	    },
 	    {
 	      "id": 2,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
+	      "createdAt": "0001-01-01T00:00:00Z",
+	      "updatedAt": "0001-01-01T00:00:00Z",
+	      "deletedAt": null,
 	      "name": "添加代理商",
 	      "url": "/#!/agent/add",
-	      "parent_id": 1,
+	      "parentId": 1,
 	      "level": 2,
 	      "status": 0
 	    },
@@ -890,18 +832,18 @@ func (self *UserController) Menu(ctx *iris.Context) {
   "data": [
     {
       "id": 1,
-      "created_at": "0001-01-01T00:00:00Z",
-      "updated_at": "0001-01-01T00:00:00Z",
-      "deleted_at": null,
+      "createdAt": "0001-01-01T00:00:00Z",
+      "updatedAt": "0001-01-01T00:00:00Z",
+      "deletedAt": null,
       "name": "代理商管理",
       "type": 0,
       "status": 0
     },
     {
       "id": 2,
-      "created_at": "0001-01-01T00:00:00Z",
-      "updated_at": "0001-01-01T00:00:00Z",
-      "deleted_at": null,
+      "createdAt": "0001-01-01T00:00:00Z",
+      "updatedAt": "0001-01-01T00:00:00Z",
+      "deletedAt": null,
       "name": "添加代理商",
       "type": 0,
       "status": 0

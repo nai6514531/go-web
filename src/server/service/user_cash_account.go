@@ -44,3 +44,14 @@ func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCa
 	}
 	return nil
 }
+
+func (self *UserCashAccountService) ListByUserIds(userIds string) (*[]*model.UserCashAccount, error) {
+	list := &[]*model.UserCashAccount{}
+	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id in (?)", userIds).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+

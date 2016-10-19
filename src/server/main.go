@@ -5,7 +5,6 @@ import (
 	"github.com/iris-contrib/template/html"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
-	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/route/api"
 	"maizuo.com/soda-manager/src/server/route/web"
 )
@@ -29,21 +28,6 @@ func SetUpServer() {
 	api.Api()
 
 	web.Web()
-
-	iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
-		ctx.Write("CUSTOM 500 INTERNAL SERVER ERROR PAGE!")
-		common.Logger.Printf("http status: 500 happened!~")
-	})
-
-	iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
-		ctx.Write("CUSTOM 404 NOT FOUND ERROR PAGE")
-		common.Logger.Printf("http status: 404 happened!")
-	})
-
-	iris.OnError(iris.StatusTooManyRequests, func(ctx *iris.Context) {
-		ctx.Write("CUSTOM 429 TOO MANY REQUESTS ERROR PAGE")
-		common.Logger.Printf("http status: 429 happened!")
-	})
 
 	iris.Listen(viper.GetString("server.host") + ":" + viper.GetString("server.port"))
 

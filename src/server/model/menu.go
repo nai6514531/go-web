@@ -4,7 +4,7 @@ type Menu struct {
 	Model
 	Name     string `json:"name"`
 	Url      string `json:"url"`
-	ParentId int    `json:"parent_id"`
+	ParentId int    `json:"parentId"`
 	Level    int    `json:"level"`
 	Status   int    `json:"status"`
 }

@@ -5,8 +5,8 @@ package model
 */
 type UserRoleRel struct {
 	Model
-	UserId int `json:"user_id"`
-	RoleId int `json:"role_id"`
+	UserId int `json:"userId"`
+	RoleId int `json:"roleId"`
 }
 
 func (UserRoleRel) TableName() string {

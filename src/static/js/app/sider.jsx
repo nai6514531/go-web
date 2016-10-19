@@ -31,6 +31,7 @@ const Navbar = React.createClass({
 	},
 	render() {
 		const {location} = this.props;
+		const menus = USER.menu || [];
 		return (<aside>
 			<h2><a href="#/"><img src={require('./logo.png')}/></a></h2>
 			<nav>
@@ -40,14 +41,14 @@ const Navbar = React.createClass({
 					  selectedKeys={['#' + location.pathname]}
 					  onClick={this.onClick}>
 
-					{Menus.map(function (menu) {
-						return <Menu.SubMenu key={menu.key} title={<div><Icon type={menu.icon} /> {menu.text}</div>}>
-							{menu.items.map(function (item) {
-								return <Menu.Item key={item.key}>{item.text}</Menu.Item>
+					{Menus.map(function (_menu) {
+						return <Menu.SubMenu key={_menu.key} title={<div><Icon type={_menu.icon}/> {_menu.text}</div>}>
+							{menus.map(function (item) {
+								return <Menu.Item key={item.url}>{item.name}</Menu.Item>
 							})}
+							<Menu.Item key="#/logout">退出</Menu.Item>
 						</Menu.SubMenu>
 					})}
-
 				</Menu>
 			</nav>
 			<footer>
