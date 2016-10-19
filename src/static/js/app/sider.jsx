@@ -9,7 +9,7 @@ const Navbar = React.createClass({
 		if (!boo) {
 			return false;
 		}
-		fetch('/api/logout', {
+		fetch('/api/signout', {
 			method: 'get',
 			credentials: 'same-origin'
 		}).then(response=>response.json())

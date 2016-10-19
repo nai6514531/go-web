@@ -128,7 +128,7 @@ var (
  *   },
  *   "msg": "登陆成功!"
  * }
-*/
+ */
 func (self *UserController) Signin(ctx *iris.Context) {
 	//每次调用返回时都清一次图片验证码
 	var returnCleanCaptcha = func(re *enity.Result) {
@@ -216,38 +216,38 @@ func (self *UserController) Signout(ctx *iris.Context) {
 }
 
 /**
- * @api {post} /api/user 新建一个用户
- * @apiName Create
- * @apiGroup User
- * @apiSuccessExample Success-Response:
-    * HTTP/1.1 200 OK
- * {
- *   "status": "01010400",
- *   "data": null,
- *   "msg": "添加用户记录成功!"
- * }
- * @apiParamExample {json} 请求例子:
- * {
- * 	"user":{
- * 		"account":"aazz啊啊啊啊aa",
- * 		"name":"卖座网",
- * 		"contact":"mainland",
- * 		"password":"123516",
- * 		"mobile":"1802338046这种1啊啊啊啊26",
- * 		"telephone":"0766-2885411",
- * 		"email":"317808023@qq.com"
- * 	},
- * 	"cash":{
- * 		"type":1,
- * 		"realName":"伍明煜",
- * 		"bankName":"中国银行",
- * 		"account":"44444441200001111",
- * 		"mobile":"18023380455",
- * 		"cityId":3333,
- * 		"provinceId":2222
- * 	}
- * }
- */
+* @api {post} /api/user 新建一个用户
+* @apiName Create
+* @apiGroup User
+* @apiSuccessExample Success-Response:
+   * HTTP/1.1 200 OK
+* {
+*   "status": "01010400",
+*   "data": null,
+*   "msg": "添加用户记录成功!"
+* }
+* @apiParamExample {json} 请求例子:
+* {
+* 	"user":{
+* 		"account":"aazz啊啊啊啊aa",
+* 		"name":"卖座网",
+* 		"contact":"mainland",
+* 		"password":"123516",
+* 		"mobile":"1802338046这种1啊啊啊啊26",
+* 		"telephone":"0766-2885411",
+* 		"email":"317808023@qq.com"
+* 	},
+* 	"cash":{
+* 		"type":1,
+* 		"realName":"伍明煜",
+* 		"bankName":"中国银行",
+* 		"account":"44444441200001111",
+* 		"mobile":"18023380455",
+* 		"cityId":3333,
+* 		"provinceId":2222
+* 	}
+* }
+*/
 func (self *UserController) Create(ctx *iris.Context) {
 	/*获取请求参数*/
 	type Body struct {
@@ -304,7 +304,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 
 	//插入user到user表
 	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
-	body.User.Password = "123456"                                                                 //设置密码为123456
+	body.User.Password = "123456"                                                        //设置密码为123456
 	ok := userService.Create(&body.User)
 	if !ok {
 		result = &enity.Result{"01010410", nil, user_msg["01010410"]}
@@ -744,9 +744,9 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	result_with_device := &[]*enity.SchoolDeviceResult{}
 	for _, school := range *schools {
 		//以用户学校为条件查找数量
-		sum, _ := deviceService.CountByByUserAndSchool(userId, school.Id)
+		total, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
 		device_result := map[string]interface{}{
-			"total": sum,
+			"total": total,
 		}
 		*result_with_device = append(*result_with_device, &enity.SchoolDeviceResult{*school, device_result})
 	}

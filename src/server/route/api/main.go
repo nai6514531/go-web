@@ -24,7 +24,7 @@ func Api() {
 	})
 
 	api.Post("/signin", user.Signin)
-	api.Post("/signout", user.Signout)
+	api.Get("/signout", user.Signout)
 
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-role", sync.SyncUserRole)
@@ -60,11 +60,7 @@ func Api() {
 
 	api.Get("/device", device.List)
 	api.Get("/device/:id", device.Basic)
-<<<<<<< HEAD
-	api.Delete("/device/:id", common.CheckDeviceId, device.Delete)
-=======
 	api.Delete("/device/:id", device.Delete)
->>>>>>> origin/feature/v1.0
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.Update)
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
