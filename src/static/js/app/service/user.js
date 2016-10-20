@@ -17,11 +17,13 @@ const UserService = {
 	remove: (id) => {
 		return apiDelete(`/api/user/${id}`);
 	},
-	school: (id) => {
-		return apiGet(`/api/user/${id}/school`);
+	school: (id, pager) => {
+		const { page, perPage } = pager;
+		return apiGet(`/api/user/${id}/school?page=${page}&perPage=${perPage}`);
 	},
-	schoolDevice:(id, school_id) => {
-		return apiGet(`/api/user/${id}/school/${school_id}/device`);
+	schoolDevice:(id, school_id, pager) => {
+		const { page, perPage } = pager;
+		return apiGet(`/api/user/${id}/school/${school_id}/device?page=${page}&perPage=${perPage}`);
 	},
 	permission: (id) => {
 		return apiGet(`/api/user/${id}/permission`);
@@ -33,7 +35,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/menu`);
 	},
 	device: (id) => {
-		return apiGet(`/api/user/${id}/device`);
+		return apiGet(`/api/user/${id}/device-total`);
 	}
 };
 
