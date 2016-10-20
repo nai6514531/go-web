@@ -2,10 +2,10 @@ package service
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type UserService struct {
@@ -58,20 +58,29 @@ func (self *UserService) Create(user *model.User) bool {
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUser(user)
+	r = common.MNDB.Create(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
 	return true
 }
 
-func (self *UserService) Update(user *model.User) error {
-	r := common.DB.Model(&model.User{}).Updates(user)
-	// r := common.DB.Model(&model.User{}).Where("id = ?", user.Id).Updates(user)
-	//先判断err因为err不为空的时候，RowsAffected也一定小于等于0
-	if r.Error != nil { //唯一索引等错误
-		return r.Error
+func (self *UserService) Update(user *model.User) bool {
+	r := common.DB.Model(&model.User{}).Updates(user).Scan(user)
+	if r.Error != nil || r.RowsAffected <= 0 {
+		return false
 	}
-	if r.RowsAffected <= 0 { //以id找不到东西
-		return errors.New("用户id不存在")
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUser(user)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
 	}
-	return nil
+	return true
 }
 
 func (self *UserService) Basic(id int) (*model.User, error) {

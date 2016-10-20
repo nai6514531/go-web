@@ -437,16 +437,16 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 
 	//更新到user表
-	err := userService.Update(&user)
-	if err != nil {
-		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
+	ok := userService.Update(&user)
+	if !ok {
+		result = &enity.Result{"01010511", nil, user_msg["01010511"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//更新结算账号信息
-	err = userCashAccountService.UpdateByUserId(cashAccount)
-	if err != nil {
-		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
+	ok = userCashAccountService.UpdateByUserId(cashAccount)
+	if !ok {
+		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}

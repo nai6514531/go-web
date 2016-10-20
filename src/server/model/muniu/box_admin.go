@@ -2,6 +2,7 @@ package muniu
 
 import (
 	"maizuo.com/soda-manager/src/server/model"
+	"strconv"
 )
 
 type BoxAdmin struct {
@@ -38,12 +39,42 @@ func (BoxAdmin) TableName() string {
 	return "box_admin"
 }
 
-//将User对应到此结构体
+//用User填充
 func (self *BoxAdmin) FillByUser(user *model.User) {
 	self.LocalId = user.Id
 	self.Name = user.Name
 	self.Contact = user.Contact
 	self.Address = user.Address
-	self.Mobile = user.Mobile
+	self.Mobile = user.Account
+	self.ServicePhone = user.Telephone
+	self.AgencyId = strconv.Itoa(user.ParentId)
+	self.Status = strconv.Itoa(user.Status)
 	self.Password = user.Password
+	self.InsertTime = user.CreatedAt.Format("2006-01-02 15:04:05")
+	self.UpdateTime = user.UpdatedAt.Format("2006-01-02 15:04:05")
+}
+
+//用UserRoleRel填充
+func (self *BoxAdmin) FillByUserRoleRel(userRoleRel *model.UserRoleRel) {
+	self.LocalId = userRoleRel.UserId
+	switch userRoleRel.RoleId {
+	case 1: //系统管理员
+		self.UserType = "0"
+	case 2: //普通后台用户
+		self.UserType = "2"
+	case 4: //客服
+		self.UserType = "5"
+	default:
+		self.UserType = strconv.Itoa(userRoleRel.RoleId)
+	}
+}
+
+//用userCashAccount填充
+func (self *BoxAdmin) FillByUserCashAccount(userCashAccount *model.UserCashAccount) {
+	self.LocalId = userCashAccount.UserId
+	self.PayType = strconv.Itoa(userCashAccount.Type - 1)
+	self.BankName = userCashAccount.BankName
+	self.PayAccount = userCashAccount.Account
+	self.PayName = userCashAccount.RealName
+	self.ContactNum = userCashAccount.Mobile
 }
