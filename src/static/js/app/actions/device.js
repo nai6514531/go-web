@@ -79,7 +79,7 @@ export function putDeviceDetail(id, device) {
 
 export function deleteDevice(id) {
 	return dispatch => {
-		DeviceService.edit(id).then((result) => {
+		DeviceService.remove(id).then((result) => {
 			dispatch({
 				type: REMOVE_DEVICE,
 				result: { fetch: true, result },
@@ -125,7 +125,7 @@ export function patchPulseName(id, device) {
 	};
 }
 
-export function patchSerialNumber(id, device) {
+export function putSerialNumber(id, device) {
 	return dispatch => {
 		DeviceService.serialNumber(id, device).then((result) => {
 			dispatch({

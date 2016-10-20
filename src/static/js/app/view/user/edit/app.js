@@ -239,7 +239,6 @@ class UserForm extends React.Component {
 						</Breadcrumb>
 					</div>
 					<div className="detail-form">
-                        <div>{this.cityId}</div>
 						<Form horizontal>
 							<FormItem
 								{...formItemLayout}

@@ -130,7 +130,7 @@ export function getSchoolDevice(id, school_id, pager) {
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: false, result },

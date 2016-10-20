@@ -1,6 +1,6 @@
 import React from 'react';
 import '../device_list/app.less';
-import { Table, Button, Breadcrumb } from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -9,19 +9,23 @@ import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
-	const { device: { list }, user: {schoolDevice} } = state;
-	return { list, schoolDevice };
+	const { device: { list, status }, user: {schoolDevice} } = state;
+	return { list, status, schoolDevice };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
 		getDeviceList,
+		deleteDevice,
+		patchDeviceStatus,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
 		getSchoolDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getDeviceList,
+		deleteDevice,
+		patchDeviceStatus,
 		getSchoolDevice,
 	};
 }
@@ -60,8 +64,8 @@ const columns = [{
 	key: 'thirdPulsePrice',
 }, {
 	title: '大物洗',
-	dataIndex: 'fourthPulseName',
-	key: 'fourthPulseName',
+	dataIndex: 'fourthPulsePrice',
+	key: 'fourthPulsePrice',
 }, {
 	title: '操作',
 	dataIndex: 'action',
@@ -70,14 +74,23 @@ const columns = [{
 		<span>
 			<Link to={"/user/device/edit/" + record.key}>修改</Link>
 			<span className="ant-divider" />
-			<a href="#">删除</a>
+			<Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
+				<a href="#">删除</a>
+			</Popconfirm>
 			<span className="ant-divider" />
-			<a href="#">停止</a>
+			{record.status == 9 ?
+				<Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
+					<a href="#">启用</a>
+				</Popconfirm>
+				:
+				<Popconfirm title="确认停止吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+					<a href="#">停止</a>
+				</Popconfirm>
+			}
+			
 		</span>
 	),
 }];
-
-
 
 
 class DeviceTable extends React.Component {
@@ -90,12 +103,24 @@ class DeviceTable extends React.Component {
 			pager: {},
 			page: 1,
 			perPage: 10,
+			changeState: 0,
 		};
+		this.remove = this.remove.bind(this);
+		this.changeStatus = this.changeStatus.bind(this);
+		
 	}
 	componentDidMount() {
 		const schoolId = this.props.params.id;
 		const pager = { page: this.state.page, perPage: this.state.perPage };
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
+	}
+	componentWillReceiveProps(nextProps) {
+		// if(this.state.changeState !== nextState.changeState){
+		// 	const schoolId = this.props.params.id;
+		// 	const pager = { page : this.state.page, perPage: this.state.perPage};
+		// 	this.props.getSchoolDevice(USER.id, schoolId, pager);
+		// 	console.log('get new status');
+		// }
 	}
 	initializePagination() {
 		let total = 1;
@@ -111,22 +136,38 @@ class DeviceTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.props.getSchoolDevice(USER.id, schoolId, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
-				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				const pager = { page : current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.props.getSchoolDevice(USER.id, schoolId, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码
-				console.log('Current: ', current);
 			},
 		}
 	}
+	remove(id) {
+		this.props.deleteDevice(id);
+	}
+	changeStatus(id,start) {
+		if(start){
+			console.log('start');
+			const status = { status: 0 };
+			this.props.patchDeviceStatus(id,status);
+			// this.setState({changeState:0});
+		}else {
+			console.log('stop');
+			const status = { status: 9 };
+			this.props.patchDeviceStatus(id,status);
+			// this.setState({changeState:9});
+		}
+	}
 	render() {
+		// const status = this.props.status;
+		// console.log('status',status);
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
+		const self = this;
 		let dataSource = [];
+		console.log('schoolDevice',schoolDevice);
 		if(schoolDevice) {
 			if(schoolDevice.fetch == true){
 				const data = schoolDevice.result.data.list;
@@ -137,11 +178,13 @@ class DeviceTable extends React.Component {
 						serialNumber: item.serialNumber,
 						referenceDevice: '洗衣机',
 						status: item.status,
-						address: item.address,
+						address: item.address + item.label,
 						firstPulsePrice: item.firstPulsePrice,
 						secondPulsePrice: item.secondPulsePrice,
 						thirdPulsePrice: item.thirdPulsePrice,
-						fourthPulseName: item.fourthPulseName,
+						fourthPulsePrice: item.fourthPulsePrice,
+						remove: self.remove,
+						changeStatus: self.changeStatus,
 					}
 				})
 			}
@@ -170,6 +213,7 @@ class DeviceTable extends React.Component {
 								   pagination={pagination}
 								   loading={this.state.loading}
 								   onChange={this.handleTableChange}
+								   bordered
 							/>
 						</div>
 				</div>
