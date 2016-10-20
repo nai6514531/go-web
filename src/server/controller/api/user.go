@@ -77,6 +77,7 @@ var (
 
 		"01011100": "拉取用户学校列表成功!",
 		"01011101": "拉取用户学校列表失败!",
+		"01011102": "该学校id不存在!",
 
 		"01011200": "拉取用户菜单列表成功!",
 		"01011201": "拉取用户菜单列表失败!",
@@ -436,16 +437,16 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 
 	//更新到user表
-	err := userService.Update(&user)
-	if err != nil {
-		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
+	ok := userService.Update(&user)
+	if !ok {
+		result = &enity.Result{"01010511", nil, user_msg["01010511"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//更新结算账号信息
-	err = userCashAccountService.UpdateByUserId(cashAccount)
-	if err != nil {
-		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
+	ok = userCashAccountService.UpdateByUserId(cashAccount)
+	if !ok {
+		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -677,7 +678,7 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 }
 
 /**
- * @api {get} /api/user/:id/school 用户学校列表
+ * @api {get} /api/user/:id/school?schoolId=1101用户学校列表
  * @apiName SchoolList
  * @apiGroup User
  	@apiSuccessExample Success-Response:
@@ -700,31 +701,50 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 func (self *UserController) SchoolList(ctx *iris.Context) {
 	//获取学校id列表
 	userId, _ := ctx.ParamInt("id")
+	schoolId, _ := ctx.URLParamInt("schoolId")
 	deviceService := &service.DeviceService{}
-	schoolIdList, err := deviceService.ListSchoolByUser(userId)
 	result := &enity.Result{}
-	if err != nil {
-		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	//以id列表找学校详情
 	schoolService := &service.SchoolService{}
-	schools, err := schoolService.ListByIdList(*schoolIdList)
-	if err != nil {
-		result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+	if schoolId == -1 || schoolId == 0 { //?schoolId=0或者没有筛选条件
+		schoolIdList, err := deviceService.ListSchoolByUser(userId)
+		if err != nil {
+			result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		//以id列表找学校详情
+		schools, err := schoolService.ListByIdList(*schoolIdList)
+		if err != nil {
+			result = &enity.Result{"01011101", nil, user_msg["01011101"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		//带上每个学校的设备总数
+		for _, school := range *schools {
+			//以用户学校为条件查找数量
+			deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
+			school.DeviceTotal = deviceTotal
+		}
+		//返回
+		result = &enity.Result{"01011100", schools, user_msg["01011100"]}
 		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	//带上每个学校的设备总数
-	for _, school := range *schools {
-		//以用户学校为条件查找数量
+
+		//如果带上schoolId=1101的参数只列出该学校
+	} else {
+		school, err := schoolService.Basic(schoolId)
+		if err != nil {
+			result = &enity.Result{"01011102", nil, user_msg["01011102"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 		deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
 		school.DeviceTotal = deviceTotal
+		var schools []model.School
+		schools = append(schools, *school)
+		//返回
+		result = &enity.Result{"01011100", schools, user_msg["01011100"]}
+		ctx.JSON(iris.StatusOK, result)
 	}
-	//返回
-	result = &enity.Result{"01011100", schools, user_msg["01011100"]}
-	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
