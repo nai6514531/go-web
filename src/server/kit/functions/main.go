@@ -1,5 +1,7 @@
 package functions
 
+import "strconv"
+
 //int数组去重
 func Uniq(ls []int) []int {
 	intInSlice := func(i int, list []int) bool {
@@ -27,4 +29,12 @@ func FindIndex(ls []int, value int) int {
 		}
 	}
 	return -1
+}
+
+func StringToInt(value string) int {
+	v, e := strconv.Atoi(value)
+	if e != nil {
+		return -1
+	}
+	return v
 }
