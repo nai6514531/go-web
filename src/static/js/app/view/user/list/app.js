@@ -175,7 +175,7 @@ class AgentTable extends React.Component {
 						contact: data.contact,
 						mobile: data.mobile,
 						address: data.address,
-						number: data.deviceTotal,
+						number: data.deviceTotal ? data.deviceTotal : 0,
 						action: self.showChild,
 						showAction: true,
 					}

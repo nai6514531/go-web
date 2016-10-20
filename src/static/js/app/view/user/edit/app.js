@@ -61,7 +61,7 @@ class UserForm extends React.Component {
         }
 	}
 	componentWillReceiveProps(nextProps) {
-		if(this.props.detail== undefined && nextProps.detail && nextProps.detail.fetch == true){
+		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
             this.props.getProvinceCityList(provinceId);
             const type = nextProps.detail.result.data.cashAccount.type;
@@ -82,7 +82,6 @@ class UserForm extends React.Component {
     provinceChange(event) {
         this.props.getProvinceCityList(event.target.value);
         this.provinceId = event.target.value;
-        console.log('province change',this.provinceId);
         this.setState({provinceChange:true});
     }
     cityOption() {
@@ -95,7 +94,6 @@ class UserForm extends React.Component {
     cityChange(event) {
         const self = this;
         self.cityId = event.target.value;
-        console.log('change city id',self.cityId);
         this.setState({cityChange:true});
     }
 	handleSubmit(e) {
@@ -111,6 +109,7 @@ class UserForm extends React.Component {
 					"contact": values.contact,
 					"mobile": values.mobile,
 					"telephone": values.telephone,
+                    "address": values.address,
 					"email": ""
 			}
 			if(values.type == 1) {
@@ -163,7 +162,6 @@ class UserForm extends React.Component {
                 if (this.state.cityChange == false) {
                     self.cityId = detail.result.data.cashAccount.cityId;
                 }
-                console.log('修改默认的省份城市为用户的',self.cityId,self.provinceId);
             }
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
@@ -207,8 +205,8 @@ class UserForm extends React.Component {
 				} else if (data.cashAccount && data.cashAccount.type == 2){
 					cashValues = {
 						type: data.cashAccount.type.toString(),
-						alipayAccount: '',
-						alipayName: '',
+						alipayAccount: data.cashAccount.account,
+						alipayName: data.cashAccount.realName,
 					}
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
