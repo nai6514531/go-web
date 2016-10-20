@@ -1,5 +1,9 @@
 package muniu
 
+import (
+	"maizuo.com/soda-manager/src/server/model"
+)
+
 type BoxAdmin struct {
 	LocalId        int     `json:"local_id" gorm:"column:LOCALID"`
 	Name           string  `json:"name" gorm:"column:NAME"`
@@ -32,4 +36,14 @@ type BoxAdmin struct {
 
 func (BoxAdmin) TableName() string {
 	return "box_admin"
+}
+
+//将User对应到此结构体
+func (self *BoxAdmin) FillByUser(user *model.User) {
+	self.LocalId = user.Id
+	self.Name = user.Name
+	self.Contact = user.Contact
+	self.Address = user.Address
+	self.Mobile = user.Mobile
+	self.Password = user.Password
 }

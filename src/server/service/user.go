@@ -126,16 +126,3 @@ func (self *UserService) SubChildIdsByUserId(parentId int) ([]int, error) {
 		return childIds, nil
 	}
 }
-
-//根据父id算出有几个子用户
-func (self *UserService) CountByParentId(parentId int) (int64, error) {
-	list := &[]*model.User{}
-	r := common.DB.Where("parent_id = ?", parentId).Find(list)
-	if r.Error != nil {
-		return 0, r.Error
-	}
-	if r.RowsAffected <= 0 {
-		return 0, nil
-	}
-	return r.RowsAffected, nil
-}
