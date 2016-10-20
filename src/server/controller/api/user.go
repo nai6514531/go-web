@@ -41,6 +41,8 @@ var (
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
 		"01010412": "新增用户角色记录失败",
+		"01010413": "手机号已被使用",
+		"01010414": "请输入11位的手机号!",
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登陆账号不能为空!",
@@ -229,94 +231,100 @@ func (self *UserController) Signout(ctx *iris.Context) {
 *   "msg": "添加用户记录成功!"
 * }
 * @apiParamExample {json} 请求例子:
-* {
-* 	"user":{
-* 		"account":"aazz啊啊啊啊aa",
-* 		"name":"卖座网",
-* 		"contact":"mainland",
-* 		"password":"123516",
-* 		"mobile":"1802338046这种1啊啊啊啊26",
-* 		"telephone":"0766-2885411",
-* 		"email":"317808023@qq.com"
-* 	},
-* 	"cash":{
-* 		"type":1,
-* 		"realName":"伍明煜",
-* 		"bankName":"中国银行",
-* 		"account":"44444441200001111",
-* 		"mobile":"18023380455",
-* 		"cityId":3333,
-* 		"provinceId":2222
-* 	}
-* }
+    "account":"wumingyu",
+    "name":"卖座网",
+    "contact":"mainland",
+    "mobile":"18023380461116",
+    "telephone":"0766-2885411",
+    "email":"317808023@qq.com",
+	"cashAccount":{
+	    "type":1,
+	    "realName":"伍明煜",
+	    "bankName":"中国银行",
+	    "account":"44444441200001111",
+	    "mobile":"18023380455",
+	    "cityId":3333,
+	    "provinceId":2222
+	}
 */
 func (self *UserController) Create(ctx *iris.Context) {
 	/*获取请求参数*/
-	type Body struct {
-		User model.User            `json:"user"`
-		Cash model.UserCashAccount `json:"cash"`
-	}
-	var body Body
+	var user model.User
 	userService := &service.UserService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	result := &enity.Result{}
-	ctx.ReadJSON(&body)
+	ctx.ReadJSON(&user)
 
 	//user信息校验
-	if body.User.Account == "" {
+	if user.Account == "" {
 		result = &enity.Result{"01010401", nil, user_msg["01010401"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Name == "" {
+	if user.Name == "" {
 		result = &enity.Result{"01010402", nil, user_msg["01010402"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Contact == "" {
+	if user.Contact == "" {
 		result = &enity.Result{"01010403", nil, user_msg["01010403"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.User.Mobile == "" {
+	if user.Mobile == "" {
 		result = &enity.Result{"01010406", nil, user_msg["01010406"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if len(user.Mobile) != 11 {
+		result = &enity.Result{"01010414", nil, user_msg["01010414"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	//判断登陆名是否已经存在
-	currentUser, _ := userService.FindByAccount(body.User.Account)
+	currentUser, _ := userService.FindByAccount(user.Account)
 	if currentUser != nil {
 		//可以找到
 		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//判断手机号是否存在
+	currentUser, _ = userService.FindByMobile(user.Mobile)
+	if currentUser != nil {
+		result = &enity.Result{"01010413", nil, user_msg["01010413"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//获取cashAccount
+	cashAccount := &model.UserCashAccount{}
+	mapstructure.Decode(user.CashAccount, cashAccount)
 	//cash内容判断
-	if (body.Cash.Type != 1) && (body.Cash.Type != 2) {
+	if (cashAccount.Type != 1) && (cashAccount.Type != 2) {
 		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if body.Cash.Account == "" {
+	if cashAccount.Account == "" {
 		result = &enity.Result{"01010409", nil, user_msg["01010409"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 
 	//插入user到user表
-	body.User.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
-	body.User.Password = "123456"                                                        //设置密码为123456
-	ok := userService.Create(&body.User)
+	user.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
+	user.Password = "123456"                                                        //设置密码为123456
+	ok := userService.Create(&user)
 	if !ok {
 		result = &enity.Result{"01010410", nil, user_msg["01010410"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	//插入结算账号信息
-	user, _ := userService.FindByAccount(body.User.Account) //得到新插入的条目
-	body.Cash.UserId = user.Id                              //cash记录的userid设置为新插入条目的id
-	ok = userCashAccountService.Create(&body.Cash)
+	userNew, _ := userService.FindByAccount(user.Account) //得到新插入的条目
+	cashAccount.UserId = userNew.Id                       //cash记录的userid设置为新插入条目的id
+	ok = userCashAccountService.Create(cashAccount)
 	if !ok {
 		result = &enity.Result{"01010411", nil, user_msg["01010411"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -443,41 +451,43 @@ func (self *UserController) Update(ctx *iris.Context) {
  *
  *  @apiSuccessExample Success-Response:
  *   HTTP/1.1 200 OK
- * 	{
- *  "status": "01010600",
- *  "data": {
- *    "role": [
- *      {
- *        "id": 1,
- *        "createdAt": "0001-01-01T00:00:00Z",
- *        "updatedAt": "0001-01-01T00:00:00Z",
- *        "deletedAt": null,
- *        "name": "系统管理员",
- *        "description": ""
- *      }
- *    ],
- *    "user": {
- *      "id": 20,
- *      "createdAt": "0001-01-01T00:00:00Z",
- *      "updatedAt": "0001-01-01T00:00:00Z",
- *      "deletedAt": null,
- *      "name": "卖座网",
- *      "contact": "mainland",
- *      "address": "科技园",
- *      "mobile": "18023380466",
- *      "account": "soda",
- *      "password": "e10adc3949ba59abbe56e057f20f883e",
- *      "telephone": "",
- *      "email": "",
- *      "parentId": 1,
- *      "gender": 0,
- *      "age": 0,
- *      "status": 0
- *    	}
- *	},
- *	 "msg": "拉取用户详情成功!"
- *	}
- */
+	{
+	  "status": "01010600",
+	  "data": {
+	    "id": 1,
+	    "createdAt": "2016-10-17T16:21:10+08:00",
+	    "updatedAt": "2016-10-10T22:51:25+08:00",
+	    "deletedAt": null,
+	    "name": "系统管理员",
+	    "contact": "",
+	    "address": "",
+	    "mobile": "",
+	    "account": "admin",
+	    "password": "e10adc3949ba59abbe56e057f20f883e",
+	    "telephone": "",
+	    "email": "",
+	    "parentId": 1,
+	    "gender": 0,
+	    "age": 0,
+	    "status": 0,
+	    "cashAccount": {
+	      "id": 626,
+	      "createdAt": "2016-10-13T13:34:48+08:00",
+	      "updatedAt": "2016-10-13T13:34:48+08:00",
+	      "deletedAt": null,
+	      "userId": 1,
+	      "type": 1,
+	      "realName": "",
+	      "bankName": "",
+	      "account": "",
+	      "mobile": "",
+	      "cityId": 0,
+	      "provinceId": 0
+	    }
+	  },
+	  "msg": "拉取用户详情成功!"
+	}
+*/
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
@@ -497,7 +507,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user?parentId=xx&page=xxx&per_page=xxx 子用户列表
+	@api {get} /api/user?page=xxx&per_page=xxx 子用户列表
 	@apiName ListByParent
 	@apiGroup User
  	@apiSuccessExample Success-Response:
@@ -543,6 +553,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("perPage")
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
+	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	list, err := userService.SubList(userId, page, perPage)
 	if err != nil {
@@ -553,7 +564,9 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		result = &enity.Result{"01010702", nil, user_msg["01010702"]}
 	}
 	for _, user := range *list {
-		deviceTotal, _ := userService.TotalOfDevice(userId)
+		userIds, _ := userService.SubChildIdsByUserId(user.Id) //获取所有子子。。用户id列表
+		userIds = append(userIds, user.Id)                     //把自己也加上
+		deviceTotal, _ := deviceService.TotalByUserIds(userIds)
 		user.DeviceTotal = deviceTotal
 	}
 	result = &enity.Result{"01010700", &enity.Pagination{total, list}, user_msg["01010700"]}
@@ -567,41 +580,31 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 
  @apiSuccessExample Success-Response:
   HTTP/1.1 200 OK
-	{
-	  "status": "01010800",
-	  "data": {
-	    "user": {
-	      "id": 2,
-	      "createdAt": "0001-01-01T00:00:00Z",
-	      "updatedAt": "2016-10-10T22:51:25+08:00",
-	      "deletedAt": null,
-	      "name": "木牛智能",
-	      "contact": "杨吉雄",
-	      "address": "深圳光明下村",
-	      "mobile": "",
-	      "account": "13682603941",
-	      "password": "e10adc3949ba59abbe56e057f20f883e",
-	      "telephone": "",
-	      "email": "",
-	      "parentId": 1,
-	      "gender": 0,
-	      "age": 0,
-	      "status": 0
-	    },
-	    "device": {
-	      "sum": 6,
-	      "user-ids": [
-	        21,
-	        167,
-	        254,
-	        2
-	      ]
-	    }
-	  },
-	  "msg": "获取用户详情含设备数成功!"
-	}
+{
+  "status": "01010800",
+  "data": {
+    "id": 20,
+    "createdAt": "2016-10-20T11:05:04+08:00",
+    "updatedAt": "2016-10-20T10:59:56+08:00",
+    "deletedAt": null,
+    "name": "卖座网",
+    "contact": "mainland",
+    "address": "科技园",
+    "mobile": "18023380461",
+    "account": "soda",
+    "password": "e10adc3949ba59abbe56e057f20f883e",
+    "telephone": "0766-2885412",
+    "email": "317808023@qq.com",
+    "parentId": 20,
+    "gender": 0,
+    "age": 0,
+    "status": 0,
+    "deviceTotal": 2
+  },
+  "msg": "获取用户详情含设备数成功!"
+}
 */
-func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
+func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
@@ -611,15 +614,12 @@ func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
 	}
 	//带上总设备数的信息
-	userIds, _ := userService.SubChildIdsByUserId(id) //计算每一条用户记录有多少个设备
-	userIds = append(userIds, id)                     //把自己也算上
-	sum, _ := deviceService.SumByUserIds(userIds)     //根据userid列表算出设备总数
-	device := map[string]interface{}{
-		"sum":      sum,
-		"user-ids": userIds,
-	}
+	ids, _ := userService.SubChildIdsByUserId(id)       //计算每一条用户记录有多少个设备
+	ids = append(ids, id)                               //把自己也算上
+	deviceTotal, _ := deviceService.TotalByUserIds(ids) //根据userid列表算出设备总数
+	user.DeviceTotal = deviceTotal
 	//返回
-	result = &enity.Result{"01010800", &enity.UserDeviceResult{*user, device}, user_msg["01010800"]}
+	result = &enity.Result{"01010800", user, user_msg["01010800"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -629,7 +629,7 @@ func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
  * @apiGroup User
  */
 func (self *UserController) DeviceList(ctx *iris.Context) {
-	userId, _ := ctx.URLParamInt("id")
+	userId, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
@@ -651,8 +651,8 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
  * @apiGroup User
  */
 func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
-	userId, _ := ctx.URLParamInt("id")
-	schoolId, _ := ctx.URLParamInt("schoolId")
+	userId, _ := ctx.ParamInt("id")
+	schoolId, _ := ctx.ParamInt("schoolId")
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
 	deviceService := &service.DeviceService{}
@@ -674,24 +674,18 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
  	@apiSuccessExample Success-Response:
    	HTTP/1.1 200 OK
 	{
-	  "status": "01011000",
+	  "status": "01011100",
 	  "data": [
 	    {
-	      "id": 1001,
+	      "id": 12051,
 	      "createdAt": "0001-01-01T00:00:00Z",
 	      "updatedAt": "0001-01-01T00:00:00Z",
 	      "deletedAt": null,
-	      "name": "清华大学"
-	    },
-	    {
-	      "id": 1002,
-	      "createdAt": "0001-01-01T00:00:00Z",
-	      "updatedAt": "0001-01-01T00:00:00Z",
-	      "deletedAt": null,
-	      "name": "北京大学"
+	      "name": "深圳大学",
+	      "deviceTotal": 1
 	    }
 	  ],
-	  "msg": ""
+	  "msg": "拉取用户学校列表成功!"
 	}
 */
 func (self *UserController) SchoolList(ctx *iris.Context) {

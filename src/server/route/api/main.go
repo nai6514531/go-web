@@ -36,7 +36,7 @@ func Api() {
 	api.UseFunc(common.RequireSignin)
 
 	api.Get("/user", user.ListByParent)
-	api.Get("/user/:id/user-device-info", user.BasicWithDeviceInfo)
+	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
 	api.Post("/user", user.Create)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
