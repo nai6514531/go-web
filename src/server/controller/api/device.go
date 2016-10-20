@@ -57,6 +57,7 @@ var (
 		"01030600": "删除设备成功!",
 		"01030601": "删除设备失败!",
 		"01030602": "设备id不能小于0!",
+		"01030603": "该设备已被删除或不存在!",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
@@ -379,6 +380,12 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	if id <= 0 {
+		result = &enity.Result{"01030602", nil, device_msg["01030602"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	currentDevice, _ := deviceService.Basic(id)
+	if currentDevice == nil { //设备被删除了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return

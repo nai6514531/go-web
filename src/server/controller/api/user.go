@@ -42,6 +42,7 @@ var (
 		"01010411": "新增用户结算账号失败",
 		"01010412": "新增用户角色记录失败",
 		"01010413": "手机号已被使用",
+		"01010414": "请输入11位的手机号!",
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登陆账号不能为空!",
@@ -272,6 +273,11 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 	if user.Mobile == "" {
 		result = &enity.Result{"01010406", nil, user_msg["01010406"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if len(user.Mobile) != 11 {
+		result = &enity.Result{"01010414", nil, user_msg["01010414"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -574,41 +580,31 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 
  @apiSuccessExample Success-Response:
   HTTP/1.1 200 OK
-	{
-	  "status": "01010800",
-	  "data": {
-	    "user": {
-	      "id": 2,
-	      "createdAt": "0001-01-01T00:00:00Z",
-	      "updatedAt": "2016-10-10T22:51:25+08:00",
-	      "deletedAt": null,
-	      "name": "木牛智能",
-	      "contact": "杨吉雄",
-	      "address": "深圳光明下村",
-	      "mobile": "",
-	      "account": "13682603941",
-	      "password": "e10adc3949ba59abbe56e057f20f883e",
-	      "telephone": "",
-	      "email": "",
-	      "parentId": 1,
-	      "gender": 0,
-	      "age": 0,
-	      "status": 0
-	    },
-	    "device": {
-	      "sum": 6,
-	      "user-ids": [
-	        21,
-	        167,
-	        254,
-	        2
-	      ]
-	    }
-	  },
-	  "msg": "获取用户详情含设备数成功!"
-	}
+{
+  "status": "01010800",
+  "data": {
+    "id": 20,
+    "createdAt": "2016-10-20T11:05:04+08:00",
+    "updatedAt": "2016-10-20T10:59:56+08:00",
+    "deletedAt": null,
+    "name": "卖座网",
+    "contact": "mainland",
+    "address": "科技园",
+    "mobile": "18023380461",
+    "account": "soda",
+    "password": "e10adc3949ba59abbe56e057f20f883e",
+    "telephone": "0766-2885412",
+    "email": "317808023@qq.com",
+    "parentId": 20,
+    "gender": 0,
+    "age": 0,
+    "status": 0,
+    "deviceTotal": 2
+  },
+  "msg": "获取用户详情含设备数成功!"
+}
 */
-func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
+func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
@@ -618,15 +614,12 @@ func (self *UserController) BasicWithDeviceInfo(ctx *iris.Context) {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
 	}
 	//带上总设备数的信息
-	userIds, _ := userService.SubChildIdsByUserId(id) //计算每一条用户记录有多少个设备
-	userIds = append(userIds, id)                     //把自己也算上
-	sum, _ := deviceService.TotalByUserIds(userIds)   //根据userid列表算出设备总数
-	device := map[string]interface{}{
-		"sum":      sum,
-		"user-ids": userIds,
-	}
+	ids, _ := userService.SubChildIdsByUserId(id)       //计算每一条用户记录有多少个设备
+	ids = append(ids, id)                               //把自己也算上
+	deviceTotal, _ := deviceService.TotalByUserIds(ids) //根据userid列表算出设备总数
+	user.DeviceTotal = deviceTotal
 	//返回
-	result = &enity.Result{"01010800", &enity.UserDeviceResult{*user, device}, user_msg["01010800"]}
+	result = &enity.Result{"01010800", user, user_msg["01010800"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
