@@ -40,11 +40,12 @@ export function getUserList(pager) {
 export function getUserDetail(id) {
 	return dispatch => {
 		UserService.detail(id).then((result) => {
+			console.log('get action result suc',result);
 			dispatch({
 				type: GET_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_DETAIL,
 				result: { fetch: false, result },

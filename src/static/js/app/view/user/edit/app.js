@@ -61,16 +61,21 @@ class UserForm extends React.Component {
         }
 	}
 	componentWillReceiveProps(nextProps) {
+        const self = this;
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
-            const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-            this.props.getProvinceCityList(provinceId);
             const type = nextProps.detail.result.data.cashAccount.type;
             if(type && type == 1){
 				this.setState({ alipay: false });
+                const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
+                this.props.getProvinceCityList(provinceId);
 			} else {
 				this.setState({ alipay: true });
 			}
 		}
+        if(this.props.provinceCity !== nextProps.provinceCity){
+            // 每次切换省,都要将城市预至成第一个
+            self.cityId = nextProps.provinceCity.result.data[0].id;
+        }
 	}
     provinceOption() {
         if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -83,6 +88,7 @@ class UserForm extends React.Component {
         this.props.getProvinceCityList(event.target.value);
         this.provinceId = event.target.value;
         this.setState({provinceChange:true});
+        this.setState({cityChange: true});
     }
     cityOption() {
         if(this.props.provinceCity && this.props.provinceCity.fetch == true){
@@ -156,6 +162,7 @@ class UserForm extends React.Component {
         const { detail, provinceCity, provinceList } = this.props;
         if(id && id !== 'new') {
             if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
+                // 修改用户 省市信息预设为用户省市信息
                 if (this.state.provinceChange == false) {
                     self.provinceId = detail.result.data.cashAccount.provinceId;
                 }
@@ -165,6 +172,7 @@ class UserForm extends React.Component {
             }
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
+                // 新增用户 省市信息预设为第一个
                 if (this.state.provinceChange == false) {
                     self.provinceId = provinceCity.result.data[0].id;
                 }
@@ -231,8 +239,8 @@ class UserForm extends React.Component {
 						</Breadcrumb>
 					</div>
 					<div className="detail-form">
+                        <div>{this.cityId}</div>
 						<Form horizontal>
-                            <div>{this.cityId},{this.provinceId}</div>
 							<FormItem
 								{...formItemLayout}
 								label="代理商名称" >
