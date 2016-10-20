@@ -106,9 +106,9 @@ export function deleteUser(id) {
 	};
 }
 
-export function getUserSchool(id, pager) {
+export function getUserSchool(id, schoolId, pager) {
 	return dispatch => {
-		UserService.school(id, pager).then((result) => {
+		UserService.school(id, schoolId, pager).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },

@@ -94,7 +94,7 @@ class DeviceTable extends React.Component {
 	}
 	componentDidMount() {
 		const schoolId = this.props.params.id;
-		const pager = { page:1, perPage:10 };
+		const pager = { page: this.state.page, perPage: this.state.perPage };
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
 	}
 	initializePagination() {
@@ -116,6 +116,7 @@ class DeviceTable extends React.Component {
 			},
 			onChange(current) {
 				const pager = { page : current, perPage: self.state.perPage};
+				self.setState(pager);
 				self.props.getSchoolDevice(USER.id, schoolId, pager);
 				// 执行函数获取对应的 page 数据,传递的参数是当前页码
 				console.log('Current: ', current);
@@ -126,11 +127,8 @@ class DeviceTable extends React.Component {
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
 		let dataSource = [];
-		let loading = true;
 		if(schoolDevice) {
-			// loading = true;
 			if(schoolDevice.fetch == true){
-				loading = false;
 				const data = schoolDevice.result.data.list;
 				dataSource = data.map(function (item, key) {
 					return {
@@ -148,7 +146,6 @@ class DeviceTable extends React.Component {
 				})
 			}
 		}
-		loading = false;
 		return (
 		<div className="detail">
 			<div className="detail-head">
@@ -171,7 +168,7 @@ class DeviceTable extends React.Component {
 							<Table columns={columns}
 								   dataSource={dataSource}
 								   pagination={pagination}
-								   loading={loading}
+								   loading={this.state.loading}
 								   onChange={this.handleTableChange}
 							/>
 						</div>

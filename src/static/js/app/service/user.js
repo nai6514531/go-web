@@ -17,9 +17,9 @@ const UserService = {
 	remove: (id) => {
 		return apiDelete(`/api/user/${id}`);
 	},
-	school: (id, pager) => {
+	school: (id, schoolId, pager) => {
 		const { page, perPage } = pager;
-		return apiGet(`/api/user/${id}/school?page=${page}&perPage=${perPage}`);
+		return apiGet(`/api/user/${id}/school?schoolId=${schoolId}&page=${page}&perPage=${perPage}`);
 	},
 	schoolDevice:(id, school_id, pager) => {
 		const { page, perPage } = pager;
