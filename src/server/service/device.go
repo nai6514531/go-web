@@ -3,6 +3,7 @@ package service
 import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type DeviceService struct {
@@ -57,7 +58,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -66,7 +67,7 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 
 func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -84,7 +85,14 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
-	r := common.DB.Create(device)
+	r := common.DB.Create(device).Scan(device)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//更新到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	r = common.MNDB.Create(boxInfo)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -92,7 +100,14 @@ func (self *DeviceService) Create(device *model.Device) bool {
 }
 
 func (self *DeviceService) Update(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
+	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(device)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//更新到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(&device)
+	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -100,7 +115,14 @@ func (self *DeviceService) Update(device model.Device) bool {
 }
 
 func (self *DeviceService) UpdateStatus(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status)
+	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(device)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//更新到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(&device)
+	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", device.Status)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -108,7 +130,14 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 }
 
 func (self *DeviceService) UpdateBySerialNumber(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device)
+	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//更新到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(&device)
+	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", device.Status)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -117,14 +146,6 @@ func (self *DeviceService) UpdateBySerialNumber(device model.Device) bool {
 
 func (self *DeviceService) Delete(id int) bool {
 	r := common.DB.Where("id = ?", id).Delete(&model.Device{})
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
-	}
-	return true
-}
-
-func (self *DeviceService) UpdatePulseName(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -150,14 +171,12 @@ func (self *DeviceService) ListSchoolByUser(userId int) (*[]int, error) {
 }
 
 //通过用户列表计算一个有多少个设备
-func (self *DeviceService) SumByUserIds(userIds []int) (int64, error) {
-	list := &[]*model.Device{}
-	r := common.DB.Where("user_id IN (?)", userIds).Find(list)
+func (self *DeviceService) TotalByUserIds(userIds []int) (int, error) {
+	//list := &[]*model.Device{}
+	var total int64
+	r := common.DB.Model(&model.Device{}).Where("user_id IN (?)", userIds).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
-	if r.RowsAffected <= 0 {
-		return 0, nil
-	}
-	return r.RowsAffected, nil
+	return int(total), nil
 }

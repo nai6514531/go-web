@@ -5,7 +5,7 @@ type Device struct {
 	UserId            int    `json:"userId"`
 	Label             string `json:"label"`
 	SerialNumber      string `json:"serialNumber"`
-	ReferenceDeviceId int    `json:"reference_deviceId"`
+	ReferenceDeviceId int    `json:"referenceDeviceId"`
 	ProvinceId        int    `json:"provinceId"`
 	CityId            int    `json:"cityId"`
 	DistrictId        int    `json:"districtId"`

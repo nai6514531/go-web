@@ -1,15 +1,15 @@
 import DeviceService from '../service/device';
 
 import {
-	GETDEVICE_LIST,
-	GETDEVICEDETAIL,
-	POSTDEVICEDETAIL,
-	PUTDEVICEDETAIL,
-	REMOVEDEVICE,
-	PATCHDEVICE_STATUS,
+	GET_DEVICE_LIST,
+	GET_DEVICE_DETAIL,
+	POST_DEVICE_DETAIL,
+	PUT_DEVICE_DETAIL,
+	REMOVE_DEVICE,
+	PATCH_DEVICE_STATUS,
 	DEVICE_PULSE_NAME,
 	DEVICE_SERIAL_NUMBER,
-	GET_REFDEVICE
+	GET_REF_DEVICE
 } from '../constants/index';
 
 
@@ -17,12 +17,12 @@ export function getDeviceList(pager) {
 	return dispatch => {
 		DeviceService.list(pager).then((result) => {
 			dispatch({
-				type: GETDEVICE_LIST,
+				type: GET_DEVICE_LIST,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GETDEVICE_LIST,
+				type: GET_DEVICE_LIST,
 				result: { fetch: false, result },
 			});
 		});
@@ -33,12 +33,12 @@ export function getDeviceDetail(id) {
 	return dispatch => {
 		DeviceService.detail(id).then((result) => {
 			dispatch({
-				type: GETDEVICEDETAIL,
+				type: GET_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GETDEVICEDETAIL,
+				type: GET_DEVICE_DETAIL,
 				result: { fetch: false, result },
 			});
 		});
@@ -49,12 +49,12 @@ export function postDeviceDetail(device) {
 	return dispatch => {
 		DeviceService.create(device).then((result) => {
 			dispatch({
-				type: POSTDEVICEDETAIL,
+				type: POST_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: POSTDEVICEDETAIL,
+				type: POST_DEVICE_DETAIL,
 				result: { fetch: false, result },
 			});
 		});
@@ -65,12 +65,12 @@ export function putDeviceDetail(id, device) {
 	return dispatch => {
 		DeviceService.edit(id, device).then((result) => {
 			dispatch({
-				type: PUTDEVICEDETAIL,
+				type: PUT_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: PUTDEVICEDETAIL,
+				type: PUT_DEVICE_DETAIL,
 				result: { fetch: false, result },
 			});
 		});
@@ -79,14 +79,14 @@ export function putDeviceDetail(id, device) {
 
 export function deleteDevice(id) {
 	return dispatch => {
-		DeviceService.edit(id).then((result) => {
+		DeviceService.remove(id).then((result) => {
 			dispatch({
-				type: REMOVEDEVICE,
+				type: REMOVE_DEVICE,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: REMOVEDEVICE,
+				type: REMOVE_DEVICE,
 				result: { fetch: false, result },
 			});
 		});
@@ -97,12 +97,12 @@ export function patchDeviceStatus(id, device) {
 	return dispatch => {
 		DeviceService.status(id, device).then((result) => {
 			dispatch({
-				type: PATCHDEVICE_STATUS,
+				type: PATCH_DEVICE_STATUS,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: PATCHDEVICE_STATUS,
+				type: PATCH_DEVICE_STATUS,
 				result: { fetch: false, result },
 			});
 		});
@@ -125,7 +125,7 @@ export function patchPulseName(id, device) {
 	};
 }
 
-export function patchSerialNumber(id, device) {
+export function putSerialNumber(id, device) {
 	return dispatch => {
 		DeviceService.serialNumber(id, device).then((result) => {
 			dispatch({
@@ -145,12 +145,12 @@ export function getRefDevice() {
 	return dispatch => {
 		DeviceService.reference().then((result) => {
 			dispatch({
-				type: GET_REFDEVICE,
+				type: GET_REF_DEVICE,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_REFDEVICE,
+				type: GET_REF_DEVICE,
 				result: { fetch: false, result },
 			});
 		});

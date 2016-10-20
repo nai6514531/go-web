@@ -2,10 +2,10 @@ package service
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type UserService struct {
@@ -34,7 +34,7 @@ func (self *UserService) FindByMobile(mobile string) (*model.User, error) {
 func (self *UserService) TotalByParentId(parentId int) (int, error) {
 	user := &model.User{}
 	var total int64
-	r := common.DB.Model(user).Where("parent_id = ?", parentId).Count(&total)
+	r := common.DB.Model(user).Where("parent_id = ? AND id != ?", parentId, parentId).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -58,20 +58,29 @@ func (self *UserService) Create(user *model.User) bool {
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUser(user)
+	r = common.MNDB.Create(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
 	return true
 }
 
-func (self *UserService) Update(user *model.User) error {
-	r := common.DB.Model(&model.User{}).Updates(user)
-	// r := common.DB.Model(&model.User{}).Where("id = ?", user.Id).Updates(user)
-	//先判断err因为err不为空的时候，RowsAffected也一定小于等于0
-	if r.Error != nil { //唯一索引等错误
-		return r.Error
+func (self *UserService) Update(user *model.User) bool {
+	r := common.DB.Model(&model.User{}).Updates(user).Scan(user)
+	if r.Error != nil || r.RowsAffected <= 0 {
+		return false
 	}
-	if r.RowsAffected <= 0 { //以id找不到东西
-		return errors.New("用户id不存在")
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUser(user)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
 	}
-	return nil
+	return true
 }
 
 func (self *UserService) Basic(id int) (*model.User, error) {
@@ -85,7 +94,7 @@ func (self *UserService) Basic(id int) (*model.User, error) {
 
 func (self *UserService) SubList(parentId int, page int, perPage int) (*[]*model.User, error) {
 	list := &[]*model.User{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("parent_id = ?", parentId).Order("id desc").Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("parent_id = ? AND id != ?", parentId, parentId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -125,17 +134,4 @@ func (self *UserService) SubChildIdsByUserId(parentId int) ([]int, error) {
 		}
 		return childIds, nil
 	}
-}
-
-//根据父id算出有几个子用户
-func (self *UserService) CountByParentId(parentId int) (int64, error) {
-	list := &[]*model.User{}
-	r := common.DB.Where("parent_id = ?", parentId).Find(list)
-	if r.Error != nil {
-		return 0, r.Error
-	}
-	if r.RowsAffected <= 0 {
-		return 0, nil
-	}
-	return r.RowsAffected, nil
 }

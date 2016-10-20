@@ -40,11 +40,12 @@ export function getUserList(pager) {
 export function getUserDetail(id) {
 	return dispatch => {
 		UserService.detail(id).then((result) => {
+			console.log('get action result suc',result);
 			dispatch({
 				type: GET_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_DETAIL,
 				result: { fetch: false, result },
@@ -105,9 +106,9 @@ export function deleteUser(id) {
 	};
 }
 
-export function getUserSchool(id) {
+export function getUserSchool(id, schoolId, pager) {
 	return dispatch => {
-		UserService.school(id).then((result) => {
+		UserService.school(id, schoolId, pager).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },
@@ -122,14 +123,14 @@ export function getUserSchool(id) {
 	};
 }
 
-export function getSchoolDevice(id, school_id) {
+export function getSchoolDevice(id, school_id, pager) {
 	return dispatch => {
-		UserService.schoolDevice(id, school_id).then((result) => {
+		UserService.schoolDevice(id, school_id, pager).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_SCHOOL_DEVICE,
 				result: { fetch: false, result },

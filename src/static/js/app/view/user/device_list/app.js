@@ -54,44 +54,56 @@ class SchoolTable extends React.Component {
 			data: [],
 			pagination: {},
 			loading: false,
+			pager: {},
+			page: 1,
+			perPage: 10,
 		};
 	}
-	handleTableChange(pagination, filters, sorter) {
-		const pager = this.state.pagination;
-		pager.current = pagination.current;
-		this.setState({
-			pagination: pager,
-		});
-		this.fetch({
-			results: pagination.pageSize,
-			page: pagination.current,
-			sortField: sorter.field,
-			sortOrder: sorter.order,
-			...filters,
-		});
-	}
-	fetch(params = {}) {
-		console.log(params);
-		this.setState({ loading: true });
-	}
 	componentDidMount() {
-		// this.fetch();
-		const id = USER.id;
-		this.props.getUserSchool(id);
+		const pager = {page: this.state.page, perPage: this.state.perPage};
+		const schoolId = 0;
+		this.props.getUserSchool(USER.id, schoolId, pager);
+	}
+	initializePagination() {
+		let total = 1;
+		if (this.props.school && this.props.school.fetch == true) {
+			total = this.props.school.result.data.total;
+		}
+		const self = this;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(current, pageSize) {
+				const pager = { page : current, perPage: pageSize};
+				self.setState(pager);
+				self.props.getUserSchool(USER.id, pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
+				console.log('Current: ', current, '; PageSize: ', pageSize);
+			},
+			onChange(current) {
+				const pager = { page: current, perPage: self.state.perPage};
+				self.setState(pager);
+				self.props.getUserSchool(USER.id, pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码
+				console.log('Current: ', current);
+			},
+		}
 	}
 	render() {
+		const pagination = this.initializePagination();
 		const school = this.props.school;
 		let dataSource = [];
+		let list = [];
 		if(school){
 			if(school.fetch == true){
-        		const data = school.result.data;
-				dataSource = data.map(function (item,key) {
+				list = school.result.data;
+				dataSource = list.map(function (item,key) {
 					console.log(item);
 					return {
 						key: item.id,
 						index: key,
 						school: item.name,
-						number: '1234',
+						number: item.deviceTotal,
 					}
 				})
 			}
@@ -109,10 +121,15 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter school={school} getSchoolDevice={this.props.getSchoolDevice}/>
+									<SchoolFilter 
+										schoolList={list}
+										getUserSchool={this.props.getUserSchool}
+										page={this.state.page}
+										perPage={this.state.perPage}
+									/>
 									<Table columns={columns}
 										   dataSource={dataSource}
-										   pagination={this.state.pagination}
+										   pagination={pagination}
 										   loading={this.state.loading}
 										   onChange={this.handleTableChange}
 									/>
@@ -133,21 +150,18 @@ class SchoolFilter extends React.Component {
 	}
 	handleSubmit(e) {
 		e.preventDefault();
-		const id = USER.id;
 		const schoolId = parseInt(this.props.form.getFieldsValue().school);
-		this.props.getSchoolDevice(id, schoolId);
+		const pager = {page: this.props.page, perPage: this.props.perPage};
+		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	render() {
-		const school = this.props.school;
+		const schoolList = this.props.schoolList;
 		let schoolNode = [];
-		if(school){
-			if(school.fetch == true){
-				const data = school.result.data;
-				schoolNode = data.map(function (item, key) {
-					const id = item.id.toString();
-					return <Option key={key} value={id}>{item.name}</Option>;
-				})
-			}
+		if(schoolList){
+			schoolNode = schoolList.map(function (item, key) {
+				const id = item.id.toString();
+				return <Option key={key} value={id}>{item.name}</Option>;
+			})
 		}
 		const { getFieldDecorator } = this.props.form;
 		return (

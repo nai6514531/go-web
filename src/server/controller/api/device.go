@@ -35,7 +35,8 @@ var (
 		"01030309": "请填写快洗价格!",
 		"01030310": "请填写标准洗价格!",
 		"01030311": "请填写大件洗价格!",
-		"01030312": "请填写大件洗价格!",
+		"01030312": "设备id不能小于0!",
+		"01030313": "该设备序列号已经存在!",
 
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
@@ -56,6 +57,7 @@ var (
 		"01030600": "删除设备成功!",
 		"01030601": "删除设备失败!",
 		"01030602": "设备id不能小于0!",
+		"01030603": "该设备已被删除或不存在!",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
@@ -69,7 +71,7 @@ var (
 		"01030709": "请填写快洗价格!",
 		"01030710": "请填写标准洗价格!",
 		"01030711": "请填写大件洗价格!",
-		"01030712": "请填写大件洗价格!",
+		"01030712": "该设备序列号已经存在!",
 
 		"01030800": "更新设备脉冲名成功!",
 		"01030801": "更新设备脉冲名失败!",
@@ -191,7 +193,7 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	var device model.Device
 	ctx.ReadJSON(&device)
 	if id <= 0 {
-		result = &enity.Result{"01030302", nil, device_msg["01030302"]}
+		result = &enity.Result{"01030202", nil, device_msg["01030202"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -274,6 +276,13 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	}
 	if device.FourthPulsePrice <= 0 {
 		result = &enity.Result{"01030311", nil, device_msg["01030311"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//判断序列号名是否已经被使用了
+	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if (currentDevice != nil) && (currentDevice.Id != id) { //可以找到并且不为当前要修改的记录
+		result = &enity.Result{"01030313", nil, device_msg["01030313"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -371,6 +380,12 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	if id <= 0 {
+		result = &enity.Result{"01030602", nil, device_msg["01030602"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	currentDevice, _ := deviceService.Basic(id)
+	if currentDevice == nil { //设备被删除了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -476,6 +491,13 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//查找该序列号是否已经存在
+	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if currentDevice != nil {
+		result = &enity.Result{"01030712", nil, device_msg["01030712"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	success := deviceService.Create(&device)
 	if !success {
 		result = &enity.Result{"01030701", nil, device_msg["01030701"]}
@@ -511,7 +533,8 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	success := deviceService.UpdatePulseName(device)
+	device.Id = id
+	success := deviceService.Update(device)
 	if !success {
 		result = &enity.Result{"01030801", nil, device_msg["01030801"]}
 		ctx.JSON(iris.StatusOK, result)

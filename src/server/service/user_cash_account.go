@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type UserCashAccountService struct {
@@ -31,18 +31,29 @@ func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccoun
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUserCashAccount(userCashAccount)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
 	return true
 }
 
-func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) error {
+func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) bool {
 	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
-	if r.Error != nil {
-		return r.Error
+	if r.Error != nil || r.RowsAffected <= 0 {
+		return false
 	}
-	if r.RowsAffected <= 0 {
-		return errors.New("用户id不存在")
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUserCashAccount(userCashAccount)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
 	}
-	return nil
+	return true
 }
 
 func (self *UserCashAccountService) ListByUserIds(userIds string) (*[]*model.UserCashAccount, error) {
@@ -53,5 +64,3 @@ func (self *UserCashAccountService) ListByUserIds(userIds string) (*[]*model.Use
 	}
 	return list, nil
 }
-
-

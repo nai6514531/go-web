@@ -78,6 +78,7 @@ class AgentTable extends React.Component {
 			loading: false,
 			child: false,
 			list: [],
+			pager: {},
 		};
 		this.showChild = this.showChild.bind(this);
 	}
@@ -126,10 +127,11 @@ class AgentTable extends React.Component {
 				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
-				const pager = { page : self.state.page, perPage: self.state.perPage};
+				console.log('Current: ', current);
+				const pager = { page : current, perPage: self.state.perPage};
+				self.setState(pager);
 				self.props.getUserList(pager);
 				// 执行函数获取对应的 page 数据,传递的参数是当前页码
-				console.log('Current: ', current);
 			},
 		}
 	}
@@ -153,7 +155,7 @@ class AgentTable extends React.Component {
 							contact: item.contact,
 							mobile: item.mobile,
 							address: item.address,
-							number: item.deviceTotal,
+							number: item.deviceTotal ? item.deviceTotal : 0,
 							action: self.showChild,
 							showAction: false,
 						}
@@ -173,7 +175,7 @@ class AgentTable extends React.Component {
 						contact: data.contact,
 						mobile: data.mobile,
 						address: data.address,
-						number: data.deviceTotal,
+						number: data.deviceTotal ? data.deviceTotal : 0,
 						action: self.showChild,
 						showAction: true,
 					}

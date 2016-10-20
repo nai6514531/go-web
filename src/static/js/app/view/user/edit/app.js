@@ -25,6 +25,7 @@ function mapDispatchToProps(dispatch) {
 	const {
 		getProvinceList,
 		getCityList,
+        getProvinceCityList,
 	} = bindActionCreators(regionActions, dispatch);
 	return {
 		postUserDetail,
@@ -32,6 +33,7 @@ function mapDispatchToProps(dispatch) {
 		getUserDetail,
 		getProvinceList,
 		getCityList,
+        getProvinceCityList,
 	};
 }
 
@@ -40,76 +42,106 @@ class UserForm extends React.Component {
 		super(props);
 		this.state = {
 			alipay: false,
+            provinceChange: false,
+            cityChange: false,
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleReset = this.handleReset.bind(this);
+        this.provinceChange = this.provinceChange.bind(this);
 	}
 	componentWillMount() {
-		// if(user_data.cash.type == 1) {
-		// 	this.setState({ alipay: false });
-		// } else {
-		// 	this.setState({ alipay: true });
-		// }
-		this.props.getProvinceList();
-		this.props.getCityList();
+        // 默认北京市东城区
+        this.props.getProvinceList();
+        this.props.getProvinceCityList(110000);
 		const id = this.props.params.id;
 		if(id && id !== 'new') {
 			this.props.getUserDetail(id);
-		}
+		} else {
+            this.provinceId = 110000;
+        }
 	}
 	componentWillReceiveProps(nextProps) {
-		if(nextProps.detail && nextProps.detail.fetch == true){
-			const type = nextProps.detail.result.data.cashAccount.type;
-			if(type && type == 1){
+        const self = this;
+		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
+            const type = nextProps.detail.result.data.cashAccount.type;
+            if(type && type == 1){
 				this.setState({ alipay: false });
+                const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
+                this.props.getProvinceCityList(provinceId);
 			} else {
 				this.setState({ alipay: true });
 			}
 		}
+        if(this.props.provinceCity !== nextProps.provinceCity){
+            // 每次切换省,都要将城市预至成第一个
+            self.cityId = nextProps.provinceCity.result.data[0].id;
+        }
 	}
+    provinceOption() {
+        if(this.props.provinceList && this.props.provinceList.fetch == true){
+            return this.props.provinceList.result.data.map(function (item, key) {
+                    return <option key={key} value={item.id}>{item.name}</option>
+            })
+        }
+    }
+    provinceChange(event) {
+        this.props.getProvinceCityList(event.target.value);
+        this.provinceId = event.target.value;
+        this.setState({provinceChange:true});
+        this.setState({cityChange: true});
+    }
+    cityOption() {
+        if(this.props.provinceCity && this.props.provinceCity.fetch == true){
+            return this.props.provinceCity.result.data.map(function (item, key) {
+                    return <option key={key} value={item.id}>{item.name}</option>
+            })
+        }
+    }
+    cityChange(event) {
+        const self = this;
+        self.cityId = event.target.value;
+        this.setState({cityChange:true});
+    }
 	handleSubmit(e) {
 		e.preventDefault();
+        const self = this;
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				return;
 			}
-			let cashValue = {};
-			const baseValue = {
-				"user": {
-					"account": values.mobile,
+			let cashAccount = {};
+			const user = {
 					"name": values.name,
 					"contact": values.contact,
-					"password": "",
 					"mobile": values.mobile,
 					"telephone": values.telephone,
+                    "address": values.address,
 					"email": ""
-				}
 			}
 			if(values.type == 1) {
-				cashValue = {
-					"cash": {
-						"type": parseInt(values.type),
-						"realName": values.realName,
-						"bankName": values.bankName,
-						"account": values.account,
-						"mobile": values.bankMobile,
-						"cityId": values.city[1],
-						"provinceId":  values.city[0]
-					}
+                cashAccount = {
+                    "type": parseInt(values.type),
+                    "realName": values.realName,
+                    "bankName": values.bankName,
+                    "account": values.account,
+                    "mobile": values.bankMobile,
+                    "cityId": parseInt(self.cityId),
+                    "provinceId": parseInt(self.provinceId),
 				}
 			} else {
-				cashValue = {
-					"cash": {
-						"realName": values.alipayName,
-						"account": values.alipayAccount,
-					}
+                cashAccount = {
+                    "type": parseInt(values.type),
+                    "realName": values.alipayName,
+                    "account": values.alipayAccount,
 				}
 			}
-			const data = Object.assign({}, baseValue, cashValue);
+            user.cashAccount = cashAccount;
 			if(this.props.params.id == 'new') {
-				this.props.postUserDetail(data);
+                user.account = values.mobile;
+                this.props.postUserDetail(user);
 			} else {
-				this.props.putUserDetail(this.props.params.id, data);
+                user.account = self.account;
+                this.props.putUserDetail(this.props.params.id, user);
 			}
 		});
 	}
@@ -125,22 +157,41 @@ class UserForm extends React.Component {
 		}
 	}
 	render() {
-		const result = this.props.result;
-		if(result) {
-			if(result.fetch == true){
-				alert('修改成功');
-			} else {
-				console.log(result.result.msg);
-			}
-		}
-		const id = this.props.params.id;
-		const detail = this.props.detail;
+        const self = this;
+        const { id } = this.props.params;
+        const { detail, provinceCity, provinceList } = this.props;
+        if(id && id !== 'new') {
+            if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
+                // 修改用户 省市信息预设为用户省市信息
+                if (this.state.provinceChange == false) {
+                    self.provinceId = detail.result.data.cashAccount.provinceId;
+                }
+                if (this.state.cityChange == false) {
+                    self.cityId = detail.result.data.cashAccount.cityId;
+                }
+            }
+        } else {
+            if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
+                // 新增用户 省市信息预设为第一个
+                if (this.state.provinceChange == false) {
+                    self.provinceId = provinceCity.result.data[0].id;
+                }
+                if (this.state.cityChange == false) {
+                    self.cityId = provinceCity.result.data[0].id;
+                }
+            }
+        }
+		// const result = this.props.result;
+		// if(result) {
+		// 	if(result.fetch == true){
+		// 		// alert('修改成功');
+		// 	} else {
+		// 		console.log(result.result.msg);
+		// 	}
+		// }
 		let initialValue = {};
-		console.log('detail',detail);
 		if(id && id !== 'new' && detail) {
-			console.log('detail show');
 			if(detail.fetch == true){
-				console.log('fetch true');
 				const data = detail.result.data;
 				const baseValues = {
 					name: data.name,
@@ -149,6 +200,7 @@ class UserForm extends React.Component {
 					mobile : data.mobile,
 					telephone: data.telephone,
 				}
+                self.account = data.account;
 				let cashValues = {};
 				if(data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
@@ -157,13 +209,12 @@ class UserForm extends React.Component {
 						bankName: data.cashAccount.bankName,
 						account: data.cashAccount.account,
 						bankMobile: data.cashAccount.mobile,
-						city: [data.cashAccount.provinceId,data.cashAccount.cityId],
 					}
 				} else if (data.cashAccount && data.cashAccount.type == 2){
 					cashValues = {
 						type: data.cashAccount.type.toString(),
-						alipayAccount: '',
-						alipayName: '',
+						alipayAccount: data.cashAccount.account,
+						alipayName: data.cashAccount.realName,
 					}
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
@@ -171,32 +222,7 @@ class UserForm extends React.Component {
 				console.log('拉取用户详情失败');
 			}
 		}
-		const provinceList = this.props.getProvinceList;
-		const cityList = this.props.getCityList;
-		// 待优化
-		
-		// if(provinceList && cityList) {
-		// 	if(provinceList.fetch == true){
-		// 		address = provinceList.result.data.map(function(item, key){
-		// 			const data = cityList.result.data;
-		// 			let children = [];
-		// 			for (let i = 0; i < data.length; i++){
-		// 				if( data[i].parentId == item.id) {
-		// 					children[i] = {
-		// 						'value': data[i].id,
-		// 						'label': data[i].name,
-		// 					}
-		// 				}
-		// 			}
-		// 			return {
-		// 				'value': item.id,
-		// 				'label': item.name,
-		// 				'children' : children,
-		// 			}
-		// 		})
-		// 	}
-		// }
-		const { getFieldDecorator, getFieldError, isFieldValidating } = this.props.form;
+		const { getFieldDecorator } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
@@ -255,7 +281,7 @@ class UserForm extends React.Component {
 								label="手机号" >
 								{getFieldDecorator('mobile', {
 									rules: [
-										{ required: true, min: 11, message: '请输入11位手机号' },
+										{ required: true, len: 11, message: '请输入11位手机号' },
 									],
 									initialValue: initialValue.mobile,
 								})(
@@ -273,8 +299,12 @@ class UserForm extends React.Component {
 									initialValue: initialValue.type,
 								})(
 									<RadioGroup>
-										<Radio value="2" onClick = {this.handleRadio.bind(this, '2')}>实时分账(必须拥有支付宝,收取 x% 手续费)</Radio>
-										<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>财务定期结账(需提供正确银行卡号)</Radio>
+										<Radio value="2" onClick = {this.handleRadio.bind(this, '2')}>
+                                            实时分账(必须拥有支付宝,收取 x% 手续费)
+                                        </Radio>
+										<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
+                                            财务定期结账(需提供正确银行卡号)
+                                        </Radio>
 									</RadioGroup>
 								)}
 							</FormItem>
@@ -352,7 +382,7 @@ class UserForm extends React.Component {
 										label="短信通知手机号">
 										{getFieldDecorator('bankMobile', {
 											rules: [
-												{required: true, min: 11, message: '请输入11位短信通知手机号'},
+												{required: true, len: 11, message: '请输入11位短信通知手机号'},
 											],
 											initialValue: initialValue.bankMobile,
 
@@ -360,6 +390,20 @@ class UserForm extends React.Component {
 											<Input placeholder="请输入短信通知手机号"/>
 										)}
 									</FormItem>
+                                    <div className="province-filter">
+                                        <span>省份:</span>
+                                        <select name="province" id="province" value={this.provinceId}
+                                                onChange={this.provinceChange.bind(this)}>
+                                            {this.provinceOption()}
+                                        </select>
+                                    </div>
+                                    <div className="province-filter">
+                                        <span>城市:</span>
+                                        <select name="city" id="city" value={this.cityId}
+                                                onChange={this.cityChange.bind(this)}>
+                                            {this.cityOption()}
+                                        </select>
+                                    </div>
 								</div>
 							}
 							<FormItem
