@@ -57,6 +57,7 @@ var (
 		"01010510": "结算账号不能为空",
 		"01010511": "修改用户记录失败",
 		"01010512": "修改用户结算账号失败",
+		"01010513": "请输入11位的手机号!",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -276,6 +277,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//判断手机号是否为11位
 	if len(user.Mobile) != 11 {
 		result = &enity.Result{"01010414", nil, user_msg["01010414"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -399,6 +401,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 	}
 	//判断手机号码是否已经存在
 	if user.Mobile != "" {
+		//判断手机号是否为11位
+		if len(user.Mobile) != 11 {
+			result = &enity.Result{"01010513", nil, user_msg["01010513"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		//判断手机号是否已被别人使用
 		currentUser, _ := userService.FindByMobile(user.Mobile)
 		if (currentUser != nil) && (currentUser.Id != userId) {
 			//可以找到,并且不为将要修改的那一条记录
