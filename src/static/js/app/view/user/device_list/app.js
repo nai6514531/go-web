@@ -54,36 +54,36 @@ class SchoolTable extends React.Component {
 			data: [],
 			pagination: {},
 			loading: false,
+			pager: {},
 		};
 	}
 	handleTableChange(pagination, filters, sorter) {
-		const pager = this.state.pagination;
-		pager.current = pagination.current;
+		const pager = this.state.pager;
+		pager.current = pager.current;
 		this.setState({
-			pagination: pager,
+			pager: pager,
 		});
-		this.fetch({
-			results: pagination.pageSize,
-			page: pagination.current,
-			sortField: sorter.field,
-			sortOrder: sorter.order,
-			...filters,
-		});
+		// this.fetch({
+		// 	results: pagination.pageSize,
+		// 	page: pagination.current,
+		// 	sortField: sorter.field,
+		// 	sortOrder: sorter.order,
+		// 	...filters,
+		// });
 	}
 	fetch(params = {}) {
-		console.log(params);
-		this.setState({ loading: true });
+		// console.log(params);
+		// this.setState({ loading: true });
 	}
 	componentDidMount() {
 		// this.fetch();
-		const id = USER.id;
 		const pager = {page:1,perPage:10};
-		this.props.getUserSchool(id,pager);
+		this.props.getUserSchool(USER.id,pager);
 	}
 	initializePagination() {
 		let total = 1;
-		if (this.props.list && this.props.list.fetch == true) {
-			total = this.props.list.result.data.total;
+		if (this.props.school && this.props.school.fetch == true) {
+			total = this.props.school.result.data.total;
 		}
 		const self = this;
 		return {
@@ -92,13 +92,13 @@ class SchoolTable extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
-				self.props.getUserList(pager);
+				self.props.getUserSchool(USER.id, pager);
 				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
 				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				const pager = { page : self.state.page, perPage: self.state.perPage};
-				self.props.getUserList(pager);
+				self.props.getUserSchool(USER.id, pager);
 				// 执行函数获取对应的 page 数据,传递的参数是当前页码
 				console.log('Current: ', current);
 			},

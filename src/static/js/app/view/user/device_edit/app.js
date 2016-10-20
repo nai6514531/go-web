@@ -136,6 +136,7 @@ class DeviceForm extends React.Component {
 				// this.props.getDeviceDetail(9273);
 			// this.setState(thePulseName);
 		}
+
 	}
 	render() {
 		// 关联设备列表
@@ -228,9 +229,6 @@ class DeviceForm extends React.Component {
 								label="关联设备类型"
 							>
 								{getFieldDecorator('referenceDevice', {
-									rules: [
-										{ message: '请选择关联设备类型' },
-									],
 									initialValue: initialValue.referenceDevice,
 								})(
 									<RadioGroup>

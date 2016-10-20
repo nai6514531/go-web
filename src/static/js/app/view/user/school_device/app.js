@@ -1,5 +1,5 @@
 import React from 'react';
-import './../device/app.less';
+import '../device_list/app.less';
 import { Table, Button, Breadcrumb } from 'antd';
 import { Link } from 'react-router';
 
@@ -87,47 +87,55 @@ class DeviceTable extends React.Component {
 			data: [],
 			pagination: {},
 			loading: false,
+			pager: {},
+			page: 1,
+			perPage: 10,
 		};
 	}
-	handleTableChange(pagination, filters, sorter) {
-		const pager = this.state.pagination;
-		pager.current = pagination.current;
-		this.setState({
-			pagination: pager,
-		});
-		this.fetch({
-			results: pagination.pageSize,
-			page: pagination.current,
-			sortField: sorter.field,
-			sortOrder: sorter.order,
-			...filters,
-		});
-	}
-	fetch(params = {}) {
-		console.log(params);
-		this.setState({ loading: true });
-	}
 	componentDidMount() {
-		// this.fetch();
-		const id = USER.id;
 		const schoolId = this.props.params.id;
 		const pager = { page:1, perPage:10 };
-		this.props.getSchoolDevice(id, schoolId, pager);
+		this.props.getSchoolDevice(USER.id, schoolId, pager);
+	}
+	initializePagination() {
+		let total = 1;
+		if (this.props.schoolDevice && this.props.schoolDevice.fetch == true) {
+			total = this.props.schoolDevice.result.data.total;
+		}
+		const self = this;
+		const schoolId = this.props.params.id;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(current, pageSize) {
+				const pager = { page : current, perPage: pageSize};
+				self.setState(pager);
+				self.props.getSchoolDevice(USER.id, schoolId, pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
+				console.log('Current: ', current, '; PageSize: ', pageSize);
+			},
+			onChange(current) {
+				const pager = { page : current, perPage: self.state.perPage};
+				self.props.getSchoolDevice(USER.id, schoolId, pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码
+				console.log('Current: ', current);
+			},
+		}
 	}
 	render() {
+		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
-		console.log('schoolDevice',schoolDevice);
 		let dataSource = [];
-		let loading = false;
+		let loading = true;
 		if(schoolDevice) {
-			loading = true;
+			// loading = true;
 			if(schoolDevice.fetch == true){
 				loading = false;
 				const data = schoolDevice.result.data.list;
 				dataSource = data.map(function (item, key) {
 					return {
 						key: item.id,
-						index: key,
+						index: item.id,
 						serialNumber: item.serialNumber,
 						referenceDevice: '洗衣机',
 						status: item.status,
@@ -140,10 +148,7 @@ class DeviceTable extends React.Component {
 				})
 			}
 		}
-		let pagination = {
-			pageSize: 10,
-			current: 1,
-		}
+		loading = false;
 		return (
 		<div className="detail">
 			<div className="detail-head">

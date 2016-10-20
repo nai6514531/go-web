@@ -35,7 +35,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/menu`);
 	},
 	device: (id) => {
-		return apiGet(`/api/user/${id}/device`);
+		return apiGet(`/api/user/${id}/device-total`);
 	}
 };
 

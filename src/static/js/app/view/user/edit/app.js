@@ -42,33 +42,30 @@ class UserForm extends React.Component {
 		super(props);
 		this.state = {
 			alipay: false,
-            provinceId: 110000,
-            cityId: 110101,
+            provinceChange: false,
+            cityChange: false,
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleReset = this.handleReset.bind(this);
+        this.provinceChange = this.provinceChange.bind(this);
 	}
 	componentWillMount() {
         // 默认北京市东城区
         this.props.getProvinceList();
         this.props.getProvinceCityList(110000);
 		const id = this.props.params.id;
-        const self = this;
 		if(id && id !== 'new') {
 			this.props.getUserDetail(id);
 		} else {
-            self.provinceId = 110000;
+            this.provinceId = 110000;
         }
 	}
 	componentWillReceiveProps(nextProps) {
 		if(this.props.detail== undefined && nextProps.detail && nextProps.detail.fetch == true){
-			const type = nextProps.detail.result.data.cashAccount.type;
             const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-            // 获取对应省份的城市信息
-            console.log('will get city list');
-            console.log('provinceId', provinceId);
             this.props.getProvinceCityList(provinceId);
-			if(type && type == 1){
+            const type = nextProps.detail.result.data.cashAccount.type;
+            if(type && type == 1){
 				this.setState({ alipay: false });
 			} else {
 				this.setState({ alipay: true });
@@ -84,8 +81,9 @@ class UserForm extends React.Component {
     }
     provinceChange(event) {
         this.props.getProvinceCityList(event.target.value);
-        const self = this;
-        self.provinceId = event.target.value;
+        this.provinceId = event.target.value;
+        console.log('province change',this.provinceId);
+        this.setState({provinceChange:true});
     }
     cityOption() {
         if(this.props.provinceCity && this.props.provinceCity.fetch == true){
@@ -98,6 +96,7 @@ class UserForm extends React.Component {
         const self = this;
         self.cityId = event.target.value;
         console.log('change city id',self.cityId);
+        this.setState({cityChange:true});
     }
 	handleSubmit(e) {
 		e.preventDefault();
@@ -108,7 +107,6 @@ class UserForm extends React.Component {
 			}
 			let cashAccount = {};
 			const user = {
-					"account": values.mobile,
 					"name": values.name,
 					"contact": values.contact,
 					"mobile": values.mobile,
@@ -127,15 +125,18 @@ class UserForm extends React.Component {
 				}
 			} else {
                 cashAccount = {
+                    "type": parseInt(values.type),
                     "realName": values.alipayName,
                     "account": values.alipayAccount,
 				}
 			}
             user.cashAccount = cashAccount;
 			if(this.props.params.id == 'new') {
-				this.props.postUserDetail(user);
+                user.account = values.mobile;
+                this.props.postUserDetail(user);
 			} else {
-				this.props.putUserDetail(this.props.params.id, user);
+                user.account = self.account;
+                this.props.putUserDetail(this.props.params.id, user);
 			}
 		});
 	}
@@ -155,31 +156,33 @@ class UserForm extends React.Component {
         const { id } = this.props.params;
         const { detail, provinceCity, provinceList } = this.props;
         if(id && id !== 'new') {
-            // 修改 默认值是用户的 city ID,前提是已经获取到对应省及省的城市列表了
             if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
-                self.cityId = detail.result.data.cashAccount.cityId;
-                self.provinceId = detail.result.data.cashAccount.provinceId;
+                if (this.state.provinceChange == false) {
+                    self.provinceId = detail.result.data.cashAccount.provinceId;
+                }
+                if (this.state.cityChange == false) {
+                    self.cityId = detail.result.data.cashAccount.cityId;
+                }
                 console.log('修改默认的省份城市为用户的',self.cityId,self.provinceId);
             }
         } else {
-            // 新增 默认值是第一个城市
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
-                self.cityId = provinceCity.result.data[0].id;
-                self.provinceId = provinceCity.result.data[0].id;
-                console.log('新增 该省份所有市', provinceCity.result.data);
-                console.log('新增 第一个市', self.cityId);
+                if (this.state.provinceChange == false) {
+                    self.provinceId = provinceCity.result.data[0].id;
+                }
+                if (this.state.cityChange == false) {
+                    self.cityId = provinceCity.result.data[0].id;
+                }
             }
         }
-        // 如果是新增,则默认第一个,如果是修改,则默认是用户的cityId
-        console.log(self.provinceId, self.cityId);
-		const result = this.props.result;
-		if(result) {
-			if(result.fetch == true){
-				alert('修改成功');
-			} else {
-				console.log(result.result.msg);
-			}
-		}
+		// const result = this.props.result;
+		// if(result) {
+		// 	if(result.fetch == true){
+		// 		// alert('修改成功');
+		// 	} else {
+		// 		console.log(result.result.msg);
+		// 	}
+		// }
 		let initialValue = {};
 		if(id && id !== 'new' && detail) {
 			if(detail.fetch == true){
@@ -191,6 +194,7 @@ class UserForm extends React.Component {
 					mobile : data.mobile,
 					telephone: data.telephone,
 				}
+                self.account = data.account;
 				let cashValues = {};
 				if(data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
@@ -230,14 +234,7 @@ class UserForm extends React.Component {
 					</div>
 					<div className="detail-form">
 						<Form horizontal>
-                            <select name="province" id="province" defaultValue={this.provinceId}
-                                    onChange={this.provinceChange.bind(this)}>
-                                {this.provinceOption()}
-                            </select>
-                            <select name="city" id="city" defaultValue={this.cityId}
-                                    onChange={this.cityChange.bind(this)}>
-                                {this.cityOption()}
-                            </select>
+                            <div>{this.cityId},{this.provinceId}</div>
 							<FormItem
 								{...formItemLayout}
 								label="代理商名称" >
@@ -388,6 +385,20 @@ class UserForm extends React.Component {
 											<Input placeholder="请输入短信通知手机号"/>
 										)}
 									</FormItem>
+                                    <div className="province-filter">
+                                        <span>省份:</span>
+                                        <select name="province" id="province" value={this.provinceId}
+                                                onChange={this.provinceChange.bind(this)}>
+                                            {this.provinceOption()}
+                                        </select>
+                                    </div>
+                                    <div className="province-filter">
+                                        <span>城市:</span>
+                                        <select name="city" id="city" value={this.cityId}
+                                                onChange={this.cityChange.bind(this)}>
+                                            {this.cityOption()}
+                                        </select>
+                                    </div>
 								</div>
 							}
 							<FormItem
