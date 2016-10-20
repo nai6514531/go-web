@@ -448,36 +448,35 @@ func (self *UserController) Update(ctx *iris.Context) {
 	{
 	  "status": "01010600",
 	  "data": {
-	    "id": 20,
-	    "createdAt": "2016-10-19T15:29:12+08:00",
-	    "updatedAt": "2016-10-19T15:21:25+08:00",
+	    "id": 1,
+	    "createdAt": "2016-10-17T16:21:10+08:00",
+	    "updatedAt": "2016-10-10T22:51:25+08:00",
 	    "deletedAt": null,
-	    "name": "卖座网",
-	    "contact": "mainland",
-	    "address": "科技园",
-	    "mobile": "18023380461",
-	    "account": "soda",
+	    "name": "系统管理员",
+	    "contact": "",
+	    "address": "",
+	    "mobile": "",
+	    "account": "admin",
 	    "password": "e10adc3949ba59abbe56e057f20f883e",
-	    "telephone": "0766-2885411",
-	    "email": "317808023@qq.com",
-	    "parentId": 20,
+	    "telephone": "",
+	    "email": "",
+	    "parentId": 1,
 	    "gender": 0,
 	    "age": 0,
 	    "status": 0,
-	    "deviceTotal": 2,
 	    "cashAccount": {
-	      "id": 938,
-	      "createdAt": "2016-10-19T17:12:01+08:00",
-	      "updatedAt": "2016-10-19T15:17:42+08:00",
+	      "id": 626,
+	      "createdAt": "2016-10-13T13:34:48+08:00",
+	      "updatedAt": "2016-10-13T13:34:48+08:00",
 	      "deletedAt": null,
-	      "userId": 20,
+	      "userId": 1,
 	      "type": 1,
-	      "realName": "伍明煜",
-	      "bankName": "中国银行",
-	      "account": "44444441200001111",
-	      "mobile": "18023380455",
-	      "cityId": 340500,
-	      "provinceId": 340000
+	      "realName": "",
+	      "bankName": "",
+	      "account": "",
+	      "mobile": "",
+	      "cityId": 0,
+	      "provinceId": 0
 	    }
 	  },
 	  "msg": "拉取用户详情成功!"
@@ -682,24 +681,18 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
  	@apiSuccessExample Success-Response:
    	HTTP/1.1 200 OK
 	{
-	  "status": "01011000",
+	  "status": "01011100",
 	  "data": [
 	    {
-	      "id": 1001,
+	      "id": 12051,
 	      "createdAt": "0001-01-01T00:00:00Z",
 	      "updatedAt": "0001-01-01T00:00:00Z",
 	      "deletedAt": null,
-	      "name": "清华大学"
-	    },
-	    {
-	      "id": 1002,
-	      "createdAt": "0001-01-01T00:00:00Z",
-	      "updatedAt": "0001-01-01T00:00:00Z",
-	      "deletedAt": null,
-	      "name": "北京大学"
+	      "name": "深圳大学",
+	      "deviceTotal": 1
 	    }
 	  ],
-	  "msg": ""
+	  "msg": "拉取用户学校列表成功!"
 	}
 */
 func (self *UserController) SchoolList(ctx *iris.Context) {
