@@ -185,7 +185,6 @@ class AgentTable extends React.Component {
 			}
 		}
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -212,7 +211,6 @@ class AgentTable extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 		);
 	}
 }

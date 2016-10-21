@@ -246,7 +246,6 @@ class DeviceForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -271,8 +270,8 @@ class DeviceForm extends React.Component {
 								)}
 							</FormItem>
 							<div className="select-school">
-								<span className="select-title">省份学校:</span>
-								<SchoolSelect handleSelect={this.handleSelect} 
+								<label className="select-title">省份学校</label>
+								<SchoolSelect handleSelect={this.handleSelect}
 											  provinceId={this.provinceId}
 											  schoolId={this.schoolId}
 											  provinceName={this.provinceName}
@@ -407,7 +406,6 @@ class DeviceForm extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}

@@ -27,7 +27,7 @@ export function getUserList(pager) {
 				type: GET_USER_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_LIST,
 				result: { fetch: false, result },
@@ -40,7 +40,6 @@ export function getUserList(pager) {
 export function getUserDetail(id) {
 	return dispatch => {
 		UserService.detail(id).then((result) => {
-			console.log('get action result suc',result);
 			dispatch({
 				type: GET_USER_DETAIL,
 				result: { fetch: true, result },
@@ -62,7 +61,7 @@ export function postUserDetail(user) {
 				type: POST_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: POST_USER_DETAIL,
 				result: { fetch: false, result },
@@ -79,7 +78,7 @@ export function putUserDetail(id, user) {
 				type: PUT_USER_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: PUT_USER_DETAIL,
 				result: { fetch: false, result },
@@ -96,7 +95,7 @@ export function deleteUser(id) {
 				type: REMOVE_USER,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: REMOVE_USER,
 				result: { fetch: false, result },
@@ -113,7 +112,7 @@ export function getUserSchool(id, schoolId, pager) {
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
 				result: { fetch: false, result },
@@ -147,7 +146,7 @@ export function getUserPermission(id) {
 				type: GET_USER_PERMISSION,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_PERMISSION,
 				result: { fetch: false, result },
@@ -166,7 +165,7 @@ export function userLogout() {
 				type: USER_LOGOUT,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: USER_LOGOUT,
 				result: { fetch: false, result },
@@ -184,7 +183,7 @@ export function getUserMenu(id) {
 				type: GET_USER_MENU,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_MENU,
 				result: { fetch: false, result },
@@ -201,7 +200,7 @@ export function getUserDevice(id) {
 				type: GET_USER_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_USER_DEVICE,
 				result: { fetch: false, result },

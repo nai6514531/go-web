@@ -190,7 +190,9 @@ class DeviceTable extends React.Component {
 			}
 		}
 		return (
-		<div className="detail">
+			<div className="body-panel">
+
+			<div className="detail">
 			<div className="detail-head">
 				<Breadcrumb separator=">">
 					<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
@@ -219,6 +221,7 @@ class DeviceTable extends React.Component {
 				</div>
 			</div>
 		</div>
+				</div>
 
 		);
 	}

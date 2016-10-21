@@ -73,8 +73,11 @@ class UserForm extends React.Component {
 			}
 		}
         if(this.props.provinceCity !== nextProps.provinceCity){
+            console.log('qiehuan',this.props.provinceCity,nextProps.provinceCity);
             // 每次切换省,都要将城市预至成第一个
-            self.cityId = nextProps.provinceCity.result.data[0].id;
+            if(nextProps.provinceCity.fetch == true) {
+                // self.cityId = nextProps.provinceCity.result.data[0].id;
+            }
         }
 	}
     provinceOption() {
@@ -173,6 +176,7 @@ class UserForm extends React.Component {
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
                 // 新增用户 省市信息预设为第一个
+                // 获取省市信息成功但是实际没数据后报错
                 if (this.state.provinceChange == false) {
                     self.provinceId = provinceCity.result.data[0].id;
                 }
@@ -229,7 +233,6 @@ class UserForm extends React.Component {
 		};
 
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -391,18 +394,20 @@ class UserForm extends React.Component {
 										)}
 									</FormItem>
                                     <div className="province-filter">
-                                        <span>省份:</span>
+                                        <label>省份</label>
                                         <select name="province" id="province" value={this.provinceId}
                                                 onChange={this.provinceChange.bind(this)}>
                                             {this.provinceOption()}
                                         </select>
-                                    </div>
+										<span></span>
+									</div>
                                     <div className="province-filter">
-                                        <span>城市:</span>
+                                        <label>城市</label>
                                         <select name="city" id="city" value={this.cityId}
                                                 onChange={this.cityChange.bind(this)}>
                                             {this.cityOption()}
                                         </select>
+										<span></span>
                                     </div>
 								</div>
 							}
@@ -427,7 +432,6 @@ class UserForm extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 		);
 	}
 }

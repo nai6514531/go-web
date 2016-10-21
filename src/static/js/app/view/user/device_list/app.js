@@ -109,7 +109,6 @@ class SchoolTable extends React.Component {
 			}
 		}
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -138,7 +137,6 @@ class SchoolTable extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}
