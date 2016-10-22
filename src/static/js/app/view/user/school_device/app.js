@@ -116,10 +116,15 @@ class DeviceTable extends React.Component {
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
+		// 成功才拉取,失败就提示
 		if(this.theStatus == 0 || this.theStatus == 9) {
-			const schoolId = this.props.params.id;
-			const pager = { page : this.state.page, perPage: this.state.perPage};
-			this.props.getSchoolDevice(USER.id, schoolId, pager);
+			if(nextProps.status && nextProps.status.fetch == true){
+				const schoolId = this.props.params.id;
+				const pager = { page : this.state.page, perPage: this.state.perPage};
+				this.props.getSchoolDevice(USER.id, schoolId, pager);
+			} else if(nextProps.status && nextProps.status.fetch == false) {
+				console.log(nextProps.status.result.msg);
+			}
 			self.theStatus = -1;
 		}
 		

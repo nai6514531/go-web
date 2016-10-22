@@ -41,7 +41,7 @@ class UserForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			type: "1",
+			type: "3",
 			alipay: false,
             provinceChange: false,
             cityChange: false,
@@ -66,7 +66,7 @@ class UserForm extends React.Component {
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             if(nextProps.detail.result.data.cashAccount){
 				const type = nextProps.detail.result.data.cashAccount.type;
-				if(type && type == 1){
+				if(type && type == 3){
 					this.setState({ alipay: false });
 					const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
 					this.props.getProvinceCityList(provinceId);
@@ -136,7 +136,7 @@ class UserForm extends React.Component {
                     "address": values.address,
 					"email": ""
 			}
-			if(values.type == 1) {
+			if(values.type == 3) {
                 cashAccount = {
                     "type": parseInt(values.type),
                     "realName": values.realName,
@@ -168,7 +168,7 @@ class UserForm extends React.Component {
 		this.props.form.resetFields();
 	}
 	handleRadio(select) {
-		if (select === '1') {
+		if (select === '2') {
 			this.setState({ alipay: false });
 		} else {
 			this.setState({ alipay: true });
@@ -214,7 +214,7 @@ class UserForm extends React.Component {
 				}
                 self.account = data.account;
 				let cashValues = {};
-				if(data.cashAccount && data.cashAccount.type == 1){
+				if(data.cashAccount && data.cashAccount.type == 3){
 					cashValues = {
 						type: data.cashAccount.type.toString(),
 						realName: data.cashAccount.realName,
@@ -222,7 +222,7 @@ class UserForm extends React.Component {
 						account: data.cashAccount.account,
 						bankMobile: data.cashAccount.mobile,
 					}
-				} else if (data.cashAccount && data.cashAccount.type == 2){
+				} else if (data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
 						type: data.cashAccount.type.toString(),
 						alipayAccount: data.cashAccount.account,
@@ -310,10 +310,10 @@ class UserForm extends React.Component {
 									initialValue: initialValue.type ? initialValue.type : this.state.type,
 								})(
 									<RadioGroup>
-										<Radio value="2" onClick = {this.handleRadio.bind(this, '2')}>
+										<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
                                             实时分账(必须拥有支付宝,收取 x% 手续费)
                                         </Radio>
-										<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
+										<Radio value="3" onClick = {this.handleRadio.bind(this, '3')}>
                                             财务定期结账(需提供正确银行卡号)
                                         </Radio>
 									</RadioGroup>

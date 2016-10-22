@@ -29,12 +29,12 @@ export default function (state = initialState, action) {
 		case POST_DEVICE_DETAIL:
 			return {
 				...state,
-				detail: action.result,
+				result: action.result,
 			};
 		case PUT_DEVICE_DETAIL:
 			return {
 				...state,
-				detail: action.result,
+				result: action.result,
 			};
 		case REMOVE_DEVICE:
 			return {
