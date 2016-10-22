@@ -33,6 +33,7 @@ const Navbar = React.createClass({
 		const {location} = this.props;
 		const menus = USER.menu || [];
 		return (<aside>
+			<h2><a href="#/"><img src={require('./logo.png')}/></a></h2>
 			<nav>
 				<Menu mode="inline"
 					  theme="dark"
@@ -45,13 +46,13 @@ const Navbar = React.createClass({
 							{menus.map(function (item) {
 								return <Menu.Item key={item.url}>{item.name}</Menu.Item>
 							})}
-							<Menu.Item key="#/logout">退出</Menu.Item>
 						</Menu.SubMenu>
 					})}
 				</Menu>
+				<footer>
+					<p> - &#10084; - </p>
+				</footer>
 			</nav>
-			<footer>
-			</footer>
 		</aside>)
 	}
 });
