@@ -51,7 +51,6 @@ const Navbar = React.createClass({
 				</Menu>
 			</nav>
 			<footer>
-				<p> - &#10084; - </p>
 			</footer>
 		</aside>)
 	}

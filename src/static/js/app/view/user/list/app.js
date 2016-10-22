@@ -82,11 +82,14 @@ class AgentTable extends React.Component {
 		};
 		this.showChild = this.showChild.bind(this);
 	}
-	componentDidMount() {
+	componentWillMount() {
+		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
 		if(this.props.params.id) {
+			self.loading = true;
 			this.props.getUserList(pager);
 		} else {
+			self.loading = false;
 			this.props.getUserDetail(USER.id);
 		}
 	}
@@ -96,8 +99,10 @@ class AgentTable extends React.Component {
 		})
 	}
 	componentWillUpdate(nextProps, nextState) {
+		const self = this;
 		if(nextState.child == true && this.state.child == false) {
 			const pager = { page : this.state.page, perPage: this.state.perPage};
+			self.loading = true;
 			this.props.getUserList(pager);
 		}
 	}
@@ -122,23 +127,23 @@ class AgentTable extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getUserList(pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
 				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				console.log('Current: ', current);
 				const pager = { page : current, perPage: self.state.perPage};
+				self.loading = true;
 				self.setState(pager);
 				self.props.getUserList(pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码
 			},
 		}
 	}
 	render() {
+		// console.log('routes',this.props.routes);
 		const { list, detail, params: {id} } = this.props;
 		const pagination = this.initializePagination();
-		let loading = true;
 		let data = '';
 		let dataSource = [];
 		const self = this;
@@ -161,8 +166,9 @@ class AgentTable extends React.Component {
 						}
 						)
 					})
+					self.loading = false;
 				}
-				loading = false;
+
 			}
 		} else {
 			if(detail) {
@@ -180,8 +186,8 @@ class AgentTable extends React.Component {
 						showAction: true,
 					}
 					];
+					self.loading = false;
 				}
-				loading = false;
 			}
 		}
 		return (
@@ -192,6 +198,7 @@ class AgentTable extends React.Component {
 							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
 						</Breadcrumb>
 					</div>
+					<div>{this.loading}</div>
 					<div className="detail-form">
 						<div className="table">
 							<div className="detail-button">
@@ -205,7 +212,7 @@ class AgentTable extends React.Component {
 								   rowKey={record => record.key}
 								   dataSource={dataSource}
 								   pagination={pagination}
-								   loading={loading ? loading : false}
+								   loading={this.loading ? this.loading : false}
 							/>
 						</div>
 					</div>
