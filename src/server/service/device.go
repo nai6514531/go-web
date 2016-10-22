@@ -85,7 +85,7 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
-	r := common.DB.Create(device).Scan(device) //userid=0
+	r := common.DB.Create(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

@@ -74,6 +74,8 @@ func Api() {
 
 	api.Get("/daily-bill", dailyBill.List)
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
-	api.Get("/daily-bill/no-settlement-user", dailyBill.List)
+	//api.Get("/daily-bill/no-settlement-user", dailyBill.List)
+	api.Get("/daily-bill/apply", dailyBill.Apply)
+	//api.Put("/daily-bill/settlement", dailyBill.Settlement)
 
 }
