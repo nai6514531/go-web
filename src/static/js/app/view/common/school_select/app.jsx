@@ -56,7 +56,7 @@ class SchoolSelect extends React.Component {
 		}
 		if(this.props.schoolId !== nextProps.schoolId) {
 			this.setState({schoolId: nextProps.schoolId});
-		}			
+		}
 		// console.log('child',this.props.schoolName,nextProps.schoolName);
 		if(this.props.schoolName !== nextProps.schoolName) {
 			this.setState({schoolName: nextProps.schoolName});
@@ -83,8 +83,6 @@ class SchoolSelect extends React.Component {
 		this.refs.mask.classList.toggle('box-show');
 	}
 	render() {
-		// console.log(this.state.provinceId,this.state.schoolId);
-		// console.log(this.state.provinceName,this.state.schoolName);
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
 		const that = this;

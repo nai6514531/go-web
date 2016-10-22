@@ -4,7 +4,7 @@ import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb } from 
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-import SchoolSelect from '../../common/school_select/app';
+import SchoolSelect from '../../common/school_select/app.jsx';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -127,7 +127,6 @@ class DeviceForm extends React.Component {
 			if (errors) {
 				return;
 			}
-			console.log(values);
 			const deviceValue = {
 				"serialNumber": values.serialNumber,
 				"provinceId": self.provinceId,
@@ -217,7 +216,6 @@ class DeviceForm extends React.Component {
 		// 初始化参数
 		const self = this;
 		const detail = this.props.detail;
-		console.log('device',this.props.detail);
 		const { id } = this.props.params;
 		let initialValue = {};
 		if(detail && id) {
