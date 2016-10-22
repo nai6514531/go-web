@@ -27,8 +27,13 @@ var (
 
 		"01060300": "更新日账单状态成功",
 		"01060301": "更新日账单状态失败",
-		"01060302": "更新日账单状态部分成功",
+		"01060302": "更新日账单状态部分失败",
 		//"01060303": "请求修改状态参数有误",
+
+		"01060400": "日账单结账成功",
+		"01060401": "日账单结账失败",
+		"01060402": "日账单部分结账失败",
+
 	}
 )
 
@@ -68,9 +73,9 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	dailyBillDetailService := &service.DailyBillDetailService{}
 	result := &enity.Result{}
 	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("per_page")
-	userId, _ := ctx.URLParamInt("user_id")
-	billAt := ctx.URLParam("bill_at")
+	perPage, _ := ctx.URLParamInt("perPage")
+	userId, _ := ctx.URLParamInt("userId")
+	billAt := ctx.URLParam("billAt")
 	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt)
 	if err != nil {
 		result = &enity.Result{"01060202", nil, daily_bill_msg["01060202"]}
@@ -130,6 +135,8 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	aliPayUserIds := []string{}
 	wechatPayUserIds := []string{}
 	bankPayUserIds := []string{}
+	var result *enity.Result
+	isSuccessed := true
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
@@ -165,11 +172,19 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	if len(bankPayUserIds) > 0 {
 		rows, err := dailyBillService.UpdateStatus(2, billAt, bankPayUserIds...)
 		if err != nil {
-
+			common.Logger.Warningln("银行结算更新失败")
+			isSuccessed = false
 		}
 		if rows != int64(len(bankPayUserIds)) {
-
+			common.Logger.Warningln("银行结算部分更新失败")
+			isSuccessed = false
 		}
 	}
 
+	if isSuccessed {
+		result = &enity.Result{"01060400", nil, daily_bill_msg["01060400"]}
+	}else {
+		result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
+	}
+	ctx.JSON(iris.StatusOK, result)
 }
