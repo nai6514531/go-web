@@ -19,32 +19,32 @@ const router = (
 		}} />
 		<Route path="/user(/:id)" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/list/app').default);
+				callback(null, require('./view/user/list/app.jsx').default);
 			});
 		}} />
 		<Route path="/user/edit/:id" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/edit/app').default);
+				callback(null, require('./view/user/edit/app.jsx').default);
 			});
 		}} />
 		<Route path="/user/device/list" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/device_list/app').default);
+				callback(null, require('./view/user/device_list/app.jsx').default);
 			});
 		}} />
 		<Route path="/user/device/school/:id" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/school_device/app').default);
+				callback(null, require('./view/user/school_device/app.jsx').default);
 			});
 		}} />
 		<Route path="/user/device/edit(/:id)" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/device_edit/app').default);
+				callback(null, require('./view/user/device_edit/app.jsx').default);
 			});
 		}} />
 		<Route path="/user/edit" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/list/app.js').default);
+				callback(null, require('./view/user/list/app.jsx').default);
 			});
 		}} />
 		<Route path="/settlement" getComponent={(location, callback) => {
@@ -55,6 +55,16 @@ const router = (
 		<Route path="/settlement/daily-bill-detail/:user_id/:bill_at" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
 				callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
+			});
+		}} />
+		<Route path="/device" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/device/list/app.jsx').default);
+			});
+		}} />
+		<Route path="/device/edit" getComponent={(location, callback) => {
+			require.ensure([], (require) => {
+				callback(null, require('./view/device/edit/app.jsx').default);
 			});
 		}} />
 	</Route>

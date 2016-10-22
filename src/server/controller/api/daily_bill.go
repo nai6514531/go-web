@@ -33,6 +33,8 @@ var (
 		"01060400": "日账单结账成功",
 		"01060401": "日账单结账失败",
 		"01060402": "日账单部分结账失败",
+		"01060403": "选用用户未申请提现或已结账",
+		"01060404": "无选用用户账户信息",
 
 	}
 )
@@ -132,6 +134,7 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
+	_userIds := []int{}
 	aliPayUserIds := []string{}
 	wechatPayUserIds := []string{}
 	bankPayUserIds := []string{}
@@ -142,10 +145,27 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 		return
 	}
 	userIds := strings.Split(userIdStr, ",")
-	accountMap, err := userCashAccountService.BasicMapByUserId(userIds)
-	if err != nil {
 
+	//过滤掉未申请提现的用户
+	dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出已申请提现的用户
+	if err != nil || len(*dailyBillMap) <=0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+		return
 	}
+	for _userId, _ := range *dailyBillMap {
+		_userIds = append(_userIds, _userId)
+	}
+	if len(_userIds) <= 0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+		return
+	}
+
+	accountMap, err := userCashAccountService.BasicMapByUserId(_userIds)
+	if err != nil || len(*accountMap) <= 0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060404", nil, daily_bill_msg["01060404"]})
+		return
+	}
+
 	for _, _account := range *accountMap {
 		switch _account.Type {
 		case 1: //支付宝

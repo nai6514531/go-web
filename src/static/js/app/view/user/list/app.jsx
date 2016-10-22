@@ -129,10 +129,8 @@ class AgentTable extends React.Component {
 				self.setState(pager);
 				self.loading = true;
 				self.props.getUserList(pager);
-				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
-				console.log('Current: ', current);
 				const pager = { page : current, perPage: self.state.perPage};
 				self.loading = true;
 				self.setState(pager);
@@ -141,7 +139,6 @@ class AgentTable extends React.Component {
 		}
 	}
 	render() {
-		// console.log('routes',this.props.routes);
 		const { list, detail, params: {id} } = this.props;
 		const pagination = this.initializePagination();
 		let data = '';
