@@ -41,13 +41,13 @@ func (BoxAdmin) TableName() string {
 
 //用User填充
 func (self *BoxAdmin) FillByUser(user *model.User) {
-	self.LocalId = user.Id
+	self.LocalId = user.Id - 1 //木牛有id为0的记录映射到新数据是1
 	self.Name = user.Name
 	self.Contact = user.Contact
 	self.Address = user.Address
 	self.Mobile = user.Account
 	self.ServicePhone = user.Telephone
-	self.AgencyId = strconv.Itoa(user.ParentId)
+	self.AgencyId = strconv.Itoa(user.ParentId - 1) //木牛有id为0的记录映射到新数据是1
 	self.Status = strconv.Itoa(user.Status)
 	self.Password = user.Password
 	self.InsertTime = user.CreatedAt.Format("2006-01-02 15:04:05")
@@ -56,7 +56,7 @@ func (self *BoxAdmin) FillByUser(user *model.User) {
 
 //用UserRoleRel填充
 func (self *BoxAdmin) FillByUserRoleRel(userRoleRel *model.UserRoleRel) {
-	self.LocalId = userRoleRel.UserId
+	self.LocalId = userRoleRel.UserId - 1 //木牛有id为0的记录映射到新数据是1
 	switch userRoleRel.RoleId {
 	case 1: //系统管理员
 		self.UserType = "0"
@@ -71,7 +71,7 @@ func (self *BoxAdmin) FillByUserRoleRel(userRoleRel *model.UserRoleRel) {
 
 //用userCashAccount填充
 func (self *BoxAdmin) FillByUserCashAccount(userCashAccount *model.UserCashAccount) {
-	self.LocalId = userCashAccount.UserId
+	self.LocalId = userCashAccount.UserId - 1 //木牛有id为0的记录映射到新数据是1
 	self.PayType = strconv.Itoa(userCashAccount.Type - 1)
 	self.BankName = userCashAccount.BankName
 	self.PayAccount = userCashAccount.Account

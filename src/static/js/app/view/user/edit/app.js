@@ -4,6 +4,8 @@ import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+import { Link } from 'react-router';
+
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -241,205 +243,203 @@ class UserForm extends React.Component {
 		};
 
 		return (
-			<div className="body-panel">
-				<div className="detail">
-					<div className="detail-head">
-						<Breadcrumb separator=">">
-							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-						</Breadcrumb>
-					</div>
-					<div className="detail-form">
-						<Form horizontal>
-							<FormItem
-								{...formItemLayout}
-								label="代理商名称" >
-								{getFieldDecorator('name', {
-									rules: [
-										{ required: true, message: '请输入代理商名称' },
-									],
-									initialValue: initialValue.name,
-								})(
-									<Input placeholder="请输入代理商名称" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="联系人" >
-								{getFieldDecorator('contact', {
-									rules: [
-										{ required: true, message: '请输入联系人' },
-									],
-									initialValue: initialValue.contact,
-								})(
-									<Input placeholder="请输入联系人" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="地址" >
-								{getFieldDecorator('address', {
-									rules: [
-										{ required: true, message: '请输入地址' },
-									],
-									initialValue: initialValue.address,
-								})(
-									<Input placeholder="请输入地址" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="手机号" >
-								{getFieldDecorator('mobile', {
-									rules: [
-										{ required: true, len: 11, message: '请输入11位手机号' },
-									],
-									initialValue: initialValue.mobile,
-								})(
-									<Input placeholder="请输入手机号" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="收款方式"
-							>
-								{getFieldDecorator('type', {
-									rules: [
-										{ required: true, message: '请选择收款方式' },
-									],
-									initialValue: initialValue.type ? initialValue.type : this.state.type,
-								})(
-									<RadioGroup>
-										<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
-                                            实时分账(必须拥有支付宝,收取 x% 手续费)
-                                        </Radio>
-										<Radio value="3" onClick = {this.handleRadio.bind(this, '3')}>
-                                            财务定期结账(需提供正确银行卡号)
-                                        </Radio>
-									</RadioGroup>
-								)}
-							</FormItem>
-							{ this.state.alipay ?
-								<div>
-									<FormItem
-										{...formItemLayout}
-										label="支付宝账号">
-										{getFieldDecorator('alipayAccount', {
-											rules: [
-												{required: true, message: '请输入支付宝账号'},
-											],
-											initialValue: initialValue.alipayAccount,
+			<section className="view-user-list">
+				<header>
+					<Breadcrumb separator=">">
+						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to={"/user/edit/" + id }>添加/修改用户</Link></Breadcrumb.Item>
+					</Breadcrumb>
+				</header>
+				<section className="view-content">
+					<Form horizontal>
+						<FormItem
+							{...formItemLayout}
+							label="代理商名称" >
+							{getFieldDecorator('name', {
+								rules: [
+									{ required: true, message: '请输入代理商名称' },
+								],
+								initialValue: initialValue.name,
+							})(
+								<Input placeholder="请输入代理商名称" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="联系人" >
+							{getFieldDecorator('contact', {
+								rules: [
+									{ required: true, message: '请输入联系人' },
+								],
+								initialValue: initialValue.contact,
+							})(
+								<Input placeholder="请输入联系人" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="地址" >
+							{getFieldDecorator('address', {
+								rules: [
+									{ required: true, message: '请输入地址' },
+								],
+								initialValue: initialValue.address,
+							})(
+								<Input placeholder="请输入地址" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="手机号" >
+							{getFieldDecorator('mobile', {
+								rules: [
+									{ required: true, len: 11, message: '请输入11位手机号' },
+								],
+								initialValue: initialValue.mobile,
+							})(
+								<Input placeholder="请输入手机号" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="收款方式"
+						>
+							{getFieldDecorator('type', {
+								rules: [
+									{ required: true, message: '请选择收款方式' },
+								],
+								initialValue: initialValue.type ? initialValue.type : this.state.type,
+							})(
+								<RadioGroup>
+									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
+										实时分账(必须拥有支付宝,收取 x% 手续费)
+									</Radio>
+									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')}>
+										财务定期结账(需提供正确银行卡号)
+									</Radio>
+								</RadioGroup>
+							)}
+						</FormItem>
+						{ this.state.alipay ?
+							<div>
+								<FormItem
+									{...formItemLayout}
+									label="支付宝账号">
+									{getFieldDecorator('alipayAccount', {
+										rules: [
+											{required: true, message: '请输入支付宝账号'},
+										],
+										initialValue: initialValue.alipayAccount,
 
-										})(
-											<Input placeholder="请输入支付宝账号"/>
-										)}
-									</FormItem>
-									<FormItem
-										{...formItemLayout}
-										label="支付宝姓名">
-										{getFieldDecorator('alipayName', {
-											rules: [
-												{required: true, message: '请输入支付宝姓名'},
-											],
-											initialValue: initialValue.alipayName,
+									})(
+										<Input placeholder="请输入支付宝账号"/>
+									)}
+								</FormItem>
+								<FormItem
+									{...formItemLayout}
+									label="支付宝姓名">
+									{getFieldDecorator('alipayName', {
+										rules: [
+											{required: true, message: '请输入支付宝姓名'},
+										],
+										initialValue: initialValue.alipayName,
 
-										})(
-											<Input placeholder="请输入支付宝姓名"/>
-										)}
-									</FormItem>
-								</div> :
-								<div>
-									<FormItem
-										{...formItemLayout}
-										label="转账户名">
-										{getFieldDecorator('realName', {
-											rules: [
-												{required: true, message: '请输入转账户名'},
-											],
-											initialValue: initialValue.realName,
+									})(
+										<Input placeholder="请输入支付宝姓名"/>
+									)}
+								</FormItem>
+							</div> :
+							<div>
+								<FormItem
+									{...formItemLayout}
+									label="转账户名">
+									{getFieldDecorator('realName', {
+										rules: [
+											{required: true, message: '请输入转账户名'},
+										],
+										initialValue: initialValue.realName,
 
-										})(
-											<Input placeholder="请输入转账户名"/>
-										)}
-									</FormItem>
-									<FormItem
-										{...formItemLayout}
-										label="开户行">
-										{getFieldDecorator('bankName', {
-											rules: [
-												{required: true, message: '请输入开户行'},
-											],
-											initialValue: initialValue.bankName,
+									})(
+										<Input placeholder="请输入转账户名"/>
+									)}
+								</FormItem>
+								<FormItem
+									{...formItemLayout}
+									label="开户行">
+									{getFieldDecorator('bankName', {
+										rules: [
+											{required: true, message: '请输入开户行'},
+										],
+										initialValue: initialValue.bankName,
 
-										})(
-											<Input placeholder="请输入开户行"/>
-										)}
-									</FormItem>
-									<FormItem
-										{...formItemLayout}
-										label="账号">
-										{getFieldDecorator('account', {
-											rules: [
-												{required: true, message: '请输入账号'},
-											],
-											initialValue: initialValue.account,
+									})(
+										<Input placeholder="请输入开户行"/>
+									)}
+								</FormItem>
+								<FormItem
+									{...formItemLayout}
+									label="账号">
+									{getFieldDecorator('account', {
+										rules: [
+											{required: true, message: '请输入账号'},
+										],
+										initialValue: initialValue.account,
 
-										})(
-											<Input placeholder="请输入账号"/>
-										)}
-									</FormItem>
-									<FormItem
-										{...formItemLayout}
-										label="短信通知手机号">
-										{getFieldDecorator('bankMobile', {
-											rules: [
-												{required: true, len: 11, message: '请输入11位短信通知手机号'},
-											],
-											initialValue: initialValue.bankMobile,
+									})(
+										<Input placeholder="请输入账号"/>
+									)}
+								</FormItem>
+								<FormItem
+									{...formItemLayout}
+									label="短信通知手机号">
+									{getFieldDecorator('bankMobile', {
+										rules: [
+											{required: true, len: 11, message: '请输入11位短信通知手机号'},
+										],
+										initialValue: initialValue.bankMobile,
 
-										})(
-											<Input placeholder="请输入短信通知手机号"/>
-										)}
-									</FormItem>
-                                    <div className="province-filter">
-                                        <label>省份</label>
-                                        <select name="province" id="province" value={this.provinceId}
-                                                onChange={this.provinceChange.bind(this)}>
-                                            {this.provinceOption()}
-                                        </select>
-										<span></span>
-									</div>
-                                    <div className="province-filter">
-                                        <label>城市</label>
-                                        <select name="city" id="city" value={this.cityId}
-                                                onChange={this.cityChange.bind(this)}>
-                                            {this.cityOption()}
-                                        </select>
-										<span></span>
-                                    </div>
+									})(
+										<Input placeholder="请输入短信通知手机号"/>
+									)}
+								</FormItem>
+								<div className="province-filter">
+									<label>省份</label>
+									<select name="province" id="province" value={this.provinceId}
+											onChange={this.provinceChange.bind(this)}>
+										{this.provinceOption()}
+									</select>
+									<span></span>
 								</div>
-							}
-							<FormItem
-								{...formItemLayout}
-								label="服务电话" >
-								{getFieldDecorator('telephone', {
-									rules: [
-										{ required: true, message: '请输入服务电话' },
-									],
-									initialValue: initialValue.telephone,
+								<div className="province-filter">
+									<label>城市</label>
+									<select name="city" id="city" value={this.cityId}
+											onChange={this.cityChange.bind(this)}>
+										{this.cityOption()}
+									</select>
+									<span></span>
+								</div>
+							</div>
+						}
+						<FormItem
+							{...formItemLayout}
+							label="服务电话" >
+							{getFieldDecorator('telephone', {
+								rules: [
+									{ required: true, message: '请输入服务电话' },
+								],
+								initialValue: initialValue.telephone,
 
-								})(
-									<Input placeholder="请输入服务电话" />
-								)}
-							</FormItem>
-							<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-								<Button type="ghost" onClick={this.handleReset}>取消</Button>
-								<Button type="primary" onClick={this.handleSubmit}>保存</Button>
-							</FormItem>
-						</Form>
-					</div>
-				</div>
-			</div>
+							})(
+								<Input placeholder="请输入服务电话" />
+							)}
+						</FormItem>
+						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
+							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
+						</FormItem>
+					</Form>
+				</section>
+			</section>
 		);
 	}
 }
