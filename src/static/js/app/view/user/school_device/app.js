@@ -123,11 +123,12 @@ class DeviceTable extends React.Component {
 				const pager = { page : this.state.page, perPage: this.state.perPage};
 				this.props.getSchoolDevice(USER.id, schoolId, pager);
 			} else if(nextProps.status && nextProps.status.fetch == false) {
+				alert('操作失败!');
 				console.log(nextProps.status.result.msg);
 			}
 			self.theStatus = -1;
 		}
-		
+
 	}
 	initializePagination() {
 		let total = 1;
@@ -195,37 +196,36 @@ class DeviceTable extends React.Component {
 		}
 		return (
 			<div className="body-panel">
-
-			<div className="detail">
-			<div className="detail-head">
-				<Breadcrumb separator=">">
-					<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-					<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-					<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
-				</Breadcrumb>
-			</div>
-			<div className="detail-form">
-				<div className="table">
-						<div>
-							<div className="detail-button">
-								<Button type="primary">
-									<Link to="/user/device/edit">
-										添加新设备
-									</Link>
-								</Button>
+				<div className="detail">
+					<div className="detail-head">
+						<Breadcrumb separator=">">
+							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
+							<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
+						</Breadcrumb>
+					</div>
+					<div className="detail-form">
+						<div className="table">
+							<div>
+								<div className="detail-button">
+									<Button type="primary">
+										<Link to="/user/device/edit">
+											添加新设备
+										</Link>
+									</Button>
+								</div>
+								<Table columns={columns}
+									   dataSource={dataSource}
+									   pagination={pagination}
+									   loading={this.state.loading}
+									   onChange={this.handleTableChange}
+									   bordered
+								/>
 							</div>
-							<Table columns={columns}
-								   dataSource={dataSource}
-								   pagination={pagination}
-								   loading={this.state.loading}
-								   onChange={this.handleTableChange}
-								   bordered
-							/>
 						</div>
+					</div>
 				</div>
 			</div>
-		</div>
-				</div>
 
 		);
 	}

@@ -74,6 +74,19 @@ class SchoolTable extends React.Component {
 			this.setState({
 				schoolList: nextProps.school.result.data,
 			});
+			const school = this.props.school;
+			if(school == undefined && nextProps.school && nextProps.school.fetch == true) {
+				console.log('初始化学校筛选列表');
+				// 当组件退出进来的时候,state 里是没有数据的
+				this.state.schoolList = nextProps.school.result.data;
+			}
+			// 当筛选以后,this.props.school 内的数据会变少
+			console.log('buweikong',this.props.school,nextProps.school);
+			if(this.props.school !== undefined && nextProps.school && nextProps.school.fetch == true) {
+				if(this.props.school.result.data.length >= nextProps.school.result.data.length) {
+					this.state.schoolList = nextProps.school.result.data;
+				}
+			}
 			// const theSchool = this.props.school;
 			// if(theSchool && theSchool.fetch == true) {
 			// 	if(theSchool.result.data.length > nextProps.school.result.data.length){
