@@ -47,7 +47,7 @@ func (self *RegionService) City() (*[]*model.Region, error) {
 func (self *RegionService) CitiesOfProvince(parentId int) (*[]*model.Region, error) {
 	list := &[]*model.Region{}
 	r := common.DB.Where("parent_id = ?", parentId).Find(list)
-	if r.Error != nil {
+	if r.Error != nil || r.RowsAffected <= 0 {
 		return nil, r.Error
 	}
 	return list, r.Error
@@ -56,7 +56,7 @@ func (self *RegionService) CitiesOfProvince(parentId int) (*[]*model.Region, err
 func (self *RegionService) DistrictsOfCity(parentId int) (*[]*model.Region, error) {
 	list := &[]*model.Region{}
 	r := common.DB.Where("parent_id = ?", parentId).Find(list)
-	if r.Error != nil {
+	if r.Error != nil || r.RowsAffected <= 0 {
 		return nil, r.Error
 	}
 	return list, r.Error
@@ -65,7 +65,7 @@ func (self *RegionService) DistrictsOfCity(parentId int) (*[]*model.Region, erro
 func (self *RegionService) SchoolOfProvince(provinceId int) (*[]*model.School, error) {
 	list := &[]*model.School{}
 	r := common.DB.Where("province_id = ?", provinceId).Find(list)
-	if r.Error != nil {
+	if r.Error != nil || r.RowsAffected <= 0 {
 		return nil, r.Error
 	}
 	return list, r.Error
