@@ -9,8 +9,8 @@ const Application = React.createClass({
 		const { location, children } = this.props;
 		return (<div className="application">
 			<Sider location={location} />
+			<Header/>
 			<div className="application-main">
-				<Header/>
 				<section className="content">
 					{children}
 				</section>
