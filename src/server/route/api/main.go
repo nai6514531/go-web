@@ -19,9 +19,11 @@ func Api() {
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
-		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
+		ctx.Response.Header.Set("X-Powered-By", ctx.RemoteAddr())
 		ctx.Next()
 	})
+
+	//api.Use(common.CORS)
 
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
@@ -60,7 +62,7 @@ func Api() {
 
 	api.Get("/device", device.List)
 	api.Get("/device/:id", device.Basic)
-	api.Delete("/device/:id", device.Delete)
+	api.Patch("/device/:id/reset", device.Reset)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.Update)
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)

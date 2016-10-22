@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Table, Icon, Popconfirm, Select, DatePicker} from 'antd';
+import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
@@ -62,11 +62,11 @@ const App = React.createClass({
 				key: 'method',
 				render: (id, record) => {
 					return <span>
-                            <Popconfirm title="申请提现吗?" onConfirm={this.remove.bind(this, id)}>
+                            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, id)}>
                               <a>申请提现</a>
                             </Popconfirm>
 							<span> | </span>
-							<Popconfirm title="确认结账吗?" onConfirm={this.remove.bind(this, id)}>
+							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, id)}>
                               <a>结账</a>
                             </Popconfirm>
 							<span> | </span>
@@ -80,7 +80,8 @@ const App = React.createClass({
 			cashAccountType: 0,
 			status: 0,
 			hasApplied: 0,
-			billAt: ''
+			billAt: '',
+			selectedList: [],   //勾选的账单
 		};
 	},
 	list(data) {
@@ -111,8 +112,25 @@ const App = React.createClass({
 				});
 			})
 	},
-	remove(id) {
+	deposit(id) {
+		alert("提现"+id)
+	},
+	settle(id) {
+		alert("settle"+id)
+	},
+	multiSettle() {
 
+		if(this.state.selectedList.length == 0){
+			return message.info('请勾选您需要结账的账单');
+		}
+
+		let selectedListId = "";
+		let selectedListIdArr = [];
+		this.state.selectedList.map((item, i)=>{
+			selectedListIdArr.push(item.id);
+		})
+		selectedListId = selectedListIdArr.join(',');
+		alert(selectedListId)
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
@@ -181,11 +199,34 @@ const App = React.createClass({
 		};
 	},
 	render(){
+		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
+
+		const rowSelection = {
+		  onChange(selectedRowKeys, selectedRows) {
+		  	self.setState({selectedList: selectedRows})
+		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+		  },
+		  onSelect(record, selected, selectedRows) {
+		    //console.log(record, selected, selectedRows);
+		  },
+		  onSelectAll(selected, selectedRows, changeRows) {
+		    //console.log(selected, selectedRows, changeRows);
+		  },
+		};
+
+		const footer = (
+			<Popconfirm title="申请提现吗?" onConfirm={this.multiSettle}>
+		    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
+		  </Popconfirm>
+    )
+
 		return (<section className="view-settlement-list">
 			<header>
-				账单列表
+				<Breadcrumb>
+					<Breadcrumb.Item>账单列表</Breadcrumb.Item>
+				</Breadcrumb>
 			</header>
 			<div className="filter">
 				<Select className="item"
@@ -217,7 +258,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
 			</div>
-			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return footer}}/>
 		</section>);
 	}
 });

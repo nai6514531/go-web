@@ -30,8 +30,8 @@ class Head extends React.Component {
 					<h1>苏打生活管理系统</h1>
 				</div>
 				<div className = "right">
-					<span>{account}</span>
-					<span>{role}</span>
+					<span className="account">{account}</span>
+					<span className="role">{role}</span>
 					<a href="#" onClick={this.logout.bind(this)}>退出</a>
 				</div>
 			</div>

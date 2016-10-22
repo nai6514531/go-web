@@ -3,10 +3,10 @@ package iris
 import (
 	"sync"
 
-	"github.com/iris-contrib/errors"
+	"log"
 
-	"github.com/iris-contrib/logger"
-	"github.com/kataras/iris/utils"
+	"github.com/kataras/go-errors"
+	"github.com/kataras/go-fs"
 )
 
 var (
@@ -60,11 +60,22 @@ type (
 	}
 	// PreLookupFunc implements the simple function listener for the PreLookup(Route)
 	PreLookupFunc func(Route)
+	// pluginPreBuild implements the PreBuild(*Framework) method
+	pluginPreBuild interface {
+		// PreBuild it's being called once time, BEFORE the Server is started and before PreListen
+		// is used to do work before all other things are ready
+		// use this event if you want to add routes to your iris station
+		// or make any changes to the iris main configuration
+		// receiver is the station
+		PreBuild(*Framework)
+	}
+	// PreBuildFunc implements the simple function listener for the PreBuild(*Framework)
+	PreBuildFunc func(*Framework)
 	// pluginPreListen implements the PreListen(*Framework) method
 	pluginPreListen interface {
 		// PreListen it's being called only one time, BEFORE the Server is started (if .Listen called)
 		// is used to do work at the time all other things are ready to go
-		//  parameter is the station
+		// receiver is the station
 		PreListen(*Framework)
 	}
 	// PreListenFunc implements the simple function listener for the PreListen(*Framework)
@@ -108,29 +119,36 @@ type (
 	PluginContainer interface {
 		Add(...Plugin) error
 		Remove(string) error
+		Len() int
 		GetName(Plugin) string
 		GetDescription(Plugin) string
 		GetByName(string) Plugin
 		Printf(string, ...interface{})
+		Fired(string) int
 		PreLookup(PreLookupFunc)
 		DoPreLookup(Route)
+		PreLookupFired() bool
+		PreBuild(PreBuildFunc)
+		DoPreBuild(*Framework)
+		PreBuildFired() bool
 		PreListen(PreListenFunc)
 		DoPreListen(*Framework)
 		DoPreListenParallel(*Framework)
+		PreListenFired() bool
 		PostListen(PostListenFunc)
 		DoPostListen(*Framework)
+		PostListenFired() bool
 		PreClose(PreCloseFunc)
 		DoPreClose(*Framework)
+		PreCloseFired() bool
 		PreDownload(PreDownloadFunc)
 		DoPreDownload(Plugin, string)
-		// custom event callbacks
-		On(string, ...func())
-		Call(string)
+		PreDownloadFired() bool
 		//
 		GetAll() []Plugin
 		// GetDownloader is the only one module that is used and fire listeners at the same time in this file
 		GetDownloader() PluginDownloadManager
-	}
+	} //Note: custom event callbacks, never used internaly by Iris, but if you need them use this: github.com/kataras/go-events
 	// PluginDownloadManager is the interface which the DownloadManager should implements
 	PluginDownloadManager interface {
 		DirectoryExists(string) bool
@@ -160,6 +178,15 @@ type (
 // PreLookup called before register a route
 func (fn PreLookupFunc) PreLookup(r Route) {
 	fn(r)
+}
+
+// PreBuild it's being called once time, BEFORE the Server is started and before PreListen
+// is used to do work before all other things are ready
+// use this event if you want to add routes to your iris station
+// or make any changes to the iris main configuration
+// receiver is the station
+func (fn PreBuildFunc) PreBuild(station *Framework) {
+	fn(station)
 }
 
 // PreListen it's being called only one time, BEFORE the Server is started (if .Listen called)
@@ -199,27 +226,27 @@ var _ PluginContainer = &pluginContainer{}
 
 // DirectoryExists returns true if a given local directory exists
 func (d *pluginDownloadManager) DirectoryExists(dir string) bool {
-	return utils.DirectoryExists(dir)
+	return fs.DirectoryExists(dir)
 }
 
 // DownloadZip downlodas a zip to the given local path location
 func (d *pluginDownloadManager) DownloadZip(zipURL string, targetDir string) (string, error) {
-	return utils.DownloadZip(zipURL, targetDir)
+	return fs.DownloadZip(zipURL, targetDir, true)
 }
 
 // Unzip unzips a zip to the given local path location
 func (d *pluginDownloadManager) Unzip(archive string, target string) (string, error) {
-	return utils.Unzip(archive, target)
+	return fs.DownloadZip(archive, target, true)
 }
 
 // Remove deletes/removes/rm a file
 func (d *pluginDownloadManager) Remove(filePath string) error {
-	return utils.RemoveFile(filePath)
+	return fs.RemoveFile(filePath)
 }
 
 // Install is just the flow of the: DownloadZip->Unzip->Remove the zip
 func (d *pluginDownloadManager) Install(remoteFileZip string, targetDirectory string) (string, error) {
-	return utils.Install(remoteFileZip, targetDirectory)
+	return fs.Install(remoteFileZip, targetDirectory, true)
 }
 
 // pluginContainer is the base container of all Iris, registed plugins
@@ -227,8 +254,14 @@ type pluginContainer struct {
 	activatedPlugins []Plugin
 	customEvents     map[string][]func()
 	downloader       *pluginDownloadManager
-	logger           *logger.Logger
-	mu               sync.Mutex
+	logger           *log.Logger
+	mu               *sync.Mutex
+	fired            map[string]int // event/plugin type name and the times fired
+}
+
+// newPluginContainer receives a logger and returns a new PluginContainer
+func newPluginContainer(l *log.Logger) PluginContainer {
+	return &pluginContainer{logger: l, fired: make(map[string]int, 0), mu: &sync.Mutex{}}
 }
 
 // Add activates the plugins and if succeed then adds it to the activated plugins list
@@ -249,11 +282,12 @@ func (p *pluginContainer) Add(plugins ...Plugin) error {
 		// Activate the plugin, if no error then add it to the plugins
 		if pluginObj, ok := plugin.(pluginActivate); ok {
 
-			tempPluginContainer := *p // contains the mutex but we' re safe here.
+			tempPluginContainer := *p
 			err := pluginObj.Activate(&tempPluginContainer)
 			if err != nil {
 				return errPluginActivate.Format(pName, err.Error())
 			}
+
 			tempActivatedPluginsLen := len(tempPluginContainer.activatedPlugins)
 			if tempActivatedPluginsLen != len(p.activatedPlugins)+tempActivatedPluginsLen+1 { // see test: plugin_test.go TestPluginActivate && TestPluginActivationError
 				p.activatedPlugins = tempPluginContainer.activatedPlugins
@@ -267,20 +301,16 @@ func (p *pluginContainer) Add(plugins ...Plugin) error {
 	return nil
 }
 
-func (p *pluginContainer) Reset() {
-
-}
-
 // Remove removes a plugin by it's name, if pluginName is empty "" or no plugin found with this name, then nothing is removed and a specific error is returned.
 // This doesn't calls the PreClose method
 func (p *pluginContainer) Remove(pluginName string) error {
 	if p.activatedPlugins == nil {
-		return errPluginRemoveNoPlugins.Return()
+		return errPluginRemoveNoPlugins
 	}
 
 	if pluginName == "" {
 		//return error: cannot delete an unamed plugin
-		return errPluginRemoveEmptyName.Return()
+		return errPluginRemoveEmptyName
 	}
 
 	indexToRemove := -1
@@ -290,12 +320,17 @@ func (p *pluginContainer) Remove(pluginName string) error {
 		}
 	}
 	if indexToRemove == -1 { //if index stills -1 then no plugin was found with this name, just return an error. it is not a critical error.
-		return errPluginRemoveNotFound.Return()
+		return errPluginRemoveNotFound
 	}
 
 	p.activatedPlugins = append(p.activatedPlugins[:indexToRemove], p.activatedPlugins[indexToRemove+1:]...)
 
 	return nil
+}
+
+// Len returns the number of activate plugins
+func (p *pluginContainer) Len() int {
+	return len(p.activatedPlugins)
 }
 
 // GetName returns the name of a plugin, if no GetName() implemented it returns an empty string ""
@@ -354,6 +389,29 @@ func (p *pluginContainer) Printf(format string, a ...interface{}) {
 
 }
 
+// fire adds a fired event on the (statically type named) map and returns the new times
+func (p *pluginContainer) fire(name string) int {
+	p.mu.Lock()
+	var times int
+	// maybe unnecessary but for clarity reasons
+	if t, found := p.fired[name]; found {
+		times = t
+	}
+	times++
+	p.fired[name] = times
+	p.mu.Unlock()
+	return times
+}
+
+// Fired receives an event name/plugin type and returns the times which this event is fired and how many plugins are fired this event,
+// if zero then it's not fired at all
+func (p *pluginContainer) Fired(name string) (times int) {
+	if t, found := p.fired[name]; found {
+		times = t
+	}
+	return
+}
+
 // PreLookup adds a PreLookup plugin-function to the plugin flow container
 func (p *pluginContainer) PreLookup(fn PreLookupFunc) {
 	p.Add(fn)
@@ -364,9 +422,37 @@ func (p *pluginContainer) DoPreLookup(r Route) {
 	for i := range p.activatedPlugins {
 		// check if this method exists on our plugin obj, these are optionaly and call it
 		if pluginObj, ok := p.activatedPlugins[i].(pluginPreLookup); ok {
+			// fire will add times to the number of events fired this event
+			p.fire("prelookup")
 			pluginObj.PreLookup(r)
 		}
 	}
+}
+
+// PreLookupFired returns true if PreLookup event/ plugin type is fired at least one time
+func (p *pluginContainer) PreLookupFired() bool {
+	return p.Fired("prelookup") > 0
+}
+
+// PreBuild adds a PreBuild plugin-function to the plugin flow container
+func (p *pluginContainer) PreBuild(fn PreBuildFunc) {
+	p.Add(fn)
+}
+
+// DoPreBuild raise all plugins that have the PreBuild method
+func (p *pluginContainer) DoPreBuild(station *Framework) {
+	for i := range p.activatedPlugins {
+		// check if this method exists on our plugin obj, these are optionaly and call it
+		if pluginObj, ok := p.activatedPlugins[i].(pluginPreBuild); ok {
+			pluginObj.PreBuild(station)
+			p.fire("prebuild")
+		}
+	}
+}
+
+// PreBuildFired returns true if PreBuild event/ plugin type is fired at least one time
+func (p *pluginContainer) PreBuildFired() bool {
+	return p.Fired("prebuild") > 0
 }
 
 // PreListen adds a PreListen plugin-function to the plugin flow container
@@ -380,6 +466,7 @@ func (p *pluginContainer) DoPreListen(station *Framework) {
 		// check if this method exists on our plugin obj, these are optionaly and call it
 		if pluginObj, ok := p.activatedPlugins[i].(pluginPreListen); ok {
 			pluginObj.PreListen(station)
+			p.fire("prelisten")
 		}
 	}
 }
@@ -394,6 +481,7 @@ func (p *pluginContainer) DoPreListenParallel(station *Framework) {
 		go func(plugin Plugin) {
 			if pluginObj, ok := plugin.(pluginPreListen); ok {
 				pluginObj.PreListen(station)
+				p.fire("prelisten")
 			}
 
 			wg.Done()
@@ -403,6 +491,11 @@ func (p *pluginContainer) DoPreListenParallel(station *Framework) {
 
 	wg.Wait()
 
+}
+
+// PreListenFired returns true if PreListen or PreListenParallel event/ plugin type is fired at least one time
+func (p *pluginContainer) PreListenFired() bool {
+	return p.Fired("prelisten") > 0
 }
 
 // PostListen adds a PostListen plugin-function to the plugin flow container
@@ -416,8 +509,14 @@ func (p *pluginContainer) DoPostListen(station *Framework) {
 		// check if this method exists on our plugin obj, these are optionaly and call it
 		if pluginObj, ok := p.activatedPlugins[i].(pluginPostListen); ok {
 			pluginObj.PostListen(station)
+			p.fire("postlisten")
 		}
 	}
+}
+
+// PostListenFired returns true if PostListen event/ plugin type is fired at least one time
+func (p *pluginContainer) PostListenFired() bool {
+	return p.Fired("postlisten") > 0
 }
 
 // PreClose adds a PreClose plugin-function to the plugin flow container
@@ -431,8 +530,14 @@ func (p *pluginContainer) DoPreClose(station *Framework) {
 		// check if this method exists on our plugin obj, these are optionaly and call it
 		if pluginObj, ok := p.activatedPlugins[i].(pluginPreClose); ok {
 			pluginObj.PreClose(station)
+			p.fire("preclose")
 		}
 	}
+}
+
+// PreCloseFired returns true if PreCLose event/ plugin type is fired at least one time
+func (p *pluginContainer) PreCloseFired() bool {
+	return p.Fired("preclose") > 0
 }
 
 // PreDownload adds a PreDownload plugin-function to the plugin flow container
@@ -446,31 +551,12 @@ func (p *pluginContainer) DoPreDownload(pluginTryToDownload Plugin, downloadURL 
 		// check if this method exists on our plugin obj, these are optionaly and call it
 		if pluginObj, ok := p.activatedPlugins[i].(pluginPreDownload); ok {
 			pluginObj.PreDownload(pluginTryToDownload, downloadURL)
+			p.fire("predownload")
 		}
 	}
 }
 
-// On registers a custom event
-// these are not registed as plugins, they are hidden events
-func (p *pluginContainer) On(name string, fns ...func()) {
-	if p.customEvents == nil {
-		p.customEvents = make(map[string][]func(), 0)
-	}
-	if p.customEvents[name] == nil {
-		p.customEvents[name] = make([]func(), 0)
-	}
-	p.customEvents[name] = append(p.customEvents[name], fns...)
-}
-
-// Call fires the custom event
-func (p *pluginContainer) Call(name string) {
-	if p.customEvents == nil {
-		return
-	}
-	if fns := p.customEvents[name]; fns != nil {
-		for _, fn := range fns {
-			fn()
-		}
-
-	}
+// PreDownloadFired returns true if PreDownload event/ plugin type is fired at least one time
+func (p *pluginContainer) PreDownloadFired() bool {
+	return p.Fired("predownload") > 0
 }

@@ -33,12 +33,12 @@ export default function (state = initialState, action) {
 		case POST_USER_DETAIL:
 			return {
 				...state,
-				result: action.result,
+				resultPostDetail: action.result,
 			};
 		case PUT_USER_DETAIL:
 			return {
 				...state,
-				result: action.result,
+				resultPutDetail: action.result,
 			};
 		case REMOVE_USER:
 			return {

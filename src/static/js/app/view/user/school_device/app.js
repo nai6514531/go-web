@@ -87,7 +87,7 @@ const columns = [{
 					<a href="#">停止</a>
 				</Popconfirm>
 			}
-			
+
 		</span>
 	),
 }];
@@ -107,7 +107,7 @@ class DeviceTable extends React.Component {
 		};
 		this.remove = this.remove.bind(this);
 		this.changeStatus = this.changeStatus.bind(this);
-		
+
 	}
 	componentDidMount() {
 		const schoolId = this.props.params.id;
@@ -115,12 +115,20 @@ class DeviceTable extends React.Component {
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
 	}
 	componentWillReceiveProps(nextProps) {
-		// if(this.state.changeState !== nextState.changeState){
-		// 	const schoolId = this.props.params.id;
-		// 	const pager = { page : this.state.page, perPage: this.state.perPage};
-		// 	this.props.getSchoolDevice(USER.id, schoolId, pager);
-		// 	console.log('get new status');
-		// }
+		const self = this;
+		// 成功才拉取,失败就提示
+		if(this.theStatus == 0 || this.theStatus == 9) {
+			if(nextProps.status && nextProps.status.fetch == true){
+				const schoolId = this.props.params.id;
+				const pager = { page : this.state.page, perPage: this.state.perPage};
+				this.props.getSchoolDevice(USER.id, schoolId, pager);
+			} else if(nextProps.status && nextProps.status.fetch == false) {
+				alert('操作失败!');
+				console.log(nextProps.status.result.msg);
+			}
+			self.theStatus = -1;
+		}
+
 	}
 	initializePagination() {
 		let total = 1;
@@ -148,21 +156,18 @@ class DeviceTable extends React.Component {
 		this.props.deleteDevice(id);
 	}
 	changeStatus(id,start) {
+		const self = this;
 		if(start){
-			console.log('start');
 			const status = { status: 0 };
 			this.props.patchDeviceStatus(id,status);
-			// this.setState({changeState:0});
+			self.theStatus = 0;
 		}else {
-			console.log('stop');
 			const status = { status: 9 };
 			this.props.patchDeviceStatus(id,status);
-			// this.setState({changeState:9});
+			self.theStatus = 9;
 		}
 	}
 	render() {
-		// const status = this.props.status;
-		// console.log('status',status);
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
 		const self = this;
@@ -190,35 +195,37 @@ class DeviceTable extends React.Component {
 			}
 		}
 		return (
-		<div className="detail">
-			<div className="detail-head">
-				<Breadcrumb separator=">">
-					<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-					<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-					<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
-				</Breadcrumb>
-			</div>
-			<div className="detail-form">
-				<div className="table">
-						<div>
-							<div className="detail-button">
-								<Button type="primary">
-									<Link to="/user/device/edit">
-										添加新设备
-									</Link>
-								</Button>
+			<div className="body-panel">
+				<div className="detail">
+					<div className="detail-head">
+						<Breadcrumb separator=">">
+							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
+							<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
+						</Breadcrumb>
+					</div>
+					<div className="detail-form">
+						<div className="table">
+							<div>
+								<div className="detail-button">
+									<Button type="primary">
+										<Link to="/user/device/edit">
+											添加新设备
+										</Link>
+									</Button>
+								</div>
+								<Table columns={columns}
+									   dataSource={dataSource}
+									   pagination={pagination}
+									   loading={this.state.loading}
+									   onChange={this.handleTableChange}
+									   bordered
+								/>
 							</div>
-							<Table columns={columns}
-								   dataSource={dataSource}
-								   pagination={pagination}
-								   loading={this.state.loading}
-								   onChange={this.handleTableChange}
-								   bordered
-							/>
 						</div>
+					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}

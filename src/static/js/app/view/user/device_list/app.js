@@ -57,12 +57,37 @@ class SchoolTable extends React.Component {
 			pager: {},
 			page: 1,
 			perPage: 10,
+			schoolList: [],
 		};
 	}
-	componentDidMount() {
+	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
 		this.props.getUserSchool(USER.id, schoolId, pager);
+	}
+	componentWillReceiveProps(nextProps) {
+		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
+		const school = this.props.school;
+		if(nextProps.school && nextProps.school.fetch == true){
+			if(school == undefined){
+				this.setState({
+					schoolList: nextProps.school.result.data,
+				});
+			} else {
+				if(this.state.schoolList.length <= school.result.data.length) {
+					if(school.result.data.length >= nextProps.school.result.data.length) {
+						this.setState({
+							schoolList: school.result.data,
+						});
+					} else {
+						this.setState({
+							schoolList: nextProps.school.result.data,
+						});
+					}
+				}
+			}
+		}
+		
 	}
 	initializePagination() {
 		let total = 1;
@@ -77,15 +102,11 @@ class SchoolTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
-				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码
-				console.log('Current: ', current);
 			},
 		}
 	}
@@ -98,7 +119,6 @@ class SchoolTable extends React.Component {
 			if(school.fetch == true){
 				list = school.result.data;
 				dataSource = list.map(function (item,key) {
-					console.log(item);
 					return {
 						key: item.id,
 						index: key,
@@ -109,7 +129,6 @@ class SchoolTable extends React.Component {
 			}
 		}
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -121,8 +140,8 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter 
-										schoolList={list}
+									<SchoolFilter
+										schoolList={this.state.schoolList}
 										getUserSchool={this.props.getUserSchool}
 										page={this.state.page}
 										perPage={this.state.perPage}
@@ -138,7 +157,6 @@ class SchoolTable extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}

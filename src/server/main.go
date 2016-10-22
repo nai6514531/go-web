@@ -1,17 +1,17 @@
 package server
 
 import (
-	"github.com/iris-contrib/middleware/recovery"
 	"github.com/iris-contrib/template/html"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/route/api"
 	"maizuo.com/soda-manager/src/server/route/web"
+	"github.com/iris-contrib/middleware/recovery"
 )
 
 func SetUpServer() {
 
-	iris.Use(recovery.New(iris.Logger))
+	iris.Use(recovery.New())
 
 	isDevelopment := viper.GetBool("isDevelopment")
 	staticSystemPath := viper.GetString("staticSystemPath")

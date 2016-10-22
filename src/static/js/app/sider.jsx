@@ -46,14 +46,13 @@ const Navbar = React.createClass({
 							{menus.map(function (item) {
 								return <Menu.Item key={item.url}>{item.name}</Menu.Item>
 							})}
-							<Menu.Item key="#/logout">退出</Menu.Item>
 						</Menu.SubMenu>
 					})}
 				</Menu>
+				<footer>
+					<p> - &#10084; - </p>
+				</footer>
 			</nav>
-			<footer>
-				<p> - &#10084; - </p>
-			</footer>
 		</aside>)
 	}
 });

@@ -122,8 +122,8 @@ class SchoolSelect extends React.Component {
 				<div onClick = {this.showBox.bind(this)} className="show">
 					{this.state.provinceName ?
 						<div>
-							<span>{this.state.provinceName}</span>
-							<span>{this.state.schoolName}</span>
+							{this.state.provinceName}-
+							{this.state.schoolName}
 						</div>
 						:
 						<span>请选择学校</span>

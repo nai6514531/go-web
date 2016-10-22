@@ -88,6 +88,11 @@ export class LoginForm extends React.Component {
 	componentWillMount() {
 		this.getCaptcha();
 	}
+	handleEnter(event) {
+		if (event.keyCode==13) {
+			this.handleSubmit(event);
+		}
+	}
 	render() {
 		const { getFieldDecorator } = this.props.form;
 		const formItemLayout = {
@@ -95,7 +100,7 @@ export class LoginForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-			<Form horizontal>
+			<Form horizontal onKeyDown={this.handleEnter.bind(this)}>
 				<FormItem
 					{...formItemLayout}
 					label="用户名"
@@ -132,7 +137,7 @@ export class LoginForm extends React.Component {
 					})(
 						<div>
 							<Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
-							<img className="captcha"  src={this.state.url} />
+							<img className="captcha"  src={this.state.url} onClick={this.getCaptcha}/>
 							<span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
 						</div>
 					)}

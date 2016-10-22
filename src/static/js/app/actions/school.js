@@ -12,7 +12,7 @@ export function getSchoolDetail() {
 				type: GET_SCHOOL_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_SCHOOL_DETAIL,
 				result: { fetch: false, result },
