@@ -126,7 +126,7 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 	return &dailyBillMap, nil
 }
 
-func (self *DailyBillService) UpdateStatus(status int, billAt string, userId ...string) (int64, error) {
+func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int64, error) {
 	var r *gorm.DB
 	tx := common.DB.Begin()
 	txmn := common.MNDB.Begin()
@@ -134,7 +134,7 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userId ...
 	//update mnzn database
 	//如果status本来为1,需要更新的也为1时,返回的受影响行数为0
 	statusStr := strconv.Itoa(status)
-	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userId, billAt).Update("STATUS", statusStr)
+	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userIds, billAt).Update("STATUS", statusStr)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error.Error())
 		txmn.Rollback()
@@ -143,7 +143,7 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userId ...
 
 	//update soda-manager
 	//因为每次update时`updated_at`都会更新
-	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userId, billAt).Update("status", status)
+	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update("status", status)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error.Error())
 		tx.Rollback()

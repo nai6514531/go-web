@@ -8,6 +8,7 @@ import (
 	"strings"
 	"maizuo.com/soda-manager/src/server/common"
 	"strconv"
+	"github.com/spf13/viper"
 )
 
 type DailyBillController struct {
@@ -28,13 +29,15 @@ var (
 		"01060300": "更新日账单状态成功",
 		"01060301": "更新日账单状态失败",
 		"01060302": "更新日账单状态部分失败",
-		//"01060303": "请求修改状态参数有误",
+		"01060303": "请求修改状态参数有误",
 
 		"01060400": "日账单结账成功",
 		"01060401": "日账单结账失败",
 		"01060402": "日账单部分结账失败",
-		"01060403": "选用用户未申请提现或已结账",
-		"01060404": "无选用用户账户信息",
+		"01060403": "选中用户未申请提现或已结账",
+		"01060404": "无选中用户账户信息",
+		"01060405": "无登陆用户角色信息",
+		"01060406": "无操作权限",
 
 	}
 )
@@ -99,19 +102,19 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
-	/*status, _ := strconv.Atoi(params["status"])
-	if status != 1 {
+	status, _ := strconv.Atoi(params["status"])
+	if status != 1 && status != 0{
 		common.Logger.Warningln(daily_bill_msg["01060303"], ": ", status)
 		ctx.JSON(iris.StatusOK, daily_bill_msg["01060303"])
 		return
-	}*/
+	}
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
 	}
 	userIds := strings.Split(userIdStr, ",")
 
-	rows, err := dailyBillService.UpdateStatus(1, billAt, userIds...)
+	rows, err := dailyBillService.UpdateStatus(status, billAt, userIds...)
 	if err != nil {
 		common.Logger.Warningln(daily_bill_msg["01060302"])
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060302", nil, daily_bill_msg["01060302"]})
@@ -131,6 +134,7 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
+	userRoleRelService := &service.UserRoleRelService{}
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
@@ -140,6 +144,20 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	bankPayUserIds := []string{}
 	var result *enity.Result
 	isSuccessed := true
+	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("key==============", viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("siginUserId=====================", siginUserId)
+
+	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
+	if err != nil {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060405", nil, daily_bill_msg["01060405"]})
+		return
+	}
+	if userRoleRel.RoleId != 3 {    //不是财务角色
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
+		return
+	}
+
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
