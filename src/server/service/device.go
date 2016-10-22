@@ -100,44 +100,44 @@ func (self *DeviceService) Create(device *model.Device) bool {
 }
 
 func (self *DeviceService) Update(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(device)
+	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
 	//更新到木牛数据库
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
-	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(device)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(device)
+	if r.Error != nil {
 		return false
 	}
 	return true
 }
 
 func (self *DeviceService) UpdateStatus(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(device)
+	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
 	//更新到木牛数据库
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
-	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", device.Status)
+	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", boxInfo.Status)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
 	return true
 }
 
-func (self *DeviceService) UpdateBySerialNumber(device model.Device) bool {
+func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
 	//更新到木牛数据库
 	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(&device)
-	r = common.DB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", device.Status)
+	boxInfo.FillByDevice(device)
+	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -145,7 +145,15 @@ func (self *DeviceService) UpdateBySerialNumber(device model.Device) bool {
 }
 
 func (self *DeviceService) Delete(id int) bool {
-	r := common.DB.Where("id = ?", id).Delete(&model.Device{})
+	device := &model.Device{}
+	r := common.DB.Model(&model.Device{}).Where("id = ?", id).Scan(device).Delete(&model.Device{})
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//删除到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

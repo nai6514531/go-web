@@ -1,11 +1,11 @@
 package common
 
 import (
-	"github.com/iris-contrib/sessiondb/redis"
-	"github.com/iris-contrib/sessiondb/redis/service"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"time"
+	"github.com/kataras/go-sessions/sessiondb/redis"
+	"github.com/kataras/go-sessions/sessiondb/redis/service"
 )
 
 func SetUpSession() {

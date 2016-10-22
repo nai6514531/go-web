@@ -77,7 +77,7 @@ func (self *UserService) Update(user *model.User) bool {
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUser(user)
 	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	if r.Error != nil {
 		return false
 	}
 	return true

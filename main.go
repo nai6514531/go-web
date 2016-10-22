@@ -21,11 +21,11 @@ func main() {
 
 	//common.SetUpRateLimiter()
 
-	//common.SetUpCors()
-
-	//common.SetUpSecure()
+	common.SetUpCors()
 
 	common.SetUpCommon()
+
+	//common.SetUpSecure()
 
 	server.SetUpServer()
 
