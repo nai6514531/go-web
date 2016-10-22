@@ -50,10 +50,19 @@ const App = React.createClass({
 				dataIndex: 'status',
 				key: 'status',
 				render: (status) => {
-					if (status == 2) {
-						return <div className="status">已结账</div>
-					} else {
-						return <div className="status highlight">未结账</div>
+					switch (status) {
+						case 0:
+							return <div className="status highlight">未结账</div>
+							break;
+						case 1:
+							return <div className="status">已申请提现</div>
+							break;
+						case 2:
+							return <div className="status">已结账</div>
+							break;
+						case 3:
+							return <div className="status">结账中</div>
+							break;
 					}
 				}
 			}, {
@@ -71,7 +80,7 @@ const App = React.createClass({
 					}
 
 					let spanDiv = "";
-					switch (roleId){
+					switch (roleId) {
 						case 1:
 							spanDiv = (
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
