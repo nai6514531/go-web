@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/model/muniu"
+	"time"
 )
 
 type DailyBillService struct {
@@ -142,7 +143,12 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 	//update mnzn database
 	//如果status本来为1,需要更新的也为1时,返回的受影响行数为0
 	statusStr := strconv.Itoa(status)
-	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userIds, billAt).Update("STATUS", statusStr)
+	boxStatBill := &muniu.BoxStatBill{Status: statusStr}
+	timeNow := time.Now().Local().Format("2006-01-02 15:04:05")
+	if status == 2 {
+		boxStatBill.BillDate = timeNow
+	}
+	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error.Error())
 		txmn.Rollback()
@@ -151,7 +157,11 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 
 	//update soda-manager
 	//因为每次update时`updated_at`都会更新
-	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update("status", status)
+	dailyBill := &model.DailyBill{Status: status}
+	if status == 2 {
+		dailyBill.SettledAt = timeNow
+	}
+	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update(dailyBill)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error.Error())
 		tx.Rollback()
