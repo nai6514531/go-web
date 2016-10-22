@@ -144,10 +144,9 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	bankPayUserIds := []string{}
 	var result *enity.Result
 	isSuccessed := true
-	var siginUserId int
-	if viper.Get("server.session.user.id") != nil {
-		siginUserId = viper.Get("server.session.user.id").(int)
-	}
+	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("key==============", viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("siginUserId=====================", siginUserId)
 
 	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
 	if err != nil {
