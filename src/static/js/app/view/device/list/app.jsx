@@ -1,5 +1,4 @@
 import React from 'react';
-import '../device_list/app.less';
 import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
 import { Link } from 'react-router';
 
@@ -93,7 +92,7 @@ const columns = [{
 }];
 
 
-class DeviceTable extends React.Component {
+class DeviceList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -173,7 +172,6 @@ class DeviceTable extends React.Component {
 		const schoolId = this.props.params.id;
 		const self = this;
 		let dataSource = [];
-		console.log('schoolDevice',schoolDevice);
 		if(schoolDevice) {
 			if(schoolDevice.fetch == true){
 				const data = schoolDevice.result.data.list;
@@ -226,8 +224,8 @@ class DeviceTable extends React.Component {
 }
 
 
-DeviceTable.propTypes = {
+DeviceList.propTypes = {
 	handleTableChange: React.PropTypes.func,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(DeviceTable);
+export default connect(mapStateToProps, mapDispatchToProps)(DeviceList);

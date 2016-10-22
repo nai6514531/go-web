@@ -78,7 +78,6 @@ class UserForm extends React.Component {
 			}
 		}
         if(this.props.provinceCity !== nextProps.provinceCity){
-            console.log('qiehuan',this.props.provinceCity,nextProps.provinceCity);
             // 每次切换省,都要将城市预至成第一个
             if(nextProps.provinceCity.fetch == true) {
                 self.cityId = nextProps.provinceCity.result.data[0].id;

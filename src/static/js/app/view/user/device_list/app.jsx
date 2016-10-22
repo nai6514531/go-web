@@ -87,7 +87,7 @@ class SchoolTable extends React.Component {
 				}
 			}
 		}
-		
+
 	}
 	initializePagination() {
 		let total = 1;
@@ -191,13 +191,12 @@ class SchoolFilter extends React.Component {
 								{ required: true, message: '请选择学校' },
 							],
 						})(
-							<Select id="school" style={{ width: 200 }} >
+							<Select id="school" style={{ width: 120 }} >
 								{schoolNode}
 							</Select>
 						)}
-
 					</FormItem>
-					<Button type="primary" htmlType="submit">筛选</Button>
+					<Button style={{verticalAlign:"top",height:32}} type="primary" htmlType="submit">筛选</Button>
 				</Form>
 			</div>
 		);
