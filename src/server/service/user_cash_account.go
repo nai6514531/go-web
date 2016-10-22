@@ -50,7 +50,7 @@ func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCa
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUserCashAccount(userCashAccount)
 	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	if r.Error != nil {
 		return false
 	}
 	return true
