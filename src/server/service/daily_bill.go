@@ -21,7 +21,7 @@ func (self *DailyBillService) Total() (int, error) {
 	return int(total), nil
 }
 
-func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, billAt string) (int, error) {
+func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, billAt string, userId int) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -29,6 +29,10 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 	params := make([]interface{}, 0)
 	sql := "select count(*) as total from  daily_bill bill,cash_account_type cat,user_cash_account uca where " +
 		"bill.user_id=uca.user_id and uca.type=cat.id and bill.deleted_at IS NULL"
+	if userId != -1 {
+		sql += " and bill.user_id = ? "
+		params = append(params, userId)
+	}
 	if cashAccounType > 0 {
 		sql += " and cat.id = ? "
 		params = append(params, cashAccounType)
@@ -59,13 +63,17 @@ func (self *DailyBillService) List(page int, perPage int) (*[]*model.DailyBill, 
 	return list, nil
 }
 
-func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []string, billAt string, page int, perPage int) (*[]*model.DailyBill, error) {
+func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []string, billAt string, userId int, page int, perPage int) (*[]*model.DailyBill, error) {
 	list := []*model.DailyBill{}
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
 	_perPage := strconv.Itoa(perPage)
 	sql := "select bill.*, cat.id as account_type,cat.name as account_name from daily_bill bill,cash_account_type " +
 		"cat,user_cash_account uca where bill.user_id=uca.user_id and uca.type=cat.id and bill.deleted_at IS NULL "
+	if userId != -1 {
+		sql += " and bill.user_id = ? "
+		params = append(params, userId)
+	}
 	if cashAccounType > 0 {
 		sql += " and cat.id = ? "
 		params = append(params, cashAccounType)

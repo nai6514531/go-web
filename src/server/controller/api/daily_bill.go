@@ -42,16 +42,65 @@ var (
 	}
 )
 
+/**
+还未优化代码
+ */
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
+	userRoleRelService := &service.UserRoleRelService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
 	page := functions.StringToInt(params["page"])
 	perPage := functions.StringToInt(params["perPage"])
 	cashAccounType := functions.StringToInt(params["cashAccountType"])      //提现方式
 	var status []string
+	var _status []string
+	userId := -1
 	if params["status"] != "" {
-		status = strings.Split(params["status"], ",")  //结算状态和提现状态
+		_status = strings.Split(params["status"], ",")  //结算状态和提现状态
+	}
+
+	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
+	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
+	if err != nil {
+		return
+	}
+	if len(_status) <= 0 {
+		switch userRoleRel.RoleId {
+		case 1:
+			status = _status
+			break
+		case 3:
+			status = append(status, "1")
+			status = append(status, "2")
+			status = append(status, "3")
+			break
+		default:
+			userId = siginUserId
+			break
+		}
+	}else {
+		for _, s := range _status {
+			switch userRoleRel.RoleId {
+			case 1:
+				status = append(status, s)
+				break
+			case 3:
+				if s == "1" || s == "2" || s == "3" {
+					status = append(status, s)
+				}
+				break
+			default:
+				userId = siginUserId
+				break
+			}
+		}
+	}
+	common.Logger.Warningln("!!!!!!!!!!!!!!!!!!!!!!1", status)
+	if userRoleRel.RoleId == 3 && len(status) <= 0 {
+		status = append(status, "1")
+		status = append(status, "2")
+		status = append(status, "3")
 	}
 	billAt := params["billAt"]
 
@@ -61,13 +110,13 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		return
 	}
 
-	total, err := dailyBillService.TotalByAccountType(cashAccounType, status, billAt)
+	total, err := dailyBillService.TotalByAccountType(cashAccounType, status, billAt, userId)
 	if err != nil {
 		result = &enity.Result{"01060102", nil, daily_bill_msg["01060102"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccounType, status, billAt, page, perPage)
+	list, err := dailyBillService.ListWithAccountType(cashAccounType, status, billAt, userId, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01060101", nil, daily_bill_msg["01060101"]}
 		ctx.JSON(iris.StatusOK, result)
