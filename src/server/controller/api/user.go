@@ -36,7 +36,7 @@ var (
 		"01010405": "密码不能少于6位!",
 		"01010406": "联系人手机不能为空!",
 		"01010407": "登陆账号已被注册!",
-		"01010408": "请填写正确的type值1-实时分账，2-财务结算!",
+		"01010408": "请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行!",
 		"01010409": "结算账号不能为空",
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
@@ -53,7 +53,7 @@ var (
 		"01010506": "联系人手机不能为空!",
 		"01010507": "登陆账号已被注册!",
 		"01010508": "手机号码已被使用!",
-		"01010509": "请填写正确的type值1-实时分账，2-财务结算!",
+		"01010509": "请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行!",
 		"01010510": "结算账号不能为空",
 		"01010511": "修改用户记录失败",
 		"01010512": "修改用户结算账号失败",
@@ -303,8 +303,8 @@ func (self *UserController) Create(ctx *iris.Context) {
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	//cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) {
-		//1-实时分账，2-财务结算
+	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
+		//1-实时分账(支付宝)，2-微信 3-银行
 		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -424,7 +424,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount.UserId = userId
 	fmt.Println(cashAccount)
 	// //cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) {
+	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
 		//1-实时分账，2-财务结算
 		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -590,29 +590,29 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 
  @apiSuccessExample Success-Response:
   HTTP/1.1 200 OK
-{
-  "status": "01010800",
-  "data": {
-    "id": 20,
-    "createdAt": "2016-10-20T11:05:04+08:00",
-    "updatedAt": "2016-10-20T10:59:56+08:00",
-    "deletedAt": null,
-    "name": "卖座网",
-    "contact": "mainland",
-    "address": "科技园",
-    "mobile": "18023380461",
-    "account": "soda",
-    "password": "e10adc3949ba59abbe56e057f20f883e",
-    "telephone": "0766-2885412",
-    "email": "317808023@qq.com",
-    "parentId": 20,
-    "gender": 0,
-    "age": 0,
-    "status": 0,
-    "deviceTotal": 2
-  },
-  "msg": "获取用户详情含设备数成功!"
-}
+	{
+	  "status": "01010800",
+	  "data": {
+	    "id": 20,
+	    "createdAt": "2016-10-20T11:05:04+08:00",
+	    "updatedAt": "2016-10-20T10:59:56+08:00",
+	    "deletedAt": null,
+	    "name": "卖座网",
+	    "contact": "mainland",
+	    "address": "科技园",
+	    "mobile": "18023380461",
+	    "account": "soda",
+	    "password": "e10adc3949ba59abbe56e057f20f883e",
+	    "telephone": "0766-2885412",
+	    "email": "317808023@qq.com",
+	    "parentId": 20,
+	    "gender": 0,
+	    "age": 0,
+	    "status": 0,
+	    "deviceTotal": 2
+	  },
+	  "msg": "获取用户详情含设备数成功!"
+	}
 */
 func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
