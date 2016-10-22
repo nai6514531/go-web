@@ -69,8 +69,6 @@ const App = React.createClass({
 					}
 					let spanDiv = roleId == 3?( //角色身份判断
 						<span>
-	            <span>已提现</span>
-							<span> | </span>
 							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
 	              <a>结账</a>
 	            </Popconfirm>
@@ -90,7 +88,6 @@ const App = React.createClass({
 			            </Popconfirm>
 								)
 							}
-	            
 							<span> | </span>
 							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 	          </span>
@@ -256,11 +253,24 @@ const App = React.createClass({
 		  },
 		};
 
-		const footer = this.state.roleId == 3?(
-			<Popconfirm title="申请结账吗?" onConfirm={this.multiSettle}>
-		    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
-		  </Popconfirm>
-    ): "";
+    let footer = "";
+    if(this.state.roleId == 3){
+    	if(this.state.selectedList.length == 0){
+    		footer = (
+    			<Button onClick={this.multiSettle} className="multiSettleBtn" size="large" type="primary">
+    				结账
+    			</Button>
+    		)
+    	}else{
+    		footer = (
+    			<Popconfirm title="确认结账吗?" onConfirm={this.multiSettle}>
+				    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
+				  </Popconfirm>
+				 )
+    	}
+    }else{
+    	footer = "";
+    }
 
 		return (<section className="view-settlement-list">
 			<header>
