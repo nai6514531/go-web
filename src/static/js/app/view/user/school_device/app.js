@@ -1,6 +1,6 @@
 import React from 'react';
-import './../device/app.less';
-import { Table, Button, Breadcrumb } from 'antd';
+import '../device_list/app.less';
+import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -9,19 +9,23 @@ import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
-	const { device: { list }, user: {schoolDevice} } = state;
-	return { list, schoolDevice };
+	const { device: { list, status }, user: {schoolDevice} } = state;
+	return { list, status, schoolDevice };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
 		getDeviceList,
+		deleteDevice,
+		patchDeviceStatus,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
 		getSchoolDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getDeviceList,
+		deleteDevice,
+		patchDeviceStatus,
 		getSchoolDevice,
 	};
 }
@@ -60,8 +64,8 @@ const columns = [{
 	key: 'thirdPulsePrice',
 }, {
 	title: '大物洗',
-	dataIndex: 'fourthPulseName',
-	key: 'fourthPulseName',
+	dataIndex: 'fourthPulsePrice',
+	key: 'fourthPulsePrice',
 }, {
 	title: '操作',
 	dataIndex: 'action',
@@ -70,14 +74,23 @@ const columns = [{
 		<span>
 			<Link to={"/user/device/edit/" + record.key}>修改</Link>
 			<span className="ant-divider" />
-			<a href="#">删除</a>
+			<Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
+				<a href="#">删除</a>
+			</Popconfirm>
 			<span className="ant-divider" />
-			<a href="#">停止</a>
+			{record.status == 9 ?
+				<Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
+					<a href="#">启用</a>
+				</Popconfirm>
+				:
+				<Popconfirm title="确认停止吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+					<a href="#">停止</a>
+				</Popconfirm>
+			}
+			
 		</span>
 	),
 }];
-
-
 
 
 class DeviceTable extends React.Component {
@@ -87,61 +100,94 @@ class DeviceTable extends React.Component {
 			data: [],
 			pagination: {},
 			loading: false,
+			pager: {},
+			page: 1,
+			perPage: 10,
+			changeState: 0,
 		};
-	}
-	handleTableChange(pagination, filters, sorter) {
-		const pager = this.state.pagination;
-		pager.current = pagination.current;
-		this.setState({
-			pagination: pager,
-		});
-		this.fetch({
-			results: pagination.pageSize,
-			page: pagination.current,
-			sortField: sorter.field,
-			sortOrder: sorter.order,
-			...filters,
-		});
-	}
-	fetch(params = {}) {
-		console.log(params);
-		this.setState({ loading: true });
+		this.remove = this.remove.bind(this);
+		this.changeStatus = this.changeStatus.bind(this);
+		
 	}
 	componentDidMount() {
-		// this.fetch();
-		const id = USER.id;
 		const schoolId = this.props.params.id;
-		this.props.getSchoolDevice(id, schoolId);
+		const pager = { page: this.state.page, perPage: this.state.perPage };
+		this.props.getSchoolDevice(USER.id, schoolId, pager);
+	}
+	componentWillReceiveProps(nextProps) {
+		// if(this.state.changeState !== nextState.changeState){
+		// 	const schoolId = this.props.params.id;
+		// 	const pager = { page : this.state.page, perPage: this.state.perPage};
+		// 	this.props.getSchoolDevice(USER.id, schoolId, pager);
+		// 	console.log('get new status');
+		// }
+	}
+	initializePagination() {
+		let total = 1;
+		if (this.props.schoolDevice && this.props.schoolDevice.fetch == true) {
+			total = this.props.schoolDevice.result.data.total;
+		}
+		const self = this;
+		const schoolId = this.props.params.id;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(current, pageSize) {
+				const pager = { page : current, perPage: pageSize};
+				self.setState(pager);
+				self.props.getSchoolDevice(USER.id, schoolId, pager);
+			},
+			onChange(current) {
+				const pager = { page : current, perPage: self.state.perPage};
+				self.setState(pager);
+				self.props.getSchoolDevice(USER.id, schoolId, pager);
+			},
+		}
+	}
+	remove(id) {
+		this.props.deleteDevice(id);
+	}
+	changeStatus(id,start) {
+		if(start){
+			console.log('start');
+			const status = { status: 0 };
+			this.props.patchDeviceStatus(id,status);
+			// this.setState({changeState:0});
+		}else {
+			console.log('stop');
+			const status = { status: 9 };
+			this.props.patchDeviceStatus(id,status);
+			// this.setState({changeState:9});
+		}
 	}
 	render() {
+		// const status = this.props.status;
+		// console.log('status',status);
+		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
-		console.log('schoolDevice',schoolDevice);
+		const self = this;
 		let dataSource = [];
-		let loading = false;
+		console.log('schoolDevice',schoolDevice);
 		if(schoolDevice) {
-			loading = true;
 			if(schoolDevice.fetch == true){
-				loading = false;
 				const data = schoolDevice.result.data.list;
 				dataSource = data.map(function (item, key) {
 					return {
 						key: item.id,
-						index: key,
+						index: item.id,
 						serialNumber: item.serialNumber,
 						referenceDevice: '洗衣机',
 						status: item.status,
-						address: item.address,
+						address: item.address + item.label,
 						firstPulsePrice: item.firstPulsePrice,
 						secondPulsePrice: item.secondPulsePrice,
 						thirdPulsePrice: item.thirdPulsePrice,
-						fourthPulseName: item.fourthPulseName,
+						fourthPulsePrice: item.fourthPulsePrice,
+						remove: self.remove,
+						changeStatus: self.changeStatus,
 					}
 				})
 			}
-		}
-		let pagination = {
-			pageSize: 10,
-			current: 1,
 		}
 		return (
 		<div className="detail">
@@ -165,8 +211,9 @@ class DeviceTable extends React.Component {
 							<Table columns={columns}
 								   dataSource={dataSource}
 								   pagination={pagination}
-								   loading={loading}
+								   loading={this.state.loading}
 								   onChange={this.handleTableChange}
+								   bordered
 							/>
 						</div>
 				</div>

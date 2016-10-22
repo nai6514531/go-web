@@ -2,16 +2,16 @@ import RegionService from '../service/region';
 
 import {
 	GET_PROVINCE_LIST,
-	GET_PROVINCEDETAIL,
+	GET_PROVINCE_DETAIL,
 	GET_PROVINCE_CITY_LIST,
 	GET_PROVINCE_SCHOOL_LIST,
 
 	GET_CITY_LIST,
-	GET_CITYDETAIL,
-	GET_CITYDISTRICT_LIST,
+	GET_CITY_DETAIL,
+	GET_CITY_DISTRICT_LIST,
 
 
-	GETDISTRICTDETAIL,
+	GET_DISTRICT_DETAIL,
 } from '../constants/index';
 
 export function getProvinceList() {
@@ -35,12 +35,12 @@ export function getProvinceDetail(id) {
 	return dispatch => {
 		RegionService.province.detail(id).then((result) => {
 			dispatch({
-				type: GET_PROVINCEDETAIL,
+				type: GET_PROVINCE_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_PROVINCEDETAIL,
+				type: GET_PROVINCE_DETAIL,
 				result: { fetch: false, result },
 
 			});
@@ -103,12 +103,12 @@ export function getCityDetail(id) {
 	return dispatch => {
 		RegionService.city.detail(id).then((result) => {
 			dispatch({
-				type: GET_CITYDETAIL,
+				type: GET_CITY_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITYDETAIL,
+				type: GET_CITY_DETAIL,
 				result: { fetch: false, result },
 
 			});
@@ -120,12 +120,12 @@ export function getCityDistrictList(id) {
 	return dispatch => {
 		RegionService.city.district(id).then((result) => {
 			dispatch({
-				type: GET_CITYDISTRICT_LIST,
+				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITYDISTRICT_LIST,
+				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: false, result },
 
 			});
@@ -137,12 +137,12 @@ export function getCityDistrictDetail(id) {
 	return dispatch => {
 		RegionService.district.detail(id).then((result) => {
 			dispatch({
-				type: GETDISTRICTDETAIL,
+				type: GET_DISTRICT_DETAIL,
 				result: { fetch: true, result },
 			});
 		}).catch((result) => {
 			dispatch({
-				type: GET_CITYDISTRICT_LIST,
+				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: false, result },
 
 			});

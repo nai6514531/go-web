@@ -5,19 +5,12 @@ import { bindActionCreators } from 'redux';
 import * as UserActions from './actions/user';
 
 
-function mapStateToProps(state) {
-	const { user: { detail, result } } = state;
-	return { detail, result };
-}
-
 function mapDispatchToProps(dispatch) {
 	const {
 		userLogout,
-		userDetail,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		userLogout,
-		userDetail,
 	};
 }
 
@@ -48,7 +41,7 @@ class Head extends React.Component {
 
 
 Head.propTypes = {
-	title: React.PropTypes.string,
+	userLogout: React.PropTypes.func,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Head);
+export default connect(mapDispatchToProps)(Head);

@@ -72,87 +72,116 @@ class AgentTable extends React.Component {
 		super(props);
 		this.state = {
 			dataSource: [],
+			page: 1,
+			perPage: 10,
 			pagination: {},
 			loading: false,
 			child: false,
+			list: [],
+			pager: {},
 		};
 		this.showChild = this.showChild.bind(this);
 	}
-	handleTableChange(pagination, filters, sorter) {
-		const pager = this.state.pagination;
-		pager.current = pagination.current;
-		this.setState({
-			pagination: pager,
-		});
-		this.fetch({
-			results: pagination.pageSize,
-			page: pagination.current,
-			sortField: sorter.field,
-			sortOrder: sorter.order,
-			...filters,
-		});
-	}
-	fetch(params = {}) {
-		console.log(params);
-		this.setState({ loading: true });
-	}
 	componentDidMount() {
-		const pager = { page : 1, perPpage: 10}
-		this.props.getUserList(pager);
-		// this.fetch();
+		const pager = { page : this.state.page, perPage: this.state.perPage};
+		if(this.props.params.id) {
+			this.props.getUserList(pager);
+		} else {
+			this.props.getUserDetail(USER.id);
+		}
 	}
 	showChild() {
-		console.log('showchild');
-		
 		this.setState({
 			child: true,
 		})
 	}
+	componentWillUpdate(nextProps, nextState) {
+		if(nextState.child == true && this.state.child == false) {
+			const pager = { page : this.state.page, perPage: this.state.perPage};
+			this.props.getUserList(pager);
+		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		if(nextProps.list !== this.props.list
+			|| nextProps.detail !== this.props.detail
+			|| nextState.child == true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	initializePagination() {
+		let total = 1;
+		if (this.props.list && this.props.list.fetch == true) {
+			total = this.props.list.result.data.total;
+		}
+		const self = this;
+		return {
+			total: total,
+			showSizeChanger: true,
+			onShowSizeChange(current, pageSize) {
+				const pager = { page : current, perPage: pageSize};
+				self.setState(pager);
+				self.props.getUserList(pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
+				console.log('Current: ', current, '; PageSize: ', pageSize);
+			},
+			onChange(current) {
+				console.log('Current: ', current);
+				const pager = { page : current, perPage: self.state.perPage};
+				self.setState(pager);
+				self.props.getUserList(pager);
+				// 执行函数获取对应的 page 数据,传递的参数是当前页码
+			},
+		}
+	}
 	render() {
-		console.log('params',this.props.params.id);
-		const id = this.props.params.id;
-		const list = this.props.list;
-		console.log('list:',list);
-		let loading = false;
+		const { list, detail, params: {id} } = this.props;
+		const pagination = this.initializePagination();
+		let loading = true;
 		let data = '';
 		let dataSource = [];
-		const that = this;
-		if(list){
-			// loading = true;
-			if(list.fetch == true){
-				loading = false;
-				if(id) {
+		const self = this;
+		if(id) {
+			if(list){
+				if(list.fetch == true){
 					data = list.result.data.list;
 					dataSource = data.map(function (item, key) {
 						return (
-							{
-								key: item.user.id,
-								index: key,
-								user: item.user.name,
-								contact: item.user.contact,
-								mobile: item.user.mobile,
-								address: item.user.address,
-								number: item.device.sum,
-								action: that.showChild,
-								showAction: !that.state.child,
-							}
+						{
+							key: item.id,
+							index: item.id,
+							user: item.name,
+							contact: item.contact,
+							mobile: item.mobile,
+							address: item.address,
+							number: item.deviceTotal ? item.deviceTotal : 0,
+							action: self.showChild,
+							showAction: false,
+						}
 						)
 					})
-				} else {
-					data = list.result.data.list[0];
+				}
+				loading = false;
+			}
+		} else {
+			if(detail) {
+				if(detail.fetch == true) {
+					data = detail.result.data;
 					dataSource = [{
-						key: data.user.id,
-						index: '1',
-						user: data.user.name,
-						contact: data.user.contact,
-						mobile: data.user.mobile,
-						address: data.user.address,
-						number: data.device.sum,
-						action: that.showChild,
-						showAction: !that.state.child,
+						key: data.id,
+						index: data.id,
+						user: data.name,
+						contact: data.contact,
+						mobile: data.mobile,
+						address: data.address,
+						number: data.deviceTotal ? data.deviceTotal : 0,
+						action: self.showChild,
+						showAction: true,
 					}
 					];
 				}
+				loading = false;
 			}
 		}
 		return (
@@ -176,9 +205,8 @@ class AgentTable extends React.Component {
 							<Table columns={columns}
 								   rowKey={record => record.key}
 								   dataSource={dataSource}
-								   pagination={this.state.pagination}
+								   pagination={pagination}
 								   loading={loading ? loading : false}
-								   onChange={this.handleTableChange}
 							/>
 						</div>
 					</div>

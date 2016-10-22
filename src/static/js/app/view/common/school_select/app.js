@@ -29,7 +29,6 @@ function mapDispatchToProps(dispatch) {
 		getCityList,
 	};
 }
-const user_data = JSON.parse(document.getElementById('main').dataset.user);
 
 class SchoolSelect extends React.Component {
 	constructor(props) {
@@ -43,12 +42,25 @@ class SchoolSelect extends React.Component {
 		this.handleFilter = this.handleFilter.bind(this);
 	}
 	handleFilter() {
-		const id = user_data.user.id;
-		this.props.getSchoolDevice(id, this.state.schoolId);
-		// <Button type="primary" onClick={this.handleFilter}>筛选</Button>
+		this.props.getSchoolDevice(USER.id, this.state.schoolId);
 	}
 	componentWillMount() {
 		this.props.getProvinceList();
+	}
+	componentWillReceiveProps(nextProps) {
+		if(this.props.provinceId !== nextProps.provinceId) {
+			this.setState({provinceId: nextProps.provinceId});
+		}
+		if(this.props.provinceName !== nextProps.provinceName) {
+			this.setState({provinceName: nextProps.provinceName});
+		}
+		if(this.props.schoolId !== nextProps.schoolId) {
+			this.setState({schoolId: nextProps.schoolId});
+		}			
+		// console.log('child',this.props.schoolName,nextProps.schoolName);
+		if(this.props.schoolName !== nextProps.schoolName) {
+			this.setState({schoolName: nextProps.schoolName});
+		}
 	}
 	selectProvince(provinceId, provinceName) {
 		this.props.getProvinceSchoolList(provinceId);
@@ -71,6 +83,8 @@ class SchoolSelect extends React.Component {
 		this.refs.mask.classList.toggle('box-show');
 	}
 	render() {
+		// console.log(this.state.provinceId,this.state.schoolId);
+		// console.log(this.state.provinceName,this.state.schoolName);
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
 		const that = this;
@@ -106,7 +120,7 @@ class SchoolSelect extends React.Component {
 					</div>
 				</div>
 				<div onClick = {this.showBox.bind(this)} className="show">
-					{this.state.province_id ?
+					{this.state.provinceName ?
 						<div>
 							<span>{this.state.provinceName}</span>
 							<span>{this.state.schoolName}</span>

@@ -48,6 +48,7 @@ var (
 
 		"01020300": "拉取区列表成功!",
 		"01020301": "拉取区列表失败!",
+		"01020302": "该城市id不存在!",
 
 		"01020400": "拉取省详情成功!",
 		"01020401": "拉取省详情失败!",
@@ -60,6 +61,11 @@ var (
 
 		"01020700": "拉取指定省份的城市列表成功!",
 		"01020701": "拉取指定省份的城市列表失败!",
+		"01020702": "不存在此省份id!",
+
+		"01020800": "拉取指定省份的学校列表成功!",
+		"01020801": "拉取指定省份的学校列表失败!",
+		"01020802": "不存在此省份id或该省份没有学校!",
 	}
 )
 
@@ -202,9 +208,15 @@ func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
 	districts, err := regionService.DistrictsOfCity(id)
 	if err != nil {
 		result = &enity.Result{"01020301", nil, region_msg["01020301"]}
-	} else {
-		result = &enity.Result{"01020300", districts, region_msg["01020300"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+	if districts == nil {
+		result = &enity.Result{"01020302", nil, region_msg["01020302"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01020300", districts, region_msg["01020300"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -388,9 +400,15 @@ func (self *RegionController) CityOfProvince(ctx *iris.Context) {
 	list, err := regionService.CitiesOfProvince(id)
 	if err != nil {
 		result = &enity.Result{"01020701", nil, region_msg["01020701"]}
-	} else {
-		result = &enity.Result{"01020700", list, region_msg["01020700"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+	if list == nil {
+		result = &enity.Result{"01020702", list, region_msg["01020702"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01020700", list, region_msg["01020700"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 
@@ -428,9 +446,14 @@ func (self *RegionController) SchoolOfProvince(ctx *iris.Context) {
 	list, err := regionService.SchoolOfProvince(id)
 	if err != nil {
 		result = &enity.Result{"01020801", nil, region_msg["01020801"]}
-	} else {
-		result = &enity.Result{"01020800", list, region_msg["01020800"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+	if list == nil {
+		result = &enity.Result{"01020802", nil, region_msg["01020802"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01020800", list, region_msg["01020800"]}
 	ctx.JSON(iris.StatusOK, result)
-
 }

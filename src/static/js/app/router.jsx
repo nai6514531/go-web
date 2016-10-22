@@ -8,7 +8,6 @@ import rootReducer from './reducers/index';
 
 export const store = applyMiddleware(thunk)(createStore)(rootReducer);
 
-
 const router = (
 	<Provider store = {store}>
 	<Router history={hashHistory}>
@@ -30,7 +29,7 @@ const router = (
 		}} />
 		<Route path="/user/device/list" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
-				callback(null, require('./view/user/device/app').default);
+				callback(null, require('./view/user/device_list/app').default);
 			});
 		}} />
 		<Route path="/user/device/school/:id" getComponent={(location, callback) => {

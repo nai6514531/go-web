@@ -26,7 +26,7 @@ func Api() {
 	//api.Use(common.CORS)
 
 	api.Post("/signin", user.Signin)
-	api.Post("/signout", user.Signout)
+	api.Get("/signout", user.Signout)
 
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-role", sync.SyncUserRole)
@@ -38,7 +38,7 @@ func Api() {
 	api.UseFunc(common.RequireSignin)
 
 	api.Get("/user", user.ListByParent)
-	api.Get("/user/:id/user-device-info", user.BasicWithDeviceInfo)
+	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
 	api.Post("/user", user.Create)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)

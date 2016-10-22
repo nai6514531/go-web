@@ -2,10 +2,8 @@ import { apiGet, apiPost, apiPut, apiDelete } from '../library/axios/api';
 
 const UserService = {
 	list: (pager) => {
-		const page = pager.page;
-		const per_page = pager.per_page;
-		console.log (page)
-		return apiGet(`/api/user?${page}&${per_page}`);
+		const { page, perPage } = pager;
+		return apiGet(`/api/user?page=${page}&perPage=${perPage}`);
 	},
 	detail: (id) => {
 		return apiGet(`/api/user/${id}`);
@@ -19,11 +17,13 @@ const UserService = {
 	remove: (id) => {
 		return apiDelete(`/api/user/${id}`);
 	},
-	school: (id) => {
-		return apiGet(`/api/user/${id}/school`);
+	school: (id, schoolId, pager) => {
+		const { page, perPage } = pager;
+		return apiGet(`/api/user/${id}/school?schoolId=${schoolId}&page=${page}&perPage=${perPage}`);
 	},
-	schoolDevice:(id, school_id) => {
-		return apiGet(`/api/user/${id}/school/${school_id}/device`);
+	schoolDevice:(id, school_id, pager) => {
+		const { page, perPage } = pager;
+		return apiGet(`/api/user/${id}/school/${school_id}/device?page=${page}&perPage=${perPage}`);
 	},
 	permission: (id) => {
 		return apiGet(`/api/user/${id}/permission`);
@@ -35,7 +35,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/menu`);
 	},
 	device: (id) => {
-		return apiGet(`/api/user/${id}/device`);
+		return apiGet(`/api/user/${id}/device-total`);
 	}
 };
 

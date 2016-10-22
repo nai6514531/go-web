@@ -3,6 +3,7 @@ package service
 import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type UserRoleRelService struct {
@@ -28,6 +29,13 @@ func (self *UserRoleRelService) BasicByUserIdAndRoleId(userId int, roleId int) (
 
 func (self *UserRoleRelService) Create(userRoleRel *model.UserRoleRel) bool {
 	r := common.DB.Create(userRoleRel)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//更新到木牛数据库
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUserRoleRel(userRoleRel)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
