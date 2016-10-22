@@ -27,12 +27,12 @@ var (
 
 		"01060300": "更新日账单状态成功",
 		"01060301": "更新日账单状态失败",
-		"01060302": "更新日账单状态部分成功",
+		"01060302": "更新日账单状态部分失败",
 		//"01060303": "请求修改状态参数有误",
 
 		"01060400": "日账单结账成功",
 		"01060401": "日账单结账失败",
-		"01060402": "日账单部分结账成功",
+		"01060402": "日账单部分结账失败",
 
 	}
 )
@@ -135,7 +135,7 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	aliPayUserIds := []string{}
 	wechatPayUserIds := []string{}
 	bankPayUserIds := []string{}
-	//var result *enity.Result
+	var result *enity.Result
 	isSuccessed := true
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
@@ -182,9 +182,9 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	}
 
 	if isSuccessed {
-		//result = &enity.Result{""}
+		result = &enity.Result{"01060400", nil, daily_bill_msg["01060400"]}
 	}else {
-
+		result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
 	}
-	//ctx.JSON(iris.StatusOK, &enity.Result{""})
+	ctx.JSON(iris.StatusOK, result)
 }
