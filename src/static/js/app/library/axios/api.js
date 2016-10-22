@@ -1,16 +1,19 @@
 import axios from 'axios';
+import NProgress from "nprogress";
 
 const api = axios.create({
 	headers: {
     	'Content-Type': 'application/json'
   	},
 	transformRequest: [(data) => {
+		NProgress.start();
 		if (!data) {
 			return '';
 		}
 		return JSON.stringify(data.data);
 	}],
 	transformResponse: [(data) => {
+		NProgress.done();
 		if (!data) {
 			return '';
 		}

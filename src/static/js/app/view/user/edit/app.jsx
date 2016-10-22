@@ -169,7 +169,7 @@ class UserForm extends React.Component {
 		this.props.form.resetFields();
 	}
 	handleRadio(select) {
-		if (select === '2') {
+		if (select === '3') {
 			this.setState({ alipay: false });
 		} else {
 			this.setState({ alipay: true });

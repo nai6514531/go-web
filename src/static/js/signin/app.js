@@ -5,7 +5,7 @@ import { Button, Form, Input, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 import { checkStatus, parseJSON, parseCode } from '../common/common';
-
+import NProgress from "nprogress";
 export class LoginForm extends React.Component {
 	constructor(props) {
 		super(props);
@@ -24,6 +24,7 @@ export class LoginForm extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
 		const that = this;
+		NProgress.start();
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				return;
@@ -60,7 +61,9 @@ export class LoginForm extends React.Component {
 						if(tips){
 							that.error(tips);
 						}
+						NProgress.done();
 					}).catch(function(error) {
+						NProgress.done();
 						throw new Error(error);
 				});
 			}
@@ -100,52 +103,52 @@ export class LoginForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-			<Form horizontal onKeyDown={this.handleEnter.bind(this)}>
-				<FormItem
-					{...formItemLayout}
-					label="用户名"
-				>
-					{getFieldDecorator('account', {
-						rules: [
-							{ required: true, message: '请输入用户名' },
-						],
-					})(
-						<Input placeholder="请输入用户名" />
-					)}
-				</FormItem>
+				<Form horizontal onKeyDown={this.handleEnter.bind(this)}>
+					<FormItem
+						{...formItemLayout}
+						label="用户名"
+					>
+						{getFieldDecorator('account', {
+							rules: [
+								{ required: true, message: '请输入用户名' },
+							],
+						})(
+							<Input placeholder="请输入用户名" />
+						)}
+					</FormItem>
 
-				<FormItem
-					{...formItemLayout}
-					label="密码"
-				>
-					{getFieldDecorator('password', {
-						rules: [
-							{ required: true, message: '请输入密码' },
-						],
-					})(
-						<Input type="password" placeholder="请输入密码" />
-					)}
-				</FormItem>
-				<FormItem
-					{...formItemLayout}
-					label="图形验证码"
-				>
-					{getFieldDecorator('captcha', {
-						rules: [
-							{ required: true, message: '请输入图形验证码' },
-						],
-					})(
-						<div>
-							<Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
-							<img className="captcha"  src={this.state.url} onClick={this.getCaptcha}/>
-							<span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
-						</div>
-					)}
-				</FormItem>
-				<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-					<Button type="primary" onClick={this.handleSubmit}>登录</Button>
-				</FormItem>
-			</Form>
+					<FormItem
+						{...formItemLayout}
+						label="密码"
+					>
+						{getFieldDecorator('password', {
+							rules: [
+								{ required: true, message: '请输入密码' },
+							],
+						})(
+							<Input type="password" placeholder="请输入密码" />
+						)}
+					</FormItem>
+					<FormItem
+						{...formItemLayout}
+						label="图形验证码"
+					>
+						{getFieldDecorator('captcha', {
+							rules: [
+								{ required: true, message: '请输入图形验证码' },
+							],
+						})(
+							<div>
+								<Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
+								<img className="captcha"  src={this.state.url} onClick={this.getCaptcha}/>
+								<span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
+							</div>
+						)}
+					</FormItem>
+					<FormItem wrapperCol={{ span: 12, offset: 7 }}>
+						<Button type="primary" onClick={this.handleSubmit}>登录</Button>
+					</FormItem>
+				</Form>
 		);
 	}
 }
