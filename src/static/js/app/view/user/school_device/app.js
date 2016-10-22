@@ -170,6 +170,7 @@ class DeviceTable extends React.Component {
 	render() {
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
+		const schoolId = this.props.params.id;
 		const self = this;
 		let dataSource = [];
 		console.log('schoolDevice',schoolDevice);
@@ -195,38 +196,31 @@ class DeviceTable extends React.Component {
 			}
 		}
 		return (
-			<div className="body-panel">
-				<div className="detail">
-					<div className="detail-head">
-						<Breadcrumb separator=">">
-							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">学校</Breadcrumb.Item>
-						</Breadcrumb>
-					</div>
-					<div className="detail-form">
-						<div className="table">
-							<div>
-								<div className="detail-button">
-									<Button type="primary">
-										<Link to="/user/device/edit">
-											添加新设备
-										</Link>
-									</Button>
-								</div>
-								<Table columns={columns}
-									   dataSource={dataSource}
-									   pagination={pagination}
-									   loading={this.state.loading}
-									   onChange={this.handleTableChange}
-									   bordered
-								/>
-							</div>
-						</div>
-					</div>
+			<section className="view-user-list">
+				<header>
+					<Breadcrumb separator=">">
+						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to={"/user/device/school" + schoolId}>学校</Link></Breadcrumb.Item>
+					</Breadcrumb>
+				</header>
+				<div className="toolbar">
+					<Button type="primary" className="item">
+						<Link to="/user/device/edit">
+							添加新设备
+						</Link>
+					</Button>
 				</div>
-			</div>
-
+				<section className="view-content">
+					<Table columns={columns}
+						   dataSource={dataSource}
+						   pagination={pagination}
+						   loading={this.state.loading}
+						   onChange={this.handleTableChange}
+						   bordered
+					/>
+				</section>
+			</section>
 		);
 	}
 }

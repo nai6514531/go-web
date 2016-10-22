@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
+import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
@@ -249,173 +250,172 @@ class DeviceForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-			<div className="body-panel">
-				<div className="detail">
-					<div className="detail-head">
-						<Breadcrumb separator=">">
-							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">添加</Breadcrumb.Item>
-						</Breadcrumb>
-					</div>
-					<div className="detail-form">
-						<Form horizontal>
-							<FormItem
-								{...formItemLayout}
-								label="设备编号" >
-								{getFieldDecorator('serialNumber', {
-									rules: [
-										{ required: true, message: '请输入设备编号' },
-									],
-									initialValue: initialValue.serialNumber,
-								})( id ?
-										<Input disabled placeholder="请输入设备编号" />
-										:
-										<Input placeholder="请输入设备编号" />
-								)}
-							</FormItem>
-							<div className="select-school">
-								<label className="select-title">省份学校</label>
-								<SchoolSelect handleSelect={this.handleSelect}
-											  provinceId={this.provinceId}
-											  schoolId={this.schoolId}
-											  provinceName={this.provinceName}
-											  schoolName={this.schoolName}
-								/>
-							</div>
-							<FormItem
-								{...formItemLayout}
-								label="学校区域信息" >
-								{getFieldDecorator('address', {
-									rules: [
-										{ message: '请输入学校区域信息' },
-									],
-									initialValue: initialValue.address,
-								})(
-									<Input placeholder="请输入学校区域信息" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="楼层信息" >
-								{getFieldDecorator('label', {
-									rules: [
-										{ message: '请输入楼层信息' },
-									],
-									initialValue: initialValue.label,
-								})(
-									<Input placeholder="请输入楼层信息" />
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="关联设备类型"
-							>
-								{getFieldDecorator('referenceDevice', {
-									initialValue: initialValue.referenceDevice ?
-										initialValue.referenceDevice : this.state.refDeviceType,
-								})(
-									<RadioGroup>
-										{refDeviceNode}
-									</RadioGroup>
-								)}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="单脱价格" >
-								{getFieldDecorator('firstPulsePrice', {
-									rules: [
-										{ required: true, message: '请输入单脱价格' },
-										{ validator: this.checkNumber },
-									],
-									initialValue: initialValue.firstPulsePrice,
-								})(
-									<Input placeholder="请输入单脱价格" />
-								)}
-								{this.firstPulseName ?
-									<span>服务名称已修改为: {this.firstPulseName}
-										<a href="#" onClick={this.changeName.bind(this,1)}>修改</a>
+
+			<section className="view-user-list">
+				<header>
+					<Breadcrumb separator=">">
+						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to={"/user/device/edit" + id}>添加/修改设备</Link></Breadcrumb.Item>
+					</Breadcrumb>
+				</header>
+				<section className="view-content">
+					<Form horizontal>
+						<FormItem
+							{...formItemLayout}
+							label="设备编号" >
+							{getFieldDecorator('serialNumber', {
+								rules: [
+									{ required: true, message: '请输入设备编号' },
+								],
+								initialValue: initialValue.serialNumber,
+							})( id ?
+								<Input disabled placeholder="请输入设备编号" />
+								:
+								<Input placeholder="请输入设备编号" />
+							)}
+						</FormItem>
+						<div className="select-school">
+							<label className="select-title">省份学校</label>
+							<SchoolSelect handleSelect={this.handleSelect}
+										  provinceId={this.provinceId}
+										  schoolId={this.schoolId}
+										  provinceName={this.provinceName}
+										  schoolName={this.schoolName}
+							/>
+						</div>
+						<FormItem
+							{...formItemLayout}
+							label="学校区域信息" >
+							{getFieldDecorator('address', {
+								rules: [
+									{ message: '请输入学校区域信息' },
+								],
+								initialValue: initialValue.address,
+							})(
+								<Input placeholder="请输入学校区域信息" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="楼层信息" >
+							{getFieldDecorator('label', {
+								rules: [
+									{ message: '请输入楼层信息' },
+								],
+								initialValue: initialValue.label,
+							})(
+								<Input placeholder="请输入楼层信息" />
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="关联设备类型"
+						>
+							{getFieldDecorator('referenceDevice', {
+								initialValue: initialValue.referenceDevice ?
+									initialValue.referenceDevice : this.state.refDeviceType,
+							})(
+								<RadioGroup>
+									{refDeviceNode}
+								</RadioGroup>
+							)}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="单脱价格" >
+							{getFieldDecorator('firstPulsePrice', {
+								rules: [
+									{ required: true, message: '请输入单脱价格' },
+									{ validator: this.checkNumber },
+								],
+								initialValue: initialValue.firstPulsePrice,
+							})(
+								<Input placeholder="请输入单脱价格" />
+							)}
+							{this.firstPulseName ?
+								<span>服务名称已修改为: {this.firstPulseName}
+									<a href="#" onClick={this.changeName.bind(this,1)}>修改</a>
 										</span> :
-									<span><a href="#" onClick={this.changeName.bind(this,1)}>修改服务名称</a></span>
-								}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="快洗价格" >
-								{getFieldDecorator('secondPulsePrice', {
-									rules: [
-										{ required: true, message: '请输入快洗价格' },
-										{ validator: this.checkNumber },
-									],
-									initialValue: initialValue.secondPulsePrice,
-								})(
-									<Input placeholder="请输入快洗价格"/>
-								)}
-								{this.secondPulseName ?
-										<span>服务名称已修改为: {this.secondPulseName}
-											<a href="#" onClick={this.changeName.bind(this,2)}>修改</a>
+								<span><a href="#" onClick={this.changeName.bind(this,1)}>修改服务名称</a></span>
+							}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="快洗价格" >
+							{getFieldDecorator('secondPulsePrice', {
+								rules: [
+									{ required: true, message: '请输入快洗价格' },
+									{ validator: this.checkNumber },
+								],
+								initialValue: initialValue.secondPulsePrice,
+							})(
+								<Input placeholder="请输入快洗价格"/>
+							)}
+							{this.secondPulseName ?
+								<span>服务名称已修改为: {this.secondPulseName}
+									<a href="#" onClick={this.changeName.bind(this,2)}>修改</a>
 										</span> :
-										<span><a href="#" onClick={this.changeName.bind(this,2)}>修改服务名称</a></span>
-								}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="标准洗价格">
-								{getFieldDecorator('thirdPulsePrice', {
-									rules: [
-										{ required: true, message: '请输入标准洗价格'},
-										{ validator: this.checkNumber },
-									],
-									initialValue: initialValue.thirdPulsePrice,
-								})(
-									<Input placeholder="请输入标准洗价格"/>
-								)}
-								{this.thirdPulseName?
-										<span>服务名称已修改为: {this.thirdPulseName}
-											<a href="#" onClick={this.changeName.bind(this,3)}>修改</a>
+								<span><a href="#" onClick={this.changeName.bind(this,2)}>修改服务名称</a></span>
+							}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="标准洗价格">
+							{getFieldDecorator('thirdPulsePrice', {
+								rules: [
+									{ required: true, message: '请输入标准洗价格'},
+									{ validator: this.checkNumber },
+								],
+								initialValue: initialValue.thirdPulsePrice,
+							})(
+								<Input placeholder="请输入标准洗价格"/>
+							)}
+							{this.thirdPulseName?
+								<span>服务名称已修改为: {this.thirdPulseName}
+									<a href="#" onClick={this.changeName.bind(this,3)}>修改</a>
 										</span> :
-										<span><a href="#" onClick={this.changeName.bind(this,3)}>修改服务名称</a></span>
-								}
-							</FormItem>
-							<FormItem
-								{...formItemLayout}
-								label="大物洗价格">
-								{getFieldDecorator('fourthPulsePrice', {
-									rules: [
-										{ required: true, message: '请输入大物洗价格'},
-										{ validator: this.checkNumber },
-									],
-									initialValue: initialValue.fourthPulsePrice,
-								})(
-									<Input placeholder="请输入大物洗价格"/>
-								)}
-								{
-									this.fourthPulseName ?
-										<span>服务名称已修改为: {this.fourthPulseName}
-											<a href="#" onClick={this.changeName.bind(this,4)}>修改</a>
+								<span><a href="#" onClick={this.changeName.bind(this,3)}>修改服务名称</a></span>
+							}
+						</FormItem>
+						<FormItem
+							{...formItemLayout}
+							label="大物洗价格">
+							{getFieldDecorator('fourthPulsePrice', {
+								rules: [
+									{ required: true, message: '请输入大物洗价格'},
+									{ validator: this.checkNumber },
+								],
+								initialValue: initialValue.fourthPulsePrice,
+							})(
+								<Input placeholder="请输入大物洗价格"/>
+							)}
+							{
+								this.fourthPulseName ?
+									<span>服务名称已修改为: {this.fourthPulseName}
+										<a href="#" onClick={this.changeName.bind(this,4)}>修改</a>
 										</span> :
-										<span><a href="#" onClick={this.changeName.bind(this,4)}>修改服务名称</a></span>
-								}
-							</FormItem>
-							<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-								<Button type="ghost" onClick={this.handleReset}>取消</Button>
-								<Button type="primary" onClick={this.handleSubmit}>保存</Button>
-							</FormItem>
-							<div>
-								<PulseName changePulseName={this.changePulseName}
-										   visible={this.state.visible}
-										   onCancel={this.hideModal.bind(this)}
-										   currentPulse={this.state.currentPulse}
-										   first={this.firstPulseName}
-										   second={this.secondPulseName}
-										   third={this.thirdPulseName}
-										   fourth={this.fourthPulseName}
- 								/>
-							</div>
-						</Form>
-					</div>
-				</div>
-			</div>
+									<span><a href="#" onClick={this.changeName.bind(this,4)}>修改服务名称</a></span>
+							}
+						</FormItem>
+						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
+							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
+						</FormItem>
+						<div>
+							<PulseName changePulseName={this.changePulseName}
+									   visible={this.state.visible}
+									   onCancel={this.hideModal.bind(this)}
+									   currentPulse={this.state.currentPulse}
+									   first={this.firstPulseName}
+									   second={this.secondPulseName}
+									   third={this.thirdPulseName}
+									   fourth={this.fourthPulseName}
+							/>
+						</div>
+					</Form>
+				</section>
+			</section>
 
 		);
 	}
