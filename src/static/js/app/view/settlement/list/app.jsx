@@ -8,7 +8,7 @@ const App = React.createClass({
 	getInitialState() {
 		return {
 			columns: [{
-				title: '账单ID',
+				title: 'ID',
 				dataIndex: 'id',
 				key: 'id',
 				sorter: (a, b) => +a.id - +b.id
@@ -43,17 +43,17 @@ const App = React.createClass({
 				dataIndex: 'settledAt',
 				key: 'settledAt',
 				render: (settled_at) => {
-					return settled_at == '' ? '' : settled_at;
+					return settled_at == '' ? '/' : settled_at;
 				}
 			}, {
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
 				render: (status) => {
-					if (status == 0) {
-						return <div className="status highlight">未结账</div>
-					} else {
+					if (status == 2) {
 						return <div className="status">已结账</div>
+					} else {
+						return <div className="status highlight">未结账</div>
 					}
 				}
 			}, {
@@ -61,21 +61,41 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				render: (id, record) => {
+					const roleId = this.state.roleId;
+					const status = record.status;
 					const data = {
 						userId: record.userId,
 						billAt: moment(record.billAt).format('YYYY-MM-DD')
 					}
-					return <span>
-            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-              <a>申请提现</a>
-            </Popconfirm>
-						<span> | </span>
-						<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
-              <a>结账</a>
-            </Popconfirm>
-						<span> | </span>
-						<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-          </span>
+					let spanDiv = roleId == 3?( //角色身份判断
+						<span>
+	            <span>已提现</span>
+							<span> | </span>
+							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+	              <a>结账</a>
+	            </Popconfirm>
+							<span> | </span>
+							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          </span>
+					):(
+						<span>
+							{
+								status == 0?(
+									<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+			              <a>未申请提现</a>
+			            </Popconfirm>
+								):(
+									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+			              <a>已申请提现</a>
+			            </Popconfirm>
+								)
+							}
+	            
+							<span> | </span>
+							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          </span>
+					)
+					return spanDiv
 				}
 			}],
 			list: [],
@@ -87,6 +107,7 @@ const App = React.createClass({
 			billAt: '',
 			selectedList: [],   //勾选的账单
 			clickLock: false,   //重复点击的锁
+			roleId: window.USER.role.id
 		};
 	},
 	list(data) {
@@ -124,7 +145,12 @@ const App = React.createClass({
 		this.setState({clickLock: true});
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-			console.log(res)
+
+			if(res.status == "01060100"){
+				self.handleFilter();
+			}else{
+				message.info(res.msg)
+			}
 		}).catch((err)=>{
 			this.setState({clickLock: false});
 			message.info(err)
@@ -161,6 +187,7 @@ const App = React.createClass({
 		});
 	},
 	componentWillMount() {
+
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
 		this.list({
 			cashAccountType: cashAccountType,
@@ -229,11 +256,11 @@ const App = React.createClass({
 		  },
 		};
 
-		const footer = (
-			<Popconfirm title="申请提现吗?" onConfirm={this.multiSettle}>
+		const footer = this.state.roleId == 3?(
+			<Popconfirm title="申请结账吗?" onConfirm={this.multiSettle}>
 		    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
 		  </Popconfirm>
-    )
+    ): "";
 
 		return (<section className="view-settlement-list">
 			<header>

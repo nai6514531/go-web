@@ -16,12 +16,12 @@ const App = React.createClass({
 				sorter: (a, b) => +a.id - +b.id
 			}, {
 				title: '设备编号',
-				dataIndex: 'serial_number',
-				key: 'serial_number'
+				dataIndex: 'serialNumber',
+				key: 'serialNumber'
 			}, {
 				title: '账单日期',
-				dataIndex: 'bill_at',
-				key: 'bill_at'
+				dataIndex: 'billAt',
+				key: 'billAt'
 			}, {
 				title: '金额',
 				dataIndex: 'amount',
