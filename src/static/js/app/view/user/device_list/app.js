@@ -61,43 +61,33 @@ class SchoolTable extends React.Component {
 		};
 	}
 	componentWillMount() {
-		console.log('list will mount');
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	componentWillReceiveProps(nextProps) {
-		const self = this;
-		// store 里有数据,但是组件没数据, 组件要重新从 store 里拿数据
-		console.log('list will recieve props',this.props.school,nextProps.school);
-		if(this.props.school == undefined && nextProps.school && nextProps.school.fetch == true) {
-			this.setState({
-				schoolList: nextProps.school.result.data,
-			});
-			const school = this.props.school;
-			if(school == undefined && nextProps.school && nextProps.school.fetch == true) {
-				console.log('初始化学校筛选列表');
-				// 当组件退出进来的时候,state 里是没有数据的
-				this.state.schoolList = nextProps.school.result.data;
-			}
-			// 当筛选以后,this.props.school 内的数据会变少
-			console.log('buweikong',this.props.school,nextProps.school);
-			if(this.props.school !== undefined && nextProps.school && nextProps.school.fetch == true) {
-				if(this.props.school.result.data.length >= nextProps.school.result.data.length) {
-					this.state.schoolList = nextProps.school.result.data;
+		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
+		const school = this.props.school;
+		if(nextProps.school && nextProps.school.fetch == true){
+			if(school == undefined){
+				this.setState({
+					schoolList: nextProps.school.result.data,
+				});
+			} else {
+				if(this.state.schoolList.length <= school.result.data.length) {
+					if(school.result.data.length >= nextProps.school.result.data.length) {
+						this.setState({
+							schoolList: school.result.data,
+						});
+					} else {
+						this.setState({
+							schoolList: nextProps.school.result.data,
+						});
+					}
 				}
 			}
-			// const theSchool = this.props.school;
-			// if(theSchool && theSchool.fetch == true) {
-			// 	if(theSchool.result.data.length > nextProps.school.result.data.length){
-			// 		self.list = theSchool.result.data;
-			// 	} else {
-			// 		self.list = nextProps.school.result.data;
-			// 	}
-			// } else {
-			// 	self.list = nextProps.school.result.data;
-			// }
 		}
+		
 	}
 	initializePagination() {
 		let total = 1;
@@ -138,7 +128,6 @@ class SchoolTable extends React.Component {
 				})
 			}
 		}
-		console.log('school list',this.list);
 		return (
 			<div className="body-panel">
 				<div className="detail">
