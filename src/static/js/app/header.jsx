@@ -1,7 +1,5 @@
-import React from 'react';
-import {Menu, Button, Icon} from 'antd';
-
-import Menus from './menus.jsx'
+import React from "react";
+import {Menu, Button, Icon} from "antd";
 
 const Header = React.createClass({
 	logout() {
@@ -33,7 +31,21 @@ const Header = React.createClass({
 		const {location} = this.props;
 		const menus = USER.menu || [];
 		return (<div className="header">
-header
+			<ul className="navbar-right">
+				<li>
+					<span className="avatar">
+						<img src="static/img/app/a5.jpg" alt=""/>
+					</span>
+				</li>
+				<li>
+					<span className="name">
+						{USER.name},您好!
+					</span>
+				</li>
+				<li >
+					<Icon type="logout" />
+				</li>
+			</ul>
 		</div>)
 	}
 });
