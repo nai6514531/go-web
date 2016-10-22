@@ -61,12 +61,16 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				render: (id, record) => {
+					const data = {
+						userId: record.userId,
+						billAt: moment(record.billAt).format('YYYY-MM-DD')
+					}
 					return <span>
-            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, id)}>
+            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
               <a>申请提现</a>
             </Popconfirm>
 						<span> | </span>
-						<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, id)}>
+						<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
               <a>结账</a>
             </Popconfirm>
 						<span> | </span>
@@ -78,7 +82,7 @@ const App = React.createClass({
 			total: 0,
 			loading: false,
 			cashAccountType: 0,
-			status: 0,
+			status: "",
 			hasApplied: 0,
 			billAt: '',
 			selectedList: [],   //勾选的账单
@@ -113,18 +117,27 @@ const App = React.createClass({
 				});
 			})
 	},
-	deposit(id) {
-		if(this.setState.clickLock){
-			return;
-		}
+	deposit(data) {
+		const self = this;
+		if(this.state.clickLock){ return; } //是否存在点击锁
+
 		this.setState({clickLock: true});
-		console.log("提现"+id)
-		this.setState({clickLock: false});
+		DailyBillService.apply(data).then((res)=>{
+			this.setState({clickLock: false});
+			console.log(res)
+		}).catch((err)=>{
+			this.setState({clickLock: false});
+			message.info(err)
+			
+		})
+		
 	},
 	settle(id) {
+		if(this.state.clickLock){ return; } //是否存在点击锁
 		alert("settle"+id)
 	},
 	multiSettle() {
+		if(this.state.clickLock){ return; } //是否存在点击锁
 
 		if(this.state.selectedList.length == 0){
 			return message.info('请勾选您需要结账的账单');
@@ -166,11 +179,6 @@ const App = React.createClass({
 			status: value
 		})
 	},
-	handleHasAppliedChange(value){
-		this.setState({
-			hasApplied: value
-		})
-	},
 	handleBillAtChange(date, dateString){
 		this.setState({
 			billAt: dateString
@@ -186,7 +194,6 @@ const App = React.createClass({
 				self.list({
 					cashAccountType: cashAccountType,
 					status: status,
-					hasApplied: hasApplied,
 					billAt: billAt,
 					page: page,
 					perPage: perPage
@@ -246,20 +253,14 @@ const App = React.createClass({
 				</Select>
 				<Select
 					className="item"
-					defaultValue="0"
+					defaultValue=""
 					style={{width: 120}}
 					onChange={this.handleStatusChange}>
-					<Option value="0">请选择结算状态</Option>
-					<Option value="1">已结算</Option>
-					<Option value="2">未结算</Option>
-				</Select>
-				<Select className="item"
-						defaultValue="0"
-						style={{width: 140}}
-						onChange={this.handleHasAppliedChange}>
-					<Option value="0">请选择提现状态</Option>
+					<Option value="">请选择结算状态</Option>
+					<Option value="2">已结算</Option>
+					<Option value="0,1,3">未结算</Option>
 					<Option value="1">已申请提现</Option>
-					<Option value="2">未申请提现</Option>
+					<Option value="0">未申请提现</Option>
 				</Select>
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
