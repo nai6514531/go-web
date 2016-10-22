@@ -252,9 +252,9 @@ class DeviceForm extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/device/edit" + id}>添加/修改设备</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>添加/修改设备</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">

@@ -25,7 +25,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {

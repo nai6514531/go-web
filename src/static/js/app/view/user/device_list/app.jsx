@@ -17,18 +17,16 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
 	const {
 		getUserSchool,
-		getSchoolDevice,
 		getUserDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getUserSchool,
-		getSchoolDevice,
 		getUserDevice,
 	};
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {
@@ -121,7 +119,7 @@ class SchoolTable extends React.Component {
 				dataSource = list.map(function (item,key) {
 					return {
 						key: item.id,
-						index: key,
+						index: item.id,
 						school: item.name,
 						number: item.deviceTotal,
 					}
@@ -132,8 +130,8 @@ class SchoolTable extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">

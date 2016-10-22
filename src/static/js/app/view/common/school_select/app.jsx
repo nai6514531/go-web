@@ -39,10 +39,6 @@ class SchoolSelect extends React.Component {
 			schoolId: '',
 			schoolName: '',
 		};
-		this.handleFilter = this.handleFilter.bind(this);
-	}
-	handleFilter() {
-		this.props.getSchoolDevice(USER.id, this.state.schoolId);
 	}
 	componentWillMount() {
 		this.props.getProvinceList();

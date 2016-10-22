@@ -31,7 +31,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {
@@ -198,9 +198,9 @@ class DeviceTable extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/device/school" + schoolId}>学校</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>学校</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">
