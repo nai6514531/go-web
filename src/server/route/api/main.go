@@ -19,9 +19,11 @@ func Api() {
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
-		ctx.Response.Header.Set("Server", ctx.RemoteAddr())
+		ctx.Response.Header.Set("X-Powered-By", ctx.RemoteAddr())
 		ctx.Next()
 	})
+
+	//api.Use(common.CORS)
 
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
