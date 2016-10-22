@@ -4,6 +4,8 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"strconv"
+	"github.com/jinzhu/gorm"
+	"maizuo.com/soda-manager/src/server/model/muniu"
 )
 
 type DailyBillService struct {
@@ -108,4 +110,34 @@ func (self *DailyBillService) BasicByUserIdAndBillAt(userId int, billAt string) 
 		return nil, r.Error
 	}
 	return dailyBill, nil
+}
+
+func (self *DailyBillService) UpdateStatus(status int, billAt string, userId ...string) (int64, error) {
+	var r *gorm.DB
+	tx := common.DB.Begin()
+	txmn := common.MNDB.Begin()
+
+	//update mnzn database
+	//如果status本来为1,需要更新的也为1时,返回的受影响行数为0
+	statusStr := strconv.Itoa(status)
+	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userId, billAt).Update("STATUS", statusStr)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error.Error())
+		txmn.Rollback()
+		return int64(0), r.Error
+	}
+
+	//update soda-manager
+	//因为每次update时`updated_at`都会更新
+	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userId, billAt).Update("status", status)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error.Error())
+		tx.Rollback()
+		txmn.Rollback()
+		return int64(0), r.Error
+	}
+
+	tx.Commit()
+	txmn.Commit()
+	return r.RowsAffected, nil
 }
