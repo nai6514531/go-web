@@ -7,8 +7,7 @@ type DailyBill struct {
 	TotalAmount int    `json:"totalAmount"`
 	SettledAt   string `json:"settledAt"`
 	BillAt      string `json:"billAt"`
-	//HasApplied  int    `json:"hasApplied"`
-	Status      int    `json:"status"`      //0：未结 1：已申请提现 2：已结 3:结算中
+	Status      int    `json:"status"`      //0：未结账 1：已申请提现 2：已结账 3:结账中
 	OrderCount  int    `json:"orderCount"`
 	AccountType int    `json:"accountType,omitempty" gorm:"-"`
 	AccountName string `json:"accountName,omitempty" gorm:"-"`
