@@ -50,10 +50,19 @@ const App = React.createClass({
 				dataIndex: 'status',
 				key: 'status',
 				render: (status) => {
-					if (status == 2) {
-						return <div className="status">已结账</div>
-					} else {
-						return <div className="status highlight">未结账</div>
+					switch (status) {
+						case 0:
+							return <div className="status highlight">未结账</div>
+							break;
+						case 1:
+							return <div className="status">已申请提现</div>
+							break;
+						case 2:
+							return <div className="status">已结账</div>
+							break;
+						case 3:
+							return <div className="status">结账中</div>
+							break;
 					}
 				}
 			}, {
@@ -70,32 +79,46 @@ const App = React.createClass({
 						willApplyStatus: status == 0 ? 1: 0 //即将提现改变的状态
 					}
 
-					let spanDiv = roleId == 3?( //角色身份判断
-						<span>
-							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
-	              <a>结账</a>
-	            </Popconfirm>
-							<span> | </span>
-							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          </span>
-					):(
-						<span>
-							{
-								status == 0?(		
-									<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-			              <a>未申请提现</a>
-			            </Popconfirm>
-								):(
+					let spanDiv = "";
+					switch (roleId) {
+						case 1:
+							spanDiv = (
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+							)
+							break;
+						case 2: 
+							spanDiv = (
+								<span>
+									{
+										status == 0?(		
+											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>未申请提现</a>
+					            </Popconfirm>
+										):(
 
-									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-			              <a>已申请提现</a>
+											<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>已申请提现</a>
+					            </Popconfirm>
+										)
+									}
+									<span> | </span>
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+			          </span>
+							)
+							break;
+						case 3: 
+							spanDiv = (
+								<span>
+									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+			              <a>结账</a>
 			            </Popconfirm>
-								)
-							}
-							<span> | </span>
-							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          </span>
-					)
+									<span> | </span>
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+			          </span>
+							)
+							break;
+
+					}
 					return spanDiv
 				}
 			}],
