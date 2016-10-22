@@ -48,15 +48,24 @@ server:
     database: "soda-manager"
     max-idle: 20
     max-open: 20
+#  mndb:
+#    dialect: "mysql"
+#    host: "120.24.76.46"
+#    port: 3306
+#    user: "mnzn"
+#    password: "mnzn123"
+#    database: "mnzn"
+#    max-idle: 20
+#    max-open: 20
   mndb:
-    dialect: "mysql"
-    host: "120.24.76.46"
-    port: 3306
-    user: "mnzn"
-    password: "mnzn123"
-    database: "mnzn"
-    max-idle: 20
-    max-open: 20
+      dialect: "mysql"
+      host: "192.168.1.204"
+      port: 3306
+      user: "web"
+      password: "123456"
+      database: "mnzn"
+      max-idle: 20
+      max-open: 20
   redis:
         addr: "192.168.1.204:6379"
         password: "123456"
