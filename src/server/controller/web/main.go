@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/afocus/captcha"
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
@@ -78,5 +77,4 @@ func (self *WebController) Captcha(ctx *iris.Context) {
 	img, _captcha := _cap.Create(4, captcha.NUM)
 	png.Encode(ctx.Response.BodyWriter(), img)
 	ctx.Session().Set(captchaKey, _captcha)
-	fmt.Println(_captcha)
 }

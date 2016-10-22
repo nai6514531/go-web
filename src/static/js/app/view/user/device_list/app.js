@@ -57,12 +57,34 @@ class SchoolTable extends React.Component {
 			pager: {},
 			page: 1,
 			perPage: 10,
+			schoolList: [],
 		};
 	}
-	componentDidMount() {
+	componentWillMount() {
+		console.log('list will mount');
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
 		this.props.getUserSchool(USER.id, schoolId, pager);
+	}
+	componentWillReceiveProps(nextProps) {
+		const self = this;
+		// store 里有数据,但是组件没数据, 组件要重新从 store 里拿数据
+		console.log('list will recieve props',this.props.school,nextProps.school);
+		if(this.props.school == undefined && nextProps.school && nextProps.school.fetch == true) {
+			this.setState({
+				schoolList: nextProps.school.result.data,
+			});
+			// const theSchool = this.props.school;
+			// if(theSchool && theSchool.fetch == true) {
+			// 	if(theSchool.result.data.length > nextProps.school.result.data.length){
+			// 		self.list = theSchool.result.data;
+			// 	} else {
+			// 		self.list = nextProps.school.result.data;
+			// 	}
+			// } else {
+			// 	self.list = nextProps.school.result.data;
+			// }
+		}
 	}
 	initializePagination() {
 		let total = 1;
@@ -77,15 +99,11 @@ class SchoolTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
-				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码
-				console.log('Current: ', current);
 			},
 		}
 	}
@@ -98,7 +116,6 @@ class SchoolTable extends React.Component {
 			if(school.fetch == true){
 				list = school.result.data;
 				dataSource = list.map(function (item,key) {
-					console.log(item);
 					return {
 						key: item.id,
 						index: key,
@@ -108,8 +125,8 @@ class SchoolTable extends React.Component {
 				})
 			}
 		}
+		console.log('school list',this.list);
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -121,8 +138,8 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter 
-										schoolList={list}
+									<SchoolFilter
+										schoolList={this.state.schoolList}
 										getUserSchool={this.props.getUserSchool}
 										page={this.state.page}
 										perPage={this.state.perPage}
@@ -138,7 +155,6 @@ class SchoolTable extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}

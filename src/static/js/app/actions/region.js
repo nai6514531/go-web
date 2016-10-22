@@ -21,7 +21,7 @@ export function getProvinceList() {
 				type: GET_PROVINCE_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_PROVINCE_LIST,
 				result: { fetch: false, result },
@@ -38,7 +38,7 @@ export function getProvinceDetail(id) {
 				type: GET_PROVINCE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_PROVINCE_DETAIL,
 				result: { fetch: false, result },
@@ -55,7 +55,7 @@ export function getProvinceCityList(id) {
 				type: GET_PROVINCE_CITY_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_PROVINCE_CITY_LIST,
 				result: { fetch: false, result },
@@ -72,7 +72,7 @@ export function getProvinceSchoolList(id) {
 				type: GET_PROVINCE_SCHOOL_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_PROVINCE_SCHOOL_LIST,
 				result: { fetch: false, result },
@@ -89,7 +89,7 @@ export function getCityList() {
 				type: GET_CITY_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_CITY_LIST,
 				result: { fetch: false, result },
@@ -106,7 +106,7 @@ export function getCityDetail(id) {
 				type: GET_CITY_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_CITY_DETAIL,
 				result: { fetch: false, result },
@@ -123,7 +123,7 @@ export function getCityDistrictList(id) {
 				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: false, result },
@@ -140,7 +140,7 @@ export function getCityDistrictDetail(id) {
 				type: GET_DISTRICT_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: false, result },

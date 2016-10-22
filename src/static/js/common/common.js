@@ -1,3 +1,4 @@
+
 export const checkStatus = (response) => {
 	if (response.status >= 200 && response.status < 300) {
 		return response
@@ -13,7 +14,6 @@ export const parseJSON = (response) => {
 }
 
 export const parseCode = (code) => {
-	let newCode = code.substring(code.length - 2);
-	newCode = parseInt(newCode, 10);
+	const newCode = parseInt(code.substr(-2), 10);
 	return newCode;
 }

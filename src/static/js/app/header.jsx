@@ -3,7 +3,7 @@ import {Menu, Button, Icon} from 'antd';
 
 import Menus from './menus.jsx'
 
-const Navbar = React.createClass({
+const Header = React.createClass({
 	logout() {
 		let boo = confirm('确认退出登录吗?');
 		if (!boo) {
@@ -32,28 +32,10 @@ const Navbar = React.createClass({
 	render() {
 		const {location} = this.props;
 		const menus = USER.menu || [];
-		return (<aside>
-			<nav>
-				<Menu mode="inline"
-					  theme="dark"
-					  defaultOpenKeys={['data']}
-					  selectedKeys={['#' + location.pathname]}
-					  onClick={this.onClick}>
-
-					{Menus.map(function (_menu) {
-						return <Menu.SubMenu key={_menu.key} title={<div><Icon type={_menu.icon}/> {_menu.text}</div>}>
-							{menus.map(function (item) {
-								return <Menu.Item key={item.url}>{item.name}</Menu.Item>
-							})}
-							<Menu.Item key="#/logout">退出</Menu.Item>
-						</Menu.SubMenu>
-					})}
-				</Menu>
-			</nav>
-			<footer>
-			</footer>
-		</aside>)
+		return (<div className="header">
+header
+		</div>)
 	}
 });
 
-export default Navbar;
+export default Header;

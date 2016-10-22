@@ -29,7 +29,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/permission`);
 	},
 	logout: () => {
-		return apiPost(`/api/link/signout`);
+		return apiGet(`/api/link/signout`);
 	},
 	menu: (id) => {
 		return apiGet(`/api/user/${id}/menu`);
