@@ -133,34 +133,39 @@ func (self *DeviceController) Basic(ctx *iris.Context) {
  	@apiName List
 	@apiGroup Device
  	@apiSuccessExample 成功返回
- 	{
+	{
 	  "status": "01030400",
-	  "data": [
-	    {
-	      "id": 3,
-	      "created_at": "0001-01-01T00:00:00Z",
-	      "updated_at": "0001-01-01T00:00:00Z",
-	      "deleted_at": null,
-	      "user_id": 0,
-	      "label": "",
-	      "serial_number": "",
-	      "reference_device_id": 0,
-	      "province_id": 0,
-	      "city_id": 0,
-	      "district_id": 0,
-	      "school_id": 0,
-	      "address": "",
-	      "first_pulse_price": 0,
-	      "second_pulse_price": 0,
-	      "third_pulse_price": 0,
-	      "fourth_pulse_price": 0,
-	      "first_pulse_name": "",
-	      "second_pulse_name": "",
-	      "third_pulse_name": "",
-	      "fourth_pulse_name": "",
-	      "status": 0
-	    }...
-	  ],
+	  "data": {
+	    "total": 4,
+	    "list": [
+	      {
+	        "id": 7,
+	        "createdAt": "2016-10-22T15:40:49+08:00",
+	        "updatedAt": "2016-10-22T15:49:40+08:00",
+	        "deletedAt": null,
+	        "userId": 20,
+	        "label": "一楼1",
+	        "serialNumber": "1234567899",
+	        "referenceDeviceId": 1,
+	        "provinceId": 440000,
+	        "cityId": 0,
+	        "districtId": 0,
+	        "schoolId": 12051,
+	        "address": "",
+	        "firstPulsePrice": 1110,
+	        "secondPulsePrice": 20,
+	        "thirdPulsePrice": 30,
+	        "fourthPulsePrice": 40,
+	        "firstPulseName": "maichong",
+	        "secondPulseName": "",
+	        "thirdPulseName": "",
+	        "fourthPulseName": "",
+	        "password": "",
+	        "step": 0,
+	        "status": 0
+	      },...
+	    ]
+	  },
 	  "msg": "拉取设备列表成功!"
 	}
 	@apiParam (错误码) {String} 01030401 拉取设备列表失败
@@ -182,10 +187,20 @@ func (self *DeviceController) List(ctx *iris.Context) {
 }
 
 /**
- * @api {patch} /api/device/:id/status 更新设备状态
- * @apiName UpdateStatus
- * @apiGroup Device
- */
+  	@api {patch} /api/device/:id/status 更新设备状态
+  	@apiName UpdateStatus
+  	@apiGroup Device
+ 	@apiParamExample {json} 请求例子:
+	{
+	  "status":1
+	}
+	@apiSuccessExample 成功返回:
+	{
+	  "status": "01030200",
+	  "data": null,
+	  "msg": "更新设备状态成功!"
+	}
+**/
 func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
@@ -214,10 +229,28 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 }
 
 /**
- * @api {put} /api/device/:id 更新设备
- * @apiName Update
- * @apiGroup Device
- */
+	@api {put} /api/device/:id 更新设备
+	@apiName Update
+ 	@apiGroup Device
+  	@apiParamExample {json} 请求例子:
+	{
+		"serialNumber":"1234567890",
+		"provinceId":440000,
+		"schoolId":12051,
+		"label":"一楼",
+		"referenceDeviceId":1,
+		"firstPulsePrice":10,
+		"secondPulsePrice":20,
+		"thirdPulsePrice":30,
+		"fourthPulsePrice":40
+	}
+	@apiSuccessExample 成功返回:
+	{
+  		"status": "01030300",
+  		"data": null,
+  		"msg": "更新设备成功!"
+	}
+*/
 func (self *DeviceController) Update(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
@@ -298,10 +331,28 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 }
 
 /**
- * @api {put} /api/device/:id/serial-number 通过编号更新设备
- * @apiName UpdateBySerialNumber
- * @apiGroup Device
- */
+ 	@api {put} /api/device/:id/serial-number 通过编号更新设备
+	@apiName UpdateBySerialNumber
+	@apiGroup Device
+   	@apiParamExample {json} 请求例子:
+ 	{
+		"serialNumber":"1234567890",
+		"provinceId":440000,
+		"schoolId":12051,
+		"label":"一楼",
+		"referenceDeviceId":1,
+		"firstPulsePrice":10,
+		"secondPulsePrice":20,
+		"thirdPulsePrice":30,
+		"fourthPulsePrice":40
+	}
+	@apiSuccessExample 成功返回:
+	{
+  		"status": "01030500",
+  		"data": null,
+  		"msg": "更新设备成功!"
+	}
+*/
 func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
@@ -371,10 +422,16 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 }
 
 /**
- * @api {patch} /api/device/:id/reset 重置设备
- * @apiName Delete
- * @apiGroup Device
- */
+	@api {patch} /api/device/:id/reset 重置设备
+ 	@apiName Delete
+	@apiGroup Device
+ 	@apiSuccessExample 成功返回:
+	{
+  		"status": "01030600",
+  		"data": null,
+  		"msg": "重置设备成功!"
+	}
+*/
 //事实上是重置设备，将userid变回0
 func (self *DeviceController) Reset(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
@@ -424,18 +481,6 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		"data": null,
 		"msg": "添加设备成功!"
 	}
-	@apiParam (错误码) {String} 01030701 添加设备失败
-	@apiParam (错误码) {String} 01030702 请填写设备编号
-	@apiParam (错误码) {String} 01030703 设备编号格式不对,长度为10位!
-	@apiParam (错误码) {String} 01030704 请选择省份
-	@apiParam (错误码) {String} 01030705 请选择学校
-	@apiParam (错误码) {String} 01030706 请填写楼层信息
-	@apiParam (错误码) {String} 01030707 请选择关联设备
-	@apiParam (错误码) {String} 01030708 请填写单脱价格
-	@apiParam (错误码) {String} 01030709 请填写快洗价格
-	@apiParam (错误码) {String} 01030710 请填写标准洗价格
-	@apiParam (错误码) {String} 01030711 请填写大件洗价格
-	@apiParam (错误码) {String} 01030712 请填写大件洗价格
 */
 func (self *DeviceController) Create(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
@@ -510,10 +555,23 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 }
 
 /**
- * @api {patch} /api/device/:id/pulse-name 更新设备脉冲名
- * @apiName UpdatePulseName
- * @apiGroup Device
- */
+	@api {patch} /api/device/:id/pulse-name 更新设备脉冲名
+	@apiName UpdatePulseName
+	@apiGroup Device
+  	@apiParamExample {json} 请求例子:
+	{
+	  "firstPulseName":"单洗价格"
+	  "SecondPulseName":"xxx"
+	  ...
+	}
+	@apiSuccessExample 成功返回:
+ 	HTTP/1.1 200 OK
+	{
+		"status": "01030800",
+		"data": null,
+		"msg": "更新设备脉冲名成功!"
+	}
+*/
 func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	var device model.Device

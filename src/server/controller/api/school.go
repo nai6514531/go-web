@@ -20,7 +20,19 @@ var (
  * @api {get} /api/school/:id 学校详情
  * @apiName Basic
  * @apiGroup School
- */
+	@apiSuccessExample Success-Response:
+	 {
+	  "status": "01050100",
+	  "data": {
+	    "id": 1001,
+	    "createdAt": "0001-01-01T00:00:00Z",
+	    "updatedAt": "0001-01-01T00:00:00Z",
+	    "deletedAt": null,
+	    "name": "清华大学"
+	  },
+	  "msg": "拉取学校详情成功"
+	}
+*/
 func (self *SchoolController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	schoolService := &service.SchoolService{}
