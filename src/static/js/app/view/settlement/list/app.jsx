@@ -121,7 +121,7 @@ const App = React.createClass({
 	multiSettle() {
 
 		if(this.state.selectedList.length == 0){
-			message.info('请勾选您需要结账的账单');
+			return message.info('请勾选您需要结账的账单');
 		}
 
 		let selectedListId = "";
@@ -130,7 +130,7 @@ const App = React.createClass({
 			selectedListIdArr.push(item.id);
 		})
 		selectedListId = selectedListIdArr.join(',');
-		console.log(selectedListId)
+		alert(selectedListId)
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
@@ -216,6 +216,12 @@ const App = React.createClass({
 		  },
 		};
 
+		const footer = (
+			<Popconfirm title="申请提现吗?" onConfirm={this.multiSettle}>
+		    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
+		  </Popconfirm>
+    )
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -252,9 +258,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
 			</div>
-			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {
-				return (<Button className="multiSettleBtn" onClick={this.multiSettle} type="primary" size="large">结账</Button>)
-			}}/>
+			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return footer}}/>
 		</section>);
 	}
 });
