@@ -112,6 +112,20 @@ func (self *DailyBillService) BasicByUserIdAndBillAt(userId int, billAt string) 
 	return dailyBill, nil
 }
 
+func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...string) (*map[int]*model.DailyBill, error) {
+	list := &[]*model.DailyBill{}
+	dailyBillMap := make(map[int]*model.DailyBill)
+	r := common.DB.Where("user_id in (?) and status = ? and bill_at = ?", userIds, status, billAt).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, dailyBill := range *list {
+		dailyBillMap[dailyBill.UserId] = dailyBill
+	}
+	return &dailyBillMap, nil
+}
+
 func (self *DailyBillService) UpdateStatus(status int, billAt string, userId ...string) (int64, error) {
 	var r *gorm.DB
 	tx := common.DB.Begin()
