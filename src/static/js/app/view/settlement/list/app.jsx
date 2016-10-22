@@ -157,8 +157,7 @@ const App = React.createClass({
 
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-
-			if(res.status == "01060100"){
+			if(res.status == "0"){
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
 				message.info(res.msg)
