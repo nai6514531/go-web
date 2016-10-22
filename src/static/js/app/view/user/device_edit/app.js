@@ -79,11 +79,15 @@ class DeviceForm extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		const pulseName = nextProps.pulseName;
-		// 第一次修改成功以后就有 pulseName 的值了,但是每次修改脉冲名都返回同样的 pulseName 内容
-		// 需要每次修改成功都要弹框提示,并且只有当修改成功以后才能修改 state 的值
-		if(pulseName && pulseName.fetch == true) {
-			console.log('脉冲名修改成功');
-			// this.setState(thePulseName);
+		if(this.theName == 0){
+			if(pulseName && pulseName.fetch == true) {
+				alert('脉冲名修改成功');
+				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
+				this[pulseNameKey] = self.pulseName;
+			} else if (pulseName && pulseName.fetch == false) {
+				alert('脉冲名修改失败,请重试.');
+			}
+			self.theName = 1;
 		}
 		// 修改详情时 设置初始省市 ID
 		const deviceId = this.props.params.id;
@@ -114,15 +118,12 @@ class DeviceForm extends React.Component {
 			self.thirdPulseName = device.thirdPulseName;
 			self.fourthPulseName = device.fourthPulseName;
 		}
-
-
 	}
 	handleSubmit(e) {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
-				console.log('Errors in form!!!');
 				return;
 			}
 			console.log(values);
@@ -133,22 +134,22 @@ class DeviceForm extends React.Component {
 				'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
-				"firstPulsePrice": values.firstPulsePrice,
-				"secondPulsePrice": values.secondPulsePrice,
-				"thirdPulsePrice": values.thirdPulsePrice,
-				"fourthPulsePrice": values.fourthPulsePrice,
-				"firstPulseName": values.firstPulseName ? values.firstPulseName : "",
-				"secondPulseName": values.secondPulseName ? values.secondPulseName : "",
-				"thirdPulseName": values.thirdPulseName ? values.thirdPulseName : "",
-				"fourthPulseName": values.fourthPulseName ? values.fourthPulseName : "",
+				"firstPulsePrice": parseInt(values.firstPulsePrice),
+				"secondPulsePrice": parseInt(values.secondPulsePrice),
+				"thirdPulsePrice": parseInt(values.thirdPulsePrice),
+				"fourthPulsePrice": parseInt(values.fourthPulsePrice),
+				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
+				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
+				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
+				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			}
 			const deviceId = this.props.params.id;
 			// 新增设备
-			this.props.postDeviceDetail(deviceValue);
+			// this.props.postDeviceDetail(deviceValue);
 			if(deviceId) {
-				// this.props.putDeviceDetail(deviceId,deviceValue);
+				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
-				// this.props.putSerialNumber(values.serialNumber,deviceValue);
+				this.props.putSerialNumber(values.serialNumber,deviceValue);
 			}
 			// 修改设备
 		});
@@ -158,7 +159,6 @@ class DeviceForm extends React.Component {
 		this.props.form.resetFields();
 	}
 	handleSelect(provinceId, schoolId) {
-		console.log('选择学校',provinceId,schoolId);
 		this.provinceId = provinceId;
 		this.schoolId = schoolId;
 	}
@@ -170,7 +170,6 @@ class DeviceForm extends React.Component {
 		this.showModal();
 	}
 	changePulseName(pulseName) {
-		// 修改的脉冲服务名称
 		const deviceId = this.props.params.id;
 		// 被修改脉冲的 key
 		const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
@@ -178,15 +177,13 @@ class DeviceForm extends React.Component {
 		// 被修改的脉冲 key-value
 		thePulseName[pulseNameKey] = pulseName;
 		const addNew = this.state.addNew;
-		// 如果是修改,则需要确保反馈是成功,才能 setState,除非重新发起请求重新渲染
-		this[pulseNameKey] = pulseName;
+		this.theName = 0;
+		this.pulseName = pulseName;
 		if(addNew) {
-			// this.setState(thePulseName);
+			this[pulseNameKey] = pulseName;
 		} else {
-			// edit
 			const device = { deviceId: deviceId };
 			let data = Object.assign({}, device, thePulseName);
-			console.log('data',data);
 			this.props.patchPulseName(deviceId, data);
 		}
 	}
@@ -205,9 +202,6 @@ class DeviceForm extends React.Component {
 		}
 	}
 	render() {
-		// 设备名
-		const pulseName = this.props.pulseName;
-		console.log('pulseName',pulseName);
 		// 关联设备列表
 		const refDevice = this.props.refDevice;
 		let refDeviceNode = [];
@@ -320,7 +314,7 @@ class DeviceForm extends React.Component {
 								label="关联设备类型"
 							>
 								{getFieldDecorator('referenceDevice', {
-									initialValue: initialValue.referenceDevice ? 
+									initialValue: initialValue.referenceDevice ?
 										initialValue.referenceDevice : this.state.refDeviceType,
 								})(
 									<RadioGroup>
@@ -442,7 +436,6 @@ class PulseName extends React.Component {
 	}
 	handleSubmit() {
 		const currentPulse = this.props.currentPulse;
-		console.log('当前脉冲',currentPulse);
 		const itemKey = key[currentPulse-1] + 'PulseName';
 		const pulseName = this.props.form.getFieldsValue()[itemKey];
 		// 修改后的当前脉冲的值

@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Table, Icon, Popconfirm} from "antd";
+import {Button, Table, Icon, Popconfirm,Breadcrumb} from "antd";
 import "./app.less";
 import DailyBillDetailService from "../../../service/daily_bill_detail";
 const App = React.createClass({
@@ -94,7 +94,10 @@ const App = React.createClass({
 		};
 		return (<section className="view-daily-bill-detail">
 			<header>
-				账单明细
+				<Breadcrumb>
+					<Breadcrumb.Item><a href="/#/settlement/">账单列表</a></Breadcrumb.Item>
+					<Breadcrumb.Item>账单详情</Breadcrumb.Item>
+				</Breadcrumb>
 			</header>
 			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
 		</section>);
