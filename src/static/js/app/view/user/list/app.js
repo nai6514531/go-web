@@ -191,33 +191,29 @@ class AgentTable extends React.Component {
 			}
 		}
 		return (
-			<div className="body-panel">
-				<div className="detail">
-					<div className="detail-head">
-						<Breadcrumb separator=">">
-							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						</Breadcrumb>
-					</div>
-					<div>{this.loading}</div>
-					<div className="detail-form">
-						<div className="table">
-							<div className="detail-button">
-								<Button type="primary">
-									<Link to='/user/edit/new'>
-										添加新代理商
-									</Link>
-								</Button>
-							</div>
-							<Table columns={columns}
-								   rowKey={record => record.key}
-								   dataSource={dataSource}
-								   pagination={pagination}
-								   loading={this.loading ? this.loading : false}
-							/>
-						</div>
-					</div>
+			<section className="view-user-list">
+				<header>
+					<Breadcrumb>
+						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+					</Breadcrumb>
+				</header>
+				<div className="toolbar">
+					<Button type="primary" className="item">
+						<Link to='/user/edit/new'>
+							添加新代理商
+						</Link>
+					</Button>
 				</div>
-			</div>
+				<section className="view-content">
+					<Table columns={columns}
+						   rowKey={record => record.key}
+						   dataSource={dataSource}
+						   pagination={pagination}
+						   loading={this.loading ? this.loading : false}
+						   bordered
+					/>
+				</section>
+			</section>
 		);
 	}
 }

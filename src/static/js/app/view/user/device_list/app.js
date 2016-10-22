@@ -129,35 +129,31 @@ class SchoolTable extends React.Component {
 			}
 		}
 		return (
-			<div className="body-panel">
-				<div className="detail">
-					<div className="detail-head">
-						<Breadcrumb separator=">">
-							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-							<Breadcrumb.Item href="#">设备管理</Breadcrumb.Item>
-						</Breadcrumb>
-					</div>
-					<div className="detail-form">
-						<div className="table">
-								<div>
-									<SchoolFilter
-										schoolList={this.state.schoolList}
-										getUserSchool={this.props.getUserSchool}
-										page={this.state.page}
-										perPage={this.state.perPage}
-									/>
-									<Table columns={columns}
-										   dataSource={dataSource}
-										   pagination={pagination}
-										   loading={this.state.loading}
-										   onChange={this.handleTableChange}
-									/>
-								</div>
-						</div>
-					</div>
+			<section className="view-user-list">
+				<header>
+					<Breadcrumb separator=">">
+						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+					</Breadcrumb>
+				</header>
+				<div className="toolbar">
+					<SchoolFilter
+						schoolList={this.state.schoolList}
+						getUserSchool={this.props.getUserSchool}
+						page={this.state.page}
+						perPage={this.state.perPage}
+					/>
 				</div>
-			</div>
-
+				<section className="view-content">
+					<Table columns={columns}
+						   dataSource={dataSource}
+						   pagination={pagination}
+						   loading={this.state.loading}
+						   onChange={this.handleTableChange}
+						   bordered
+					/>
+				</section>
+			</section>
 		);
 	}
 }
