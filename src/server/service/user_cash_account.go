@@ -26,6 +26,21 @@ func (self *UserCashAccountService) BasicByUserId(userId int) (*model.UserCashAc
 	}
 	return userCashAccount, nil
 }
+
+func (self *UserCashAccountService) BasicMapByUserId(userIds []string) (*map[int]*model.UserCashAccount, error) {
+	list := &[]*model.UserCashAccount{}
+	accountMap := make(map[int]*model.UserCashAccount)
+	r := common.DB.Where("user_id in (?)", userIds).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, account := range *list {
+		accountMap[account.UserId] = account
+	}
+	return &accountMap, nil
+}
+
 func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
 	r := common.DB.Create(userCashAccount)
 	if r.RowsAffected <= 0 || r.Error != nil {
