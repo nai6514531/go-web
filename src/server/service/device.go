@@ -85,7 +85,7 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
-	r := common.DB.Create(device).Scan(device)
+	r := common.DB.Create(device).Scan(device) //userid=0
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -144,16 +144,16 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	return true
 }
 
-func (self *DeviceService) Delete(id int) bool {
+func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
-	r := common.DB.Model(&model.Device{}).Where("id = ?", id).Scan(device).Delete(&model.Device{})
+	r := common.DB.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 0).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
-	//删除到木牛数据库
+	//重置，在木牛数据库
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
-	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
+	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("COMPANYID", "0")
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

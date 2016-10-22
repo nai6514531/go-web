@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Table, Icon, Popconfirm, Select, DatePicker} from 'antd';
+import {Button, Table, Icon, Popconfirm, Select, DatePicker,Breadcrumb} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
@@ -185,7 +185,9 @@ const App = React.createClass({
 		const pagination = this.initializePagination();
 		return (<section className="view-settlement-list">
 			<header>
-				账单列表
+				<Breadcrumb>
+					<Breadcrumb.Item>账单列表</Breadcrumb.Item>
+				</Breadcrumb>
 			</header>
 			<div className="filter">
 				<Select className="item"

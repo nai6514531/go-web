@@ -54,10 +54,10 @@ var (
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
 
-		"01030600": "删除设备成功!",
-		"01030601": "删除设备失败!",
+		"01030600": "重置设备成功!",
+		"01030601": "重置设备失败!",
 		"01030602": "设备id不能小于0!",
-		"01030603": "该设备已被删除或不存在!",
+		"01030603": "该设备已被重置或不存在!",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
@@ -371,11 +371,12 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 }
 
 /**
- * @api {delete} /api/device/:id 删除设备
+ * @api {patch} /api/device/:id/reset 重置设备
  * @apiName Delete
  * @apiGroup Device
  */
-func (self *DeviceController) Delete(ctx *iris.Context) {
+//事实上是重置设备，将userid变回0
+func (self *DeviceController) Reset(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
@@ -385,12 +386,12 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 		return
 	}
 	currentDevice, _ := deviceService.Basic(id)
-	if currentDevice == nil { //设备被删除了或不存在
+	if currentDevice == nil || currentDevice.UserId == 0 { //设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	success := deviceService.Delete(id)
+	success := deviceService.Reset(id)
 	if !success {
 		result = &enity.Result{"01030601", nil, device_msg["01030601"]}
 		ctx.JSON(iris.StatusOK, result)

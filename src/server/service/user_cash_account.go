@@ -32,11 +32,14 @@ func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccoun
 		return false
 	}
 	//更新到木牛数据库
-	boxAdmin := &muniu.BoxAdmin{}
-	boxAdmin.FillByUserCashAccount(userCashAccount)
-	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	//只有更新的为银行账号才更新木牛里面的账号其他支付宝和微信不同步进去
+	if userCashAccount.Type == 3 {
+		boxAdmin := &muniu.BoxAdmin{}
+		boxAdmin.FillByUserCashAccount(userCashAccount)
+		r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+		if r.RowsAffected <= 0 || r.Error != nil {
+			return false
+		}
 	}
 	return true
 }
@@ -47,11 +50,14 @@ func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCa
 		return false
 	}
 	//更新到木牛数据库
-	boxAdmin := &muniu.BoxAdmin{}
-	boxAdmin.FillByUserCashAccount(userCashAccount)
-	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-	if r.Error != nil {
-		return false
+	//只有更新的为银行账号才更新木牛里面的账号其他支付宝和微信不同步进去
+	if userCashAccount.Type == 3 {
+		boxAdmin := &muniu.BoxAdmin{}
+		boxAdmin.FillByUserCashAccount(userCashAccount)
+		r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+		if r.Error != nil {
+			return false
+		}
 	}
 	return true
 }
