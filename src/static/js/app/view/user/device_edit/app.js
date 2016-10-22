@@ -151,7 +151,6 @@ class DeviceForm extends React.Component {
 			} else {
 				this.props.putSerialNumber(values.serialNumber,deviceValue);
 			}
-			// 修改设备
 		});
 	}
 	handleReset(e) {
@@ -240,7 +239,6 @@ class DeviceForm extends React.Component {
 					'fourthPulseName': device.fourthPulseName,
 
 				}
-				// 由于这边设置了,所以修改后又在这里被修改回来
 				self.provinceId = device.provinceId;
 				self.schoolId = device.schoolId;
 			}
