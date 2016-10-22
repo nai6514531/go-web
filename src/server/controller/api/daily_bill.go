@@ -49,7 +49,10 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	page := functions.StringToInt(params["page"])
 	perPage := functions.StringToInt(params["perPage"])
 	cashAccounType := functions.StringToInt(params["cashAccountType"])      //提现方式
-	status := strings.Split(params["status"], ",")  //结算状态和提现状态
+	var status []string
+	if params["status"] != "" {
+		status = strings.Split(params["status"], ",")  //结算状态和提现状态
+	}
 	billAt := params["billAt"]
 
 	if page <= 0 || perPage <= 0 {
