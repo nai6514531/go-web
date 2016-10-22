@@ -1,5 +1,5 @@
-// Cors credits goes to @rs, this is just edited to work with Iris, I have not done anything spcial here.
-
+// Package cors original credits goes to @rs as README notices.
+// redisnged to follows the mozzila's specifications https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 package cors
 
 import (
@@ -202,8 +202,7 @@ func New(options Options) *Cors {
 
 	// Allowed Methods
 	if len(options.AllowedMethods) == 0 {
-		// Default is spec's "simple" methods
-		c.allowedMethods = []string{"GET", "POST"}
+		c.allowedMethods = []string{iris.MethodGet, iris.MethodPost, iris.MethodPut, iris.MethodDelete, iris.MethodConnect, iris.MethodHead}
 	} else {
 		c.allowedMethods = convert(options.AllowedMethods, strings.ToUpper)
 	}
@@ -230,52 +229,60 @@ func (c *Cors) Conflicts() string {
 func (c *Cors) Serve(ctx *iris.Context) {
 	if ctx.MethodString() == iris.MethodOptions {
 		c.logf("Serve: Preflight request")
+		// Check preflight, if any error, http error will raise
 		c.handlePreflight(ctx)
-		// Preflight requests are standalone and should stop the chain as some other
-		// middleware may not handle OPTIONS requests correctly. One typical example
-		// is authentication middleware ; OPTIONS requests won't carry authentication
-		// headers (see #1)
+
+		// By pass for custom handle
 		if c.optionPassthrough {
 			ctx.Next()
+		} else {
+			// If don't have by pass through, set status ok
+			ctx.SetStatusCode(iris.StatusOK)
+			// Actual request will be serve
 		}
+
 	} else {
 		c.logf("Serve: Actual request")
 		c.handleActualRequest(ctx)
-		ctx.Next()
 	}
 }
 
 // handlePreflight handles pre-flight CORS requests
-func (c *Cors) handlePreflight(ctx *iris.Context) {
+func (c *Cors) handlePreflight(ctx *iris.Context) bool {
 	origin := ctx.RequestHeader("Origin")
 
 	if ctx.MethodString() != iris.MethodOptions {
 		c.logf("  Preflight aborted: %s!=OPTIONS", ctx.MethodString())
-		return
+		return false
 	}
 	// Always set Vary headers
 	ctx.Response.Header.Add("Vary", "Origin")
 	ctx.Response.Header.Add("Vary", "Access-Control-Request-Method")
 	ctx.Response.Header.Add("Vary", "Access-Control-Request-Headers")
 
-	if origin == "" {
-		c.logf("  Preflight aborted: empty origin")
-		return
+	if c.allowedOriginsAll {
+		origin = "*"
 	}
+
+	if origin == "" && !c.allowedOriginsAll {
+		c.logf("  Preflight aborted: empty origin")
+		return false
+	}
+
 	if !c.isOriginAllowed(origin) {
 		c.logf("  Preflight aborted: origin '%s' not allowed", origin)
-		return
+		return false
 	}
 
 	reqMethod := ctx.RequestHeader("Access-Control-Request-Method")
 	if !c.isMethodAllowed(reqMethod) {
 		c.logf("  Preflight aborted: method '%s' not allowed", reqMethod)
-		return
+		return false
 	}
 	reqHeaders := parseHeaderList(ctx.RequestHeader("Access-Control-Request-Headers"))
 	if !c.areHeadersAllowed(reqHeaders) {
 		c.logf("  Preflight aborted: headers '%v' not allowed", reqHeaders)
-		return
+		return false
 	}
 	ctx.Response.Header.Set("Access-Control-Allow-Origin", origin)
 	// Spec says: Since the list of methods can be unbounded, simply returning the method indicated
@@ -293,20 +300,26 @@ func (c *Cors) handlePreflight(ctx *iris.Context) {
 	if c.maxAge > 0 {
 		ctx.Response.Header.Set("Access-Control-Max-Age", strconv.Itoa(c.maxAge))
 	}
-	c.logf("  Preflight response headers: %v", ctx.Response.Header)
+
+	c.logf("  Preflight response headers: %v", ctx.Response.Header.String())
+	return true
 }
 
 // handleActualRequest handles simple cross-origin requests, actual request or redirects
 func (c *Cors) handleActualRequest(ctx *iris.Context) {
 	origin := ctx.RequestHeader("Origin")
 
-	if ctx.MethodString() == "OPTIONS" {
+	if ctx.MethodString() == iris.MethodOptions {
 		c.logf("  Actual request no headers added: method == %s", ctx.MethodString())
 		return
 	}
 
 	ctx.Response.Header.Add("Vary", "Origin")
-	if origin == "" {
+	if c.allowedOriginsAll {
+		origin = "*"
+	}
+
+	if origin == "" && !c.allowedOriginsAll {
 		c.logf("  Actual request no headers added: missing origin")
 		return
 	}
@@ -330,7 +343,8 @@ func (c *Cors) handleActualRequest(ctx *iris.Context) {
 	if c.allowCredentials {
 		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 	}
-	c.logf("  Actual response added headers: %v", ctx.Response.Header)
+	ctx.Next()
+
 }
 
 // convenience method. checks if debugging is turned on before printing
@@ -371,7 +385,7 @@ func (c *Cors) isMethodAllowed(method string) bool {
 		return false
 	}
 	method = strings.ToUpper(method)
-	if method == "OPTIONS" {
+	if method == iris.MethodOptions {
 		// Always allow preflight requests
 		return true
 	}
@@ -380,6 +394,7 @@ func (c *Cors) isMethodAllowed(method string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 

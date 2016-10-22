@@ -97,7 +97,7 @@ func NewClient(caDirURL string, user User, keyType KeyType) (*Client, error) {
 	return &Client{directory: dir, user: user, jws: jws, keyType: keyType, solvers: solvers}, nil
 }
 
-// SetChallengeProvider specifies a custom provider that will make the solution available
+// SetChallengeProvider specifies a custom provider p that can solve the given challenge type.
 func (c *Client) SetChallengeProvider(challenge Challenge, p ChallengeProvider) error {
 	switch challenge {
 	case HTTP01:
@@ -115,6 +115,9 @@ func (c *Client) SetChallengeProvider(challenge Challenge, p ChallengeProvider) 
 // SetHTTPAddress specifies a custom interface:port to be used for HTTP based challenges.
 // If this option is not used, the default port 80 and all interfaces will be used.
 // To only specify a port and no interface use the ":port" notation.
+//
+// NOTE: This REPLACES any custom HTTP provider previously set by calling
+// c.SetChallengeProvider with the default HTTP challenge provider.
 func (c *Client) SetHTTPAddress(iface string) error {
 	host, port, err := net.SplitHostPort(iface)
 	if err != nil {
@@ -131,6 +134,9 @@ func (c *Client) SetHTTPAddress(iface string) error {
 // SetTLSAddress specifies a custom interface:port to be used for TLS based challenges.
 // If this option is not used, the default port 443 and all interfaces will be used.
 // To only specify a port and no interface use the ":port" notation.
+//
+// NOTE: This REPLACES any custom TLS-SNI provider previously set by calling
+// c.SetChallengeProvider with the default TLS-SNI challenge provider.
 func (c *Client) SetTLSAddress(iface string) error {
 	host, port, err := net.SplitHostPort(iface)
 	if err != nil {
@@ -421,50 +427,7 @@ func (c *Client) RenewCertificate(cert CertificateResource, bundle bool) (Certif
 	timeLeft := x509Cert.NotAfter.Sub(time.Now().UTC())
 	logf("[INFO][%s] acme: Trying renewal with %d hours remaining", cert.Domain, int(timeLeft.Hours()))
 
-	// The first step of renewal is to check if we get a renewed cert
-	// directly from the cert URL.
-	resp, err := httpGet(cert.CertURL)
-	if err != nil {
-		return CertificateResource{}, err
-	}
-	defer resp.Body.Close()
-	serverCertBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return CertificateResource{}, err
-	}
-
-	serverCert, err := x509.ParseCertificate(serverCertBytes)
-	if err != nil {
-		return CertificateResource{}, err
-	}
-
-	// If the server responds with a different certificate we are effectively renewed.
-	// TODO: Further test if we can actually use the new certificate (Our private key works)
-	if !x509Cert.Equal(serverCert) {
-		logf("[INFO][%s] acme: Server responded with renewed certificate", cert.Domain)
-		issuedCert := pemEncode(derCertificateBytes(serverCertBytes))
-		// If bundle is true, we want to return a certificate bundle.
-		// To do this, we need the issuer certificate.
-		if bundle {
-			// The issuer certificate link is always supplied via an "up" link
-			// in the response headers of a new certificate.
-			links := parseLinks(resp.Header["Link"])
-			issuerCert, err := c.getIssuerCertificate(links["up"])
-			if err != nil {
-				// If we fail to acquire the issuer cert, return the issued certificate - do not fail.
-				logf("[ERROR][%s] acme: Could not bundle issuer certificate: %v", cert.Domain, err)
-			} else {
-				// Success - append the issuer cert to the issued cert.
-				issuerCert = pemEncode(derCertificateBytes(issuerCert))
-				issuedCert = append(issuedCert, issuerCert...)
-			}
-		}
-
-		cert.Certificate = issuedCert
-		return cert, nil
-	}
-
-	// If the certificate is the same, then we need to request a new certificate.
+	// We always need to request a new certificate to renew.
 	// Start by checking to see if the certificate was based off a CSR, and
 	// use that if it's defined.
 	if len(cert.CSR) > 0 {

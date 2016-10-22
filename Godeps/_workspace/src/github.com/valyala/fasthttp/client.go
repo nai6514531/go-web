@@ -55,6 +55,9 @@ func Do(req *Request, resp *Response) error {
 // ErrTimeout is returned if the response wasn't returned during
 // the given timeout.
 //
+// ErrNoFreeConns is returned if all DefaultMaxConnsPerHost connections
+// to the requested host are busy.
+//
 // It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func DoTimeout(req *Request, resp *Response, timeout time.Duration) error {
@@ -78,6 +81,9 @@ func DoTimeout(req *Request, resp *Response, timeout time.Duration) error {
 //
 // ErrTimeout is returned if the response wasn't returned until
 // the given deadline.
+//
+// ErrNoFreeConns is returned if all DefaultMaxConnsPerHost connections
+// to the requested host are busy.
 //
 // It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
@@ -292,6 +298,9 @@ func (c *Client) Post(dst []byte, url string, postArgs *Args) (statusCode int, b
 // ErrTimeout is returned if the response wasn't returned during
 // the given timeout.
 //
+// ErrNoFreeConns is returned if all Client.MaxConnsPerHost connections
+// to the requested host are busy.
+//
 // It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func (c *Client) DoTimeout(req *Request, resp *Response, timeout time.Duration) error {
@@ -316,7 +325,10 @@ func (c *Client) DoTimeout(req *Request, resp *Response, timeout time.Duration) 
 // ErrTimeout is returned if the response wasn't returned until
 // the given deadline.
 //
-// It is recommended obtaining req and resp via AcquireRequest
+// ErrNoFreeConns is returned if all Client.MaxConnsPerHost connections
+// to the requested host are busy.
+//
+/// It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func (c *Client) DoDeadline(req *Request, resp *Response, deadline time.Time) error {
 	return clientDoDeadline(req, resp, deadline, c)
@@ -565,8 +577,15 @@ type HostClient struct {
 	addrs     []string
 	addrIdx   uint32
 
+	tlsConfigMap     map[string]*tls.Config
+	tlsConfigMapLock sync.Mutex
+
 	readerPool sync.Pool
 	writerPool sync.Pool
+
+	pendingRequests uint64
+
+	connsCleanerRun bool
 }
 
 type clientConn struct {
@@ -651,25 +670,13 @@ func clientGetURLTimeout(dst []byte, url string, timeout time.Duration, c client
 	return clientGetURLDeadline(dst, url, deadline, c)
 }
 
-func clientGetURLDeadline(dst []byte, url string, deadline time.Time, c clientDoer) (statusCode int, body []byte, err error) {
-	var sleepTime time.Duration
-	for {
-		statusCode, body, err = clientGetURLDeadlineFreeConn(dst, url, deadline, c)
-		if err != ErrNoFreeConns {
-			return statusCode, body, err
-		}
-		sleepTime = updateSleepTime(sleepTime, deadline)
-		time.Sleep(sleepTime)
-	}
-}
-
 type clientURLResponse struct {
 	statusCode int
 	body       []byte
 	err        error
 }
 
-func clientGetURLDeadlineFreeConn(dst []byte, url string, deadline time.Time, c clientDoer) (statusCode int, body []byte, err error) {
+func clientGetURLDeadline(dst []byte, url string, deadline time.Time, c clientDoer) (statusCode int, body []byte, err error) {
 	timeout := -time.Since(deadline)
 	if timeout <= 0 {
 		return 0, dst, ErrTimeout
@@ -853,7 +860,10 @@ func ReleaseResponse(resp *Response) {
 // ErrTimeout is returned if the response wasn't returned during
 // the given timeout.
 //
-// It is recommended obtaining req and resp via AcquireRequest
+// ErrNoFreeConns is returned if all HostClient.MaxConns connections
+// to the host are busy.
+//
+/// It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func (c *HostClient) DoTimeout(req *Request, resp *Response, timeout time.Duration) error {
 	return clientDoTimeout(req, resp, timeout, c)
@@ -872,6 +882,9 @@ func (c *HostClient) DoTimeout(req *Request, resp *Response, timeout time.Durati
 // ErrTimeout is returned if the response wasn't returned until
 // the given deadline.
 //
+// ErrNoFreeConns is returned if all HostClient.MaxConns connections
+// to the host are busy.
+//
 // It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func (c *HostClient) DoDeadline(req *Request, resp *Response, deadline time.Time) error {
@@ -884,40 +897,6 @@ func clientDoTimeout(req *Request, resp *Response, timeout time.Duration, c clie
 }
 
 func clientDoDeadline(req *Request, resp *Response, deadline time.Time, c clientDoer) error {
-	var sleepTime time.Duration
-	for {
-		err := clientDoDeadlineFreeConn(req, resp, deadline, c)
-		if err != ErrNoFreeConns {
-			return err
-		}
-		sleepTime = updateSleepTime(sleepTime, deadline)
-		time.Sleep(sleepTime)
-	}
-}
-
-var sleepJitter uint64
-
-func updateSleepTime(prevTime time.Duration, deadline time.Time) time.Duration {
-	sleepTime := prevTime * 2
-	if sleepTime == 0 {
-		jitter := atomic.AddUint64(&sleepJitter, 1) % 40
-		sleepTime = (10 + time.Duration(jitter)) * time.Millisecond
-	}
-
-	remainingTime := deadline.Sub(time.Now())
-	if sleepTime >= remainingTime {
-		// Just sleep for the remaining time and then time out.
-		// This should save CPU time for real work by other goroutines.
-		sleepTime = remainingTime + 10*time.Millisecond
-		if sleepTime < 0 {
-			sleepTime = 10 * time.Millisecond
-		}
-	}
-
-	return sleepTime
-}
-
-func clientDoDeadlineFreeConn(req *Request, resp *Response, deadline time.Time, c clientDoer) error {
 	timeout := -time.Since(deadline)
 	if timeout <= 0 {
 		return ErrTimeout
@@ -985,6 +964,7 @@ var errorChPool sync.Pool
 // It is recommended obtaining req and resp via AcquireRequest
 // and AcquireResponse in performance-critical code.
 func (c *HostClient) Do(req *Request, resp *Response) error {
+	atomic.AddUint64(&c.pendingRequests, 1)
 	retry, err := c.do(req, resp)
 	if err != nil && retry && isIdempotent(req) {
 		_, err = c.do(req, resp)
@@ -992,7 +972,17 @@ func (c *HostClient) Do(req *Request, resp *Response) error {
 	if err == io.EOF {
 		err = ErrConnectionClosed
 	}
+	atomic.AddUint64(&c.pendingRequests, ^uint64(0))
 	return err
+}
+
+// PendingRequests returns the current number of requests the client
+// is executing.
+//
+// This function may be used for balancing load among multiple HostClient
+// instances.
+func (c *HostClient) PendingRequests() int {
+	return int(atomic.LoadUint64(&c.pendingRequests))
 }
 
 func isIdempotent(req *Request) bool {
@@ -1123,6 +1113,9 @@ func (c *HostClient) doNonNilReqResp(req *Request, resp *Response) (bool, error)
 var (
 	// ErrNoFreeConns is returned when no free connections available
 	// to the given host.
+	//
+	// Increase the allowed number of connections per host if you
+	// see this error.
 	ErrNoFreeConns = errors.New("no free connections available to host")
 
 	// ErrTimeout is returned from timed out calls.
@@ -1155,13 +1148,15 @@ func (c *HostClient) acquireConn() (*clientConn, error) {
 		if c.connsCount < maxConns {
 			c.connsCount++
 			createConn = true
-		}
-		if createConn && c.connsCount == 1 {
-			startCleaner = true
+			if !c.connsCleanerRun {
+				startCleaner = true
+				c.connsCleanerRun = true
+			}
 		}
 	} else {
 		n--
 		cc = c.conns[n]
+		c.conns[n] = nil
 		c.conns = c.conns[:n]
 	}
 	c.connsLock.Unlock()
@@ -1173,6 +1168,10 @@ func (c *HostClient) acquireConn() (*clientConn, error) {
 		return nil, ErrNoFreeConns
 	}
 
+	if startCleaner {
+		go c.connsCleaner()
+	}
+
 	conn, err := c.dialHostHard()
 	if err != nil {
 		c.decConnsCount()
@@ -1180,16 +1179,12 @@ func (c *HostClient) acquireConn() (*clientConn, error) {
 	}
 	cc = acquireClientConn(conn)
 
-	if startCleaner {
-		go c.connsCleaner()
-	}
 	return cc, nil
 }
 
 func (c *HostClient) connsCleaner() {
 	var (
 		scratch             []*clientConn
-		mustStop            bool
 		maxIdleConnDuration = c.MaxIdleConnDuration
 	)
 	if maxIdleConnDuration <= 0 {
@@ -1198,6 +1193,7 @@ func (c *HostClient) connsCleaner() {
 	for {
 		currentTime := time.Now()
 
+		// Determine idle connections to be closed.
 		c.connsLock.Lock()
 		conns := c.conns
 		n := len(conns)
@@ -1205,7 +1201,6 @@ func (c *HostClient) connsCleaner() {
 		for i < n && currentTime.Sub(conns[i].lastUseTime) > maxIdleConnDuration {
 			i++
 		}
-		mustStop = (c.connsCount == i)
 		scratch = append(scratch[:0], conns[:i]...)
 		if i > 0 {
 			m := copy(conns, conns[i:])
@@ -1216,13 +1211,23 @@ func (c *HostClient) connsCleaner() {
 		}
 		c.connsLock.Unlock()
 
+		// Close idle connections.
 		for i, cc := range scratch {
 			c.closeConn(cc)
 			scratch[i] = nil
 		}
+
+		// Determine whether to stop the connsCleaner.
+		c.connsLock.Lock()
+		mustStop := c.connsCount == 0
+		if mustStop {
+			c.connsCleanerRun = false
+		}
+		c.connsLock.Unlock()
 		if mustStop {
 			break
 		}
+
 		time.Sleep(maxIdleConnDuration)
 	}
 }
@@ -1300,11 +1305,61 @@ func (c *HostClient) releaseReader(br *bufio.Reader) {
 	c.readerPool.Put(br)
 }
 
-func newDefaultTLSConfig() *tls.Config {
-	return &tls.Config{
-		InsecureSkipVerify: true,
-		ClientSessionCache: tls.NewLRUClientSessionCache(0),
+func newClientTLSConfig(c *tls.Config, addr string) *tls.Config {
+	if c == nil {
+		c = &tls.Config{}
+	} else {
+		// TODO: substitute this with c.Clone() after go1.8 becomes mainstream :)
+		c = &tls.Config{
+			Rand:              c.Rand,
+			Time:              c.Time,
+			Certificates:      c.Certificates,
+			NameToCertificate: c.NameToCertificate,
+			GetCertificate:    c.GetCertificate,
+			RootCAs:           c.RootCAs,
+			NextProtos:        c.NextProtos,
+			ServerName:        c.ServerName,
+
+			// Do not copy ClientAuth, since it is server-related stuff
+			// Do not copy ClientCAs, since it is server-related stuff
+
+			InsecureSkipVerify: c.InsecureSkipVerify,
+			CipherSuites:       c.CipherSuites,
+
+			// Do not copy PreferServerCipherSuites - this is server stuff
+
+			SessionTicketsDisabled: c.SessionTicketsDisabled,
+
+			// Do not copy SessionTicketKey - this is server stuff
+
+			ClientSessionCache: c.ClientSessionCache,
+			MinVersion:         c.MinVersion,
+			MaxVersion:         c.MaxVersion,
+			CurvePreferences:   c.CurvePreferences,
+		}
 	}
+
+	if c.ClientSessionCache == nil {
+		c.ClientSessionCache = tls.NewLRUClientSessionCache(0)
+	}
+
+	if len(c.ServerName) == 0 {
+		serverName := tlsServerName(addr)
+		if serverName == "*" {
+			c.InsecureSkipVerify = true
+		} else {
+			c.ServerName = serverName
+		}
+	}
+	return c
+}
+
+func tlsServerName(addr string) string {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return "*"
+	}
+	return host
 }
 
 func (c *HostClient) nextAddr() string {
@@ -1340,7 +1395,8 @@ func (c *HostClient) dialHostHard() (conn net.Conn, err error) {
 	deadline := time.Now().Add(timeout)
 	for n > 0 {
 		addr := c.nextAddr()
-		conn, err = dialAddr(addr, c.Dial, c.DialDualStack, c.IsTLS, c.TLSConfig)
+		tlsConfig := c.cachedTLSConfig(addr)
+		conn, err = dialAddr(addr, c.Dial, c.DialDualStack, c.IsTLS, tlsConfig)
 		if err == nil {
 			return conn, nil
 		}
@@ -1350,6 +1406,25 @@ func (c *HostClient) dialHostHard() (conn net.Conn, err error) {
 		n--
 	}
 	return nil, err
+}
+
+func (c *HostClient) cachedTLSConfig(addr string) *tls.Config {
+	if !c.IsTLS {
+		return nil
+	}
+
+	c.tlsConfigMapLock.Lock()
+	if c.tlsConfigMap == nil {
+		c.tlsConfigMap = make(map[string]*tls.Config)
+	}
+	cfg := c.tlsConfigMap[addr]
+	if cfg == nil {
+		cfg = newClientTLSConfig(c.TLSConfig, addr)
+		c.tlsConfigMap[addr] = cfg
+	}
+	c.tlsConfigMapLock.Unlock()
+
+	return cfg
 }
 
 func dialAddr(addr string, dial DialFunc, dialDualStack, isTLS bool, tlsConfig *tls.Config) (net.Conn, error) {
@@ -1369,9 +1444,6 @@ func dialAddr(addr string, dial DialFunc, dialDualStack, isTLS bool, tlsConfig *
 		panic("BUG: DialFunc returned (nil, nil)")
 	}
 	if isTLS {
-		if tlsConfig == nil {
-			tlsConfig = newDefaultTLSConfig()
-		}
 		conn = tls.Client(conn, tlsConfig)
 	}
 	return conn, nil
@@ -1518,6 +1590,9 @@ type pipelineConnClient struct {
 	chLock sync.Mutex
 	chW    chan *pipelineWork
 	chR    chan *pipelineWork
+
+	tlsConfigLock sync.Mutex
+	tlsConfig     *tls.Config
 }
 
 type pipelineWork struct {
@@ -1770,7 +1845,8 @@ func (c *pipelineConnClient) init() {
 }
 
 func (c *pipelineConnClient) worker() error {
-	conn, err := dialAddr(c.Addr, c.Dial, c.DialDualStack, c.IsTLS, c.TLSConfig)
+	tlsConfig := c.cachedTLSConfig()
+	conn, err := dialAddr(c.Addr, c.Dial, c.DialDualStack, c.IsTLS, tlsConfig)
 	if err != nil {
 		return err
 	}
@@ -1807,6 +1883,22 @@ func (c *pipelineConnClient) worker() error {
 	}
 
 	return err
+}
+
+func (c *pipelineConnClient) cachedTLSConfig() *tls.Config {
+	if !c.IsTLS {
+		return nil
+	}
+
+	c.tlsConfigLock.Lock()
+	cfg := c.tlsConfig
+	if cfg == nil {
+		cfg = newClientTLSConfig(c.TLSConfig, c.Addr)
+		c.tlsConfig = cfg
+	}
+	c.tlsConfigLock.Unlock()
+
+	return cfg
 }
 
 func (c *pipelineConnClient) writer(conn net.Conn, stopCh <-chan struct{}) error {
@@ -1985,6 +2077,9 @@ func (c *pipelineConnClient) logger() Logger {
 // This number may exceed MaxPendingRequests*MaxConns by up to two times, since
 // each connection to the server may keep up to MaxPendingRequests requests
 // in the queue before sending them to the server.
+//
+// This function may be used for balancing load among multiple PipelineClient
+// instances.
 func (c *PipelineClient) PendingRequests() int {
 	c.connClientsLock.Lock()
 	n := 0
