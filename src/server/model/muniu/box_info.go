@@ -26,7 +26,7 @@ func (BoxInfo) TableName() string {
 }
 
 func (self *BoxInfo) FillByDevice(device *model.Device) {
-	self.CompanyId = device.UserId
+	self.CompanyId = device.UserId - 1 //木牛有id为0的记录映射到新数据是1
 	self.Password = device.Password
 	self.Location = device.Step
 	self.DeviceNo = device.SerialNumber

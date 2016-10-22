@@ -544,6 +544,8 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	device.UserId = userId
 	success := deviceService.Create(&device)
 	if !success {
 		result = &enity.Result{"01030701", nil, device_msg["01030701"]}
