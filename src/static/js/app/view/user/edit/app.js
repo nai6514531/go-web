@@ -64,13 +64,15 @@ class UserForm extends React.Component {
 	componentWillReceiveProps(nextProps) {
         const self = this;
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
-            const type = nextProps.detail.result.data.cashAccount.type;
-            if(type && type == 1){
-				this.setState({ alipay: false });
-                const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-                this.props.getProvinceCityList(provinceId);
-			} else {
-				this.setState({ alipay: true });
+            if(nextProps.detail.result.data.cashAccount){
+				const type = nextProps.detail.result.data.cashAccount.type;
+				if(type && type == 1){
+					this.setState({ alipay: false });
+					const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
+					this.props.getProvinceCityList(provinceId);
+				} else {
+					this.setState({ alipay: true });
+				}
 			}
 		}
         if(this.props.provinceCity !== nextProps.provinceCity){

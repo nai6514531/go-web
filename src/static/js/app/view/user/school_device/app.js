@@ -87,7 +87,7 @@ const columns = [{
 					<a href="#">停止</a>
 				</Popconfirm>
 			}
-			
+
 		</span>
 	),
 }];
@@ -107,7 +107,7 @@ class DeviceTable extends React.Component {
 		};
 		this.remove = this.remove.bind(this);
 		this.changeStatus = this.changeStatus.bind(this);
-		
+
 	}
 	componentDidMount() {
 		const schoolId = this.props.params.id;
@@ -115,12 +115,14 @@ class DeviceTable extends React.Component {
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
 	}
 	componentWillReceiveProps(nextProps) {
-		// if(this.state.changeState !== nextState.changeState){
-		// 	const schoolId = this.props.params.id;
-		// 	const pager = { page : this.state.page, perPage: this.state.perPage};
-		// 	this.props.getSchoolDevice(USER.id, schoolId, pager);
-		// 	console.log('get new status');
-		// }
+		const self = this;
+		if(this.theStatus == 0 || this.theStatus == 9) {
+			const schoolId = this.props.params.id;
+			const pager = { page : this.state.page, perPage: this.state.perPage};
+			this.props.getSchoolDevice(USER.id, schoolId, pager);
+			self.theStatus = -1;
+		}
+		
 	}
 	initializePagination() {
 		let total = 1;
@@ -148,21 +150,18 @@ class DeviceTable extends React.Component {
 		this.props.deleteDevice(id);
 	}
 	changeStatus(id,start) {
+		const self = this;
 		if(start){
-			console.log('start');
 			const status = { status: 0 };
 			this.props.patchDeviceStatus(id,status);
-			// this.setState({changeState:0});
+			self.theStatus = 0;
 		}else {
-			console.log('stop');
 			const status = { status: 9 };
 			this.props.patchDeviceStatus(id,status);
-			// this.setState({changeState:9});
+			self.theStatus = 9;
 		}
 	}
 	render() {
-		// const status = this.props.status;
-		// console.log('status',status);
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
 		const self = this;

@@ -133,22 +133,22 @@ class DeviceForm extends React.Component {
 				'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
-				"firstPulsePrice": values.firstPulsePrice,
-				"secondPulsePrice": values.secondPulsePrice,
-				"thirdPulsePrice": values.thirdPulsePrice,
-				"fourthPulsePrice": values.fourthPulsePrice,
-				"firstPulseName": values.firstPulseName ? values.firstPulseName : "",
-				"secondPulseName": values.secondPulseName ? values.secondPulseName : "",
-				"thirdPulseName": values.thirdPulseName ? values.thirdPulseName : "",
-				"fourthPulseName": values.fourthPulseName ? values.fourthPulseName : "",
+				"firstPulsePrice": parseInt(values.firstPulsePrice),
+				"secondPulsePrice": parseInt(values.secondPulsePrice),
+				"thirdPulsePrice": parseInt(values.thirdPulsePrice),
+				"fourthPulsePrice": parseInt(values.fourthPulsePrice),
+				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
+				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
+				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
+				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			}
 			const deviceId = this.props.params.id;
 			// 新增设备
-			this.props.postDeviceDetail(deviceValue);
+			// this.props.postDeviceDetail(deviceValue);
 			if(deviceId) {
-				// this.props.putDeviceDetail(deviceId,deviceValue);
+				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
-				// this.props.putSerialNumber(values.serialNumber,deviceValue);
+				this.props.putSerialNumber(values.serialNumber,deviceValue);
 			}
 			// 修改设备
 		});
@@ -206,8 +206,8 @@ class DeviceForm extends React.Component {
 	}
 	render() {
 		// 设备名
-		const pulseName = this.props.pulseName;
-		console.log('pulseName',pulseName);
+		// const pulseName = this.props.pulseName;
+		// console.log('pulseName',pulseName);
 		// 关联设备列表
 		const refDevice = this.props.refDevice;
 		let refDeviceNode = [];
@@ -320,7 +320,7 @@ class DeviceForm extends React.Component {
 								label="关联设备类型"
 							>
 								{getFieldDecorator('referenceDevice', {
-									initialValue: initialValue.referenceDevice ? 
+									initialValue: initialValue.referenceDevice ?
 										initialValue.referenceDevice : this.state.refDeviceType,
 								})(
 									<RadioGroup>
