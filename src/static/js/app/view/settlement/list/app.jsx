@@ -62,16 +62,16 @@ const App = React.createClass({
 				key: 'method',
 				render: (id, record) => {
 					return <span>
-                            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, id)}>
-                              <a>申请提现</a>
-                            </Popconfirm>
-							<span> | </span>
-							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, id)}>
-                              <a>结账</a>
-                            </Popconfirm>
-							<span> | </span>
-							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-                          </span>
+            <Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, id)}>
+              <a>申请提现</a>
+            </Popconfirm>
+						<span> | </span>
+						<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, id)}>
+              <a>结账</a>
+            </Popconfirm>
+						<span> | </span>
+						<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+          </span>
 				}
 			}],
 			list: [],
@@ -82,6 +82,7 @@ const App = React.createClass({
 			hasApplied: 0,
 			billAt: '',
 			selectedList: [],   //勾选的账单
+			clickLock: false,   //重复点击的锁
 		};
 	},
 	list(data) {
@@ -113,7 +114,12 @@ const App = React.createClass({
 			})
 	},
 	deposit(id) {
-		alert("提现"+id)
+		if(this.setState.clickLock){
+			return;
+		}
+		this.setState({clickLock: true});
+		console.log("提现"+id)
+		this.setState({clickLock: false});
 	},
 	settle(id) {
 		alert("settle"+id)
