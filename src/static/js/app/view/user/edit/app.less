@@ -1,22 +1,20 @@
 .detail {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  height: 600px;
-  overflow: auto;
+  height: 100%;
   .detail-head {
 	border-bottom: 1px solid #ddd;
 	margin: 0.3rem;
 	padding: 0.3rem;
+	height: 8%;
   }
   .detail-body {
 	margin: 0.3rem;
+	height: 80%;
   }
   .detail-form {
+	height: 80%;
 	overflow: auto;
-	padding: 0.5rem;
+	padding: 2rem;
 	margin-bottom: 1.5rem;
-	height: 500px;
 	button {
 	  margin: 0.2rem;
 	}
@@ -26,11 +24,50 @@
   }
 }
 .province-filter {
-  width: 70%;
-  margin: 15px auto;
-  padding-left: 5.9rem;
-  font-size: 0.8rem;
-  span {
-    margin-right: 0.5rem;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 24px;
+  width: 100%;
+  label {
+	text-align: right;
+	vertical-align: middle;
+	padding: 7px 0;
+	display: inline-block;
+	width: 29.16666667%;
+	&:before {
+	  display: inline-block;
+	  margin-right: 4px;
+	  content: "*";
+	  font-family: SimSun;
+	  font-size: 12px;
+	  color: #f50;
+	}
+	&:after {
+	  content: ":";
+	  margin: 0 8px 0 2px;
+	  position: relative;
+	  top: -.5px;
+	}
   }
+  & > select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width: 50%;
+	color: #666;
+	border: 1px solid #d9d9d9;
+	border-radius: 6px;
+	padding: 6px 7px;
+	height: 32px;
+	background: white;
+  }
+  & >span {
+	display: inline-block;
+	position: relative;
+	right: 20px;
+	&:after {
+	  content: '\25BC';
+	}
+  }
+
 }

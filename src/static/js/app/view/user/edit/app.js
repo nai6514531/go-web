@@ -12,8 +12,8 @@ import * as regionActions from '../../../actions/region';
 
 
 function mapStateToProps(state) {
-	const { user: { result, detail }, region: { provinceList, provinceCity, cityList } }= state;
-	return { result, detail, provinceList, provinceCity, cityList };
+	const { user: { resultPostDetail, resultPutDetail, detail }, region: { provinceList, provinceCity, cityList } }= state;
+	return { resultPostDetail, resultPutDetail, detail, provinceList, provinceCity, cityList };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -41,6 +41,7 @@ class UserForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			type: "1",
 			alipay: false,
             provinceChange: false,
             cityChange: false,
@@ -73,9 +74,24 @@ class UserForm extends React.Component {
 			}
 		}
         if(this.props.provinceCity !== nextProps.provinceCity){
+            console.log('qiehuan',this.props.provinceCity,nextProps.provinceCity);
             // 每次切换省,都要将城市预至成第一个
-            self.cityId = nextProps.provinceCity.result.data[0].id;
+            if(nextProps.provinceCity.fetch == true) {
+                self.cityId = nextProps.provinceCity.result.data[0].id;
+            }
         }
+		const resultPostDetail = this.props.resultPostDetail;
+		if(resultPostDetail !== nextProps.resultPostDetail && nextProps.resultPostDetail.fetch == true){
+			alert('添加成功');
+		} else {
+			console.log('resultPostDetail',resultPostDetail);
+		}
+		const resultPutDetail = this.props.resultPutDetail;
+		if(resultPutDetail !== nextProps.resultPutDetail && nextProps.resultPutDetail.fetch == true){
+			alert('修改成功');
+		} else {
+			console.log('resultPutDetail',resultPutDetail);
+		}
 	}
     provinceOption() {
         if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -173,6 +189,7 @@ class UserForm extends React.Component {
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
                 // 新增用户 省市信息预设为第一个
+                // 获取省市信息成功但是实际没数据后报错
                 if (this.state.provinceChange == false) {
                     self.provinceId = provinceCity.result.data[0].id;
                 }
@@ -181,14 +198,7 @@ class UserForm extends React.Component {
                 }
             }
         }
-		// const result = this.props.result;
-		// if(result) {
-		// 	if(result.fetch == true){
-		// 		// alert('修改成功');
-		// 	} else {
-		// 		console.log(result.result.msg);
-		// 	}
-		// }
+
 		let initialValue = {};
 		if(id && id !== 'new' && detail) {
 			if(detail.fetch == true){
@@ -219,7 +229,7 @@ class UserForm extends React.Component {
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
 			} else {
-				console.log('拉取用户详情失败');
+				alert('获取用户信息失败,请重试.');
 			}
 		}
 		const { getFieldDecorator } = this.props.form;
@@ -229,7 +239,6 @@ class UserForm extends React.Component {
 		};
 
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -296,7 +305,7 @@ class UserForm extends React.Component {
 									rules: [
 										{ required: true, message: '请选择收款方式' },
 									],
-									initialValue: initialValue.type,
+									initialValue: initialValue.type ? initialValue.type : this.state.type,
 								})(
 									<RadioGroup>
 										<Radio value="2" onClick = {this.handleRadio.bind(this, '2')}>
@@ -391,18 +400,20 @@ class UserForm extends React.Component {
 										)}
 									</FormItem>
                                     <div className="province-filter">
-                                        <span>省份:</span>
+                                        <label>省份</label>
                                         <select name="province" id="province" value={this.provinceId}
                                                 onChange={this.provinceChange.bind(this)}>
                                             {this.provinceOption()}
                                         </select>
-                                    </div>
+										<span></span>
+									</div>
                                     <div className="province-filter">
-                                        <span>城市:</span>
+                                        <label>城市</label>
                                         <select name="city" id="city" value={this.cityId}
                                                 onChange={this.cityChange.bind(this)}>
                                             {this.cityOption()}
                                         </select>
+										<span></span>
                                     </div>
 								</div>
 							}
@@ -427,7 +438,6 @@ class UserForm extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 		);
 	}
 }

@@ -59,7 +59,7 @@ class SchoolTable extends React.Component {
 			perPage: 10,
 		};
 	}
-	componentDidMount() {
+	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
 		this.props.getUserSchool(USER.id, schoolId, pager);
@@ -77,15 +77,11 @@ class SchoolTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码和需要的数据条数
-				console.log('Current: ', current, '; PageSize: ', pageSize);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.props.getUserSchool(USER.id, pager);
-				// 执行函数获取对应的 page 数据,传递的参数是当前页码
-				console.log('Current: ', current);
 			},
 		}
 	}
@@ -109,7 +105,6 @@ class SchoolTable extends React.Component {
 			}
 		}
 		return (
-		<div className="index">
 			<div className="body-panel">
 				<div className="detail">
 					<div className="detail-head">
@@ -121,7 +116,7 @@ class SchoolTable extends React.Component {
 					<div className="detail-form">
 						<div className="table">
 								<div>
-									<SchoolFilter 
+									<SchoolFilter
 										schoolList={list}
 										getUserSchool={this.props.getUserSchool}
 										page={this.state.page}
@@ -138,7 +133,6 @@ class SchoolTable extends React.Component {
 					</div>
 				</div>
 			</div>
-		</div>
 
 		);
 	}

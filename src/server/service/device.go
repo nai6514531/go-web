@@ -145,7 +145,15 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 }
 
 func (self *DeviceService) Delete(id int) bool {
-	r := common.DB.Where("id = ?", id).Delete(&model.Device{})
+	device := &model.Device{}
+	r := common.DB.Model(&model.Device{}).Where("id = ?", id).Scan(device).Delete(&model.Device{})
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//删除到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

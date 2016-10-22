@@ -20,7 +20,7 @@ export function getDeviceList(pager) {
 				type: GET_DEVICE_LIST,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_DEVICE_LIST,
 				result: { fetch: false, result },
@@ -36,7 +36,7 @@ export function getDeviceDetail(id) {
 				type: GET_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_DEVICE_DETAIL,
 				result: { fetch: false, result },
@@ -52,7 +52,7 @@ export function postDeviceDetail(device) {
 				type: POST_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: POST_DEVICE_DETAIL,
 				result: { fetch: false, result },
@@ -68,7 +68,7 @@ export function putDeviceDetail(id, device) {
 				type: PUT_DEVICE_DETAIL,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: PUT_DEVICE_DETAIL,
 				result: { fetch: false, result },
@@ -84,7 +84,7 @@ export function deleteDevice(id) {
 				type: REMOVE_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: REMOVE_DEVICE,
 				result: { fetch: false, result },
@@ -100,7 +100,7 @@ export function patchDeviceStatus(id, device) {
 				type: PATCH_DEVICE_STATUS,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: PATCH_DEVICE_STATUS,
 				result: { fetch: false, result },
@@ -116,7 +116,7 @@ export function patchPulseName(id, device) {
 				type: DEVICE_PULSE_NAME,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: DEVICE_PULSE_NAME,
 				result: { fetch: false, result },
@@ -132,7 +132,7 @@ export function putSerialNumber(id, device) {
 				type: DEVICE_SERIAL_NUMBER,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: DEVICE_SERIAL_NUMBER,
 				result: { fetch: false, result },
@@ -148,7 +148,7 @@ export function getRefDevice() {
 				type: GET_REF_DEVICE,
 				result: { fetch: true, result },
 			});
-		}).catch((result) => {
+		},(result) => {
 			dispatch({
 				type: GET_REF_DEVICE,
 				result: { fetch: false, result },

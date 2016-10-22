@@ -33,7 +33,6 @@ const Navbar = React.createClass({
 		const {location} = this.props;
 		const menus = USER.menu || [];
 		return (<aside>
-			<h2><a href="#/"><img src={require('./logo.png')}/></a></h2>
 			<nav>
 				<Menu mode="inline"
 					  theme="dark"
@@ -52,7 +51,6 @@ const Navbar = React.createClass({
 				</Menu>
 			</nav>
 			<footer>
-				<p> - &#10084; - </p>
 			</footer>
 		</aside>)
 	}
