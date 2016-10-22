@@ -16,7 +16,8 @@ const Service = {
 		return api.get('/api/daily-bill/apply', {
 			params: {
 				userId: data.userId,
-				billAt: data.billAt
+				billAt: data.billAt,
+				status: data.willApplyStatus
 			}
 		})
 	}

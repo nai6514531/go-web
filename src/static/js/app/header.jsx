@@ -12,7 +12,7 @@ const Header = React.createClass({
 			credentials: 'same-origin'
 		}).then(response=>response.json())
 			.then(function (data) {
-				if (data && data.status == 0) {
+				if (data && data.status && parseInt(data.status.substr(-2)) == 0) {
 					window.location.reload();
 				} else {
 					alert(data.msg || '系统异常,请重试!')
@@ -43,7 +43,7 @@ const Header = React.createClass({
 					</span>
 				</li>
 				<li >
-					<Icon type="logout" />
+					<Icon type="logout" onClick={this.logout}/>
 				</li>
 			</ul>
 		</div>)

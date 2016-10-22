@@ -63,14 +63,15 @@ const App = React.createClass({
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
-					const data = {
+					let data = {
+						id: record.id,
 						userId: record.userId,
-						billAt: moment(record.billAt).format('YYYY-MM-DD')
+						billAt: moment(record.billAt).format('YYYY-MM-DD'),
+						willApplyStatus: status == 0 ? 1: 0 //即将提现改变的状态
 					}
+
 					let spanDiv = roleId == 3?( //角色身份判断
 						<span>
-	            <span>已提现</span>
-							<span> | </span>
 							<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
 	              <a>结账</a>
 	            </Popconfirm>
@@ -80,17 +81,17 @@ const App = React.createClass({
 					):(
 						<span>
 							{
-								status == 0?(
+								status == 0?(		
 									<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
 			              <a>未申请提现</a>
 			            </Popconfirm>
 								):(
+
 									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
 			              <a>已申请提现</a>
 			            </Popconfirm>
 								)
 							}
-	            
 							<span> | </span>
 							<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 	          </span>
@@ -138,25 +139,33 @@ const App = React.createClass({
 				});
 			})
 	},
+	changeApplyStatus(orderId, willApplyStatus) {
+		const self = this;
+		let newList = this.state.list;
+		newList.map((item, i)=>{
+			if(item.id == orderId){
+				newList[i].status = willApplyStatus;
+			}
+		})
+		this.setState({list: newList});
+	},
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
 
 		this.setState({clickLock: true});
+
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-
-			if(res.status == "01060100"){
-				self.handleFilter();
+			if(res.status == "0"){
+				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
 				message.info(res.msg)
 			}
 		}).catch((err)=>{
 			this.setState({clickLock: false});
 			message.info(err)
-			
 		})
-		
 	},
 	settle(id) {
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -256,11 +265,24 @@ const App = React.createClass({
 		  },
 		};
 
-		const footer = this.state.roleId == 3?(
-			<Popconfirm title="申请结账吗?" onConfirm={this.multiSettle}>
-		    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
-		  </Popconfirm>
-    ): "";
+    let footer = "";
+    if(this.state.roleId == 3){
+    	if(this.state.selectedList.length == 0){
+    		footer = (
+    			<Button onClick={this.multiSettle} className="multiSettleBtn" size="large" type="primary">
+    				结账
+    			</Button>
+    		)
+    	}else{
+    		footer = (
+    			<Popconfirm title="确认结账吗?" onConfirm={this.multiSettle}>
+				    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
+				  </Popconfirm>
+				 )
+    	}
+    }else{
+    	footer = "";
+    }
 
 		return (<section className="view-settlement-list">
 			<header>
