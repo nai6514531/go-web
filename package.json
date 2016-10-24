@@ -17,6 +17,7 @@
     "classnames": "^2.2.5",
     "component-emitter": "^1.2.1",
     "fastclick": "^1.0.6",
+    "g2": "^2.0.5-beta",
     "lib-flexible": "^0.3.2",
     "lodash": "^4.13.1",
     "mailgen": "^1.0.25",

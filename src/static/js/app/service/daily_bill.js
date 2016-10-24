@@ -20,7 +20,14 @@ const Service = {
 				status: data.willApplyStatus
 			}
 		})
+	},
+	recharge: () => {
+		return api.get('/api/daily-bill/recharge')
+	},
+	consume: () => {
+		return api.get('/api/daily-bill/consume')
 	}
+
 };
 
 export default Service;

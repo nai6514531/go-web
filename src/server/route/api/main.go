@@ -28,6 +28,9 @@ func Api() {
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
 
+	api.Get("/daily-bill/recharge", dailyBill.Recharge)
+	api.Get("/daily-bill/consume", dailyBill.Consume)
+
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-role", sync.SyncUserRole)
 	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
@@ -74,7 +77,6 @@ func Api() {
 
 	api.Get("/daily-bill", dailyBill.List)
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
-	//api.Get("/daily-bill/no-settlement-user", dailyBill.List)
 	api.Get("/daily-bill/apply", dailyBill.Apply)
 	api.Get("/daily-bill/settlement", dailyBill.Settlement)
 
