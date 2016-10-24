@@ -54,22 +54,28 @@ func (self *UserService) TotalOfDevice(userId int) (int, error) {
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
-	r := common.DB.Create(user)
+	transAction := common.DB.Begin()
+	r := transAction.Create(user)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUser(user)
+	boxAdmin.LastLoginTime = "0000-00-00 00:00:00"
 	r = common.MNDB.Create(boxAdmin)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB Create BoxAdmin:", r.Error.Error())
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *UserService) Update(user *model.User) bool {
-	r := common.DB.Model(&model.User{}).Updates(user).Scan(user)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.User{}).Updates(user).Scan(user)
 	if r.Error != nil || r.RowsAffected <= 0 {
 		return false
 	}
@@ -78,8 +84,11 @@ func (self *UserService) Update(user *model.User) bool {
 	boxAdmin.FillByUser(user)
 	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
 	if r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB Update BoxAdmin:", r.Error.Error())
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 

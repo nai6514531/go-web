@@ -85,7 +85,8 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
-	r := common.DB.Create(device).Scan(device)
+	transAction := common.DB.Begin()
+	r := transAction.Create(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -94,13 +95,17 @@ func (self *DeviceService) Create(device *model.Device) bool {
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Create(boxInfo)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		common.Logger.Warningln("MNDB Create BoxInfo:", r.Error.Error())
+		transAction.Rollback()
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *DeviceService) Update(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(&device)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -109,13 +114,17 @@ func (self *DeviceService) Update(device model.Device) bool {
 	boxInfo.FillByDevice(&device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(device)
 	if r.Error != nil {
+		common.Logger.Warningln("MNDB Update BoxInfo:", r.Error.Error())
+		transAction.Rollback()
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *DeviceService) UpdateStatus(device model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -124,13 +133,17 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 	boxInfo.FillByDevice(&device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", boxInfo.Status)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		common.Logger.Warningln("MNDB Update BoxInfo-STATUS:", r.Error.Error())
+		transAction.Rollback()
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
-	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -139,14 +152,18 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
-	r := common.DB.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 0).Scan(device)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 0).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}
@@ -155,8 +172,11 @@ func (self *DeviceService) Reset(id int) bool {
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("COMPANYID", "0")
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB Update BoxInfo-Reset:", r.Error.Error())
 		return false
 	}
+	transAction.Commit()
 	return true
 }
 
