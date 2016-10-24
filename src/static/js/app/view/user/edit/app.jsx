@@ -186,18 +186,20 @@ class UserForm extends React.Component {
 		}
 	}
 	render() {
-        const self = this;
+		const self = this;
         const { id } = this.props.params;
         const { detail, provinceCity, provinceList } = this.props;
         if(id && id !== 'new') {
             if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
                 // 修改用户 省市信息预设为用户省市信息
-                if (this.state.provinceChange == false) {
-                    self.provinceId = detail.result.data.cashAccount.provinceId;
-                }
-                if (this.state.cityChange == false) {
-                    self.cityId = detail.result.data.cashAccount.cityId;
-                }
+				if(detail.result.data.cashAccount) {
+					if (this.state.provinceChange == false) {
+						self.provinceId = detail.result.data.cashAccount.provinceId;
+					}
+					if (this.state.cityChange == false) {
+						self.cityId = detail.result.data.cashAccount.cityId;
+					}
+				}
             }
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
@@ -457,6 +459,9 @@ UserForm = createForm()(UserForm);
 
 UserForm.propTypes = {
 	title: React.PropTypes.string,
+};
+UserForm.contextTypes = {
+	router: React.PropTypes.object.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserForm);

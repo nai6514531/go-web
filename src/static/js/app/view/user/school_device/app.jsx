@@ -115,6 +115,7 @@ class DeviceTable extends React.Component {
 		const schoolId = this.props.params.id;
 		const pager = { page: this.state.page, perPage: this.state.perPage };
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
+		this.loading = true;
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
@@ -124,12 +125,16 @@ class DeviceTable extends React.Component {
 				const schoolId = this.props.params.id;
 				const pager = { page : this.state.page, perPage: this.state.perPage};
 				this.props.getSchoolDevice(USER.id, schoolId, pager);
+				self.loading = true;
 			} else if(nextProps.status && nextProps.status.fetch == false) {
 				alert('操作失败!');
 				console.log(nextProps.status.result.msg);
 			}
 			self.theStatus = -1;
 			self.reset = -1;
+		}
+		if(this.props.schoolDevice !== nextProps.schoolDevice) {
+			self.loading = false;
 		}
 
 	}
@@ -146,11 +151,13 @@ class DeviceTable extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getSchoolDevice(USER.id, schoolId, pager);
 			},
 			onChange(current) {
 				const pager = { page : current, perPage: self.state.perPage};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getSchoolDevice(USER.id, schoolId, pager);
 			},
 		}
@@ -226,7 +233,7 @@ class DeviceTable extends React.Component {
 					<Table columns={columns}
 						   dataSource={dataSource}
 						   pagination={pagination}
-						   loading={this.state.loading}
+						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
 					/>
