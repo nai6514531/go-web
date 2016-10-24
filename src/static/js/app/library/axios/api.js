@@ -14,6 +14,7 @@ const api = axios.create({
 	}],
 	transformResponse: [(data) => {
 		NProgress.done();
+
 		if (!data) {
 			return '';
 		}
@@ -32,7 +33,7 @@ function handleResponse(promise, resolve, reject) {
 		let code = data.status;
 		code = code.substring(code.length-2);
 		code = parseInt(code);
-		data.loading = false;
+		// data.loading = false;
 		if (code !== 0) {
 			reject(data);
 		} else {

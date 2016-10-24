@@ -25,7 +25,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {
@@ -75,7 +75,6 @@ class AgentTable extends React.Component {
 			page: 1,
 			perPage: 10,
 			pagination: {},
-			loading: false,
 			child: false,
 			list: [],
 			pager: {},

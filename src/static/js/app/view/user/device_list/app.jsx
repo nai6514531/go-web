@@ -17,18 +17,16 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
 	const {
 		getUserSchool,
-		getSchoolDevice,
 		getUserDevice,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getUserSchool,
-		getSchoolDevice,
 		getUserDevice,
 	};
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {
@@ -53,7 +51,6 @@ class SchoolTable extends React.Component {
 		this.state = {
 			data: [],
 			pagination: {},
-			loading: false,
 			pager: {},
 			page: 1,
 			perPage: 10,
@@ -63,6 +60,7 @@ class SchoolTable extends React.Component {
 	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
+		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	componentWillReceiveProps(nextProps) {
@@ -101,16 +99,19 @@ class SchoolTable extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getUserSchool(USER.id, pager);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getUserSchool(USER.id, pager);
 			},
 		}
 	}
 	render() {
+		const self = this;
 		const pagination = this.initializePagination();
 		const school = this.props.school;
 		let dataSource = [];
@@ -121,19 +122,20 @@ class SchoolTable extends React.Component {
 				dataSource = list.map(function (item,key) {
 					return {
 						key: item.id,
-						index: key,
+						index: item.id,
 						school: item.name,
 						number: item.deviceTotal,
 					}
-				})
+				});
+				self.loading = false;
 			}
 		}
 		return (
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">
@@ -148,7 +150,7 @@ class SchoolTable extends React.Component {
 					<Table columns={columns}
 						   dataSource={dataSource}
 						   pagination={pagination}
-						   loading={this.state.loading}
+						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
 					/>

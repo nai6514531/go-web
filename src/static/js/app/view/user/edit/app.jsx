@@ -85,15 +85,15 @@ class UserForm extends React.Component {
         }
 		const resultPostDetail = this.props.resultPostDetail;
 		if(resultPostDetail !== nextProps.resultPostDetail && nextProps.resultPostDetail.fetch == true){
-			alert('添加成功');
+			console.log('添加成功');
 		} else {
-			console.log('resultPostDetail',resultPostDetail);
+			console.log('添加失败');
 		}
 		const resultPutDetail = this.props.resultPutDetail;
 		if(resultPutDetail !== nextProps.resultPutDetail && nextProps.resultPutDetail.fetch == true){
-			alert('修改成功');
+			console.log('修改成功');
 		} else {
-			console.log('resultPutDetail',resultPutDetail);
+			console.log('修改失败');
 		}
 	}
     provinceOption() {
@@ -167,6 +167,7 @@ class UserForm extends React.Component {
 	handleReset(e) {
 		e.preventDefault();
 		this.props.form.resetFields();
+		this.setState({alipay:false});
 	}
 	handleRadio(select) {
 		if (select === '3') {
@@ -245,8 +246,8 @@ class UserForm extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/edit/" + id }>添加/修改用户</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>添加/修改用户</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">
