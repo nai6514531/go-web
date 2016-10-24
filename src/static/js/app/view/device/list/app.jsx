@@ -30,7 +30,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-	title: '序号',
+	title: 'ID',
 	dataIndex: 'index',
 	key: 'index',
 }, {
@@ -71,7 +71,7 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-			<Link to={"/user/device/edit/" + record.key}>修改</Link>
+			<Link to={"/device/edit/" + record.key}>修改</Link>
 			<span className="ant-divider" />
 			<Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
 				<a href="#">删除</a>
@@ -86,7 +86,6 @@ const columns = [{
 					<a href="#">停止</a>
 				</Popconfirm>
 			}
-
 		</span>
 	),
 }];
@@ -109,50 +108,49 @@ class DeviceList extends React.Component {
 
 	}
 	componentDidMount() {
-		const schoolId = this.props.params.id;
 		const pager = { page: this.state.page, perPage: this.state.perPage };
-		this.props.getSchoolDevice(USER.id, schoolId, pager);
+		this.props.getDeviceList(pager);
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		// 成功才拉取,失败就提示
-		if(this.theStatus == 0 || this.theStatus == 9) {
+		if(this.theStatus !== -1 || this.removeDevice !== -1) {
 			if(nextProps.status && nextProps.status.fetch == true){
-				const schoolId = this.props.params.id;
 				const pager = { page : this.state.page, perPage: this.state.perPage};
-				this.props.getSchoolDevice(USER.id, schoolId, pager);
+				this.props.getDeviceList(pager);
 			} else if(nextProps.status && nextProps.status.fetch == false) {
 				alert('操作失败!');
 				console.log(nextProps.status.result.msg);
 			}
 			self.theStatus = -1;
+			self.removeDevice = -1;
 		}
 
 	}
 	initializePagination() {
 		let total = 1;
-		if (this.props.schoolDevice && this.props.schoolDevice.fetch == true) {
-			total = this.props.schoolDevice.result.data.total;
+		if (this.props.list && this.props.list.fetch == true) {
+			total = this.props.list.result.data.total;
 		}
 		const self = this;
-		const schoolId = this.props.params.id;
 		return {
 			total: total,
 			showSizeChanger: true,
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
-				self.props.getSchoolDevice(USER.id, schoolId, pager);
+				self.props.getDeviceList(pager);
 			},
 			onChange(current) {
 				const pager = { page : current, perPage: self.state.perPage};
 				self.setState(pager);
-				self.props.getSchoolDevice(USER.id, schoolId, pager);
+				self.props.getDeviceList(pager);
 			},
 		}
 	}
 	remove(id) {
 		this.props.deleteDevice(id);
+		this.removeDevice = -1;
 	}
 	changeStatus(id,start) {
 		const self = this;
@@ -167,20 +165,29 @@ class DeviceList extends React.Component {
 		}
 	}
 	render() {
+		console.log('list',this.props.list);
 		const pagination = this.initializePagination();
-		const schoolDevice = this.props.schoolDevice;
-		const schoolId = this.props.params.id;
 		const self = this;
+		const list = this.props.list;
 		let dataSource = [];
-		if(schoolDevice) {
-			if(schoolDevice.fetch == true){
-				const data = schoolDevice.result.data.list;
+		if(list) {
+			if(list.fetch == true){
+				const data = list.result.data.list;
 				dataSource = data.map(function (item, key) {
+					let referenceDevice = '';
+					switch (item.referenceDeviceId){
+						case 1:
+							referenceDevice = '洗衣机';
+							break;
+						default:
+							referenceDevice = '洗衣机';
+							break;
+					}
 					return {
 						key: item.id,
 						index: item.id,
 						serialNumber: item.serialNumber,
-						referenceDevice: '洗衣机',
+						referenceDevice: referenceDevice,
 						status: item.status,
 						address: item.address + item.label,
 						firstPulsePrice: item.firstPulsePrice,
@@ -202,7 +209,7 @@ class DeviceList extends React.Component {
 				</header>
 				<div className="toolbar">
 					<Button type="primary" className="item">
-						<Link to="/user/device/edit">
+						<Link to="/device/edit">
 							添加新设备
 						</Link>
 					</Button>

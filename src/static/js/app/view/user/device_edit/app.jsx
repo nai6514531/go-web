@@ -14,9 +14,9 @@ import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
-	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultPostDetail }, 
+	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultPostDetail },
 		region: {provinceList, provinceSchool} } = state;
-	return { detail, status, result, refDevice, pulseName, 
+	return { detail, status, result, refDevice, pulseName,
 		resultPutDetail, resultPostDetail, provinceList, provinceSchool };
 }
 
@@ -103,18 +103,25 @@ class DeviceForm extends React.Component {
 				});
 				self.provinceId = provinceId;
 				self.cityId = cityId;
-				self.provinceName = provinceName[0].name;
+				if(provinceName.length >= 1){
+					self.provinceName = provinceName[0].name;
+				}
 				this.props.getProvinceSchoolList(provinceId);
 			}
 			if(this.props.provinceSchool == undefined && this.props.provinceSchool !== nextProps.provinceSchool) {
-				const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
-					return item.id == self.schoolId;
-				})
-				self.schoolName = schoolName[0].name;
+				console.log('province school',this.props.provinceSchool,nextProps.provinceSchool);
+				if(nextProps.provinceSchool.fetch == true) {
+					const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
+						return item.id == self.schoolId;
+					})
+					self.schoolName = schoolName[0].name;
+				} else {
+					alert(nextProps.provinceSchool.result.msg);
+				}
 			}
 			// const resultPutDetail = this.props.resultPutDetail;
 			// if(resultPutDetail == undefined && nextProps.resultPutDetail) {
-			//	
+			//
 			// }
 		}
 
@@ -206,6 +213,11 @@ class DeviceForm extends React.Component {
 			callback('只能为数字');
 		}
 	}
+	handleEnter(event) {
+		if (event.keyCode==13) {
+			this.handleSubmit(event);
+		}
+	}
 	render() {
 		// 关联设备列表
 		const refDevice = this.props.refDevice;
@@ -254,7 +266,7 @@ class DeviceForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-			<section className="view-user-list">
+			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>

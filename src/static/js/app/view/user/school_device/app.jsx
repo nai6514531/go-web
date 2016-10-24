@@ -18,6 +18,7 @@ function mapDispatchToProps(dispatch) {
 		getDeviceList,
 		deleteDevice,
 		patchDeviceStatus,
+		resetDevice,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
 		getSchoolDevice,
@@ -26,6 +27,7 @@ function mapDispatchToProps(dispatch) {
 		getDeviceList,
 		deleteDevice,
 		patchDeviceStatus,
+		resetDevice,
 		getSchoolDevice,
 	};
 }
@@ -117,7 +119,7 @@ class DeviceTable extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		// 成功才拉取,失败就提示
-		if(this.theStatus == 0 || this.theStatus == 9) {
+		if(this.theStatus !== -1 || this.reset !== -1) {
 			if(nextProps.status && nextProps.status.fetch == true){
 				const schoolId = this.props.params.id;
 				const pager = { page : this.state.page, perPage: this.state.perPage};
@@ -127,6 +129,7 @@ class DeviceTable extends React.Component {
 				console.log(nextProps.status.result.msg);
 			}
 			self.theStatus = -1;
+			self.reset = -1;
 		}
 
 	}
@@ -153,7 +156,8 @@ class DeviceTable extends React.Component {
 		}
 	}
 	remove(id) {
-		this.props.deleteDevice(id);
+		this.props.resetDevice(id);
+		this.reset = 1;
 	}
 	changeStatus(id,start) {
 		const self = this;
@@ -176,11 +180,20 @@ class DeviceTable extends React.Component {
 			if(schoolDevice.fetch == true){
 				const data = schoolDevice.result.data.list;
 				dataSource = data.map(function (item, key) {
+					let referenceDevice = '';
+					switch (item.referenceDeviceId){
+						case 1:
+							referenceDevice = '洗衣机';
+							break;
+						default:
+							referenceDevice = '洗衣机';
+							break;
+					}
 					return {
 						key: item.id,
 						index: item.id,
 						serialNumber: item.serialNumber,
-						referenceDevice: '洗衣机',
+						referenceDevice: referenceDevice,
 						status: item.status,
 						address: item.address + item.label,
 						firstPulsePrice: item.firstPulsePrice,

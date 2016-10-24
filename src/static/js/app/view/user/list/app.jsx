@@ -117,6 +117,7 @@ class AgentTable extends React.Component {
 		} else {
 			return false;
 		}
+
 	}
 	initializePagination() {
 		let total = 1;

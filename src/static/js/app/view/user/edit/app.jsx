@@ -124,6 +124,10 @@ class UserForm extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
         const self = this;
+		if(!self.provinceId || !self.schoolId) {
+			alert('请选择省份及学校');
+			return false;
+		}
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				return;
@@ -174,6 +178,11 @@ class UserForm extends React.Component {
 			this.setState({ alipay: false });
 		} else {
 			this.setState({ alipay: true });
+		}
+	}
+	handleEnter(event) {
+		if (event.keyCode==13) {
+			this.handleSubmit(event);
 		}
 	}
 	render() {
@@ -243,7 +252,7 @@ class UserForm extends React.Component {
 		};
 
 		return (
-			<section className="view-user-list">
+			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
