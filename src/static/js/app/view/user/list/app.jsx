@@ -75,7 +75,6 @@ class AgentTable extends React.Component {
 			page: 1,
 			perPage: 10,
 			pagination: {},
-			loading: false,
 			child: false,
 			list: [],
 			pager: {},

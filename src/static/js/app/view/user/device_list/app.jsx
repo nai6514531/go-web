@@ -51,7 +51,6 @@ class SchoolTable extends React.Component {
 		this.state = {
 			data: [],
 			pagination: {},
-			loading: false,
 			pager: {},
 			page: 1,
 			perPage: 10,
@@ -61,6 +60,7 @@ class SchoolTable extends React.Component {
 	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
 		const schoolId = 0;
+		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	componentWillReceiveProps(nextProps) {
@@ -99,16 +99,19 @@ class SchoolTable extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getUserSchool(USER.id, pager);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getUserSchool(USER.id, pager);
 			},
 		}
 	}
 	render() {
+		const self = this;
 		const pagination = this.initializePagination();
 		const school = this.props.school;
 		let dataSource = [];
@@ -123,7 +126,8 @@ class SchoolTable extends React.Component {
 						school: item.name,
 						number: item.deviceTotal,
 					}
-				})
+				});
+				self.loading = false;
 			}
 		}
 		return (
@@ -146,7 +150,7 @@ class SchoolTable extends React.Component {
 					<Table columns={columns}
 						   dataSource={dataSource}
 						   pagination={pagination}
-						   loading={this.state.loading}
+						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
 					/>

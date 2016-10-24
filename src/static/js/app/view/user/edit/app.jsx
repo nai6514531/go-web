@@ -85,15 +85,15 @@ class UserForm extends React.Component {
         }
 		const resultPostDetail = this.props.resultPostDetail;
 		if(resultPostDetail !== nextProps.resultPostDetail && nextProps.resultPostDetail.fetch == true){
-			alert('添加成功');
+			console.log('添加成功');
 		} else {
-			console.log('resultPostDetail',resultPostDetail);
+			console.log('添加失败');
 		}
 		const resultPutDetail = this.props.resultPutDetail;
 		if(resultPutDetail !== nextProps.resultPutDetail && nextProps.resultPutDetail.fetch == true){
-			alert('修改成功');
+			console.log('修改成功');
 		} else {
-			console.log('resultPutDetail',resultPutDetail);
+			console.log('修改失败');
 		}
 	}
     provinceOption() {

@@ -170,7 +170,6 @@ class DeviceTable extends React.Component {
 	render() {
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
-		const schoolId = this.props.params.id;
 		const self = this;
 		let dataSource = [];
 		if(schoolDevice) {

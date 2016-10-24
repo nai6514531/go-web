@@ -14,8 +14,10 @@ import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
-	const { device: { detail, status, result, refDevice, pulseName }, region: {provinceList, provinceSchool} } = state;
-	return { detail, status, result, refDevice, pulseName, provinceList, provinceSchool };
+	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultPostDetail }, 
+		region: {provinceList, provinceSchool} } = state;
+	return { detail, status, result, refDevice, pulseName, 
+		resultPutDetail, resultPostDetail, provinceList, provinceSchool };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -110,6 +112,10 @@ class DeviceForm extends React.Component {
 				})
 				self.schoolName = schoolName[0].name;
 			}
+			// const resultPutDetail = this.props.resultPutDetail;
+			// if(resultPutDetail == undefined && nextProps.resultPutDetail) {
+			//	
+			// }
 		}
 
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
@@ -248,7 +254,6 @@ class DeviceForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		return (
-
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
