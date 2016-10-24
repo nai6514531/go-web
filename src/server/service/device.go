@@ -180,6 +180,27 @@ func (self *DeviceService) Reset(id int) bool {
 	return true
 }
 
+func (self *DeviceService) Delete(id int) bool {
+	device := &model.Device{}
+	transAction := common.DB.Begin()
+	//硬删除记录
+	r := transAction.Model(&model.Device{}).Where("id = ?", id).Scan(device).Unscoped().Delete(&model.Device{})
+	if r.RowsAffected <= 0 || r.Error != nil {
+		return false
+	}
+	//重置，在木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
+	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB Delete BoxInfo:", r.Error.Error())
+		return false
+	}
+	transAction.Commit()
+	return true
+}
+
 func (self *DeviceService) ListSchoolIdByUser(userId int) (*[]int, error) {
 	var schoolList []int
 	type MyDevice struct {
