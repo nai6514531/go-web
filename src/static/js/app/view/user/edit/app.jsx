@@ -40,17 +40,20 @@ function mapDispatchToProps(dispatch) {
 }
 
 class UserForm extends React.Component {
-	constructor(props) {
-		super(props);
+	constructor(props, context) {
+		super(props, context);
 		this.state = {
 			type: "3",
 			alipay: false,
             provinceChange: false,
             cityChange: false,
+			unsaved: true,
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleReset = this.handleReset.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
+	}
+	static contextTypes = {
+		router: React.PropTypes.object
 	}
 	componentWillMount() {
         // 默认北京市东城区
@@ -83,17 +86,22 @@ class UserForm extends React.Component {
                 self.cityId = nextProps.provinceCity.result.data[0].id;
             }
         }
-		const resultPostDetail = this.props.resultPostDetail;
-		if(resultPostDetail !== nextProps.resultPostDetail && nextProps.resultPostDetail.fetch == true){
-			console.log('添加成功');
-		} else {
-			console.log('添加失败');
-		}
-		const resultPutDetail = this.props.resultPutDetail;
-		if(resultPutDetail !== nextProps.resultPutDetail && nextProps.resultPutDetail.fetch == true){
-			console.log('修改成功');
-		} else {
-			console.log('修改失败');
+		if(self.saveDetail == 1){
+			const resultPostDetail = this.props.resultPostDetail;
+			if(resultPostDetail !== nextProps.resultPostDetail 
+				&& nextProps.resultPostDetail.fetch == true){
+				console.log('添加用户成功');
+			} else {
+				console.log('添加用户失败');
+			}
+			const resultPutDetail = this.props.resultPutDetail;
+			if(resultPutDetail !== nextProps.resultPutDetail 
+				&& nextProps.resultPutDetail.fetch == true){
+				console.log('修改用户成功');
+			} else {
+				console.log('修改用户失败');
+			}
+			self.saveDetail = -1;
 		}
 	}
     provinceOption() {
@@ -166,13 +174,10 @@ class UserForm extends React.Component {
                 user.account = self.account;
                 this.props.putUserDetail(this.props.params.id, user);
 			}
+			self.saveDetail = 1;
 		});
 	}
-	handleReset(e) {
-		e.preventDefault();
-		this.props.form.resetFields();
-		this.setState({alipay:false});
-	}
+	
 	handleRadio(select) {
 		if (select === '3') {
 			this.setState({ alipay: false });
@@ -183,6 +188,13 @@ class UserForm extends React.Component {
 	handleEnter(event) {
 		if (event.keyCode==13) {
 			this.handleSubmit(event);
+		}
+	}
+	goBack() {
+		if(this.state.unsaved) {
+			if(confirm('确定取消?')){
+				this.context.router.goBack();
+			}
 		}
 	}
 	render() {
@@ -445,7 +457,7 @@ class UserForm extends React.Component {
 							)}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
 							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 					</Form>
@@ -459,9 +471,6 @@ UserForm = createForm()(UserForm);
 
 UserForm.propTypes = {
 	title: React.PropTypes.string,
-};
-UserForm.contextTypes = {
-	router: React.PropTypes.object.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserForm);

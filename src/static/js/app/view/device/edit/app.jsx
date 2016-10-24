@@ -47,8 +47,8 @@ function mapDispatchToProps(dispatch) {
 const key = ['first','second','third','fourth'];
 
 class DeviceForm extends React.Component {
-	constructor(props) {
-		super(props);
+	constructor(props, context) {
+		super(props, context);
 		this.state = {
 			provinceId: '',
 			schoolId: '',
@@ -62,12 +62,14 @@ class DeviceForm extends React.Component {
 			visible: false,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleReset = this.handleReset.bind(this);
 		this.showModal = this.showModal.bind(this);
 		this.hideModal = this.hideModal.bind(this);
 		this.handleSelect = this.handleSelect.bind(this);
 		this.changePulseName = this.changePulseName.bind(this);
 		this.checkNumber = this.checkNumber.bind(this);
+	}
+	static contextTypes = {
+		router: React.PropTypes.object
 	}
 	componentWillMount() {
 		const deviceId = this.props.params.id;
@@ -117,10 +119,23 @@ class DeviceForm extends React.Component {
 					alert(nextProps.provinceSchool.result.msg);
 				}
 			}
-			// const resultPutDetail = this.props.resultPutDetail;
-			// if(resultPutDetail == undefined && nextProps.resultPutDetail) {
-			//
-			// }
+			if(self.saveDetail == 1){
+				const resultPutDetail = this.props.resultPutDetail;
+				if(resultPutDetail !== nextProps.resultPutDetail
+					&& nextProps.resultPutDetail.fetch == true) {
+					alert('修改成功');
+				} else {
+					console.log('修改失败');
+				}
+				const resultPostDetail = this.props.resultPostDetail;
+				if(resultPostDetail !== nextProps.resultPostDetail
+					&& nextProps.resultPostDetail.fetch == true) {
+					alert('添加成功');
+				} else {
+					console.log('添加失败');
+				}
+				self.saveDetail = -1;
+			}
 		}
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
 			const device = nextProps.detail.result.data;
@@ -164,11 +179,8 @@ class DeviceForm extends React.Component {
 			} else {
 				this.props.postDeviceDetail(deviceValue);
 			}
+			self.saveDetail = 1;
 		});
-	}
-	handleReset(e) {
-		e.preventDefault();
-		this.props.form.resetFields();
 	}
 	handleSelect(provinceId, schoolId) {
 		this.provinceId = provinceId;
@@ -216,6 +228,13 @@ class DeviceForm extends React.Component {
 	handleEnter(event) {
 		if (event.keyCode==13) {
 			this.handleSubmit(event);
+		}
+	}
+	goBack() {
+		if(this.state.unsaved) {
+			if(confirm('确定取消?')){
+				this.context.router.goBack();
+			}
 		}
 	}
 	render() {
@@ -413,7 +432,7 @@ class DeviceForm extends React.Component {
 							}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
 							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 						<div>
