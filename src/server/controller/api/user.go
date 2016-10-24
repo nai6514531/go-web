@@ -641,7 +641,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user/:id/user-device-info 用户详情(含设备总数)
+	@api {get} /api/user/:id/device-total 用户详情(含设备总数)
 	@apiName BasicWithDeviceInfo
 	@apiGroup User
  	@apiSuccessExample Success-Response:

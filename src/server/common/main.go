@@ -13,7 +13,7 @@ var (
 		"-3": "你所请求的API不存在,请检查后再试!",
 		"-4": "你所请求的API超过频率限制,请稍后再试!",
 		"-5": "你没有操作该用户id的权限",
-		"-6": "请不要操作不属于你的设备",
+		"-6": "请操作你自身的设备或Test账号下的设备",
 	}
 )
 
@@ -51,50 +51,51 @@ var (
 			return
 		}
 	}
-	/*
+
 	//中间件-检查是否有操作改用户id的权限
-	CheckUserId = func(ctx *iris.Context) {
-		optUserId, _ := ctx.ParamInt("id") //要操作的用户id
-		result := &enity.Result{}
-		myUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-		//根据要操作的用户id查找到其父用户id
-		userService := &service.UserService{}
-		user, err := userService.Basic(optUserId)
-		if err != nil {
-			//如果没有找到条目不做处理
-			ctx.Next()
-			return
-		}
-		detailMsg := fmt.Sprintf("你的用户id为:%d,你要操作的用户id为:%d,其父id为:%d.", myUserId, optUserId, user.ParentId)
-		if (optUserId != myUserId) && (myUserId != user.ParentId) {
-			//如果要操作的id既不是我自身的id也不是我的子用户id
-			result = &enity.Result{"-5", detailMsg, common_msg["-5"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		} else {
-			ctx.Next()
-		}
-	}
-	//中间件-判断是否具有操作设备id的权限
-	CheckDeviceId = func(ctx *iris.Context) {
-		optDeviceId, _ := ctx.ParamInt("id") //要操作的设备id
-		result := &enity.Result{}
-		myUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-		//根据要操作的设备id查找
-		deviceService := &service.DeviceService{}
-		device, err := deviceService.Basic(optDeviceId)
-		if err != nil {
-			//如果没有找到条目不做处理
-			ctx.Next()
-			return
-		}
-		if device.UserId != myUserId {
-			//该设备的用户不是当前登陆用户
-			result = &enity.Result{"-6", nil, common_msg["-6"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		} else {
-			ctx.Next()
-		}
-	}*/
+	// CheckUserId = func(ctx *iris.Context) {
+	// 	optUserId, _ := ctx.ParamInt("id") //要操作的用户id
+	// 	result := &enity.Result{}
+	// 	myUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	// 	//根据要操作的用户id查找到其父用户id
+	// 	userService := &service.UserService{}
+	// 	user, err := userService.Basic(optUserId)
+	// 	if err != nil {
+	// 		//如果没有找到条目不做处理
+	// 		ctx.Next()
+	// 		return
+	// 	}
+	// 	detailMsg := fmt.Sprintf("你的用户id为:%d,你要操作的用户id为:%d,其父id为:%d.", myUserId, optUserId, user.ParentId)
+	// 	if (optUserId != myUserId) && (myUserId != user.ParentId) {
+	// 		//如果要操作的id既不是我自身的id也不是我的子用户id
+	// 		result = &enity.Result{"-5", detailMsg, common_msg["-5"]}
+	// 		ctx.JSON(iris.StatusOK, result)
+	// 		return
+	// 	} else {
+	// 		ctx.Next()
+	// 	}
+	// }
+	//中间件-判断操作的设备是否属于我或者测试账号
+	// OwnToMeOrTest = func(ctx *iris.Context) {
+	// 	id, _ := ctx.ParamInt("id") //要操作的设备id
+	// 	result := &enity.Result{}
+	// 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	// 	//根据要操作的设备id查找
+	// 	deviceService := &service.DeviceService{}
+	// 	device, err := deviceService.Basic(id)
+	// 	if err != nil {
+	// 		//如果没有找到条目不做处理
+	// 		ctx.Next()
+	// 		return
+	// 	}
+	// 	if device.UserId == userId || device.UserId == 1 {
+	// 		ctx.Next()
+	// 		return
+	// 	} else {
+	// 		//该设备的用户不是当前登陆用户
+	// 		result = &enity.Result{"-6", nil, common_msg["-6"]}
+	// 		ctx.JSON(iris.StatusOK, result)
+	// 		return
+	// 	}
+	// }
 )
