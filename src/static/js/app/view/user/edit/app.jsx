@@ -132,9 +132,11 @@ class UserForm extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
         const self = this;
-		if(!self.provinceId || !self.schoolId) {
-			alert('请选择省份及学校');
-			return false;
+		if(!this.state.alipay){
+			if(!self.provinceId || !self.schoolId) {
+				alert('请选择省份及学校');
+				return false;
+			}
 		}
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
