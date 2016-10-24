@@ -163,7 +163,7 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 0).Scan(device)
+	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 1).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		return false
 	}

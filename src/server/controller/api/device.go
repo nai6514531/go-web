@@ -437,7 +437,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
   		"msg": "重置设备成功!"
 	}
 */
-//事实上是重置设备，将userid变回0
+//事实上是重置设备，将userid变回1
 func (self *DeviceController) Reset(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
@@ -448,7 +448,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		return
 	}
 	currentDevice, _ := deviceService.Basic(id)
-	if currentDevice == nil || currentDevice.UserId == 0 { //设备被重置了或不存在
+	if currentDevice == nil || currentDevice.UserId == 1 { //设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
