@@ -59,8 +59,12 @@ const columns = [{
 				<span>
 					<span className="ant-divider" />
 					<Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link>
-					<span className="ant-divider" />
-					<Link to='/user/device/list'>设备管理</Link>
+					{USER.role.id == 1 ? "" :
+						<span>
+							<span className="ant-divider" />
+							<Link to='/user/device/list'>设备管理</Link>
+						</span>
+					}
 				</span>
 			:''}
 		</span>

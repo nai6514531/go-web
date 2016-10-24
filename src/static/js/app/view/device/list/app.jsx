@@ -197,9 +197,7 @@ class DeviceList extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/device/school" + schoolId}>学校</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">

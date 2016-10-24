@@ -145,11 +145,11 @@ class DeviceEdit extends React.Component {
 			}
 			const deviceId = this.props.params.id;
 			// 新增设备
-			// this.props.postDeviceDetail(deviceValue);
 			if(deviceId) {
 				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
-				this.props.putSerialNumber(values.serialNumber,deviceValue);
+				this.props.postDeviceDetail(deviceValue);
+				// this.props.putSerialNumber(values.serialNumber,deviceValue);
 			}
 		});
 	}
@@ -252,9 +252,8 @@ class DeviceEdit extends React.Component {
 			<section className="view-user-list">
 				<header>
 					<Breadcrumb separator=">">
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/device/edit" + id}>添加/修改设备</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item>添加/修改设备</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">
