@@ -147,7 +147,7 @@ func (self *SyncService) SyncDevice() bool {
 
 func (self *SyncService) SyncDailyBill() bool {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("companyid>0 and status = 0").Find(list)
+	r := common.MNDB.Where("status = 0 or status =1").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
 	if r.Error != nil {
@@ -156,17 +156,18 @@ func (self *SyncService) SyncDailyBill() bool {
 	}
 	boo := true
 	for _, boxStatBill := range *list {
-		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(boxStatBill.CompanyId, boxStatBill.PeriodStart)
+		userId:=(boxStatBill.CompanyId+1)
+		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
 		if dailyBill == nil && err != nil {
 			boo = syncService.AddDailyBill(boxStatBill)
 			if !boo {
-				common.Logger.Warningln("AddDailyBill:", boxStatBill.AgencyId, boxStatBill.PeriodStart)
+				common.Logger.Warningln("AddDailyBill:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		} else {
 			boo = syncService.UpdateDailyBill(boxStatBill)
 			if !boo {
-				common.Logger.Warningln("UpdateDailyBill:", boxStatBill.AgencyId, boxStatBill.PeriodStart)
+				common.Logger.Warningln("UpdateDailyBill:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		}

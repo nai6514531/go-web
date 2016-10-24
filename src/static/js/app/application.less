@@ -7,43 +7,10 @@
 	height: 100%;
 	min-height: 500px;
 	margin: 0 0 0 (200px + 32px);
-	div.header {
-	  height: 50px;
-	  background-color: #fff;
-	  border-bottom: 1px solid #eee;
-	  position: fixed;
-	  top: 0;
-	  width: 100%;
-	  z-index: 99;
-	  padding-right: 32px;
-	  ul.navbar-right {
-		float: right;
-		width: 400px;
-		line-height: 50px;
-		li {
-		  float: left;
-		  margin: 0 10px;
-		  span {
-			display: inline-block;
-		  }
-		  span.avatar img {
-			width: 30px;
-			height: auto;
-			max-width: 100%;
-			vertical-align: middle;
-			border-radius: 50%;
-		  }
-		  i.anticon-logout{
-			font-size:16px;
-			cursor: pointer;
-		  }
-		}
-	  }
-	}
 	section.content {
 	  padding: 16px;
 	  margin-top: 50px;
-	  section>header{
+	  section > header {
 		border-bottom: 1px solid #ddd;
 		height: 50px;
 		line-height: 50px;
@@ -73,6 +40,39 @@
 	  text-align: center;
 	}
   }
+  & > div.header {
+	height: 50px;
+	background-color: #fff;
+	border-bottom: 1px solid #eee;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 99;
+	padding-left: 232px;
+	padding-right: 16px;
+	ul.navbar-right {
+	  float: right;
+	  line-height: 50px;
+	  li {
+		float: left;
+		margin: 0 10px;
+		span {
+		  display: inline-block;
+		}
+		span.avatar img {
+		  width: 30px;
+		  height: auto;
+		  max-width: 100%;
+		  vertical-align: middle;
+		  border-radius: 50%;
+		}
+		i.anticon-logout {
+		  font-size: 16px;
+		  cursor: pointer;
+		}
+	  }
+	}
+  }
   & > aside {
 	background-color: @dark-bg-color;
 	position: fixed;
@@ -80,6 +80,7 @@
 	bottom: 0;
 	width: 200px + 32px;
 	padding: 16px;
+	z-index: 100;
 	h2 {
 	  text-align: center;
 	  a {
@@ -157,6 +158,7 @@ html, body, #main, .app-main, .index {
   height: 100%;
   margin: 0 auto;
 }
+
 .detail {
   height: 100%;
   .detail-head {
@@ -180,6 +182,7 @@ html, body, #main, .app-main, .index {
 	padding: 0.3rem;
   }
 }
+
 .province-filter {
   margin-left: 0;
   margin-right: 0;
@@ -219,7 +222,7 @@ html, body, #main, .app-main, .index {
 	background: white;
 
   }
-  & >span {
+  & > span {
 	display: inline-block;
 	position: relative;
 	right: 20px;

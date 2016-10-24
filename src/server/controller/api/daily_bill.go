@@ -8,6 +8,7 @@ import (
 	"strings"
 	"maizuo.com/soda-manager/src/server/common"
 	"strconv"
+	"github.com/spf13/viper"
 )
 
 type DailyBillController struct {
@@ -28,23 +29,79 @@ var (
 		"01060300": "更新日账单状态成功",
 		"01060301": "更新日账单状态失败",
 		"01060302": "更新日账单状态部分失败",
-		//"01060303": "请求修改状态参数有误",
+		"01060303": "请求修改状态参数有误",
 
 		"01060400": "日账单结账成功",
 		"01060401": "日账单结账失败",
 		"01060402": "日账单部分结账失败",
+		"01060403": "选中用户未申请提现或已结账",
+		"01060404": "无选中用户账户信息",
+		"01060405": "无登陆用户角色信息",
+		"01060406": "无操作权限",
 
 	}
 )
 
+/**
+还未优化代码
+ */
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
+	userRoleRelService := &service.UserRoleRelService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
 	page := functions.StringToInt(params["page"])
 	perPage := functions.StringToInt(params["perPage"])
 	cashAccounType := functions.StringToInt(params["cashAccountType"])      //提现方式
-	status := strings.Split(params["status"], ",")  //结算状态和提现状态
+	var status []string
+	var _status []string
+	userId := -1
+	if params["status"] != "" {
+		_status = strings.Split(params["status"], ",")  //结算状态和提现状态
+	}
+
+	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
+	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
+	if err != nil {
+		return
+	}
+	if len(_status) <= 0 {
+		switch userRoleRel.RoleId {
+		case 1:
+			status = _status
+			break
+		case 3:
+			status = append(status, "1")
+			status = append(status, "2")
+			status = append(status, "3")
+			break
+		default:
+			userId = siginUserId
+			break
+		}
+	}else {
+		for _, s := range _status {
+			switch userRoleRel.RoleId {
+			case 1:
+				status = append(status, s)
+				break
+			case 3:
+				if s == "1" || s == "2" || s == "3" {
+					status = append(status, s)
+				}
+				break
+			default:
+				userId = siginUserId
+				break
+			}
+		}
+	}
+	common.Logger.Warningln("!!!!!!!!!!!!!!!!!!!!!!1", status)
+	if userRoleRel.RoleId == 3 && len(status) <= 0 {
+		status = append(status, "1")
+		status = append(status, "2")
+		status = append(status, "3")
+	}
 	billAt := params["billAt"]
 
 	if page <= 0 || perPage <= 0 {
@@ -53,13 +110,13 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		return
 	}
 
-	total, err := dailyBillService.TotalByAccountType(cashAccounType, status, billAt)
+	total, err := dailyBillService.TotalByAccountType(cashAccounType, status, billAt, userId)
 	if err != nil {
 		result = &enity.Result{"01060102", nil, daily_bill_msg["01060102"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccounType, status, billAt, page, perPage)
+	list, err := dailyBillService.ListWithAccountType(cashAccounType, status, billAt, userId, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01060101", nil, daily_bill_msg["01060101"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -97,19 +154,19 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
-	/*status, _ := strconv.Atoi(params["status"])
-	if status != 1 {
+	status, _ := strconv.Atoi(params["status"])
+	if status != 1 && status != 0{
 		common.Logger.Warningln(daily_bill_msg["01060303"], ": ", status)
 		ctx.JSON(iris.StatusOK, daily_bill_msg["01060303"])
 		return
-	}*/
+	}
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
 	}
 	userIds := strings.Split(userIdStr, ",")
 
-	rows, err := dailyBillService.UpdateStatus(1, billAt, userIds...)
+	rows, err := dailyBillService.UpdateStatus(status, billAt, userIds...)
 	if err != nil {
 		common.Logger.Warningln(daily_bill_msg["01060302"])
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060302", nil, daily_bill_msg["01060302"]})
@@ -129,23 +186,56 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
+	userRoleRelService := &service.UserRoleRelService{}
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
+	_userIds := []int{}
 	aliPayUserIds := []string{}
 	wechatPayUserIds := []string{}
 	bankPayUserIds := []string{}
 	var result *enity.Result
 	isSuccessed := true
+	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("key==============", viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("siginUserId=====================", siginUserId)
+
+	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
+	if err != nil {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060405", nil, daily_bill_msg["01060405"]})
+		return
+	}
+	if userRoleRel.RoleId != 3 {    //不是财务角色
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
+		return
+	}
+
 	if userIdStr == "" {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
 	}
 	userIds := strings.Split(userIdStr, ",")
-	accountMap, err := userCashAccountService.BasicMapByUserId(userIds)
-	if err != nil {
 
+	//过滤掉未申请提现的用户
+	dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出已申请提现的用户
+	if err != nil || len(*dailyBillMap) <=0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+		return
 	}
+	for _userId, _ := range *dailyBillMap {
+		_userIds = append(_userIds, _userId)
+	}
+	if len(_userIds) <= 0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+		return
+	}
+
+	accountMap, err := userCashAccountService.BasicMapByUserId(_userIds)
+	if err != nil || len(*accountMap) <= 0 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060404", nil, daily_bill_msg["01060404"]})
+		return
+	}
+
 	for _, _account := range *accountMap {
 		switch _account.Type {
 		case 1: //支付宝

@@ -835,7 +835,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
 	if schoolId == -1 || schoolId == 0 { //?schoolId=0或者没有筛选条件
-		schoolIdList, err := deviceService.ListSchoolByUser(userId)
+		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
 			result = &enity.Result{"01011101", nil, user_msg["01011101"]}
 			ctx.JSON(iris.StatusOK, result)

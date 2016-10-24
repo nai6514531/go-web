@@ -29,7 +29,7 @@ func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Devi
 
 func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -58,7 +58,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -67,7 +67,7 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 
 func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Find(list)
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -160,7 +160,7 @@ func (self *DeviceService) Reset(id int) bool {
 	return true
 }
 
-func (self *DeviceService) ListSchoolByUser(userId int) (*[]int, error) {
+func (self *DeviceService) ListSchoolIdByUser(userId int) (*[]int, error) {
 	var schoolList []int
 	type MyDevice struct {
 		SchoolId int `json:"school_id"`
