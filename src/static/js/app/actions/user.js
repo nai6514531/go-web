@@ -18,10 +18,10 @@ import {
 
 export function getUserList(pager) {
 	return dispatch => {
-		dispatch({
-			type: GETING_USER_LIST,
-			result: { loading: true },
-		});
+		// dispatch({
+		// 	type: GETING_USER_LIST,
+		// 	result: { loading: true },
+		// });
 		UserService.list(pager).then((result) => {
 			dispatch({
 				type: GET_USER_LIST,

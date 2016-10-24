@@ -55,6 +55,7 @@ class SchoolTable extends React.Component {
 			page: 1,
 			perPage: 10,
 			schoolList: [],
+			schoolId:'',
 		};
 	}
 	componentWillMount() {
@@ -93,6 +94,10 @@ class SchoolTable extends React.Component {
 			total = this.props.school.result.data.total;
 		}
 		const self = this;
+		let schoolId = 0;
+		if(this.state.schoolId) {
+			schoolId = this.state.schoolId;
+		}
 		return {
 			total: total,
 			showSizeChanger: true,
@@ -100,15 +105,19 @@ class SchoolTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.loading = true;
-				self.props.getUserSchool(USER.id, pager);
+				self.props.getUserSchool(USER.id, schoolId, pager);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
+				console.log('device list',pager);
 				self.loading = true;
-				self.props.getUserSchool(USER.id, pager);
+				self.props.getUserSchool(USER.id, schoolId, pager);
 			},
 		}
+	}
+	changeSchoolId(schoolId) {
+		this.setState({schoolId:schoolId})
 	}
 	render() {
 		const self = this;
@@ -144,6 +153,7 @@ class SchoolTable extends React.Component {
 						getUserSchool={this.props.getUserSchool}
 						page={this.state.page}
 						perPage={this.state.perPage}
+						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
 				</div>
 				<section className="view-content">
@@ -167,6 +177,7 @@ class SchoolFilter extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
 		const schoolId = parseInt(this.props.form.getFieldsValue().school);
+		this.props.changeSchoolId(schoolId);
 		const pager = {page: this.props.page, perPage: this.props.perPage};
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}

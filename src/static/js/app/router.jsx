@@ -62,7 +62,7 @@ const router = (
 				callback(null, require('./view/device/list/app.jsx').default);
 			});
 		}} />
-		<Route path="/device/edit" getComponent={(location, callback) => {
+		<Route path="/device/edit(/:id)" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
 				callback(null, require('./view/device/edit/app.jsx').default);
 			});

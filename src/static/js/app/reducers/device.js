@@ -8,6 +8,7 @@ import {
 	DEVICE_PULSE_NAME,
 	DEVICE_SERIAL_NUMBER,
 	GET_REF_DEVICE,
+	RESET_DEVICE,
 } from '../constants/index';
 
 const initialState = {
@@ -35,6 +36,11 @@ export default function (state = initialState, action) {
 			return {
 				...state,
 				resultPutDetail: action.result,
+			};
+		case RESET_DEVICE:
+			return {
+				...state,
+				result: action.result,
 			};
 		case REMOVE_DEVICE:
 			return {
