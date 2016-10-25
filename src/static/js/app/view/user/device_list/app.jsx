@@ -60,7 +60,7 @@ class SchoolTable extends React.Component {
 	}
 	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
-		const schoolId = 0;
+		const schoolId = -1;
 		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
@@ -94,7 +94,7 @@ class SchoolTable extends React.Component {
 			total = this.props.school.result.data.total;
 		}
 		const self = this;
-		let schoolId = 0;
+		let schoolId = -1;
 		if(this.state.schoolId) {
 			schoolId = this.state.schoolId;
 		}
@@ -184,7 +184,7 @@ class SchoolFilter extends React.Component {
 		const schoolList = this.props.schoolList;
 		let schoolNode = [];
 		if(schoolList){
-			const firstNode = <Option key='-1' value="0">所有学校</Option>;
+			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
 			schoolNode[0] = firstNode;
 			for(let i = 0; i < schoolList.length; i++) {
 				const id = schoolList[i].id.toString();

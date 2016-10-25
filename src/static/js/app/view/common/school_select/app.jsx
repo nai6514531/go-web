@@ -38,25 +38,43 @@ class SchoolSelect extends React.Component {
 			provinceName: '',
 			schoolId: '',
 			schoolName: '',
+			defaultProvince:{
+				provinceId:'',
+				provinceName:'',
+			}
 		};
 	}
 	componentWillMount() {
 		this.props.getProvinceList();
 	}
 	componentWillReceiveProps(nextProps) {
+		// 如果父组件有变动,就改变内容
 		if(this.props.provinceId !== nextProps.provinceId) {
-			this.setState({provinceId: nextProps.provinceId});
+			this.setState({
+				provinceId: nextProps.provinceId,
+				defaultProvince: {
+					provinceId: nextProps.provinceId,
+				}
+			});
 		}
 		if(this.props.provinceName !== nextProps.provinceName) {
-			this.setState({provinceName: nextProps.provinceName});
+			this.setState({
+				provinceName: nextProps.provinceName,
+				defaultProvince: {
+					provinceName: nextProps.provinceName,
+				}
+			});
 		}
 		if(this.props.schoolId !== nextProps.schoolId) {
 			this.setState({schoolId: nextProps.schoolId});
 		}
-		// console.log('child',this.props.schoolName,nextProps.schoolName);
 		if(this.props.schoolName !== nextProps.schoolName) {
 			this.setState({schoolName: nextProps.schoolName});
 		}
+		// console.log('schoolId',this.props.schoolId,nextProps.schoolId);
+		// console.log('schoolName',this.props.schoolName,nextProps.schoolName);
+		// console.log('provinceId',this.props.provinceId,nextProps.provinceId);
+		// console.log('provinceName',this.props.provinceName,nextProps.provinceName);
 	}
 	selectProvince(provinceId, provinceName) {
 		this.props.getProvinceSchoolList(provinceId);
@@ -69,14 +87,25 @@ class SchoolSelect extends React.Component {
 		this.setState({
 			schoolId: schoolId,
 			schoolName: schoolName,
+			defaultProvince: {
+				provinceId: this.state.provinceId,
+				provinceName: this.state.provinceName,
+			}
 		});
-		this.refs.box.classList.toggle('box-show');
-		this.refs.mask.classList.toggle('box-show');
+		this.toggleBox();
 		this.props.handleSelect(this.state.provinceId, schoolId);
 	}
-	showBox() {
+	toggleBox() {
 		this.refs.box.classList.toggle('box-show');
 		this.refs.mask.classList.toggle('box-show');
+	}
+	onCancle() {
+		this.toggleBox();
+		// console.log('default',this.state.defaultProvince);
+		this.setState({
+			provinceId: this.state.defaultProvince.provinceId,
+			provinceName: this.state.defaultProvince.provinceName,
+		});
 	}
 	render() {
 		const provinceList = this.props.provinceList;
@@ -104,7 +133,7 @@ class SchoolSelect extends React.Component {
 		}
 		return (
 			<div className="filter">
-				<div  ref="mask" className="mask box-show"></div>
+				<div  ref="mask" className="mask box-show" onClick={this.onCancle.bind(this)}></div>
 				<div ref="box" className="box box-show" >
 					<div className="province">
 						{provinceNode}
@@ -113,7 +142,7 @@ class SchoolSelect extends React.Component {
 						{schoolNode ? schoolNode : '请先选择省份'}
 					</div>
 				</div>
-				<div onClick = {this.showBox.bind(this)} className="show">
+				<div onClick = {this.toggleBox.bind(this)} className="show">
 					{this.state.provinceName ?
 						<div>
 							{this.state.provinceName}-

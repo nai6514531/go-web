@@ -181,6 +181,7 @@ class DeviceTable extends React.Component {
 	render() {
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
+		const schoolId = this.props.params.id;
 		const self = this;
 		let dataSource = [];
 		if(schoolDevice) {
@@ -218,7 +219,7 @@ class DeviceTable extends React.Component {
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to={"/user/device/school/" + schoolId}>设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>学校</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>

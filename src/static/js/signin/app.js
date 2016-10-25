@@ -39,9 +39,8 @@ export class LoginForm extends React.Component {
 					captcha: captcha,
 				};
 				LoginService.login(data).then((response)=>{
-					const newCode = parseCode(response.status);
 					let tips = '';
-					switch (newCode) {
+					switch (response.status) {
 						case 0: {
 							window.location.href = '/';
 							break;

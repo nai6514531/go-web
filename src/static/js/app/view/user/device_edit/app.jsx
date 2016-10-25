@@ -14,10 +14,10 @@ import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
-	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultPostDetail },
+	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultSerialNumber },
 		region: {provinceList, provinceSchool} } = state;
 	return { detail, status, result, refDevice, pulseName,
-		resultPutDetail, resultPostDetail, provinceList, provinceSchool };
+		resultPutDetail, resultSerialNumber, provinceList, provinceSchool };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -79,7 +79,6 @@ class DeviceForm extends React.Component {
 		} else {
 			this.setState({addNew: true});
 		}
-		// 获取关联设备列表
 		this.props.getRefDevice();
 	}
 	componentWillReceiveProps(nextProps) {
@@ -121,30 +120,7 @@ class DeviceForm extends React.Component {
 					alert(nextProps.provinceSchool.result.msg);
 				}
 			}
-			if(self.saveDetail == 1){
-				const resultPostDetail = this.props.resultPostDetail;
-				if(resultPostDetail !== nextProps.resultPostDetail
-					&& nextProps.resultPostDetail.fetch == true){
-					alert('添加设备成功');
-					self.saveDetail = -1;
-				} else if(resultPostDetail !== nextProps.resultPostDetail
-					&& nextProps.resultPostDetail.fetch == false){
-					alert('添加设备失败');
-					self.saveDetail = -1;
-				}
-				const resultPutDetail = this.props.resultPutDetail;
-				if(resultPutDetail !== nextProps.resultPutDetail
-					&& nextProps.resultPutDetail.fetch == true){
-					alert('修改设备成功');
-					self.saveDetail = -1;
-				} else if(resultPutDetail !== nextProps.resultPutDetail
-					&& nextProps.resultPutDetail.fetch == false){
-					alert('修改设备失败');
-					self.saveDetail = -1;
-				}
-			}
 		}
-
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
 			const device = nextProps.detail.result.data;
 			self.firstPulseName = device.firstPulseName;
@@ -152,6 +128,36 @@ class DeviceForm extends React.Component {
 			self.thirdPulseName = device.thirdPulseName;
 			self.fourthPulseName = device.fourthPulseName;
 		}
+		if(self.saveDetail == 1){
+			const resultSerialNumber = this.props.resultSerialNumber;
+			if(resultSerialNumber !== nextProps.resultSerialNumber) {
+				if( nextProps.resultSerialNumber.fetch == true) {
+					alert('添加设备成功');
+					self.saveDetail = -1;
+				} else if(nextProps.resultSerialNumber.fetch == false) {
+					switch (nextProps.resultSerialNumber.result.status){
+						case 3:
+							alert(nextProps.resultSerialNumber.result.msg);
+							break;
+						default:
+							alert('添加设备失败');
+							break;
+					}
+					self.saveDetail = -1;
+				}
+			}
+			const resultPutDetail = this.props.resultPutDetail;
+			if(resultPutDetail !== nextProps.resultPutDetail) {
+				if(nextProps.resultPutDetail.fetch == true){
+					alert('修改设备成功');
+					self.saveDetail = -1;
+				} else if(nextProps.resultPutDetail.fetch == false) {
+					alert('修改设备失败');
+					self.saveDetail = -1;
+				}
+			}
+		}
+
 	}
 	handleSubmit(e) {
 		e.preventDefault();
