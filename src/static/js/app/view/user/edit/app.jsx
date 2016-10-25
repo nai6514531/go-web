@@ -214,8 +214,8 @@ class UserForm extends React.Component {
 						bankName: data.cashAccount.bankName,
 						account: data.cashAccount.account,
 						bankMobile: data.cashAccount.mobile,
-						provinceId: data.cashAccount.provinceId,
-						cityId: data.cashAccount.cityId,
+						provinceId: data.cashAccount.provinceId.toString(),
+						cityId: data.cashAccount.cityId.toString(),
 					}
 				} else if (data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
