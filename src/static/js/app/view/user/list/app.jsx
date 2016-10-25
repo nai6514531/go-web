@@ -9,8 +9,8 @@ import * as UserActions from '../../../actions/user';
 
 
 function mapStateToProps(state) {
-	const { user: { list, detail } } = state;
-	return { list, detail };
+	const { user: { list, detail, detailTotal } } = state;
+	return { list, detail, detailTotal };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -110,7 +110,7 @@ class AgentTable extends React.Component {
 		}
 		// 首次从子用户列表跳转到父用户列表
 		if(this.state.child == true && nextState.child == true &&
-			nextProps.routeParams.id == undefined && this.props.detail == undefined){
+			nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
 			self.setState({child: false});
 			self.loading = true;
 			this.props.getDetailTotal(USER.id);
@@ -118,7 +118,7 @@ class AgentTable extends React.Component {
 	}
 	shouldComponentUpdate(nextProps, nextState) {
 		if(nextProps.list !== this.props.list
-			|| nextProps.detail !== this.props.detail
+			|| nextProps.detailTotal !== this.props.detailTotal
 			|| nextState.child == true || nextState.child == false) {
 			return true;
 		} else {
@@ -151,7 +151,7 @@ class AgentTable extends React.Component {
 	}
 	render() {
 		// console.log(this.props);
-		const { list, detail, params: {id} } = this.props;
+		const { list, detailTotal, params: {id} } = this.props;
 		const pagination = this.initializePagination();
 		let data = '';
 		let dataSource = [];
@@ -180,9 +180,9 @@ class AgentTable extends React.Component {
 
 			}
 		} else {
-			if(detail) {
-				if(detail.fetch == true) {
-					data = detail.result.data;
+			if(detailTotal) {
+				if(detailTotal.fetch == true) {
+					data = detailTotal.result.data;
 					dataSource = [{
 						key: data.id,
 						index: data.id,
@@ -199,7 +199,6 @@ class AgentTable extends React.Component {
 				}
 			}
 		}
-		console.log('loading',this.loading);
 		return (
 			<section className="view-user-list">
 				<header>
