@@ -4,7 +4,6 @@ import md5 from 'md5';
 import { Button, Form, Input, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
-import { checkStatus, parseJSON, parseCode } from '../common/common';
 import LoginService from '../app/service/login';
 export class LoginForm extends React.Component {
 	constructor(props) {
@@ -12,6 +11,7 @@ export class LoginForm extends React.Component {
 		this.state = {
 			url: '',
 			loginButton: true,
+			tips:'',
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.getCaptcha = this.getCaptcha.bind(this);
@@ -43,6 +43,7 @@ export class LoginForm extends React.Component {
 					window.location.href = '/';
 					if(tips){
 						self.error(tips);
+						this.setState({tips:tips});
 					}
 					self.setState({loginButton:true});
 				},(response) => {
@@ -68,6 +69,7 @@ export class LoginForm extends React.Component {
 			this.handleSubmit(event);
 		}
 	}
+	
 	render() {
 		const { getFieldDecorator } = this.props.form;
 		const formItemLayout = {
@@ -88,7 +90,6 @@ export class LoginForm extends React.Component {
 							<Input placeholder="请输入用户名" />
 						)}
 					</FormItem>
-
 					<FormItem
 						{...formItemLayout}
 						label="密码"

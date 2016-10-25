@@ -100,6 +100,11 @@ class AgentTable extends React.Component {
 			child: true,
 		})
 	}
+	hideChild() {
+		this.setState({
+			child: false,
+		})
+	}
 	componentWillUpdate(nextProps, nextState) {
 		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
@@ -202,9 +207,16 @@ class AgentTable extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					<Breadcrumb>
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-					</Breadcrumb>
+					{this.state.child?
+						<Breadcrumb>
+							<Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item>下级代理商</Breadcrumb.Item>
+						</Breadcrumb>
+						:
+						<Breadcrumb>
+							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						</Breadcrumb>
+					}
 				</header>
 				<div className="toolbar">
 					<Button type="primary" className="item">
