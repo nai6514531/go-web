@@ -125,6 +125,7 @@ class DeviceForm extends React.Component {
 				if(resultPostDetail !== nextProps.resultPostDetail
 					&& nextProps.resultPostDetail.fetch == true){
 					alert('添加设备成功');
+					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(resultPostDetail !== nextProps.resultPostDetail
 					&& nextProps.resultPostDetail.fetch == false){
@@ -135,6 +136,7 @@ class DeviceForm extends React.Component {
 				if(resultPutDetail !== nextProps.resultPutDetail
 					&& nextProps.resultPutDetail.fetch == true){
 					alert('修改设备成功');
+					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(resultPutDetail !== nextProps.resultPutDetail
 					&& nextProps.resultPutDetail.fetch == false){
@@ -241,7 +243,7 @@ class DeviceForm extends React.Component {
 			if(confirm('确定取消?')){
 				this.context.router.goBack();
 			}
-		}
+		} 
 	}
 	render() {
 		// 关联设备列表

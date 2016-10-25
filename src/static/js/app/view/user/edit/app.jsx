@@ -81,12 +81,12 @@ class UserForm extends React.Component {
 				}
 			}
 		}
-
 		if(self.saveDetail == 1){
 			const resultPostDetail = this.props.resultPostDetail;
 			if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == true){
 				alert('添加用户成功');
+				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == false){
@@ -97,6 +97,7 @@ class UserForm extends React.Component {
 			if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == true){
 				alert('修改用户成功');
+				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == false){
@@ -120,7 +121,6 @@ class UserForm extends React.Component {
 			if (errors) {
 				return;
 			}
-			console.log('values',values);
 			let cashAccount = {};
 			const user = {
 					"name": values.name,
@@ -176,7 +176,7 @@ class UserForm extends React.Component {
 			if(confirm('确定取消?')){
 				this.context.router.goBack();
 			}
-		}
+		} 
 	}
 	render() {
 		let ProvinceNode = [];
@@ -193,6 +193,7 @@ class UserForm extends React.Component {
 		}
 		const self = this;
         const { id } = this.props.params;
+		const userId = USER.id;
         const { detail, provinceCity, provinceList } = this.props;
 		let initialValue = {};
 		if(id && id !== 'new' && detail) {
@@ -240,6 +241,7 @@ class UserForm extends React.Component {
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to={"/user/" + userId}>下级代理商</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>添加/修改用户</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>

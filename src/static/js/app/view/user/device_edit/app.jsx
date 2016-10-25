@@ -128,10 +128,11 @@ class DeviceForm extends React.Component {
 			self.thirdPulseName = device.thirdPulseName;
 			self.fourthPulseName = device.fourthPulseName;
 		}
-		if(self.saveDetail == 1){
+		if(this.saveDetail == 1){
 			const resultSerialNumber = this.props.resultSerialNumber;
 			if(resultSerialNumber !== nextProps.resultSerialNumber) {
 				if( nextProps.resultSerialNumber.fetch == true) {
+					self.context.router.goBack();
 					alert('添加设备成功');
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
@@ -150,6 +151,7 @@ class DeviceForm extends React.Component {
 			if(resultPutDetail !== nextProps.resultPutDetail) {
 				if(nextProps.resultPutDetail.fetch == true){
 					alert('修改设备成功');
+					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(nextProps.resultPutDetail.fetch == false) {
 					alert('修改设备失败');
@@ -244,7 +246,7 @@ class DeviceForm extends React.Component {
 			if(confirm('确定取消?')){
 				this.context.router.goBack();
 			}
-		}
+		} 
 	}
 	render() {
 		// 关联设备列表
