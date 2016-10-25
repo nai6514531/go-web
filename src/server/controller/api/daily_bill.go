@@ -188,10 +188,7 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userRoleRelService := &service.UserRoleRelService{}
-	_userIds := []int{}
-	aliPayUserIds := []string{}
-	wechatPayUserIds := []string{}
-	bankPayUserIds := []string{}
+
 	var result *enity.Result
 	isSuccessed := true
 	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
@@ -201,7 +198,7 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060405", nil, daily_bill_msg["01060405"]})
 		return
 	}
-	if userRoleRel.RoleId != 3 && userRoleRel.RoleId != 1{    //不是财务角色
+	if userRoleRel.RoleId != 3/* && userRoleRel.RoleId != 1*/{    //不是财务角色
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
 		return
 	}
@@ -214,6 +211,11 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	}
 	paramList := params["params"].([]interface{})
 	for _, _param := range paramList {
+		_userIds := []int{}
+		aliPayUserIds := []string{}
+		wechatPayUserIds := []string{}
+		bankPayUserIds := []string{}
+
 		_map := _param.(map[string]interface{})
 		if _map["userId"] == nil || _map["billAt"] == nil {
 			continue
