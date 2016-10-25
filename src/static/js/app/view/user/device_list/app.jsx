@@ -10,18 +10,20 @@ import * as UserActions from '../../../actions/user';
 
 
 function mapStateToProps(state) {
-	const { user: { school, schoolDevice, device } } = state;
-	return { school, schoolDevice, device };
+	const { user: { school, schoolDevice, device, allSchool } } = state;
+	return { school, schoolDevice, device, allSchool };
 }
 
 function mapDispatchToProps(dispatch) {
 	const {
 		getUserSchool,
 		getUserDevice,
+		getAllSchool,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getUserSchool,
 		getUserDevice,
+		getAllSchool,
 	};
 }
 
@@ -63,6 +65,7 @@ class SchoolTable extends React.Component {
 		const schoolId = -1;
 		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
+		this.props.getAllSchool(USER.id, schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
 		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
@@ -148,7 +151,7 @@ class SchoolTable extends React.Component {
 				</header>
 				<div className="toolbar">
 					<SchoolFilter
-						schoolList={this.state.schoolList}
+						allSchool={this.props.allSchool}
 						getUserSchool={this.props.getUserSchool}
 						page={this.state.page}
 						perPage={this.state.perPage}
@@ -181,14 +184,14 @@ class SchoolFilter extends React.Component {
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	render() {
-		const schoolList = this.props.schoolList;
+		const allSchool = this.props.allSchool;
 		let schoolNode = [];
-		if(schoolList){
+		if(allSchool){
 			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
 			schoolNode[0] = firstNode;
-			for(let i = 0; i < schoolList.length; i++) {
-				const id = schoolList[i].id.toString();
-				const name = schoolList[i].name;
+			for(let i = 0; i < allSchool.length; i++) {
+				const id = allSchool[i].id.toString();
+				const name = allSchool[i].name;
 				const item = <Option key={id} value={id}>{name}</Option>;
 				schoolNode.push(item);
 			}

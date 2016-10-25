@@ -12,16 +12,14 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
+	GET_ALL_SCHOOL,
+	GET_DETAIL_TOTAL,
 	GETING_USER_LIST,
 } from '../constants/index';
 
 
 export function getUserList(pager) {
 	return dispatch => {
-		// dispatch({
-		// 	type: GETING_USER_LIST,
-		// 	result: { loading: true },
-		// });
 		UserService.list(pager).then((result) => {
 			dispatch({
 				type: GET_USER_LIST,
@@ -47,6 +45,23 @@ export function getUserDetail(id) {
 		},(result) => {
 			dispatch({
 				type: GET_USER_DETAIL,
+				result: { fetch: false, result },
+
+			});
+		});
+	};
+}
+
+export function getDetailTotal(id) {
+	return dispatch => {
+		UserService.detailTotal(id).then((result) => {
+			dispatch({
+				type: GET_DETAIL_TOTAL,
+				result: { fetch: true, result },
+			});
+		},(result) => {
+			dispatch({
+				type: GET_DETAIL_TOTAL,
 				result: { fetch: false, result },
 
 			});
@@ -107,7 +122,7 @@ export function deleteUser(id) {
 
 export function getUserSchool(id, schoolId, pager) {
 	return dispatch => {
-		UserService.school(id, schoolId, pager).then((result) => {
+		UserService.schoolTotal(id, schoolId, pager).then((result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
 				result: { fetch: true, result },
@@ -115,6 +130,23 @@ export function getUserSchool(id, schoolId, pager) {
 		},(result) => {
 			dispatch({
 				type: GET_USER_SCHOOL,
+				result: { fetch: false, result },
+
+			});
+		});
+	};
+}
+
+export function getAllSchool(id, schoolId, pager) {
+	return dispatch => {
+		UserService.school(id, schoolId, pager).then((result) => {
+			dispatch({
+				type: GET_ALL_SCHOOL,
+				result: { fetch: true, result },
+			});
+		},(result) => {
+			dispatch({
+				type: GET_ALL_SCHOOL,
 				result: { fetch: false, result },
 
 			});
