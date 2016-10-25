@@ -16,11 +16,11 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
 	const {
 		getUserList,
-		getUserDetail,
+		getDetailTotal,
 	} = bindActionCreators(UserActions, dispatch);
 	return {
 		getUserList,
-		getUserDetail,
+		getDetailTotal,
 	};
 }
 
@@ -92,7 +92,7 @@ class AgentTable extends React.Component {
 			this.setState({child:true});
 			this.props.getUserList(pager);
 		} else {
-			this.props.getUserDetail(USER.id);
+			this.props.getDetailTotal(USER.id);
 		}
 	}
 	showChild() {
@@ -113,7 +113,7 @@ class AgentTable extends React.Component {
 			nextProps.routeParams.id == undefined && this.props.detail == undefined){
 			self.setState({child: false});
 			self.loading = true;
-			this.props.getUserDetail(USER.id);
+			this.props.getDetailTotal(USER.id);
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {

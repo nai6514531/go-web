@@ -10,7 +10,9 @@ import {
 	USER_LOGOUT,
 	GET_USER_MENU,
 	GET_USER_DEVICE,
+	GET_ALL_SCHOOL,
 	GETING_USER_LIST,
+	GET_DETAIL_TOTAL,
 } from '../constants/index';
 
 const initialState = {
@@ -29,6 +31,11 @@ export default function (state = initialState, action) {
 			return {
 				...state,
 				detail: action.result,
+			};
+		case GET_DETAIL_TOTAL:
+			return {
+				...state,
+				detailTotal: action.result,
 			};
 		case POST_USER_DETAIL:
 			return {
@@ -49,6 +56,11 @@ export default function (state = initialState, action) {
 			return {
 				...state,
 				school: action.result,
+			};
+		case GET_ALL_SCHOOL:
+			return {
+				...state,
+				allSchool: action.result,
 			};
 		case GET_USER_SCHOOL_DEVICE:
 			return {
