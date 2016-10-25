@@ -173,7 +173,7 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-	changeSettlementStatus(orderId) {
+	changeSettlementStatus(data) {
 		return;
 		const self = this;
 		let newList = this.state.list;
@@ -203,12 +203,15 @@ const App = React.createClass({
 		})
 	},
 	settle(data) {
-		const self = this;
-		if(this.state.clickLock){ return; } //是否存在点击锁
-
-		this.setState({clickLock: true});
-
-		this.settleAjax();
+		let params = [];
+		let paramsObj = {
+			"userId": data.userId+"",
+			"billAt": data.billAt,
+		};
+		params.push(paramsObj)
+		this.changeSettlementStatus(data)
+		return
+		this.settleAjax(params);
 	},
 	multiSettle() {
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -225,16 +228,20 @@ const App = React.createClass({
 		selectedListId = selectedListIdArr.join(',');
 		alert(selectedListId)
 	},
-	settleAjax() {
+	settleAjax(data) {
 		let self = this;
+		if(this.state.clickLock){ return; } //是否存在点击锁
+		this.setState({clickLock: true});
+		console.log()
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "0"){
-				self.changeSettlementStatus(data.id, data.willApplyStatus);
+				self.changeSettlementStatus(data);
 			}else{
 				message.info(res.msg)
 			}
 		}).catch((err)=>{
+			message.info(err)
 			this.setState({clickLock: false});
 			message.info(err)
 		})
