@@ -15,6 +15,9 @@ type DeviceController struct {
 var (
 	device_msg = map[string]string{
 
+		"01030001": "该设备id不存在",
+		"01030002": "请操作你自身的设备或Test账号下的设备",
+
 		"01030100": "拉取设备详情成功!",
 		"01030101": "拉取设备详情失败!",
 
@@ -84,6 +87,30 @@ var (
 		"01030903": "该设备已被注册或不存在!",
 	}
 )
+
+//中间件-判断操作的设备是否属于我或者测试账号
+func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
+	id, _ := ctx.ParamInt("id") //要操作的设备id
+	result := &enity.Result{}
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//根据要操作的设备id查找
+	deviceService := &service.DeviceService{}
+	device, err := deviceService.Basic(id)
+	if err != nil {
+		//如果没有找到条目不做处理
+		result = &enity.Result{"01030001", nil, device_msg["01030001"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.UserId == userId || device.UserId == 1 {
+		ctx.Next()
+		return
+	} else {
+		result = &enity.Result{"01030002", nil, device_msg["01030002"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+}
 
 /**
 	@api {get} /api/device/:id 设备详情
