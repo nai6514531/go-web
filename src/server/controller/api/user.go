@@ -137,6 +137,7 @@ var (
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
+		"01010602": "该用户不存在!",
 
 		"01010700": "拉取用户列表成功!",
 		"01010701": "拉取用户列表失败!",
@@ -568,6 +569,11 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01010602", nil, user_msg["01010602"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	userCashAccountService := &service.UserCashAccountService{}
 	cashAccount, _ := userCashAccountService.BasicByUserId(id)
 	user.CashAccount = cashAccount
