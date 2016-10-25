@@ -10,7 +10,7 @@ const api = axios.create({
 		if (!data) {
 			return '';
 		}
-		return JSON.stringify(data.data);
+		return JSON.stringify(data);
 	}],
 	transformResponse: [(data)=> {
 		NProgress.done();

@@ -132,13 +132,15 @@ const App = React.createClass({
 			billAt: '',
 			selectedList: [],   //勾选的账单
 			clickLock: false,   //重复点击的锁
-			roleId: 3
+			roleId: window.USER.role.id,
+			nowAjaxStatus: {}   //保存ajax请求字段状态
 		};
 	},
 	list(data) {
 		var self = this;
 		this.setState({
 			loading: true,
+			nowAjaxStatus: data
 		});
 		DailyBillService.list(data)
 			.then((data) => {
@@ -173,16 +175,8 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-	changeSettlementStatus(orderId) {
-		return;
-		const self = this;
-		let newList = this.state.list;
-		newList.map((item, i)=>{
-			if(item.id == orderId){
-				newList[i].status = willApplyStatus;
-			}
-		})
-		this.setState({list: newList});
+	changeSettlementStatus(data) {
+		this.list(this.state.nowAjaxStatus)
 	},
 	deposit(data) {
 		const self = this;
@@ -203,38 +197,62 @@ const App = React.createClass({
 		})
 	},
 	settle(data) {
-		const self = this;
-		if(this.state.clickLock){ return; } //是否存在点击锁
+		let params = [];
+		let paramsObj = {
+			"userId": data.userId+"",
+			"billAt": data.billAt,
+		};
+		params.push(paramsObj)
 
-		this.setState({clickLock: true});
-
-		this.settleAjax();
+		this.settleAjax(params);
 	},
 	multiSettle() {
-		if(this.state.clickLock){ return; } //是否存在点击锁
 
 		if(this.state.selectedList.length == 0){
 			return message.info('请勾选您需要结账的账单');
 		}
 
-		let selectedListId = "";
-		let selectedListIdArr = [];
+		let params = [];
+		let paramsObj = {};
+
+		let billAtObj = {};
+		let userIdArr = [];
 		this.state.selectedList.map((item, i)=>{
-			selectedListIdArr.push(item.id);
+			let billAt = moment(item.billAt).format('YYYY-MM-DD')
+			if(!billAtObj[billAt]){
+				billAtObj[billAt] = [];
+			}
+			billAtObj[billAt].push(item);
 		})
-		selectedListId = selectedListIdArr.join(',');
-		alert(selectedListId)
+		for(var i in billAtObj){
+			paramsObj = {};
+			paramsObj.billAt = i;
+			userIdArr = [];
+			for(var j=0; j<billAtObj[i].length; j++){
+				console.log(billAtObj[i][j].userId);
+				userIdArr.push(billAtObj[i][j].userId);
+			}
+			paramsObj.userId = userIdArr.join(',');
+			params.push(paramsObj);
+		}
+		console.log(params);
+		this.settleAjax(params);
 	},
-	settleAjax() {
+	settleAjax(data) {
 		let self = this;
+		if(this.state.clickLock){ return; } //是否存在点击锁
+		this.setState({clickLock: true});
+		console.log()
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "0"){
-				self.changeSettlementStatus(data.id, data.willApplyStatus);
+				//message.info(res.msg)
+				self.changeSettlementStatus(data);
 			}else{
 				message.info(res.msg)
 			}
 		}).catch((err)=>{
+			message.info(err)
 			this.setState({clickLock: false});
 			message.info(err)
 		})
@@ -280,23 +298,16 @@ const App = React.createClass({
 			total: total,
 			showSizeChanger: true,
 			onShowSizeChange(page, perPage) {
-				self.list({
-					cashAccountType: cashAccountType,
-					status: status,
-					billAt: billAt,
-					page: page,
-					perPage: perPage
-				});
+				let listObj = self.state.nowAjaxStatus;
+				listObj.page = page;
+				listObj.perPage = perPage;
+				self.list(listObj);
 			},
 			onChange(page) {
-				self.list({
-					cashAccountType: cashAccountType,
-					status: status,
-					hasApplied: hasApplied,
-					billAt: billAt,
-					page: this.current,
-					perPage: this.pageSize
-				});
+				let listObj = self.state.nowAjaxStatus;
+				listObj.page = this.current;
+				listObj.perPage = this.pageSize;
+				self.list(listObj);
 			},
 		};
 	},
