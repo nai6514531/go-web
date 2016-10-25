@@ -13,7 +13,7 @@ gulp.task('default', () => {
 });
 
 gulp.task('build', () => {
-	return sequence('clean', 'copy-template', 'webpack', 'rev', 'rev-replace', 'minify');
+	return sequence('clean', 'copy-template','copy-img', 'webpack', 'rev', 'rev-replace', 'minify');
 });
 
 gulp.task('local', shell.task([

@@ -47,10 +47,10 @@ const App = React.createClass({
 	},
 	render(){
 		return (<section className="view-settlement-list">
-			<Card title="独立充值" style={{width: "45%", margin: "20px", float: "left"}}>
+			<Card title="独立充值" style={{ margin: "20px auto",width:900}}>
 				<div id="c1"></div>
 			</Card>
-			<Card title="独立消费" style={{width: "45%", margin: "20px", float: "left"}}>
+			<Card title="独立消费" style={{ margin: "20px auto",width:900}}>
 				<div id="c2"></div>
 			</Card>
 		</section>);
