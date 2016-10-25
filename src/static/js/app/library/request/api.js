@@ -10,7 +10,6 @@ const api = axios.create({
 		if (!data) {
 			return '';
 		}
-		console.log(typeof JSON.stringify(data))
 		return JSON.stringify(data);
 	}],
 	transformResponse: [(data)=> {
