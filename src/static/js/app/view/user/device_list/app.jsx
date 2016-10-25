@@ -186,12 +186,13 @@ class SchoolFilter extends React.Component {
 	render() {
 		const allSchool = this.props.allSchool;
 		let schoolNode = [];
-		if(allSchool){
+		if(allSchool && allSchool.fetch == true){
 			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
+			const schoolList = allSchool.result.data;
 			schoolNode[0] = firstNode;
-			for(let i = 0; i < allSchool.length; i++) {
-				const id = allSchool[i].id.toString();
-				const name = allSchool[i].name;
+			for(let i = 0; i < schoolList.length; i++) {
+				const id = schoolList[i].id.toString();
+				const name = schoolList[i].name;
 				const item = <Option key={id} value={id}>{name}</Option>;
 				schoolNode.push(item);
 			}
