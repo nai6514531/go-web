@@ -62,6 +62,7 @@ func Api() {
 
 	api.Get("/device", device.List)
 	api.Get("/device/:id", device.Basic)
+	//api.Delete("/device/:id", device.Delete)
 	api.Patch("/device/:id/reset", device.Reset)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.Update)
@@ -76,6 +77,6 @@ func Api() {
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
 	//api.Get("/daily-bill/no-settlement-user", dailyBill.List)
 	api.Get("/daily-bill/apply", dailyBill.Apply)
-	api.Get("/daily-bill/settlement", dailyBill.Settlement)
+	api.Put("/daily-bill/settlement", dailyBill.Settlement)
 
 }

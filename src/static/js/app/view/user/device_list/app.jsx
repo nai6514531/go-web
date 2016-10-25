@@ -55,11 +55,12 @@ class SchoolTable extends React.Component {
 			page: 1,
 			perPage: 10,
 			schoolList: [],
+			schoolId:'',
 		};
 	}
 	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
-		const schoolId = 0;
+		const schoolId = -1;
 		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
@@ -93,6 +94,10 @@ class SchoolTable extends React.Component {
 			total = this.props.school.result.data.total;
 		}
 		const self = this;
+		let schoolId = -1;
+		if(this.state.schoolId) {
+			schoolId = this.state.schoolId;
+		}
 		return {
 			total: total,
 			showSizeChanger: true,
@@ -100,15 +105,18 @@ class SchoolTable extends React.Component {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
 				self.loading = true;
-				self.props.getUserSchool(USER.id, pager);
+				self.props.getUserSchool(USER.id, schoolId, pager);
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.loading = true;
-				self.props.getUserSchool(USER.id, pager);
+				self.props.getUserSchool(USER.id, schoolId, pager);
 			},
 		}
+	}
+	changeSchoolId(schoolId) {
+		this.setState({schoolId:schoolId})
 	}
 	render() {
 		const self = this;
@@ -144,6 +152,7 @@ class SchoolTable extends React.Component {
 						getUserSchool={this.props.getUserSchool}
 						page={this.state.page}
 						perPage={this.state.perPage}
+						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
 				</div>
 				<section className="view-content">
@@ -167,6 +176,7 @@ class SchoolFilter extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
 		const schoolId = parseInt(this.props.form.getFieldsValue().school);
+		this.props.changeSchoolId(schoolId);
 		const pager = {page: this.props.page, perPage: this.props.perPage};
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
@@ -174,10 +184,18 @@ class SchoolFilter extends React.Component {
 		const schoolList = this.props.schoolList;
 		let schoolNode = [];
 		if(schoolList){
-			schoolNode = schoolList.map(function (item, key) {
-				const id = item.id.toString();
-				return <Option key={key} value={id}>{item.name}</Option>;
-			})
+			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
+			schoolNode[0] = firstNode;
+			for(let i = 0; i < schoolList.length; i++) {
+				const id = schoolList[i].id.toString();
+				const name = schoolList[i].name;
+				const item = <Option key={id} value={id}>{name}</Option>;
+				schoolNode.push(item);
+			}
+			// schoolNode = schoolList.map(function (item, key) {
+			// 	const id = item.id.toString();
+			// 	return <Option key={key} value={id}>{item.name}</Option>;
+			// })
 		}
 		const { getFieldDecorator } = this.props.form;
 		return (

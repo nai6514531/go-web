@@ -137,6 +137,7 @@ var (
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
+		"01010602": "该用户不存在!",
 
 		"01010700": "拉取用户列表成功!",
 		"01010701": "拉取用户列表失败!",
@@ -568,6 +569,11 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01010602", nil, user_msg["01010602"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	userCashAccountService := &service.UserCashAccountService{}
 	cashAccount, _ := userCashAccountService.BasicByUserId(id)
 	user.CashAccount = cashAccount
@@ -641,7 +647,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user/:id/user-device-info 用户详情(含设备总数)
+	@api {get} /api/user/:id/device-total 用户详情(含设备总数)
 	@apiName BasicWithDeviceInfo
 	@apiGroup User
  	@apiSuccessExample Success-Response:
@@ -834,7 +840,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
-	if schoolId == -1 || schoolId == 0 { //?schoolId=0或者没有筛选条件
+	if schoolId == -1 || ctx.URLParam("schoolId") == "" { //?schoolId=-1或者没有筛选条件
 		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
 			result = &enity.Result{"01011101", nil, user_msg["01011101"]}

@@ -40,17 +40,20 @@ function mapDispatchToProps(dispatch) {
 }
 
 class UserForm extends React.Component {
-	constructor(props) {
-		super(props);
+	constructor(props, context) {
+		super(props, context);
 		this.state = {
 			type: "3",
 			alipay: false,
             provinceChange: false,
             cityChange: false,
+			unsaved: true,
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleReset = this.handleReset.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
+	}
+	static contextTypes = {
+		router: React.PropTypes.object
 	}
 	componentWillMount() {
         // 默认北京市东城区
@@ -83,17 +86,27 @@ class UserForm extends React.Component {
                 self.cityId = nextProps.provinceCity.result.data[0].id;
             }
         }
-		const resultPostDetail = this.props.resultPostDetail;
-		if(resultPostDetail !== nextProps.resultPostDetail && nextProps.resultPostDetail.fetch == true){
-			console.log('添加成功');
-		} else {
-			console.log('添加失败');
-		}
-		const resultPutDetail = this.props.resultPutDetail;
-		if(resultPutDetail !== nextProps.resultPutDetail && nextProps.resultPutDetail.fetch == true){
-			console.log('修改成功');
-		} else {
-			console.log('修改失败');
+		if(self.saveDetail == 1){
+			const resultPostDetail = this.props.resultPostDetail;
+			if(resultPostDetail !== nextProps.resultPostDetail
+				&& nextProps.resultPostDetail.fetch == true){
+				alert('添加用户成功');
+				self.saveDetail = -1;
+			} else if(resultPostDetail !== nextProps.resultPostDetail
+				&& nextProps.resultPostDetail.fetch == false){
+				alert('添加用户失败');
+				self.saveDetail = -1;
+			}
+			const resultPutDetail = this.props.resultPutDetail;
+			if(resultPutDetail !== nextProps.resultPutDetail
+				&& nextProps.resultPutDetail.fetch == true){
+				alert('修改用户成功');
+				self.saveDetail = -1;
+			} else if(resultPutDetail !== nextProps.resultPutDetail
+				&& nextProps.resultPutDetail.fetch == false){
+				alert('修改用户失败');
+				self.saveDetail = -1;
+			}
 		}
 	}
     provinceOption() {
@@ -124,6 +137,12 @@ class UserForm extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
         const self = this;
+		if(!this.state.alipay){
+			if(!self.provinceId || !self.schoolId) {
+				alert('请选择省份及学校');
+				return false;
+			}
+		}
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				return;
@@ -162,13 +181,10 @@ class UserForm extends React.Component {
                 user.account = self.account;
                 this.props.putUserDetail(this.props.params.id, user);
 			}
+			self.saveDetail = 1;
 		});
 	}
-	handleReset(e) {
-		e.preventDefault();
-		this.props.form.resetFields();
-		this.setState({alipay:false});
-	}
+
 	handleRadio(select) {
 		if (select === '3') {
 			this.setState({ alipay: false });
@@ -176,19 +192,33 @@ class UserForm extends React.Component {
 			this.setState({ alipay: true });
 		}
 	}
+	handleEnter(event) {
+		if (event.keyCode==13) {
+			this.handleSubmit(event);
+		}
+	}
+	goBack() {
+		if(this.state.unsaved) {
+			if(confirm('确定取消?')){
+				this.context.router.goBack();
+			}
+		}
+	}
 	render() {
-        const self = this;
+		const self = this;
         const { id } = this.props.params;
         const { detail, provinceCity, provinceList } = this.props;
         if(id && id !== 'new') {
             if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
                 // 修改用户 省市信息预设为用户省市信息
-                if (this.state.provinceChange == false) {
-                    self.provinceId = detail.result.data.cashAccount.provinceId;
-                }
-                if (this.state.cityChange == false) {
-                    self.cityId = detail.result.data.cashAccount.cityId;
-                }
+				if(detail.result.data.cashAccount) {
+					if (this.state.provinceChange == false) {
+						self.provinceId = detail.result.data.cashAccount.provinceId;
+					}
+					if (this.state.cityChange == false) {
+						self.cityId = detail.result.data.cashAccount.cityId;
+					}
+				}
             }
         } else {
             if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
@@ -233,7 +263,7 @@ class UserForm extends React.Component {
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
 			} else {
-				alert('获取用户信息失败,请重试.');
+				console.log('获取用户信息失败,请重试.');
 			}
 		}
 		const { getFieldDecorator } = this.props.form;
@@ -243,7 +273,7 @@ class UserForm extends React.Component {
 		};
 
 		return (
-			<section className="view-user-list">
+			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
@@ -434,7 +464,7 @@ class UserForm extends React.Component {
 							)}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
 							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 					</Form>

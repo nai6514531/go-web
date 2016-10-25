@@ -77,6 +77,11 @@ var (
 		"01030801": "更新设备脉冲名失败!",
 		"01030802": "设备id不能小于0!",
 		"01030803": "设备脉冲名不能为空!",
+
+		"01030900": "删除设备成功!",
+		"01030901": "删除设备失败!",
+		"01030902": "设备id不能小于0!",
+		"01030903": "该设备已被注册或不存在!",
 	}
 )
 
@@ -423,7 +428,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 
 /**
 	@api {patch} /api/device/:id/reset 重置设备
- 	@apiName Delete
+ 	@apiName Reset
 	@apiGroup Device
  	@apiSuccessExample 成功返回:
 	{
@@ -432,7 +437,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
   		"msg": "重置设备成功!"
 	}
 */
-//事实上是重置设备，将userid变回0
+//事实上是重置设备，将userid变回1
 func (self *DeviceController) Reset(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
@@ -443,7 +448,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		return
 	}
 	currentDevice, _ := deviceService.Basic(id)
-	if currentDevice == nil || currentDevice.UserId == 0 { //设备被重置了或不存在
+	if currentDevice == nil || currentDevice.UserId == 1 { //设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -455,6 +460,43 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01030600", nil, device_msg["01030600"]}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+	@api {patch} /api/device/:id 删除设备
+ 	@apiName Delete
+	@apiGroup Device
+ 	@apiSuccessExample 成功返回:
+	{
+  		"status": "01030600",
+  		"data": null,
+  		"msg": "重置设备成功!"
+	}
+*/
+//事实上是重置设备，将userid变回0
+func (self *DeviceController) Delete(ctx *iris.Context) {
+	id, _ := ctx.ParamInt("id")
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	if id <= 0 {
+		result = &enity.Result{"01030902", nil, device_msg["01030902"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	currentDevice, _ := deviceService.Basic(id)
+	if currentDevice == nil || currentDevice.UserId != 1 { //设备正在使用了或不存在
+		result = &enity.Result{"01030903", nil, device_msg["01030903"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	success := deviceService.Delete(id)
+	if !success {
+		result = &enity.Result{"01030901", nil, device_msg["01030901"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01030900", nil, device_msg["01030900"]}
 	ctx.JSON(iris.StatusOK, result)
 }
 

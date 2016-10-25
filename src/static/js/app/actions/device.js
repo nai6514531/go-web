@@ -9,7 +9,8 @@ import {
 	PATCH_DEVICE_STATUS,
 	DEVICE_PULSE_NAME,
 	DEVICE_SERIAL_NUMBER,
-	GET_REF_DEVICE
+	GET_REF_DEVICE,
+	RESET_DEVICE,
 } from '../constants/index';
 
 
@@ -45,9 +46,9 @@ export function getDeviceDetail(id) {
 	};
 }
 
-export function postDeviceDetail(device) {
+export function postDeviceDetail(id) {
 	return dispatch => {
-		DeviceService.create(device).then((result) => {
+		DeviceService.create(id).then((result) => {
 			dispatch({
 				type: POST_DEVICE_DETAIL,
 				result: { fetch: true, result },
@@ -71,6 +72,22 @@ export function putDeviceDetail(id, device) {
 		},(result) => {
 			dispatch({
 				type: PUT_DEVICE_DETAIL,
+				result: { fetch: false, result },
+			});
+		});
+	};
+}
+
+export function resetDevice(id) {
+	return dispatch => {
+		DeviceService.reset(id).then((result) => {
+			dispatch({
+				type: RESET_DEVICE,
+				result: { fetch: true, result },
+			});
+		},(result) => {
+			dispatch({
+				type: RESET_DEVICE,
 				result: { fetch: false, result },
 			});
 		});

@@ -59,8 +59,12 @@ const columns = [{
 				<span>
 					<span className="ant-divider" />
 					<Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link>
-					<span className="ant-divider" />
-					<Link to='/user/device/list'>设备管理</Link>
+					{USER.role.id == 1 ? "" :
+						<span>
+							<span className="ant-divider" />
+							<Link to='/user/device/list'>设备管理</Link>
+						</span>
+					}
 				</span>
 			:''}
 		</span>
@@ -82,13 +86,12 @@ class AgentTable extends React.Component {
 		this.showChild = this.showChild.bind(this);
 	}
 	componentWillMount() {
-		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
+		this.loading = true;
 		if(this.props.params.id) {
-			self.loading = true;
+			this.setState({child:true});
 			this.props.getUserList(pager);
 		} else {
-			self.loading = false;
 			this.props.getUserDetail(USER.id);
 		}
 	}
@@ -99,20 +102,29 @@ class AgentTable extends React.Component {
 	}
 	componentWillUpdate(nextProps, nextState) {
 		const self = this;
+		const pager = { page : this.state.page, perPage: this.state.perPage};
+		// 加载子用户列表
 		if(nextState.child == true && this.state.child == false) {
-			const pager = { page : this.state.page, perPage: this.state.perPage};
 			self.loading = true;
 			this.props.getUserList(pager);
+		}
+		// 首次从子用户列表跳转到父用户列表
+		if(this.state.child == true && nextState.child == true &&
+			nextProps.routeParams.id == undefined && this.props.detail == undefined){
+			self.setState({child: false});
+			self.loading = true;
+			this.props.getUserDetail(USER.id);
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
 		if(nextProps.list !== this.props.list
 			|| nextProps.detail !== this.props.detail
-			|| nextState.child == true) {
+			|| nextState.child == true || nextState.child == false) {
 			return true;
 		} else {
 			return false;
 		}
+
 	}
 	initializePagination() {
 		let total = 1;
@@ -138,6 +150,7 @@ class AgentTable extends React.Component {
 		}
 	}
 	render() {
+		// console.log(this.props);
 		const { list, detail, params: {id} } = this.props;
 		const pagination = this.initializePagination();
 		let data = '';
@@ -186,6 +199,7 @@ class AgentTable extends React.Component {
 				}
 			}
 		}
+		console.log('loading',this.loading);
 		return (
 			<section className="view-user-list">
 				<header>
@@ -204,7 +218,7 @@ class AgentTable extends React.Component {
 					<Table columns={columns}
 						   rowKey={record => record.key}
 						   dataSource={dataSource}
-						   pagination={pagination}
+						   pagination={id?pagination:''}
 						   loading={this.loading ? this.loading : false}
 						   bordered
 					/>

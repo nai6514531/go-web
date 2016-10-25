@@ -6,7 +6,7 @@ const UserService = {
 		return apiGet(`/api/user?page=${page}&perPage=${perPage}`);
 	},
 	detail: (id) => {
-		return apiGet(`/api/user/${id}`);
+		return apiGet(`/api/user/${id}/device-total`);
 	},
 	create: (user) => {
 		return apiPost(`/api/user`, user);
@@ -35,7 +35,7 @@ const UserService = {
 		return apiGet(`/api/user/${id}/menu`);
 	},
 	device: (id) => {
-		return apiGet(`/api/user/${id}/device-total`);
+		return apiGet(`/api/user/${id}/device`);
 	}
 };
 
