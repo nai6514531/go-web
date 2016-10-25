@@ -60,7 +60,7 @@ export default function (state = initialState, action) {
 		case DEVICE_SERIAL_NUMBER:
 			return {
 				...state,
-				result: action.result,
+				resultSerialNumber: action.result,
 			};
 		case GET_REF_DEVICE:
 			return {

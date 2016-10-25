@@ -14,10 +14,10 @@ import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
-	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultPostDetail },
+	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultSerialNumber },
 		region: {provinceList, provinceSchool} } = state;
 	return { detail, status, result, refDevice, pulseName,
-		resultPutDetail, resultPostDetail, provinceList, provinceSchool };
+		resultPutDetail, resultSerialNumber, provinceList, provinceSchool };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -47,8 +47,8 @@ function mapDispatchToProps(dispatch) {
 const key = ['first','second','third','fourth'];
 
 class DeviceForm extends React.Component {
-	constructor(props) {
-		super(props);
+	constructor(props, context) {
+		super(props, context);
 		this.state = {
 			provinceId: '',
 			schoolId: '',
@@ -60,14 +60,17 @@ class DeviceForm extends React.Component {
 			thirdPulseName: '',
 			fourthPulseName: '',
 			visible: false,
+			unsaved: true,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.handleReset = this.handleReset.bind(this);
 		this.showModal = this.showModal.bind(this);
 		this.hideModal = this.hideModal.bind(this);
 		this.handleSelect = this.handleSelect.bind(this);
 		this.changePulseName = this.changePulseName.bind(this);
 		this.checkNumber = this.checkNumber.bind(this);
+	}
+	static contextTypes = {
+		router: React.PropTypes.object
 	}
 	componentWillMount() {
 		const deviceId = this.props.params.id;
@@ -76,7 +79,6 @@ class DeviceForm extends React.Component {
 		} else {
 			this.setState({addNew: true});
 		}
-		// 获取关联设备列表
 		this.props.getRefDevice();
 	}
 	componentWillReceiveProps(nextProps) {
@@ -109,7 +111,6 @@ class DeviceForm extends React.Component {
 				this.props.getProvinceSchoolList(provinceId);
 			}
 			if(this.props.provinceSchool == undefined && this.props.provinceSchool !== nextProps.provinceSchool) {
-				console.log('province school',this.props.provinceSchool,nextProps.provinceSchool);
 				if(nextProps.provinceSchool.fetch == true) {
 					const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
 						return item.id == self.schoolId;
@@ -119,12 +120,7 @@ class DeviceForm extends React.Component {
 					alert(nextProps.provinceSchool.result.msg);
 				}
 			}
-			// const resultPutDetail = this.props.resultPutDetail;
-			// if(resultPutDetail == undefined && nextProps.resultPutDetail) {
-			//
-			// }
 		}
-
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
 			const device = nextProps.detail.result.data;
 			self.firstPulseName = device.firstPulseName;
@@ -132,6 +128,36 @@ class DeviceForm extends React.Component {
 			self.thirdPulseName = device.thirdPulseName;
 			self.fourthPulseName = device.fourthPulseName;
 		}
+		if(self.saveDetail == 1){
+			const resultSerialNumber = this.props.resultSerialNumber;
+			if(resultSerialNumber !== nextProps.resultSerialNumber) {
+				if( nextProps.resultSerialNumber.fetch == true) {
+					alert('添加设备成功');
+					self.saveDetail = -1;
+				} else if(nextProps.resultSerialNumber.fetch == false) {
+					switch (nextProps.resultSerialNumber.result.status){
+						case 3:
+							alert(nextProps.resultSerialNumber.result.msg);
+							break;
+						default:
+							alert('添加设备失败');
+							break;
+					}
+					self.saveDetail = -1;
+				}
+			}
+			const resultPutDetail = this.props.resultPutDetail;
+			if(resultPutDetail !== nextProps.resultPutDetail) {
+				if(nextProps.resultPutDetail.fetch == true){
+					alert('修改设备成功');
+					self.saveDetail = -1;
+				} else if(nextProps.resultPutDetail.fetch == false) {
+					alert('修改设备失败');
+					self.saveDetail = -1;
+				}
+			}
+		}
+
 	}
 	handleSubmit(e) {
 		e.preventDefault();
@@ -157,18 +183,13 @@ class DeviceForm extends React.Component {
 				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			}
 			const deviceId = this.props.params.id;
-			// 新增设备
-			// this.props.postDeviceDetail(deviceValue);
 			if(deviceId) {
 				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
 				this.props.putSerialNumber(values.serialNumber,deviceValue);
 			}
+			self.saveDetail = 1;
 		});
-	}
-	handleReset(e) {
-		e.preventDefault();
-		this.props.form.resetFields();
 	}
 	handleSelect(provinceId, schoolId) {
 		this.provinceId = provinceId;
@@ -216,6 +237,13 @@ class DeviceForm extends React.Component {
 	handleEnter(event) {
 		if (event.keyCode==13) {
 			this.handleSubmit(event);
+		}
+	}
+	goBack() {
+		if(this.state.unsaved) {
+			if(confirm('确定取消?')){
+				this.context.router.goBack();
+			}
 		}
 	}
 	render() {
@@ -414,7 +442,7 @@ class DeviceForm extends React.Component {
 							}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.handleReset}>取消</Button>
+							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
 							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 						<div>
@@ -480,7 +508,6 @@ class PulseName extends React.Component {
 				break;
 		}
 		// 四个脉冲的初始值
-		console.log('initialValue',initialValue);
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{initialValue:initialValue})(<Input type="text"/>)}
 		</FormItem>

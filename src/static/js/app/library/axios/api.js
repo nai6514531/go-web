@@ -26,19 +26,40 @@ function handleResponse(promise, resolve, reject) {
 	return promise.then((response) => {
 		return response.data;
 	}).then(( data ) => {
-		if (!data) {
-			reject(data);
-			return;
-		}
-		let code = data.status;
-		code = code.substring(code.length-2);
-		code = parseInt(code);
-		// data.loading = false;
-		if (code !== 0) {
-			reject(data);
+		// if (!data) {
+		// 	reject(data);
+		// 	return;
+		// }
+		// let code = data.status;
+		// code = code.substring(code.length-2);
+		// code = parseInt(code);
+		//
+		// if (code !== 0) {
+		// 	reject(data);
+		// } else {
+		// 	resolve(data);
+		// }
+		if (data) {
+			if (parseInt(data.status) < 0) {
+				data.status = parseInt(data.status);
+				if (data.status == -1) {
+					alert(data.msg);
+					window.location.href = '/';
+				}
+			} else {
+				data.status = parseInt(data.status.substr(-2));
+				if (data.status !== 0) {
+					reject(data);
+				} else {
+					resolve(data);
+				}
+				// return data;
+			}
 		} else {
-			resolve(data);
+			reject(data);
+			return alert('服务器返回数据异常!');
 		}
+		
 	});
 }
 
