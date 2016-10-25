@@ -4,6 +4,7 @@ import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const Option = Select.Option;
 import { Link } from 'react-router';
 
 
@@ -80,12 +81,7 @@ class UserForm extends React.Component {
 				}
 			}
 		}
-        if(this.props.provinceCity !== nextProps.provinceCity){
-            // 每次切换省,都要将城市预至成第一个
-            if(nextProps.provinceCity.fetch == true) {
-                self.cityId = nextProps.provinceCity.result.data[0].id;
-            }
-        }
+
 		if(self.saveDetail == 1){
 			const resultPostDetail = this.props.resultPostDetail;
 			if(resultPostDetail !== nextProps.resultPostDetail
@@ -109,44 +105,22 @@ class UserForm extends React.Component {
 			}
 		}
 	}
-    provinceOption() {
-        if(this.props.provinceList && this.props.provinceList.fetch == true){
-            return this.props.provinceList.result.data.map(function (item, key) {
-                    return <option key={key} value={item.id}>{item.name}</option>
-            })
-        }
-    }
     provinceChange(event) {
-        this.props.getProvinceCityList(event.target.value);
-        this.provinceId = event.target.value;
+		this.props.getProvinceCityList(event);
         this.setState({provinceChange:true});
         this.setState({cityChange: true});
     }
-    cityOption() {
-        if(this.props.provinceCity && this.props.provinceCity.fetch == true){
-            return this.props.provinceCity.result.data.map(function (item, key) {
-                    return <option key={key} value={item.id}>{item.name}</option>
-            })
-        }
-    }
     cityChange(event) {
-        const self = this;
-        self.cityId = event.target.value;
         this.setState({cityChange:true});
     }
 	handleSubmit(e) {
 		e.preventDefault();
         const self = this;
-		if(!this.state.alipay){
-			if(!self.provinceId || !self.schoolId) {
-				alert('请选择省份及学校');
-				return false;
-			}
-		}
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				return;
 			}
+			console.log('values',values);
 			let cashAccount = {};
 			const user = {
 					"name": values.name,
@@ -163,8 +137,8 @@ class UserForm extends React.Component {
                     "bankName": values.bankName,
                     "account": values.account,
                     "mobile": values.bankMobile,
-                    "cityId": parseInt(self.cityId),
-                    "provinceId": parseInt(self.provinceId),
+                    "cityId": parseInt(values.cityId),
+                    "provinceId": parseInt(values.provinceId),
 				}
 			} else {
                 cashAccount = {
@@ -205,34 +179,21 @@ class UserForm extends React.Component {
 		}
 	}
 	render() {
+		let ProvinceNode = [];
+		if(this.props.provinceList && this.props.provinceList.fetch == true){
+			ProvinceNode = this.props.provinceList.result.data.map(function (item, key) {
+				return <Option key={key} value={item.id.toString()}>{item.name}</Option>
+			})
+		}
+		let cityNode = [];
+		if(this.props.provinceCity && this.props.provinceCity.fetch == true){
+			cityNode = this.props.provinceCity.result.data.map(function (item, key) {
+				return <Option key={key} value={item.id.toString()}>{item.name}</Option>
+			})
+		}
 		const self = this;
         const { id } = this.props.params;
         const { detail, provinceCity, provinceList } = this.props;
-        if(id && id !== 'new') {
-            if(detail && detail.fetch == true && provinceCity && provinceCity.fetch == true){
-                // 修改用户 省市信息预设为用户省市信息
-				if(detail.result.data.cashAccount) {
-					if (this.state.provinceChange == false) {
-						self.provinceId = detail.result.data.cashAccount.provinceId;
-					}
-					if (this.state.cityChange == false) {
-						self.cityId = detail.result.data.cashAccount.cityId;
-					}
-				}
-            }
-        } else {
-            if(provinceCity && provinceCity.fetch == true && provinceList && provinceList.fetch == true) {
-                // 新增用户 省市信息预设为第一个
-                // 获取省市信息成功但是实际没数据后报错
-                if (this.state.provinceChange == false) {
-                    self.provinceId = provinceCity.result.data[0].id;
-                }
-                if (this.state.cityChange == false) {
-                    self.cityId = provinceCity.result.data[0].id;
-                }
-            }
-        }
-
 		let initialValue = {};
 		if(id && id !== 'new' && detail) {
 			if(detail.fetch == true){
@@ -253,6 +214,8 @@ class UserForm extends React.Component {
 						bankName: data.cashAccount.bankName,
 						account: data.cashAccount.account,
 						bankMobile: data.cashAccount.mobile,
+						provinceId: data.cashAccount.provinceId,
+						cityId: data.cashAccount.cityId,
 					}
 				} else if (data.cashAccount && data.cashAccount.type == 1){
 					cashValues = {
@@ -432,22 +395,36 @@ class UserForm extends React.Component {
 										<Input placeholder="请输入短信通知手机号"/>
 									)}
 								</FormItem>
-								<div className="province-filter">
-									<label>省份</label>
-									<select name="province" id="province" value={this.provinceId}
-											onChange={this.provinceChange.bind(this)}>
-										{this.provinceOption()}
-									</select>
-									<span></span>
-								</div>
-								<div className="province-filter">
-									<label>城市</label>
-									<select name="city" id="city" value={this.cityId}
-											onChange={this.cityChange.bind(this)}>
-										{this.cityOption()}
-									</select>
-									<span></span>
-								</div>
+								<FormItem
+									{...formItemLayout}
+									label="省份"
+								>
+									{getFieldDecorator('provinceId', {
+										rules: [
+											{ required: true, message: '请选择省份' },
+										],
+										initialValue: initialValue.provinceId,
+									})(
+										<Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
+											{ProvinceNode}
+										</Select>
+									)}
+								</FormItem>
+								<FormItem
+									{...formItemLayout}
+									label="城市"
+								>
+									{getFieldDecorator('cityId', {
+										rules: [
+											{ required: true, message: '请选择城市' },
+										],
+										initialValue: initialValue.cityId,
+									})(
+										<Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
+											{cityNode}
+										</Select>
+									)}
+								</FormItem>
 							</div>
 						}
 						<FormItem

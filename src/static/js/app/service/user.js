@@ -5,8 +5,11 @@ const UserService = {
 		const { page, perPage } = pager;
 		return apiGet(`/api/user?page=${page}&perPage=${perPage}`);
 	},
-	detail: (id) => {
+	detailTotal: (id) => {
 		return apiGet(`/api/user/${id}/device-total`);
+	},
+	detail: (id) => {
+		return apiGet(`/api/user/${id}`);
 	},
 	create: (user) => {
 		return apiPost(`/api/user`, user);
@@ -17,9 +20,12 @@ const UserService = {
 	remove: (id) => {
 		return apiDelete(`/api/user/${id}`);
 	},
-	school: (id, schoolId, pager) => {
+	school: (id, schoolId) => {
+		return apiGet(`/api/user/${id}/school?hasDeviceTotal=0&schoolId=${schoolId}`);
+	},
+	schoolTotal: (id, schoolId, pager) => {
 		const { page, perPage } = pager;
-		return apiGet(`/api/user/${id}/school?schoolId=${schoolId}&page=${page}&perPage=${perPage}`);
+		return apiGet(`/api/user/${id}/school?hasDeviceTotal=1&schoolId=${schoolId}&page=${page}&perPage=${perPage}`);
 	},
 	schoolDevice:(id, school_id, pager) => {
 		const { page, perPage } = pager;
