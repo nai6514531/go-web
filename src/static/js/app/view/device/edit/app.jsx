@@ -60,6 +60,7 @@ class DeviceForm extends React.Component {
 			thirdPulseName: '',
 			fourthPulseName: '',
 			visible: false,
+			unsaved: true,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -120,21 +121,26 @@ class DeviceForm extends React.Component {
 				}
 			}
 			if(self.saveDetail == 1){
-				const resultPutDetail = this.props.resultPutDetail;
-				if(resultPutDetail !== nextProps.resultPutDetail
-					&& nextProps.resultPutDetail.fetch == true) {
-					alert('修改成功');
-				} else {
-					console.log('修改失败');
-				}
 				const resultPostDetail = this.props.resultPostDetail;
 				if(resultPostDetail !== nextProps.resultPostDetail
-					&& nextProps.resultPostDetail.fetch == true) {
-					alert('添加成功');
-				} else {
-					console.log('添加失败');
+					&& nextProps.resultPostDetail.fetch == true){
+					alert('添加设备成功');
+					self.saveDetail = -1;
+				} else if(resultPostDetail !== nextProps.resultPostDetail
+					&& nextProps.resultPostDetail.fetch == false){
+					alert('添加设备失败');
+					self.saveDetail = -1;
 				}
-				self.saveDetail = -1;
+				const resultPutDetail = this.props.resultPutDetail;
+				if(resultPutDetail !== nextProps.resultPutDetail
+					&& nextProps.resultPutDetail.fetch == true){
+					alert('修改设备成功');
+					self.saveDetail = -1;
+				} else if(resultPutDetail !== nextProps.resultPutDetail
+					&& nextProps.resultPutDetail.fetch == false){
+					alert('修改设备失败');
+					self.saveDetail = -1;
+				}
 			}
 		}
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){

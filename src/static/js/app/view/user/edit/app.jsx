@@ -88,20 +88,25 @@ class UserForm extends React.Component {
         }
 		if(self.saveDetail == 1){
 			const resultPostDetail = this.props.resultPostDetail;
-			if(resultPostDetail !== nextProps.resultPostDetail 
+			if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == true){
-				console.log('添加用户成功');
-			} else {
-				console.log('添加用户失败');
+				alert('添加用户成功');
+				self.saveDetail = -1;
+			} else if(resultPostDetail !== nextProps.resultPostDetail
+				&& nextProps.resultPostDetail.fetch == false){
+				alert('添加用户失败');
+				self.saveDetail = -1;
 			}
 			const resultPutDetail = this.props.resultPutDetail;
-			if(resultPutDetail !== nextProps.resultPutDetail 
+			if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == true){
-				console.log('修改用户成功');
-			} else {
-				console.log('修改用户失败');
+				alert('修改用户成功');
+				self.saveDetail = -1;
+			} else if(resultPutDetail !== nextProps.resultPutDetail
+				&& nextProps.resultPutDetail.fetch == false){
+				alert('修改用户失败');
+				self.saveDetail = -1;
 			}
-			self.saveDetail = -1;
 		}
 	}
     provinceOption() {
@@ -179,7 +184,7 @@ class UserForm extends React.Component {
 			self.saveDetail = 1;
 		});
 	}
-	
+
 	handleRadio(select) {
 		if (select === '3') {
 			this.setState({ alipay: false });
