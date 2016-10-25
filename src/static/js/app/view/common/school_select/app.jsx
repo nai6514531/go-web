@@ -97,9 +97,10 @@ class SchoolSelect extends React.Component {
 					provinceName: this.state.provinceName,
 				}
 			});
-			console.log(this.state.provinceId,this.state.provinceName);
 			this.toggleBox();
 			this.props.handleSelect(this.state.provinceId, schoolId);
+		} else {
+			alert('请先选择省份');
 		}
 	}
 	toggleBox() {
@@ -108,14 +109,13 @@ class SchoolSelect extends React.Component {
 	}
 	onCancle() {
 		this.toggleBox();
-		console.log('default',this.state.defaultProvince);
 		this.setState({
 			provinceId: this.state.defaultProvince.provinceId,
 			provinceName: this.state.defaultProvince.provinceName,
+			chooseSchool: false,
 		});
 	}
 	render() {
-		console.log('default',this.state.defaultProvince);
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
 		const that = this;
