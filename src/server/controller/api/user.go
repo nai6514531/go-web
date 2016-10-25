@@ -813,10 +813,13 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 }
 
 /**
-	@api {get} /api/user/:id/school?schoolId=1101用户学校列表
+	@api {get} /api/user/:id/school?schoolId=1101&hasDeviceTotal=1用户学校列表
 	@apiName SchoolList
 	@apiGroup User
  	@apiSuccessExample Success-Response:
+ 	@apiParam (参数) {String} schoolId 为空或-1返回全部学校,不为空返回对应学校id聚合
+ 	@apiParam (参数) {String} hasDeviceTotal 为空或0,不带设备总数，为1带设备总数
+
    	HTTP/1.1 200 OK
 	{
 		"status": "01011100",
@@ -837,9 +840,13 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	//获取学校id列表
 	userId, _ := ctx.ParamInt("id")
 	schoolId, _ := ctx.URLParamInt("schoolId")
+	hasDeviceTotal, _ := ctx.URLParamInt("hasDeviceTotal")
+	schools := &[]*model.School{}
+
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
+	//返回全部学校列表
 	if schoolId == -1 || ctx.URLParam("schoolId") == "" { //?schoolId=-1或者没有筛选条件
 		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
@@ -848,22 +855,12 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 			return
 		}
 		//以id列表找学校详情
-		schools, err := schoolService.ListByIdList(*schoolIdList)
+		schools, err = schoolService.ListByIdList(*schoolIdList)
 		if err != nil {
 			result = &enity.Result{"01011101", nil, user_msg["01011101"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		//带上每个学校的设备总数
-		for _, school := range *schools {
-			//以用户学校为条件查找数量
-			deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
-			school.DeviceTotal = deviceTotal
-		}
-		//返回
-		result = &enity.Result{"01011100", schools, user_msg["01011100"]}
-		ctx.JSON(iris.StatusOK, result)
-
 		//如果带上schoolId=1101的参数只列出该学校
 	} else {
 		school, err := schoolService.Basic(schoolId)
@@ -872,14 +869,21 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
-		school.DeviceTotal = deviceTotal
-		var schools []model.School
-		schools = append(schools, *school)
-		//返回
-		result = &enity.Result{"01011100", schools, user_msg["01011100"]}
-		ctx.JSON(iris.StatusOK, result)
+		*schools = append(*schools, school)
 	}
+	//判断是否需要带上设备总数
+	if hasDeviceTotal == 1 {
+		//带上每个学校的设备总数
+		for _, school := range *schools {
+			//以用户学校为条件查找数量
+			deviceTotal, _ := deviceService.TotalByByUserAndSchool(userId, school.Id)
+			school.DeviceTotal = deviceTotal
+		}
+	}
+
+	//返回
+	result = &enity.Result{"01011100", schools, user_msg["01011100"]}
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**

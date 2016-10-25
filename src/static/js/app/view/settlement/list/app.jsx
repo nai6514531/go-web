@@ -86,7 +86,8 @@ const App = React.createClass({
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							)
 							break;
-						case 2: 
+						case 2:
+						case 5: 
 							spanDiv = (
 								<span>
 									{
@@ -131,7 +132,7 @@ const App = React.createClass({
 			billAt: '',
 			selectedList: [],   //勾选的账单
 			clickLock: false,   //重复点击的锁
-			roleId: window.USER.role.id
+			roleId: 3
 		};
 	},
 	list(data) {
@@ -172,6 +173,17 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
+	changeSettlementStatus(orderId) {
+		return;
+		const self = this;
+		let newList = this.state.list;
+		newList.map((item, i)=>{
+			if(item.id == orderId){
+				newList[i].status = willApplyStatus;
+			}
+		})
+		this.setState({list: newList});
+	},
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -190,9 +202,13 @@ const App = React.createClass({
 			message.info(err)
 		})
 	},
-	settle(id) {
+	settle(data) {
+		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
-		alert("settle"+id)
+
+		this.setState({clickLock: true});
+
+		this.settleAjax();
 	},
 	multiSettle() {
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -208,6 +224,20 @@ const App = React.createClass({
 		})
 		selectedListId = selectedListIdArr.join(',');
 		alert(selectedListId)
+	},
+	settleAjax() {
+		let self = this;
+		DailyBillService.updateSettlement(data).then((res)=>{
+			this.setState({clickLock: false});
+			if(res.status == "0"){
+				self.changeSettlementStatus(data.id, data.willApplyStatus);
+			}else{
+				message.info(res.msg)
+			}
+		}).catch((err)=>{
+			this.setState({clickLock: false});
+			message.info(err)
+		})
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
