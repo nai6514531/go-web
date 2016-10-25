@@ -32,3 +32,7 @@ gulp.task('doc', shell.task([
 	'apidoc -i ./src/server/ -o doc/',
 ]));
 
+gulp.task('sync-stat', shell.task([
+	'scp -r . table@192.168.3.113:/home/table/data/project/soda-mng',
+]));
+
