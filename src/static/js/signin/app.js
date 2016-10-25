@@ -40,26 +40,14 @@ export class LoginForm extends React.Component {
 				};
 				LoginService.login(data).then((response)=>{
 					let tips = '';
-					switch (response.status) {
-						case 0: {
-							window.location.href = '/';
-							break;
-						}
-						default: {
-							tips = response.msg;
-							break;
-						}
-					}
+					window.location.href = '/';
 					if(tips){
 						self.error(tips);
 					}
 					self.setState({loginButton:true});
-				}).catch(function(error) {
-					if(error) {
-						alert('登录失败,请重试!');
-					}
+				},(response) => {
+					self.error(response.msg);
 					self.setState({loginButton:true});
-					throw new Error(error);
 				});
 			}
 		});

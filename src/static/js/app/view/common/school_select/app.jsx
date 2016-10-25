@@ -41,7 +41,8 @@ class SchoolSelect extends React.Component {
 			defaultProvince:{
 				provinceId:'',
 				provinceName:'',
-			}
+			},
+			chooseSchool: false,
 		};
 	}
 	componentWillMount() {
@@ -54,6 +55,7 @@ class SchoolSelect extends React.Component {
 				provinceId: nextProps.provinceId,
 				defaultProvince: {
 					provinceId: nextProps.provinceId,
+					provinceName: this.state.defaultProvince.provinceName,
 				}
 			});
 		}
@@ -61,6 +63,7 @@ class SchoolSelect extends React.Component {
 			this.setState({
 				provinceName: nextProps.provinceName,
 				defaultProvince: {
+					provinceId: this.state.defaultProvince.provinceId,
 					provinceName: nextProps.provinceName,
 				}
 			});
@@ -81,19 +84,23 @@ class SchoolSelect extends React.Component {
 		this.setState({
 			provinceId: provinceId,
 			provinceName: provinceName,
+			chooseSchool: true,
 		});
 	}
 	selectSchool(schoolId, schoolName) {
-		this.setState({
-			schoolId: schoolId,
-			schoolName: schoolName,
-			defaultProvince: {
-				provinceId: this.state.provinceId,
-				provinceName: this.state.provinceName,
-			}
-		});
-		this.toggleBox();
-		this.props.handleSelect(this.state.provinceId, schoolId);
+		if(this.state.chooseSchool){
+			this.setState({
+				schoolId: schoolId,
+				schoolName: schoolName,
+				defaultProvince: {
+					provinceId: this.state.provinceId,
+					provinceName: this.state.provinceName,
+				}
+			});
+			console.log(this.state.provinceId,this.state.provinceName);
+			this.toggleBox();
+			this.props.handleSelect(this.state.provinceId, schoolId);
+		}
 	}
 	toggleBox() {
 		this.refs.box.classList.toggle('box-show');
@@ -101,13 +108,14 @@ class SchoolSelect extends React.Component {
 	}
 	onCancle() {
 		this.toggleBox();
-		// console.log('default',this.state.defaultProvince);
+		console.log('default',this.state.defaultProvince);
 		this.setState({
 			provinceId: this.state.defaultProvince.provinceId,
 			provinceName: this.state.defaultProvince.provinceName,
 		});
 	}
 	render() {
+		console.log('default',this.state.defaultProvince);
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
 		const that = this;
