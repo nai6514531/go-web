@@ -137,7 +137,7 @@ class DeviceForm extends React.Component {
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
 					switch (nextProps.resultSerialNumber.result.status){
-						case 3:
+						case 3 || 1:
 							alert(nextProps.resultSerialNumber.result.msg);
 							break;
 						default:
@@ -229,11 +229,13 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: false });
 	}
 	checkNumber(rule, value, callback) {
-		var pattern=new RegExp(/\d+/);
-		if(pattern.test(parseInt(value))){
-			callback();
-		} else {
-			callback('只能为数字');
+		var pattern=new RegExp(/^\d+$/);
+		if(value){
+			if(pattern.test(value)){
+				callback();
+			} else {
+				callback('只能为数字');
+			}
 		}
 	}
 	handleEnter(event) {
@@ -246,7 +248,7 @@ class DeviceForm extends React.Component {
 			if(confirm('确定取消?')){
 				this.context.router.goBack();
 			}
-		} 
+		}
 	}
 	render() {
 		// 关联设备列表
@@ -295,13 +297,17 @@ class DeviceForm extends React.Component {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
 		};
+		let breadcrumb = '添加设备';
+		if(id) {
+			breadcrumb = '修改设备';
+		}
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item>添加/修改设备</Breadcrumb.Item>
+						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">
@@ -311,7 +317,7 @@ class DeviceForm extends React.Component {
 							label="设备编号" >
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									{ required: true, message: '请输入设备编号' },
+									{ required: true, len:10, message: '请输入设备编号,长度为十位' },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
@@ -334,7 +340,7 @@ class DeviceForm extends React.Component {
 							label="学校区域信息" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ message: '请输入学校区域信息' },
+									{ max:30, message: '请输入学校区域信息,不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -346,7 +352,7 @@ class DeviceForm extends React.Component {
 							label="楼层信息" >
 							{getFieldDecorator('label', {
 								rules: [
-									{ message: '请输入楼层信息' },
+									{ max:30, message: '请输入楼层信息,不超过三十个字' },
 								],
 								initialValue: initialValue.label,
 							})(
@@ -371,7 +377,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入单脱价格' },
+									{ message: '请输入单脱价格' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.firstPulsePrice,
@@ -390,7 +396,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入快洗价格' },
+									{ message: '请输入快洗价格' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -409,7 +415,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入标准洗价格'},
+									{ message: '请输入标准洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -428,7 +434,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入大物洗价格'},
+									{ message: '请输入大物洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.fourthPulsePrice,
@@ -456,6 +462,7 @@ class DeviceForm extends React.Component {
 									   second={this.secondPulseName}
 									   third={this.thirdPulseName}
 									   fourth={this.fourthPulseName}
+									   checkNumber={this.checkNumber}
 							/>
 						</div>
 					</Form>
@@ -511,7 +518,12 @@ class PulseName extends React.Component {
 		}
 		// 四个脉冲的初始值
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
-			{getFieldDecorator(itemKey,{initialValue:initialValue})(<Input type="text"/>)}
+			{getFieldDecorator(itemKey,{
+				rules: [
+					{ required: true, max:30, message: '请输入服务名称,不超过三十个字'},
+					{ validator: this.props.checkNumber },
+				],
+				initialValue:initialValue})(<Input type="text"/>)}
 		</FormItem>
 		return (
 			<div>

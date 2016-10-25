@@ -52,6 +52,7 @@ class UserForm extends React.Component {
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
+		this.checkNumber = this.checkNumber.bind(this);
 	}
 	static contextTypes = {
 		router: React.PropTypes.object
@@ -85,23 +86,23 @@ class UserForm extends React.Component {
 			const resultPostDetail = this.props.resultPostDetail;
 			if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == true){
-				alert('添加用户成功');
+				alert('添加代理商成功');
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == false){
-				alert('添加用户失败');
+				alert('添加代理商失败');
 				self.saveDetail = -1;
 			}
 			const resultPutDetail = this.props.resultPutDetail;
 			if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == true){
-				alert('修改用户成功');
+				alert('修改代理商成功');
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == false){
-				alert('修改用户失败');
+				alert('修改代理商失败');
 				self.saveDetail = -1;
 			}
 		}
@@ -176,7 +177,15 @@ class UserForm extends React.Component {
 			if(confirm('确定取消?')){
 				this.context.router.goBack();
 			}
-		} 
+		}
+	}
+	checkNumber(rule, value, callback) {
+		var pattern=new RegExp(/^\d+$/);
+		if(pattern.test(value)){
+			callback();
+		} else {
+			callback('只能为数字');
+		}
 	}
 	render() {
 		let ProvinceNode = [];
@@ -235,14 +244,17 @@ class UserForm extends React.Component {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
 		};
-
+		let breadcrumb = '添加代理商';
+		if(id !== 'new') {
+			breadcrumb = '修改代理商';
+		}
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to={"/user/" + userId}>下级代理商</Link></Breadcrumb.Item>
-						<Breadcrumb.Item>添加/修改用户</Breadcrumb.Item>
+						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">
@@ -252,7 +264,7 @@ class UserForm extends React.Component {
 							label="代理商名称" >
 							{getFieldDecorator('name', {
 								rules: [
-									{ required: true, message: '请输入代理商名称' },
+									{ required: true, max:30, message: '请输入代理商名称,不超过三十个字' },
 								],
 								initialValue: initialValue.name,
 							})(
@@ -264,7 +276,7 @@ class UserForm extends React.Component {
 							label="联系人" >
 							{getFieldDecorator('contact', {
 								rules: [
-									{ required: true, message: '请输入联系人' },
+									{ required: true, max:30, message: '请输入联系人,不超过三十个字' },
 								],
 								initialValue: initialValue.contact,
 							})(
@@ -276,7 +288,7 @@ class UserForm extends React.Component {
 							label="地址" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ required: true, message: '请输入地址' },
+									{ required: true, max:30, message: '请输入地址,不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -289,6 +301,7 @@ class UserForm extends React.Component {
 							{getFieldDecorator('mobile', {
 								rules: [
 									{ required: true, len: 11, message: '请输入11位手机号' },
+									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.mobile,
 							})(
@@ -322,7 +335,7 @@ class UserForm extends React.Component {
 									label="支付宝账号">
 									{getFieldDecorator('alipayAccount', {
 										rules: [
-											{required: true, message: '请输入支付宝账号'},
+											{required: true, max:30, message: '请输入支付宝账号,不超过三十个字符'},
 										],
 										initialValue: initialValue.alipayAccount,
 
@@ -335,7 +348,7 @@ class UserForm extends React.Component {
 									label="支付宝姓名">
 									{getFieldDecorator('alipayName', {
 										rules: [
-											{required: true, message: '请输入支付宝姓名'},
+											{required: true, max:30, message: '请输入支付宝姓名,不超过三十个字'},
 										],
 										initialValue: initialValue.alipayName,
 
@@ -350,7 +363,7 @@ class UserForm extends React.Component {
 									label="转账户名">
 									{getFieldDecorator('realName', {
 										rules: [
-											{required: true, message: '请输入转账户名'},
+											{required: true, max:30, message: '请输入转账户名,不超过三十个字'},
 										],
 										initialValue: initialValue.realName,
 
@@ -363,7 +376,7 @@ class UserForm extends React.Component {
 									label="开户行">
 									{getFieldDecorator('bankName', {
 										rules: [
-											{required: true, message: '请输入开户行'},
+											{required: true, max:30, message: '请输入开户行,不超过三十个字'},
 										],
 										initialValue: initialValue.bankName,
 
@@ -376,7 +389,8 @@ class UserForm extends React.Component {
 									label="账号">
 									{getFieldDecorator('account', {
 										rules: [
-											{required: true, message: '请输入账号'},
+											{required: true, max:30, message: '请输入账号'},
+											{ validator: this.checkNumber },
 										],
 										initialValue: initialValue.account,
 
@@ -434,7 +448,8 @@ class UserForm extends React.Component {
 							label="服务电话" >
 							{getFieldDecorator('telephone', {
 								rules: [
-									{ required: true, message: '请输入服务电话' },
+									{ required: true, max:30, message: '请输入服务电话' },
+									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.telephone,
 

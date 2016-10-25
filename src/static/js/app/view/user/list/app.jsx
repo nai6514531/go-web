@@ -113,9 +113,8 @@ class AgentTable extends React.Component {
 			self.loading = true;
 			this.props.getUserList(pager);
 		}
-		// 首次从子用户列表跳转到父用户列表
-		if(this.state.child == true && nextState.child == true &&
-			nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
+		
+		if(this.state.child == true && nextState.child == false  && this.props.detailTotal == undefined){
 			self.setState({child: false});
 			self.loading = true;
 			this.props.getDetailTotal(USER.id);
