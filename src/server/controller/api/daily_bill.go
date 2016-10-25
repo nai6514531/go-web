@@ -9,6 +9,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"strconv"
 	"github.com/spf13/viper"
+	"encoding/json"
 )
 
 type DailyBillController struct {
@@ -187,9 +188,6 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userRoleRelService := &service.UserRoleRelService{}
-	params := ctx.URLParams()
-	userIdStr := params["userId"]
-	billAt := params["billAt"]
 	_userIds := []int{}
 	aliPayUserIds := []string{}
 	wechatPayUserIds := []string{}
@@ -197,77 +195,90 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 	var result *enity.Result
 	isSuccessed := true
 	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	common.Logger.Debugln("key==============", viper.GetString("server.session.user.id"))
-	common.Logger.Debugln("siginUserId=====================", siginUserId)
 
 	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
 	if err != nil {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060405", nil, daily_bill_msg["01060405"]})
 		return
 	}
-	if userRoleRel.RoleId != 3 {    //不是财务角色
+	if userRoleRel.RoleId != 3 && userRoleRel.RoleId != 1{    //不是财务角色
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
 		return
 	}
 
-	if userIdStr == "" {
+	var params map[string]interface{}
+	json.Unmarshal(ctx.PostBody(), &params)
+	if params["params"] == nil {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
 	}
-	userIds := strings.Split(userIdStr, ",")
-
-	//过滤掉未申请提现的用户
-	dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出已申请提现的用户
-	if err != nil || len(*dailyBillMap) <=0 {
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
-		return
-	}
-	for _userId, _ := range *dailyBillMap {
-		_userIds = append(_userIds, _userId)
-	}
-	if len(_userIds) <= 0 {
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
-		return
-	}
-
-	accountMap, err := userCashAccountService.BasicMapByUserId(_userIds)
-	if err != nil || len(*accountMap) <= 0 {
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060404", nil, daily_bill_msg["01060404"]})
-		return
-	}
-
-	for _, _account := range *accountMap {
-		switch _account.Type {
-		case 1: //支付宝
-			break
-		case 2: //微信
-			break
-		case 3: //银行
-			bankPayUserIds = append(bankPayUserIds, strconv.Itoa(_account.UserId))
-			break
+	paramList := params["params"].([]interface{})
+	for _, _param := range paramList {
+		_map := _param.(map[string]interface{})
+		if _map["userId"] == nil || _map["billAt"] == nil {
+			continue
 		}
-	}
-
-	//update aliPay
-	if len(aliPayUserIds) > 0 {
-
-	}
-
-	//update wechatPay
-	if len(wechatPayUserIds) > 0 {
-
-	}
-
-	//update bankPay
-	if len(bankPayUserIds) > 0 {
-		rows, err := dailyBillService.UpdateStatus(2, billAt, bankPayUserIds...)
-		if err != nil {
-			common.Logger.Warningln("银行结算更新失败")
-			isSuccessed = false
+		userIdStr := _map["userId"].(string)
+		billAt := _map["billAt"].(string)
+		if userIdStr == "" || billAt == "" {
+			//common.Logger.Warningln(daily_bill_msg["01060001"])
+			continue
 		}
-		if rows != int64(len(bankPayUserIds)) {
-			common.Logger.Warningln("银行结算部分更新失败")
-			isSuccessed = false
+		userIds := strings.Split(userIdStr, ",")
+
+		//过滤掉未申请提现的用户
+		dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出已申请提现的用户
+		if err != nil || len(*dailyBillMap) <=0 {
+			//ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+			continue
+		}
+		for _userId, _ := range *dailyBillMap {
+			_userIds = append(_userIds, _userId)
+		}
+		if len(_userIds) <= 0 {
+			//ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
+			continue
+		}
+
+		accountMap, err := userCashAccountService.BasicMapByUserId(_userIds)
+		if err != nil || len(*accountMap) <= 0 {
+			//ctx.JSON(iris.StatusOK, &enity.Result{"01060404", nil, daily_bill_msg["01060404"]})
+			continue
+		}
+
+		for _, _account := range *accountMap {
+			switch _account.Type {
+			case 1: //支付宝
+				break
+			case 2: //微信
+				break
+			case 3: //银行
+				bankPayUserIds = append(bankPayUserIds, strconv.Itoa(_account.UserId))
+				break
+			}
+		}
+
+		//update aliPay
+		if len(aliPayUserIds) > 0 {
+
+		}
+
+		//update wechatPay
+		if len(wechatPayUserIds) > 0 {
+
+		}
+
+		//update bankPay
+		if len(bankPayUserIds) > 0 {
+			rows, err := dailyBillService.UpdateStatus(2, billAt, bankPayUserIds...)
+			if err != nil {
+				common.Logger.Warningln("银行结算更新失败")
+				isSuccessed = false
+			}
+			if rows != int64(len(bankPayUserIds)) {
+				common.Logger.Warningln("银行结算部分更新失败")
+				isSuccessed = false
+			}
 		}
 	}
 
