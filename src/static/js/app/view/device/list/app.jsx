@@ -107,9 +107,10 @@ class DeviceList extends React.Component {
 		this.changeStatus = this.changeStatus.bind(this);
 
 	}
-	componentDidMount() {
+	componentWillMount() {
 		const pager = { page: this.state.page, perPage: this.state.perPage };
 		this.props.getDeviceList(pager);
+		this.loading = true;
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
@@ -118,6 +119,7 @@ class DeviceList extends React.Component {
 			if(nextProps.status && nextProps.status.fetch == true){
 				const pager = { page : this.state.page, perPage: this.state.perPage};
 				this.props.getDeviceList(pager);
+				self.loading = true;
 			} else if(nextProps.status && nextProps.status.fetch == false) {
 				alert('操作失败!');
 				console.log(nextProps.status.result.msg);
@@ -125,7 +127,9 @@ class DeviceList extends React.Component {
 			self.theStatus = -1;
 			self.removeDevice = -1;
 		}
-
+		if(this.props.list !== nextProps.list) {
+			self.loading = false;
+		}
 	}
 	initializePagination() {
 		let total = 1;
@@ -139,11 +143,13 @@ class DeviceList extends React.Component {
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getDeviceList(pager);
 			},
 			onChange(current) {
 				const pager = { page : current, perPage: self.state.perPage};
 				self.setState(pager);
+				self.loading = true;
 				self.props.getDeviceList(pager);
 			},
 		}
@@ -165,7 +171,6 @@ class DeviceList extends React.Component {
 		}
 	}
 	render() {
-		console.log('list',this.props.list);
 		const pagination = this.initializePagination();
 		const self = this;
 		const list = this.props.list;
@@ -218,7 +223,7 @@ class DeviceList extends React.Component {
 					<Table columns={columns}
 						   dataSource={dataSource}
 						   pagination={pagination}
-						   loading={this.state.loading}
+						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
 					/>

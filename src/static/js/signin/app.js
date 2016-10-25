@@ -5,12 +5,13 @@ import { Button, Form, Input, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 import { checkStatus, parseJSON, parseCode } from '../common/common';
-import NProgress from "nprogress";
+import LoginService from '../app/service/login';
 export class LoginForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			url: '',
+			loginButton: true,
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.getCaptcha = this.getCaptcha.bind(this);
@@ -23,48 +24,30 @@ export class LoginForm extends React.Component {
 	}
 	handleSubmit(e) {
 		e.preventDefault();
-		const that = this;
-		NProgress.start();
+		const self = this;
+		this.setState({loginButton:false});
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
+				this.setState({loginButton:true});
 				return;
 			} else {
 				const { account, password, verificode, captcha } = values;
-				fetch('/api/signin', {
-					method: 'post',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						account: account,
-						password: md5(password),
-						verificode: verificode,
-						captcha: captcha,
-					}),
-					credentials: 'same-origin'
-				}).then(checkStatus)
-					.then(parseJSON)
-					.then(function(response) {
-						const newCode = parseCode(response.status);
-						let tips = '';
-						switch (newCode) {
-							case 0: {
-								window.location.href = '/';
-								break;
-							}
-							default: {
-								tips = response.msg;
-								break;
-							}
-						}
-						if(tips){
-							that.error(tips);
-						}
-						NProgress.done();
-					}).catch(function(error) {
-						NProgress.done();
-						throw new Error(error);
+				const data = {
+					account: account,
+					password: md5(password),
+					verificode: verificode,
+					captcha: captcha,
+				};
+				LoginService.login(data).then((response)=>{
+					let tips = '';
+					window.location.href = '/';
+					if(tips){
+						self.error(tips);
+					}
+					self.setState({loginButton:true});
+				},(response) => {
+					self.error(response.msg);
+					self.setState({loginButton:true});
 				});
 			}
 		});
@@ -73,20 +56,9 @@ export class LoginForm extends React.Component {
 		if(e){
 			e.preventDefault();
 		}
-		const that = this;
-		fetch('/captcha.png', {
-			method: 'get',
-			headers: {
-				'Content-Type': 'image/png; charset=UTF-8'
-			},
-			credentials: 'same-origin'
-		}).then(checkStatus)
-			.then(function(response) {
-				var timestamp = Date.parse((new Date()).toString());
-				that.setState({ url: `${response.url}?${timestamp}` })
-			}).catch(function(error) {
-			throw new Error(error);
-		});
+		const url = '/captcha.png';
+		var timestamp = Date.parse((new Date()).toString());
+		this.setState({ url: `${url}?${timestamp}` })
 	}
 	componentWillMount() {
 		this.getCaptcha();
@@ -146,7 +118,11 @@ export class LoginForm extends React.Component {
 						)}
 					</FormItem>
 					<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-						<Button type="primary" onClick={this.handleSubmit}>登录</Button>
+						{this.state.loginButton ?
+							<Button type="primary" onClick={this.handleSubmit}>登录</Button>
+								:
+							<Button type="primary" disabled onClick={this.handleSubmit}>登录</Button>
+						}
 					</FormItem>
 				</Form>
 		);

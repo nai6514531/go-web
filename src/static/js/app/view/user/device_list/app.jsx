@@ -60,7 +60,7 @@ class SchoolTable extends React.Component {
 	}
 	componentWillMount() {
 		const pager = {page: this.state.page, perPage: this.state.perPage};
-		const schoolId = 0;
+		const schoolId = -1;
 		this.loading = true;
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
@@ -94,7 +94,7 @@ class SchoolTable extends React.Component {
 			total = this.props.school.result.data.total;
 		}
 		const self = this;
-		let schoolId = 0;
+		let schoolId = -1;
 		if(this.state.schoolId) {
 			schoolId = this.state.schoolId;
 		}
@@ -110,7 +110,6 @@ class SchoolTable extends React.Component {
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
-				console.log('device list',pager);
 				self.loading = true;
 				self.props.getUserSchool(USER.id, schoolId, pager);
 			},
@@ -185,10 +184,18 @@ class SchoolFilter extends React.Component {
 		const schoolList = this.props.schoolList;
 		let schoolNode = [];
 		if(schoolList){
-			schoolNode = schoolList.map(function (item, key) {
-				const id = item.id.toString();
-				return <Option key={key} value={id}>{item.name}</Option>;
-			})
+			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
+			schoolNode[0] = firstNode;
+			for(let i = 0; i < schoolList.length; i++) {
+				const id = schoolList[i].id.toString();
+				const name = schoolList[i].name;
+				const item = <Option key={id} value={id}>{name}</Option>;
+				schoolNode.push(item);
+			}
+			// schoolNode = schoolList.map(function (item, key) {
+			// 	const id = item.id.toString();
+			// 	return <Option key={key} value={id}>{item.name}</Option>;
+			// })
 		}
 		const { getFieldDecorator } = this.props.form;
 		return (
