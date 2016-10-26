@@ -236,7 +236,7 @@ class UserForm extends React.Component {
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
 			} else {
-				console.log('获取用户信息失败,请重试.');
+				console.log('获取代理商信息失败,请重试.');
 			}
 		}
 		const { getFieldDecorator } = this.props.form;
@@ -251,7 +251,7 @@ class UserForm extends React.Component {
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
-					<Breadcrumb separator=">">
+					<Breadcrumb >
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to={"/user/" + userId}>下级代理商</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
