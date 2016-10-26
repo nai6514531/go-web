@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"sort"
 	"fmt"
-	"os"
 	"maizuo.com/soda-manager/src/server/common"
 )
 
@@ -18,7 +17,7 @@ type AlipayKit struct {
  */
 func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
 	//apiKey := viper.GetString("pay.wechat.api-key")
-	apiKey := os.Getenv("APIKEY")
+	apiKey := ""//os.Getenv("APIKEY")
 	common.Logger.Warningln("支付宝支付签名计算, API KEY:", apiKey)
 
 	//STEP 1, 对key进行升序排序.
