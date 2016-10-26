@@ -10,6 +10,10 @@ import (
 	"strconv"
 	"github.com/spf13/viper"
 	"encoding/json"
+	"time"
+	"maizuo.com/soda-manager/src/server/kit/alipay"
+	"maizuo.com/smart-cinema/Godeps/_workspace/src/github.com/levigross/grequests"
+	"fmt"
 )
 
 type DailyBillController struct {
@@ -184,12 +188,13 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060300", nil, daily_bill_msg["01060300"]})
 }
 
-func (self *DailyBillController) Settlement(ctx *iris.Context) {
+func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userRoleRelService := &service.UserRoleRelService{}
-
+	batchNum := 0
 	var result *enity.Result
+	aliPayDetailDataStr := ""
 	isSuccessed := true
 	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
@@ -198,7 +203,7 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060405", nil, daily_bill_msg["01060405"]})
 		return
 	}
-	if userRoleRel.RoleId != 3/* && userRoleRel.RoleId != 1*/{    //不是财务角色
+	if userRoleRel.RoleId != 3 {    //不是财务角色
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
 		return
 	}
@@ -251,6 +256,8 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 		for _, _account := range *accountMap {
 			switch _account.Type {
 			case 1: //支付宝
+				//batchNum++       //计算批量结算请求中支付宝结算的日订单数,不可超过1000
+				aliPayUserIds = append(aliPayUserIds, strconv.Itoa(_account.UserId))
 				break
 			case 2: //微信
 				break
@@ -262,6 +269,13 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 
 		//update aliPay
 		if len(aliPayUserIds) > 0 {
+			fmt.Println("aliPayUserIds=====================", aliPayUserIds)
+			for _, _userId := range aliPayUserIds {
+				_dailyBill := (*dailyBillMap)[functions.StringToInt(_userId)]
+				_userCashAccount := (*accountMap)[functions.StringToInt(_userId)]
+				aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^" + _userCashAccount.Account + "^" + _userCashAccount.RealName +
+				"^" + strconv.Itoa(_dailyBill.TotalAmount) + "^" + "无" + "|"
+			}
 
 		}
 
@@ -284,10 +298,74 @@ func (self *DailyBillController) Settlement(ctx *iris.Context) {
 		}
 	}
 
+	//发起支付宝请求
+	if batchNum >0 && batchNum<=1000 && aliPayDetailDataStr != ""{
+		param := make(map[string]string, 0)
+		if strings.HasPrefix(aliPayDetailDataStr, "|") {
+			aliPayDetailDataStr = aliPayDetailDataStr[:len(aliPayDetailDataStr)-1]
+		}
+		fmt.Println("aliPayDetailDataStr====================", aliPayDetailDataStr)
+		param["service"] = "batch-pay"
+		param["partner"] = "20884219463*****"
+		param["input_charset"] = "UTF-8"
+		param["sign_type"] = "MD5"
+		param["notify_url"] = "http://tunnel.maizuo.com/api/daily_bill/alipay/notification"
+		param["account_name"] = "深圳市华策网络科技有限公司"
+		param["detail_data"] = aliPayDetailDataStr
+		param["batch_no"] = time.Now().Local().Format("20160102150405")
+		param["batch_num"] = strconv.Itoa(batchNum)
+		param["batch_fee"] = "0.01"
+		param["email"] = "laura@maizuo.com"
+		param["pay_date"] = time.Now().Local().Format("20160102")
+		param["sign"] = alipay.CreateSign(param, 2)
+
+		response, err := grequests.Get("https://mapi.alipay.com/gateway.do", &grequests.RequestOptions{
+			Params: param,
+			Headers:map[string]string{
+				"Accept": "application/json",
+				"Content-Type": "application/json;charset=utf-8",
+			},
+		})
+		if err != nil {
+
+		}
+		common.Logger.Infoln(response.String())
+
+	}
+
+
 	if isSuccessed {
 		result = &enity.Result{"01060400", nil, daily_bill_msg["01060400"]}
 	}else {
 		result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *DailyBillController) Notification (ctx *iris.Context) {
+	notifyRequest := alipay.NotifyRequest{}
+	reqMap := make(map[string]interface{}, 0)
+	body := ctx.Request.Body()
+	common.Logger.Debugln("支付宝通知 Body:", string(body))
+	err := json.Unmarshal(body, &notifyRequest)
+	if err != nil {
+
+	}
+	reqMap["notify_time"] = notifyRequest.NotifyTime
+	reqMap["notify_type"] = notifyRequest.NotifyType
+	reqMap["notify_dd"] = notifyRequest.NotifyId
+	reqMap["batch_no"] = notifyRequest.BatchNo
+	reqMap["pay_user_id"] = notifyRequest.PayUserId
+	reqMap["pay_user_name"] = notifyRequest.PayUserName
+	reqMap["pay_account_no"] = notifyRequest.PayAccountNo
+	reqMap["success_details"] = notifyRequest.SuccessDetails
+	reqMap["fail_details"] = notifyRequest.FailDetails
+	common.Logger.Debugln("signTypesignTypesignTypesignTypesignType=====", notifyRequest.SignType)
+	if alipay.VerifySign(reqMap, notifyRequest.Sign) {
+
+		ctx.Response.SetBodyString("success")
+	}else {
+		ctx.Response.SetBodyString("fail")
+	}
+	common.Logger.Debugln("完成了!!!!!!!!!")
 }
