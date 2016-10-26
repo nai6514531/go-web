@@ -187,6 +187,8 @@ const App = React.createClass({
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "0"){
+				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
+				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
 				message.info(res.msg)
@@ -318,6 +320,8 @@ const App = React.createClass({
 
 		const rowSelection = {
 		  onChange(selectedRowKeys, selectedRows) {
+		  	console.log(selectedRows)
+		  	console.log(changeRows)
 		  	self.setState({selectedList: selectedRows})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
