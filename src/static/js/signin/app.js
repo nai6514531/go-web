@@ -46,7 +46,6 @@ export class LoginForm extends React.Component {
 				LoginService.login(data).then((response)=>{
 					window.location.href = '/';
 				},(response) => {
-					console.log(response);
 					switch (response.status) {
 						case 1:
 						case 9:
@@ -81,6 +80,10 @@ export class LoginForm extends React.Component {
 			alert('您的操作太快!');
 			self.getCaptcha();
 		}
+		const { getFieldValue } = this.props.form;
+		if(!getFieldValue('account')&& this.state.account ){this.setState({account:''})}
+		if(!getFieldValue('password')&& this.state.password ){this.setState({password:''})}
+		if(!getFieldValue('captcha')&& this.state.captcha ){this.setState({captcha:''})}
 	}
 	getCaptcha(e) {
 		if(e){
