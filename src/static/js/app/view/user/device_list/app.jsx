@@ -69,26 +69,26 @@ class SchoolTable extends React.Component {
 	}
 	componentWillReceiveProps(nextProps) {
 		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
-		const school = this.props.school;
-		if(nextProps.school && nextProps.school.fetch == true){
-			if(school == undefined){
-				this.setState({
-					schoolList: nextProps.school.result.data,
-				});
-			} else {
-				if(this.state.schoolList.length <= school.result.data.length) {
-					if(school.result.data.length >= nextProps.school.result.data.length) {
-						this.setState({
-							schoolList: school.result.data,
-						});
-					} else {
-						this.setState({
-							schoolList: nextProps.school.result.data,
-						});
-					}
-				}
-			}
-		}
+		// const school = this.props.school;
+		// if(nextProps.school && nextProps.school.fetch == true){
+		// 	if(school == undefined){
+		// 		this.setState({
+		// 			schoolList: nextProps.school.result.data,
+		// 		});
+		// 	} else {
+		// 		if(this.state.schoolList.length <= school.result.data.length) {
+		// 			if(school.result.data.length >= nextProps.school.result.data.length) {
+		// 				this.setState({
+		// 					schoolList: school.result.data,
+		// 				});
+		// 			} else {
+		// 				this.setState({
+		// 					schoolList: nextProps.school.result.data,
+		// 				});
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 	}
 	initializePagination() {
@@ -186,12 +186,13 @@ class SchoolFilter extends React.Component {
 	render() {
 		const allSchool = this.props.allSchool;
 		let schoolNode = [];
-		if(allSchool){
+		if(allSchool && allSchool.fetch == true){
 			const firstNode = <Option key='-1' value="-1">所有学校</Option>;
+			const schoolList = allSchool.result.data;
 			schoolNode[0] = firstNode;
-			for(let i = 0; i < allSchool.length; i++) {
-				const id = allSchool[i].id.toString();
-				const name = allSchool[i].name;
+			for(let i = 0; i < schoolList.length; i++) {
+				const id = schoolList[i].id.toString();
+				const name = schoolList[i].name;
 				const item = <Option key={id} value={id}>{name}</Option>;
 				schoolNode.push(item);
 			}

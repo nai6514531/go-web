@@ -84,7 +84,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 			userId = siginUserId
 			break
 		}
-	}else {
+	} else {
 		for _, s := range _status {
 			switch userRoleRel.RoleId {
 			case 1:
@@ -160,7 +160,7 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
 	status, _ := strconv.Atoi(params["status"])
-	if status != 1 && status != 0{
+	if status != 1 && status != 0 {
 		common.Logger.Warningln(daily_bill_msg["01060303"], ": ", status)
 		ctx.JSON(iris.StatusOK, daily_bill_msg["01060303"])
 		return
@@ -336,11 +336,12 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 
 	if isSuccessed {
 		result = &enity.Result{"01060400", nil, daily_bill_msg["01060400"]}
-	}else {
+	} else {
 		result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
+
 
 func (self *DailyBillController) Notification (ctx *iris.Context) {
 	notifyRequest := alipay.NotifyRequest{}
@@ -364,8 +365,33 @@ func (self *DailyBillController) Notification (ctx *iris.Context) {
 	if alipay.VerifySign(reqMap, notifyRequest.Sign) {
 
 		ctx.Response.SetBodyString("success")
-	}else {
+	} else {
 		ctx.Response.SetBodyString("fail")
 	}
 	common.Logger.Debugln("完成了!!!!!!!!!")
+
+}
+
+func (self *DailyBillController) Recharge(ctx *iris.Context) {
+	dailyBillService := &service.DailyBillService{}
+	result := &enity.Result{}
+	list, err := dailyBillService.Recharge()
+	if err != nil {
+		result = &enity.Result{"1", nil, "拉取充值数据异常"}
+	} else {
+		result = &enity.Result{"0", list, "拉取充值数据成功"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+func (self *DailyBillController) Consume(ctx *iris.Context) {
+	dailyBillService := &service.DailyBillService{}
+	result := &enity.Result{}
+	list, err := dailyBillService.Consume()
+	if err != nil {
+		result = &enity.Result{"1", nil, "拉取消费数据异常"}
+	} else {
+		result = &enity.Result{"0", list, "拉取消费数据成功"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+
 }

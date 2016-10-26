@@ -22,13 +22,17 @@ const Service = {
 		})
 	},
 	updateSettlement: (data) => {
-		return api.get('/api/daily-bill/settlement', {
-			params: {
-				userId: data.userId,
-				billAt: data.billAt
-			}
+		return api.put('/api/daily-bill/settlement', {
+			params: data
 		})
+	},
+	recharge: () => {
+		return api.get('/api/daily-bill/recharge')
+	},
+	consume: () => {
+		return api.get('/api/daily-bill/consume')
 	}
+
 };
 
 export default Service;

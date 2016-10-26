@@ -144,7 +144,6 @@ export function getCityDistrictDetail(id) {
 			dispatch({
 				type: GET_CITY_DISTRICT_LIST,
 				result: { fetch: false, result },
-
 			});
 		});
 	};
