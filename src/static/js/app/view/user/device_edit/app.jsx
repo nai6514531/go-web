@@ -99,26 +99,35 @@ class DeviceForm extends React.Component {
 		if(deviceId) {
 			if(this.props.provinceList !== nextProps.provinceList) {
 				const provinceId = nextProps.detail.result.data.provinceId;
-				const cityId = nextProps.detail.result.data.cityId;
+				const schoolId = nextProps.detail.result.data.schoolId;
 				const provinceName = nextProps.provinceList.result.data.filter(function (item) {
 					return item.id == provinceId;
 				});
 				self.provinceId = provinceId;
-				self.cityId = cityId;
+				self.schoolId = schoolId;
 				if(provinceName.length >= 1){
 					self.provinceName = provinceName[0].name;
 				}
 				this.props.getProvinceSchoolList(provinceId);
+				self.getSchool = 1;
 			}
-			if(this.props.provinceSchool == undefined && this.props.provinceSchool !== nextProps.provinceSchool) {
-				if(nextProps.provinceSchool.fetch == true) {
-					const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
-						return item.id == self.schoolId;
-					})
-					self.schoolName = schoolName[0].name;
-				} else {
+			if(this.getSchool
+				&& this.props.provinceSchool !== nextProps.provinceSchool
+				&& nextProps.provinceSchool
+				&& nextProps.provinceSchool.fetch == true){
+				const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
+					return item.id == self.schoolId;
+				})
+				if(schoolName){
+					if(schoolName.length > 0 ){
+						self.schoolName = schoolName[0].name;
+					}
+				}
+				else {
 					alert(nextProps.provinceSchool.result.msg);
 				}
+				this.getSchool = 0;
+
 			}
 		}
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
@@ -288,8 +297,6 @@ class DeviceForm extends React.Component {
 					'fourthPulseName': device.fourthPulseName,
 
 				}
-				self.provinceId = device.provinceId;
-				self.schoolId = device.schoolId;
 			}
 		}
 		const { getFieldDecorator } = this.props.form;
@@ -377,7 +384,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ message: '请输入单脱价格' },
+									{ required: true, message: '请输入单脱价格' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.firstPulsePrice,
@@ -396,7 +403,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ message: '请输入快洗价格' },
+									{ required: true, message: '请输入快洗价格' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -415,7 +422,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ message: '请输入标准洗价格'},
+									{ required: true, message: '请输入标准洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -434,7 +441,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ message: '请输入大物洗价格'},
+									{ required: true, message: '请输入大物洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.fourthPulsePrice,
