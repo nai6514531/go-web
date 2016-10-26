@@ -25,7 +25,14 @@ const Service = {
 		return api.put('/api/daily-bill/batch-pay', {
 			params: data
 		})
+	},
+	recharge: () => {
+		return api.get('/api/daily-bill/recharge')
+	},
+	consume: () => {
+		return api.get('/api/daily-bill/consume')
 	}
+
 };
 
 export default Service;

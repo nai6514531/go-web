@@ -99,35 +99,54 @@ class DeviceForm extends React.Component {
 		if(deviceId) {
 			if(this.props.provinceList !== nextProps.provinceList) {
 				const provinceId = nextProps.detail.result.data.provinceId;
-				const cityId = nextProps.detail.result.data.cityId;
+				const schoolId = nextProps.detail.result.data.schoolId;
 				const provinceName = nextProps.provinceList.result.data.filter(function (item) {
 					return item.id == provinceId;
 				});
 				self.provinceId = provinceId;
-				self.cityId = cityId;
+				self.schoolId = schoolId;
 				if(provinceName.length >= 1){
 					self.provinceName = provinceName[0].name;
 				}
 				this.props.getProvinceSchoolList(provinceId);
+				self.getSchool = 1;
 			}
-			if(this.props.provinceSchool == undefined && this.props.provinceSchool !== nextProps.provinceSchool) {
-				if(nextProps.provinceSchool.fetch == true) {
+			if(this.getSchool
+					&& this.props.provinceSchool !== nextProps.provinceSchool
+				&& nextProps.provinceSchool
+				&& nextProps.provinceSchool.fetch == true){
 					const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
 						return item.id == self.schoolId;
 					})
-					self.schoolName = schoolName[0].name;
-				} else {
-					alert(nextProps.provinceSchool.result.msg);
-				}
+					if(schoolName){
+						if(schoolName.length > 0 ){
+							self.schoolName = schoolName[0].name;
+						}
+					}
+					else {
+						alert(nextProps.provinceSchool.result.msg);
+					}
+				this.getSchool = 0;
+
 			}
 			if(self.saveDetail == 1){
 				const resultPostDetail = this.props.resultPostDetail;
 				if(resultPostDetail !== nextProps.resultPostDetail
 					&& nextProps.resultPostDetail.fetch == true){
 					alert('添加设备成功');
+					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(resultPostDetail !== nextProps.resultPostDetail
 					&& nextProps.resultPostDetail.fetch == false){
+					switch (nextProps.resultPostDetail.result.status){
+						case 3 || 1:
+							alert(nextProps.resultPostDetail.result.msg);
+							break;
+						default:
+							alert('添加设备失败');
+							break;
+					}
+					self.saveDetail = -1;
 					alert('添加设备失败');
 					self.saveDetail = -1;
 				}
@@ -135,6 +154,7 @@ class DeviceForm extends React.Component {
 				if(resultPutDetail !== nextProps.resultPutDetail
 					&& nextProps.resultPutDetail.fetch == true){
 					alert('修改设备成功');
+					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(resultPutDetail !== nextProps.resultPutDetail
 					&& nextProps.resultPutDetail.fetch == false){
@@ -224,11 +244,14 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: false });
 	}
 	checkNumber(rule, value, callback) {
-		var pattern=new RegExp(/\d+/);
-		if(pattern.test(parseInt(value))){
-			callback();
-		} else {
-			callback('只能为数字');
+		var pattern=new RegExp(/^\d+$/);
+		// console.log('value',value);
+		if(value){
+			if(pattern.test(value)){
+				callback();
+			} else {
+				callback('只能为数字');
+			}
 		}
 	}
 	handleEnter(event) {
@@ -281,8 +304,6 @@ class DeviceForm extends React.Component {
 					'fourthPulseName': device.fourthPulseName,
 
 				}
-				self.provinceId = device.provinceId;
-				self.schoolId = device.schoolId;
 			}
 		}
 		const { getFieldDecorator } = this.props.form;
@@ -290,12 +311,17 @@ class DeviceForm extends React.Component {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
 		};
+		let breadcrumb = '添加设备';
+		if(id) {
+			breadcrumb = '修改设备';
+		}
+		console.log('ids',this.provinceId,this.schoolId,this.provinceName,this.schoolName);
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item>添加/修改设备</Breadcrumb.Item>
+						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<section className="view-content">
@@ -305,7 +331,7 @@ class DeviceForm extends React.Component {
 							label="设备编号" >
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									{ required: true, message: '请输入设备编号' },
+									{ required: true, len:10, message: '请输入设备编号,长度为十位' },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
@@ -328,7 +354,7 @@ class DeviceForm extends React.Component {
 							label="学校区域信息" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ required: true, message: '请输入学校区域信息' },
+									{ required: true, max:30, message: '请输入学校区域信息,不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -340,7 +366,7 @@ class DeviceForm extends React.Component {
 							label="楼层信息" >
 							{getFieldDecorator('label', {
 								rules: [
-									{ required: true, message: '请输入楼层信息' },
+									{ required: true, max:30, message: '请输入楼层信息,不超过三十个字' },
 								],
 								initialValue: initialValue.label,
 							})(
@@ -384,7 +410,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入快洗价格' },
+									{  required: true, message: '请输入快洗价格' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -403,7 +429,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入标准洗价格'},
+									{  required: true, message: '请输入标准洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -422,7 +448,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入大物洗价格'},
+									{  required: true, message: '请输入大物洗价格'},
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.fourthPulsePrice,

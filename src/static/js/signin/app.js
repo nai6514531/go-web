@@ -4,7 +4,6 @@ import md5 from 'md5';
 import { Button, Form, Input, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
-import { checkStatus, parseJSON, parseCode } from '../common/common';
 import LoginService from '../app/service/login';
 export class LoginForm extends React.Component {
 	constructor(props) {
@@ -12,6 +11,11 @@ export class LoginForm extends React.Component {
 		this.state = {
 			url: '',
 			loginButton: true,
+			getCaptcha: false,
+			account: '',
+			password: '',
+			captcha: '',
+
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.getCaptcha = this.getCaptcha.bind(this);
@@ -24,8 +28,9 @@ export class LoginForm extends React.Component {
 	}
 	handleSubmit(e) {
 		e.preventDefault();
+		if(this.state.loginButton == false){return;}
 		const self = this;
-		this.setState({loginButton:false});
+		this.setState({loginButton:false,account:'',password:'',captcha:''});
 		this.props.form.validateFields((errors, values) => {
 			if (errors) {
 				this.setState({loginButton:true});
@@ -39,33 +44,65 @@ export class LoginForm extends React.Component {
 					captcha: captcha,
 				};
 				LoginService.login(data).then((response)=>{
-					let tips = '';
 					window.location.href = '/';
-					if(tips){
-						self.error(tips);
-					}
-					self.setState({loginButton:true});
 				},(response) => {
-					self.error(response.msg);
-					self.setState({loginButton:true});
+					switch (response.status) {
+						case 1:
+						case 9:
+							self.setState({account:response.msg});
+							break;
+						case 2:
+						case 10:
+							self.setState({password:response.msg});
+							break;
+						case 3:
+						case 4:
+						case 5:
+							self.setState({captcha:response.msg});
+							break;
+						default:
+							self.error(response.msg);
+							break;
+					}
+					this.getCaptcha();
 				});
 			}
 		});
+	}
+	componentWillUpdate(nextProps, nextState) {
+		const self = this;
+		if(this.captcha && this.state.url !== nextState.url) {
+			this.setState({loginButton:true});
+			this.captcha = 0;
+		}  else if (this.first == false && this.captcha
+			&& this.state.url == nextState.url) {
+			// 两次时间戳结果相等,表示操作太快
+			alert('您的操作太快!');
+			self.getCaptcha();
+		}
+		const { getFieldValue } = this.props.form;
+		if(!getFieldValue('account')&& this.state.account ){this.setState({account:''})}
+		if(!getFieldValue('password')&& this.state.password ){this.setState({password:''})}
+		if(!getFieldValue('captcha')&& this.state.captcha ){this.setState({captcha:''})}
 	}
 	getCaptcha(e) {
 		if(e){
 			e.preventDefault();
 		}
 		const url = '/captcha.png';
-		var timestamp = Date.parse((new Date()).toString());
-		this.setState({ url: `${url}?${timestamp}` })
+		var timestamp =new Date().getTime();
+		this.captcha = 1;
+		this.setState({ url: `${url}?${timestamp}`});
 	}
 	componentWillMount() {
 		this.getCaptcha();
+		this.first = true;
 	}
 	handleEnter(event) {
-		if (event.keyCode==13) {
-			this.handleSubmit(event);
+		if(this.state.loginButton) {
+			if (event.keyCode==13) {
+				this.handleSubmit(event);
+			}
 		}
 	}
 	render() {
@@ -74,11 +111,14 @@ export class LoginForm extends React.Component {
 			labelCol: { span: 7 },
 			wrapperCol: { span: 12 },
 		};
+		const accountHelp = this.state.account?{'help':this.state.account,'className':'has-error'}:{};
+		const passwordHelp = this.state.password?{'help':this.state.password,'className':'has-error'}:{};
+		const captchaHelp = this.state.captcha?{'help':this.state.captcha,'className':'has-error'}:{};
 		return (
 				<Form horizontal onKeyDown={this.handleEnter.bind(this)}>
-					<FormItem
-						{...formItemLayout}
+					<FormItem {...formItemLayout}
 						label="用户名"
+						{...accountHelp}
 					>
 						{getFieldDecorator('account', {
 							rules: [
@@ -88,10 +128,10 @@ export class LoginForm extends React.Component {
 							<Input placeholder="请输入用户名" />
 						)}
 					</FormItem>
-
 					<FormItem
 						{...formItemLayout}
 						label="密码"
+						{...passwordHelp}
 					>
 						{getFieldDecorator('password', {
 							rules: [
@@ -104,6 +144,7 @@ export class LoginForm extends React.Component {
 					<FormItem
 						{...formItemLayout}
 						label="图形验证码"
+						{...captchaHelp}
 					>
 						{getFieldDecorator('captcha', {
 							rules: [

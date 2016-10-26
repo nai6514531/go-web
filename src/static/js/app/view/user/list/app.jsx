@@ -89,7 +89,7 @@ class AgentTable extends React.Component {
 		const pager = { page : this.state.page, perPage: this.state.perPage};
 		this.loading = true;
 		if(this.props.params.id) {
-			this.setState({child:true});
+			this.showChild();
 			this.props.getUserList(pager);
 		} else {
 			this.props.getDetailTotal(USER.id);
@@ -100,6 +100,11 @@ class AgentTable extends React.Component {
 			child: true,
 		})
 	}
+	hideChild() {
+		this.setState({
+			child: false,
+		})
+	}
 	componentWillUpdate(nextProps, nextState) {
 		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
@@ -108,12 +113,21 @@ class AgentTable extends React.Component {
 			self.loading = true;
 			this.props.getUserList(pager);
 		}
-		// 首次从子用户列表跳转到父用户列表
-		if(this.state.child == true && nextState.child == true &&
-			nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
-			self.setState({child: false});
-			self.loading = true;
-			this.props.getDetailTotal(USER.id);
+		// 首次加载子代理商列表,首次从子用户列表跳转到父用户列表
+		if(this.props.list == undefined && nextProps.list) {
+			this.first = 1;
+		}
+		// 首次加载父代理商列表
+		if(nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
+			if(this.first) {
+				this.setState({child:false});
+				this.first = 0;
+			}
+			if(this.state.child == true && nextState.child == false) {
+				self.hideChild();
+				self.loading = true;
+				this.props.getDetailTotal(USER.id);
+			}
 		}
 	}
 	shouldComponentUpdate(nextProps, nextState) {
@@ -202,9 +216,16 @@ class AgentTable extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					<Breadcrumb>
-						<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
-					</Breadcrumb>
+					{this.state.child?
+						<Breadcrumb>
+							<Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item>下级代理商</Breadcrumb.Item>
+						</Breadcrumb>
+						:
+						<Breadcrumb>
+							<Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+						</Breadcrumb>
+					}
 				</header>
 				<div className="toolbar">
 					<Button type="primary" className="item">
