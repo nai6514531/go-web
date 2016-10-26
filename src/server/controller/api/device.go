@@ -501,7 +501,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
   		"msg": "重置设备成功!"
 	}
 */
-//事实上是重置设备，将userid变回0
+//硬删除
 func (self *DeviceController) Delete(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}

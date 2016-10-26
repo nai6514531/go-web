@@ -65,7 +65,7 @@ func Api() {
 
 	api.Get("/device", device.List)
 	api.Get("/device/:id", device.Basic)
-	//api.Delete("/device/:id", device.Delete)
+	api.Delete("/device/:id", device.Delete)
 	api.Patch("/device/:id/reset", device.OwnToMeOrTest, device.Reset)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.OwnToMeOrTest, device.Update)
