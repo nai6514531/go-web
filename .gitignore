@@ -79,3 +79,5 @@ fabric.properties
 .idea
 *.iml
 .DS_Store
+/k8s/
+/soda-manager
