@@ -8,36 +8,24 @@ require('./task/rev');
 require('./task/minify');
 require('./task/copy');
 require('./task/bump');
-require('./task/k8s');
+require('./task/deploy');
 
 gulp.task('default', () => {
-	return sequence('clean', 'copy-img', 'webpack-dev');
-});
-
-gulp.task('build', () => {
-	return sequence('clean', 'copy-template', 'copy-img', 'webpack', 'rev', 'rev-replace', 'minify');
+	return sequence('clean', 'copy:img', 'webpack:dev');
 });
 
 gulp.task('local', shell.task([
-	"godep go run main.go -conf ./config/local"
+	"godep go run main.go -conf ./config/default"
 ]));
 
 gulp.task('deve', shell.task([
-	'godep go run main.go -conf ./config/deve',
+	'godep go run main.go -conf ./config/development',
 ]));
 
 gulp.task('prod', shell.task([
-	'godep go run main.go -conf ./config/prod',
+	'godep go run main.go -conf ./config/production',
 ]));
 
 gulp.task('doc', shell.task([
 	'apidoc -i ./src/server/ -o doc/',
 ]));
-
-gulp.task('compile:deve', () => {
-	return sequence('build', 'compile');
-});
-
-gulp.task('deploy:deve', () => {
-	return sequence('build-image', 'push-image', 'build-k8s-config', 'delete-k8s','create-k8s');
-});

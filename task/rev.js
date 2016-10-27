@@ -15,7 +15,7 @@ gulp.task('rev', function () {
 		.pipe(gulp.dest('./src/build/'));
 });
 
-gulp.task('rev-replace', function () {
+gulp.task('rev:replace', function () {
 	return gulp.src('./src/template/**/*.html')
 		.pipe(replace({
 			manifest: gulp.src('./src/build/rev-manifest.json'),

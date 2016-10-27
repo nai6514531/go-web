@@ -1,13 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: <%-pkg.name%>
+  name: <%-config.get('name')%>
 spec:
   rules:
-  - host: <%-pkg.domain.url%>
+  - host: <%-config.get('domain.url')%>
     http:
       paths:
       - path: /
         backend:
-          serviceName: <%-pkg.name%>
+          serviceName: <%-config.get('name')%>
           servicePort: 80

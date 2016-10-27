@@ -1,0 +1,14 @@
+{
+  "name": "soda-manager",
+  "version": "0.0.8",
+  "image": {
+	"url": "reg.miz.so"
+  },
+  "domain": {
+	"url": "mng.huace.cn"
+  },
+  "author": "soda",
+  "log": {
+	"path": "/data/logs"
+  }
+}
