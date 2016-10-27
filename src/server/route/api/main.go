@@ -37,6 +37,7 @@ func Api() {
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
+	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
 
 	api.UseFunc(common.RequireSignin)
 
@@ -80,5 +81,6 @@ func Api() {
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
 	api.Get("/daily-bill/apply", dailyBill.Apply)
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
+
 
 }
