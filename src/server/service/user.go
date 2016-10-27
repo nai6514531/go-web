@@ -51,6 +51,23 @@ func (self *UserService) TotalOfDevice(userId int) (int, error) {
 	return total, nil
 }
 
+func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
+	list := []*muniu.SignInUser{}
+	sql := "select date(inserttime) as 'date',count(*) as 'count' from box_user " +
+		"where date(inserttime)>='2016-01-01' group by date(inserttime)"
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		signInUser := &muniu.SignInUser{}
+		common.MNDB.ScanRows(rows, signInUser)
+		list = append(list, signInUser)
+	}
+	return &list, nil
+}
+
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))

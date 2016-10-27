@@ -164,6 +164,18 @@ var (
 	}
 )
 
+
+func (self *UserController) SignInUser(ctx *iris.Context) {
+	userService := &service.UserService{}
+	result := &enity.Result{}
+	list, err := userService.ListOfSignIn()
+	if err != nil {
+		result = &enity.Result{"1", nil, "拉取注册用户数据异常"}
+	} else {
+		result = &enity.Result{"0", list, "拉取注册用户数据成功"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
 /**
 	@api {post} /api/signin 用户登陆
 	@apiName Signin
