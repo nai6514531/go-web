@@ -251,7 +251,7 @@ class UserForm extends React.Component {
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
-					{userId?
+					{userId == id?
 						<Breadcrumb >
 							<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
