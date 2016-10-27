@@ -40,12 +40,12 @@ export default function (state = initialState, action) {
 		case RESET_DEVICE:
 			return {
 				...state,
-				result: action.result,
+				resultReset: action.result,
 			};
 		case REMOVE_DEVICE:
 			return {
 				...state,
-				result: action.result,
+				resultRemove: action.result,
 			};
 		case PATCH_DEVICE_STATUS:
 			return {
