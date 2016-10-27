@@ -1,25 +1,25 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: <%-pkg.name%>
+  name: <%-config.get('name')%>
   namespace: default
   labels:
-    app: <%-pkg.name%>
+    app: <%-config.get('name')%>
     version: v1.0
 spec:
   replicas: 1
   selector:
-    app: <%-pkg.name%>
+    app: <%-config.get('name')%>
     version: v1.0
   template:
     metadata:
       labels:
-        app: <%-pkg.name%>
+        app: <%-config.get('name')%>
         version: v1.0
     spec:
       containers:
-        - name: <%-pkg.name%>
-          image: <%-pkg.image.url%>/<%-pkg.author%>/<%-pkg.name%>:v<%-pkg.version%>
+        - name: <%-config.get('name')%>
+          image: <%-config.get('image.url')%>/<%-config.get('author')%>/<%-config.get('name')%>:v<%-config.get('version')%>
           imagePullPolicy: Always
           resources:
             limits:
@@ -29,10 +29,10 @@ spec:
               cpu: 1000m
               memory: 512Mi
           volumeMounts:
-            - name: <%-pkg.name%>-vol
+            - name: <%-config.get('name')%>-vol
               mountPath: /var/log
       volumes:
-        - name: <%-pkg.name%>-vol
+        - name: <%-config.get('name')%>-vol
           hostPath:
-            path: /data/logs
+            path: <%-config.get('log.path')%>
 
