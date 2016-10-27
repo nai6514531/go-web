@@ -93,7 +93,7 @@ gulp deve || gulp local
 
 - 设置kubernetes环境
 	`
-	gulp k8s:ctx
+	kubectl config set current-context dev || prod
 	`
 
 - 删除服务器上的服务
@@ -101,7 +101,7 @@ gulp deve || gulp local
 	gulp k8s:delete
 	`
 
-- 用kubernetes发布(需要先删除原有的rc)
+- 用kubernetes发布
 	`
 	gulp k8s:create
 	`
