@@ -15,15 +15,15 @@ gulp.task('default', () => {
 });
 
 gulp.task('local', shell.task([
-	"godep go run main.go -conf ./config/default"
+	"godep go run main.go -conf ./config/server/default"
 ]));
 
 gulp.task('deve', shell.task([
-	'godep go run main.go -conf ./config/development',
+	'godep go run main.go -conf ./config/server/development',
 ]));
 
 gulp.task('prod', shell.task([
-	'godep go run main.go -conf ./config/production',
+	'godep go run main.go -conf ./config/server/production',
 ]));
 
 gulp.task('doc', shell.task([

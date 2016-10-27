@@ -35,6 +35,9 @@ module.exports = {
 		}]
 	},
 	plugins: [
+		new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+		}),
 		new webpack.ProgressPlugin(function (percentage, message) {
 			const percent = Math.round(percentage * 100);
 			process.stderr.clearLine();
