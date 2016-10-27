@@ -45,65 +45,63 @@ gulp deve || gulp local
 
 ### 生产环境
 
-`
-export NODE_ENV=production
-`
 
-1、编译前端js
+- 手动设置环境
+	`
+	export NODE_ENV=production
+	`
 
-`
-gulp build
-`
+- 更新版本号
+	`
+	gulp bump:patch || gulp bump:minor
+	`
 
-2、手动打版本号
+- 编译前端资源
+	`
+	gulp build
+	`
 
-`
-gulp bump:patch || gulp bump:minor
-`
+- 编译后端资源
+	`
+	gulp compile
+	`
 
-3、编译后端go
+- 生成Dockerfile
+	`
+	 gulp docker:config
+	`
+	
+- 构建docker镜像
+	`
+	 gulp docker:build
+	`
 
-`
-gulp compile
-`
+- 登录docker远端仓库
+	`
+	docker login reg.miz.so || docker login reg.maizuo.com
+	`
 
-4、按环境动态生成Dockerfile(`需切换到docker命令行`)
+- 推送docker镜像
+	`
+	gulp docker:push
+	`
 
-`
- gulp docker:config
-`
-5、本地docker镜像构建(`需切换到docker命令行`)
+- 生成kubernetes配置
+	`
+	gulp k8s:config
+	`
 
-`
- gulp docker:build
-`
+- 设置kubernetes环境
+	`
+	gulp k8s:ctx
+	`
 
-6、推送docker镜像push到仓库(`需切换到docker命令行`)
+- 删除服务器上的服务
+	`
+	gulp k8s:delete
+	`
 
-`
-gulp docker:push
-`
-
-7、按环境动态生成kubernetes配置文件
-
-`
-gulp k8s:config
-`
-
-8、设置kubernetes环境
-
-`
-gulp k8s:ctx
-`
-
-9、删除服务器上的服务
-
-`
-gulp k8s:delete
-`
-
-10、用kubernetes发布(需要先删除原有的rc)
-
-`
-gulp k8s:create
-`
+- 用kubernetes发布(需要先删除原有的rc)
+	`
+	gulp k8s:create
+	`

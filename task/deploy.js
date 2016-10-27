@@ -22,8 +22,9 @@ gulp.task('docker:config', function () {
 });
 
 gulp.task('docker:login', shell.task([
+	'eval $(docker-machine env default)',
 	`docker login ${imageUrl}`
-]));
+],{interactive:true}));
 
 gulp.task('docker:build', shell.task([
 	`docker build -t ${imageUrl}/${author}/${name}:v${version} .`

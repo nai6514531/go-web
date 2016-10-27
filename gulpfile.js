@@ -8,7 +8,7 @@ require('./task/rev');
 require('./task/minify');
 require('./task/copy');
 require('./task/bump');
-require('./task/k8s');
+require('./task/deploy');
 
 gulp.task('default', () => {
 	return sequence('clean', 'copy:img', 'webpack:dev');
