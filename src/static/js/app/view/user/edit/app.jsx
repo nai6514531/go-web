@@ -45,7 +45,7 @@ class UserForm extends React.Component {
 		super(props, context);
 		this.state = {
 			type: "3",
-			alipay: false,
+			alipay: 0,
             provinceChange: false,
             cityChange: false,
 			unsaved: true,
@@ -74,11 +74,11 @@ class UserForm extends React.Component {
             if(nextProps.detail.result.data.cashAccount){
 				const type = nextProps.detail.result.data.cashAccount.type;
 				if(type && type == 3){
-					this.setState({ alipay: false });
+					this.setState({ alipay: 3 });
 					const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
 					this.props.getProvinceCityList(provinceId);
 				} else {
-					this.setState({ alipay: true });
+					this.setState({ alipay: 1 });
 				}
 			}
 		}
@@ -91,7 +91,15 @@ class UserForm extends React.Component {
 				self.saveDetail = -1;
 			} else if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == false){
-				alert('添加代理商失败');
+				const code = nextProps.resultPostDetail.result.status;
+				console.log(code);
+				switch (code) {
+					case 7:
+						alert('该手机号已存在');
+						break;
+					default:
+						alert('添加代理商失败');
+				}
 				self.saveDetail = -1;
 			}
 			const resultPutDetail = this.props.resultPutDetail;
@@ -109,6 +117,9 @@ class UserForm extends React.Component {
 	}
     provinceChange(event) {
 		this.props.getProvinceCityList(event);
+		const { setFieldsValue } = this.props.form;
+		setFieldsValue({'cityId':'-1'});
+		this.default = -1;
         this.setState({provinceChange:true});
         this.setState({cityChange: true});
     }
@@ -162,9 +173,9 @@ class UserForm extends React.Component {
 
 	handleRadio(select) {
 		if (select === '3') {
-			this.setState({ alipay: false });
+			this.setState({ alipay: 3 });
 		} else {
-			this.setState({ alipay: true });
+			this.setState({ alipay: 1 });
 		}
 	}
 	handleEnter(event) {
@@ -196,9 +207,16 @@ class UserForm extends React.Component {
 		}
 		let cityNode = [];
 		if(this.props.provinceCity && this.props.provinceCity.fetch == true){
-			cityNode = this.props.provinceCity.result.data.map(function (item, key) {
-				return <Option key={key} value={item.id.toString()}>{item.name}</Option>
-			})
+			const firstNode = <Option key="-1" value="-1">请选择城市</Option>;
+			cityNode.push(firstNode);
+			const list = this.props.provinceCity.result.data;
+			for(let i = 0;i<list.length; i++) {
+				const item = <Option key={i} value={list[i].id.toString()}>{list[i].name}</Option>
+				cityNode.push(item);
+			}
+			// cityNode = this.props.provinceCity.result.data.map(function (item, key) {
+			// 	return <Option key={key} value={item.id.toString()}>{item.name}</Option>
+			// })
 		}
 		const self = this;
         const { id } = this.props.params;
@@ -248,6 +266,123 @@ class UserForm extends React.Component {
 		if(id !== 'new') {
 			breadcrumb = '修改代理商';
 		}
+		let payNode = '';
+		if(this.state.alipay == 1){
+			payNode = <div>
+				<FormItem
+					{...formItemLayout}
+					label="支付宝账号">
+					{getFieldDecorator('alipayAccount', {
+						rules: [
+							{required: true, max:30, message: '请输入支付宝账号,不超过三十个字符'},
+						],
+						initialValue: initialValue.alipayAccount,
+
+					})(
+						<Input placeholder="请输入支付宝账号"/>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="支付宝姓名">
+					{getFieldDecorator('alipayName', {
+						rules: [
+							{required: true, max:30, message: '请输入支付宝姓名,不超过三十个字'},
+						],
+						initialValue: initialValue.alipayName,
+
+					})(
+						<Input placeholder="请输入支付宝姓名"/>
+					)}
+				</FormItem>
+			</div>
+		} else if (this.state.alipay == 3){
+			payNode = <div>
+				<FormItem
+					{...formItemLayout}
+					label="转账户名">
+					{getFieldDecorator('realName', {
+						rules: [
+							{required: true, max:30, message: '请输入转账户名,不超过三十个字'},
+						],
+						initialValue: initialValue.realName,
+
+					})(
+						<Input placeholder="请输入转账户名"/>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="开户行">
+					{getFieldDecorator('bankName', {
+						rules: [
+							{required: true, max:30, message: '请输入开户行,不超过三十个字'},
+						],
+						initialValue: initialValue.bankName,
+
+					})(
+						<Input placeholder="请输入开户行"/>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="账号">
+					{getFieldDecorator('account', {
+						rules: [
+							{required: true, max:30, message: '请输入账号,长度不超过三十位'},
+							{ validator: this.checkNumber },
+						],
+						initialValue: initialValue.account,
+
+					})(
+						<Input placeholder="请输入账号"/>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="短信通知手机号">
+					{getFieldDecorator('bankMobile', {
+						rules: [
+							{required: true, len: 11, message: '请输入11位短信通知手机号'},
+						],
+						initialValue: initialValue.bankMobile,
+
+					})(
+						<Input placeholder="请输入短信通知手机号"/>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="省份"
+				>
+					{getFieldDecorator('provinceId', {
+						rules: [
+							{ required: true, message: '请选择省份' },
+						],
+						initialValue: initialValue.provinceId,
+					})(
+						<Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
+							{ProvinceNode}
+						</Select>
+					)}
+				</FormItem>
+				<FormItem
+					{...formItemLayout}
+					label="城市"
+				>
+					{getFieldDecorator('cityId', {
+						rules: [
+							{ required: true, message: '请选择城市' },
+						],
+						initialValue: initialValue.cityId,
+					})(
+						<Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
+							{cityNode}
+						</Select>
+					)}
+				</FormItem>
+			</div>
+		}
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
@@ -263,7 +398,7 @@ class UserForm extends React.Component {
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 						</Breadcrumb>
 					}
-					
+
 				</header>
 				<section className="view-content">
 					<Form horizontal>
@@ -324,7 +459,7 @@ class UserForm extends React.Component {
 								rules: [
 									{ required: true, message: '请选择收款方式' },
 								],
-								initialValue: initialValue.type ? initialValue.type : this.state.type,
+								initialValue: initialValue.type,
 							})(
 								<RadioGroup>
 									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
@@ -336,127 +471,13 @@ class UserForm extends React.Component {
 								</RadioGroup>
 							)}
 						</FormItem>
-						{ this.state.alipay ?
-							<div>
-								<FormItem
-									{...formItemLayout}
-									label="支付宝账号">
-									{getFieldDecorator('alipayAccount', {
-										rules: [
-											{required: true, max:30, message: '请输入支付宝账号,不超过三十个字符'},
-										],
-										initialValue: initialValue.alipayAccount,
-
-									})(
-										<Input placeholder="请输入支付宝账号"/>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="支付宝姓名">
-									{getFieldDecorator('alipayName', {
-										rules: [
-											{required: true, max:30, message: '请输入支付宝姓名,不超过三十个字'},
-										],
-										initialValue: initialValue.alipayName,
-
-									})(
-										<Input placeholder="请输入支付宝姓名"/>
-									)}
-								</FormItem>
-							</div> :
-							<div>
-								<FormItem
-									{...formItemLayout}
-									label="转账户名">
-									{getFieldDecorator('realName', {
-										rules: [
-											{required: true, max:30, message: '请输入转账户名,不超过三十个字'},
-										],
-										initialValue: initialValue.realName,
-
-									})(
-										<Input placeholder="请输入转账户名"/>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="开户行">
-									{getFieldDecorator('bankName', {
-										rules: [
-											{required: true, max:30, message: '请输入开户行,不超过三十个字'},
-										],
-										initialValue: initialValue.bankName,
-
-									})(
-										<Input placeholder="请输入开户行"/>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="账号">
-									{getFieldDecorator('account', {
-										rules: [
-											{required: true, max:30, message: '请输入账号'},
-											{ validator: this.checkNumber },
-										],
-										initialValue: initialValue.account,
-
-									})(
-										<Input placeholder="请输入账号"/>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="短信通知手机号">
-									{getFieldDecorator('bankMobile', {
-										rules: [
-											{required: true, len: 11, message: '请输入11位短信通知手机号'},
-										],
-										initialValue: initialValue.bankMobile,
-
-									})(
-										<Input placeholder="请输入短信通知手机号"/>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="省份"
-								>
-									{getFieldDecorator('provinceId', {
-										rules: [
-											{ required: true, message: '请选择省份' },
-										],
-										initialValue: initialValue.provinceId,
-									})(
-										<Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
-											{ProvinceNode}
-										</Select>
-									)}
-								</FormItem>
-								<FormItem
-									{...formItemLayout}
-									label="城市"
-								>
-									{getFieldDecorator('cityId', {
-										rules: [
-											{ required: true, message: '请选择城市' },
-										],
-										initialValue: initialValue.cityId,
-									})(
-										<Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
-											{cityNode}
-										</Select>
-									)}
-								</FormItem>
-							</div>
-						}
+						{payNode}
 						<FormItem
 							{...formItemLayout}
 							label="服务电话" >
 							{getFieldDecorator('telephone', {
 								rules: [
-									{ required: true, max:30, message: '请输入服务电话' },
+									{ required: true, max:30, message: '请输入服务电话,长度不超过三十位' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.telephone,

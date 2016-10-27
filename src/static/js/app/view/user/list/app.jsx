@@ -82,6 +82,7 @@ class AgentTable extends React.Component {
 			child: false,
 			list: [],
 			pager: {},
+			total: 1,
 		};
 		this.showChild = this.showChild.bind(this);
 	}
@@ -106,6 +107,7 @@ class AgentTable extends React.Component {
 		})
 	}
 	componentWillUpdate(nextProps, nextState) {
+		console.log('update');
 		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
 		// 加载子用户列表
@@ -142,8 +144,11 @@ class AgentTable extends React.Component {
 	}
 	initializePagination() {
 		let total = 1;
-		if (this.props.list && this.props.list.fetch == true) {
-			total = this.props.list.result.data.total;
+		console.log('the child',this.state.child);
+		if(this.state.child){
+			if (this.props.list && this.props.list.fetch == true) {
+				total = this.props.list.result.data.total;
+			}
 		}
 		const self = this;
 		return {
@@ -163,14 +168,12 @@ class AgentTable extends React.Component {
 			},
 		}
 	}
-	onTest() {
-		console.log('test suc');
-	}
-
 	render() {
 		// console.log(this.props);
 		const { list, detailTotal, params: {id} } = this.props;
 		const pagination = this.initializePagination();
+		// page 的 total 已经是 1,为什么还没切换?
+		console.log('the page',pagination);
 		let data = '';
 		let dataSource = [];
 		const self = this;
