@@ -320,8 +320,6 @@ const App = React.createClass({
 
 		const rowSelection = {
 		  onChange(selectedRowKeys, selectedRows) {
-		  	console.log(selectedRows)
-		  	console.log(changeRows)
 		  	self.setState({selectedList: selectedRows})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
