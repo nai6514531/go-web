@@ -8,6 +8,7 @@ require('./task/rev');
 require('./task/minify');
 require('./task/copy');
 require('./task/bump');
+require('./task/git');
 require('./task/deploy');
 
 gulp.task('default', () => {
