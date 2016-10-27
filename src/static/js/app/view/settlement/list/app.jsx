@@ -39,7 +39,7 @@ const App = React.createClass({
 					return moment(bill_at).format('YYYY-MM-DD')
 				}
 			}, {
-				title: '结账时期',
+				title: '结账日期',
 				dataIndex: 'settledAt',
 				key: 'settledAt',
 				render: (settled_at) => {
@@ -93,7 +93,7 @@ const App = React.createClass({
 									{
 										status == 0?(		
 											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>未申请提现</a>
+					              <a>申请提现</a>
 					            </Popconfirm>
 										):(
 
@@ -187,6 +187,8 @@ const App = React.createClass({
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "0"){
+				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
+				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
 				message.info(res.msg)
@@ -318,6 +320,8 @@ const App = React.createClass({
 
 		const rowSelection = {
 		  onChange(selectedRowKeys, selectedRows) {
+		  	console.log(selectedRows)
+		  	console.log(changeRows)
 		  	self.setState({selectedList: selectedRows})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
@@ -351,7 +355,7 @@ const App = React.createClass({
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
-					<Breadcrumb.Item>账单列表</Breadcrumb.Item>
+					<Breadcrumb.Item>结算管理</Breadcrumb.Item>
 				</Breadcrumb>
 			</header>
 			<div className="filter">
@@ -370,8 +374,8 @@ const App = React.createClass({
 					style={{width: 120}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
-					<Option value="2">已结算</Option>
-					<Option value="0,1,3">未结算</Option>
+					<Option value="2">已结账</Option>
+					<Option value="0,1,3">未结账</Option>
 					<Option value="1">已申请提现</Option>
 					<Option value="0">未申请提现</Option>
 				</Select>
