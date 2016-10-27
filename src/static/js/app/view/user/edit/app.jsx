@@ -174,8 +174,10 @@ class UserForm extends React.Component {
 	handleRadio(select) {
 		if (select === '3') {
 			this.setState({ alipay: 3 });
-		} else {
+		} else if (select === '1') {
 			this.setState({ alipay: 1 });
+		} else {
+			this.setState({ alipay: 0 });
 		}
 	}
 	handleEnter(event) {
@@ -462,10 +464,13 @@ class UserForm extends React.Component {
 								initialValue: initialValue.type,
 							})(
 								<RadioGroup>
-									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')}>
+									<Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">
+										无
+									</Radio>
+									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
 										实时分账(必须拥有支付宝,收取 x% 手续费)
 									</Radio>
-									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')}>
+									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
 										财务定期结账(需提供正确银行卡号)
 									</Radio>
 								</RadioGroup>
