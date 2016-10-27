@@ -9,8 +9,8 @@ import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
-	const { device: { list, status }, user: {schoolDevice} } = state;
-	return { list, status, schoolDevice };
+	const { device: { list, status, resultReset }, user: {schoolDevice} } = state;
+	return { list, status, resultReset, schoolDevice };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -49,7 +49,7 @@ const columns = [{
 	dataIndex: 'status',
 	key: 'status',
 }, {
-	title: '楼层信息',
+	title: '楼道信息',
 	dataIndex: 'address',
 	key: 'address',
 }, {
@@ -120,18 +120,33 @@ class DeviceTable extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		// 成功才拉取,失败就提示
-		if(this.theStatus !== -1 || this.reset !== -1) {
-			if(nextProps.status && nextProps.status.fetch == true){
-				const schoolId = this.props.params.id;
-				const pager = { page : this.state.page, perPage: this.state.perPage};
-				this.props.getSchoolDevice(USER.id, schoolId, pager);
-				self.loading = true;
-			} else if(nextProps.status && nextProps.status.fetch == false) {
-				alert('操作失败!');
-				console.log(nextProps.status.result.msg);
+		const schoolId = this.props.params.id;
+		const pager = { page : this.state.page, perPage: this.state.perPage};
+		if(this.theStatus !== -1) {
+			const status = nextProps.status;
+			if(status) {
+				if(status.fetch == true) {
+					this.props.getSchoolDevice(USER.id, schoolId, pager);
+					self.loading = true;
+				} else {
+					alert('修改失败!');
+					console.log(nextProps.status.result.msg);
+				}
+				self.theStatus = -1;
 			}
-			self.theStatus = -1;
-			self.reset = -1;
+		}
+		if(this.reset !== -1) {
+			const reset = nextProps.resultReset;
+			if(reset) {
+				if(reset.fetch == true) {
+					this.props.getSchoolDevice(USER.id, schoolId, pager);
+					self.loading = true;
+				} else {
+					alert('删除失败!');
+					console.log(nextProps.status.result.msg);
+				}
+				self.reset = -1;
+			}
 		}
 		if(this.props.schoolDevice !== nextProps.schoolDevice) {
 			self.loading = false;
@@ -193,17 +208,33 @@ class DeviceTable extends React.Component {
 						case 1:
 							referenceDevice = '洗衣机';
 							break;
+						case 2:
+							referenceDevice = '充电桩';
+							break;
+						case 3:
+							referenceDevice = 'GPRS模块洗衣机';
+							break;
 						default:
 							referenceDevice = '洗衣机';
+					}
+					let status = '';
+					switch (item.status) {
+						case 0:
+							status = '启用';
 							break;
+						case 9:
+							status = '停止';
+							break;
+						default:
+							status = '启用';
 					}
 					return {
 						key: item.id,
 						index: item.id,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
-						status: item.status,
-						address: item.address + item.label,
+						status: status,
+						address: item.address,
 						firstPulsePrice: item.firstPulsePrice/100,
 						secondPulsePrice: item.secondPulsePrice/100,
 						thirdPulsePrice: item.thirdPulsePrice/100,
@@ -219,16 +250,14 @@ class DeviceTable extends React.Component {
 				<header>
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to={"/user/device/school/" + schoolId}>设备管理</Link></Breadcrumb.Item>
+						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>学校</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">
-					<Button type="primary" className="item">
-						<Link to="/user/device/edit">
-							添加新设备
-						</Link>
-					</Button>
+					<Link to="/user/device/edit" className="ant-btn ant-btn-primary item">
+						添加新设备
+					</Link>
 				</div>
 				<section className="view-content">
 					<Table columns={columns}

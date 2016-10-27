@@ -2,17 +2,30 @@
 
 var gulp = require('gulp');
 var bump = require('gulp-bump');
+var config = require('config');
 
 gulp.task('bump:minor', function () {
 	var options = {
 		type: 'minor'
 	};
-	gulp.src('./package.json')
+	var env = '';
+	if (!process.env.NODE_ENV) {
+		env = 'default';
+	} else {
+		env = process.env.NODE_ENV;
+	}
+	gulp.src(`./config/${env}.json`)
 		.pipe(bump(options))
-		.pipe(gulp.dest('./'));
+		.pipe(gulp.dest('./config'));
 });
 gulp.task('bump:patch', function () {
-	gulp.src('./package.json')
+	var env = '';
+	if (!process.env.NODE_ENV) {
+		env = 'default';
+	} else {
+		env = process.env.NODE_ENV;
+	}
+	gulp.src(`./config/${env}.json`)
 		.pipe(bump())
-		.pipe(gulp.dest('./'));
+		.pipe(gulp.dest('./config'));
 });

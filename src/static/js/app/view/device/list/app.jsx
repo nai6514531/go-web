@@ -8,8 +8,8 @@ import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 
 function mapStateToProps(state) {
-	const { device: { list, status }, user: {schoolDevice} } = state;
-	return { list, status, schoolDevice };
+	const { device: { list, status, resultRemove }, user: {schoolDevice} } = state;
+	return { list, status, resultRemove, schoolDevice };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -46,7 +46,7 @@ const columns = [{
 	dataIndex: 'status',
 	key: 'status',
 }, {
-	title: '楼层信息',
+	title: '楼道信息',
 	dataIndex: 'address',
 	key: 'address',
 }, {
@@ -115,17 +115,33 @@ class DeviceList extends React.Component {
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		// 成功才拉取,失败就提示
-		if(this.theStatus !== -1 || this.removeDevice !== -1) {
-			if(nextProps.status && nextProps.status.fetch == true){
-				const pager = { page : this.state.page, perPage: this.state.perPage};
-				this.props.getDeviceList(pager);
-				self.loading = true;
-			} else if(nextProps.status && nextProps.status.fetch == false) {
-				alert('操作失败!');
-				console.log(nextProps.status.result.msg);
+		const pager = { page : this.state.page, perPage: this.state.perPage};
+		if(this.theStatus !== -1) {
+			const status = nextProps.status;
+			if(status){
+				if(status.fetch == true){
+					this.props.getDeviceList(pager);
+					// alert('操作成功');
+				} else {
+					alert('操作失败!');
+					console.log(nextProps.status.result.msg);
+				}
+				self.theStatus = -1;
 			}
-			self.theStatus = -1;
-			self.removeDevice = -1;
+		}
+		if(this.removeDevice !== -1) {
+			const remove = nextProps.resultRemove;
+			if(remove){
+				if(remove.fetch == true){
+					this.props.getDeviceList(pager);
+					// alert('删除成功');
+					self.loading = true;
+				} else {
+					alert('删除失败!');
+					console.log(nextProps.status.result.msg);
+				}
+				self.removeDevice = -1;
+			}
 		}
 		if(this.props.list !== nextProps.list) {
 			self.loading = false;
@@ -156,7 +172,8 @@ class DeviceList extends React.Component {
 	}
 	remove(id) {
 		this.props.deleteDevice(id);
-		this.removeDevice = -1;
+		this.removeDevice = 1;
+		// 这边执行完并不会触发 componentWillReceiveProps ?
 	}
 	changeStatus(id,start) {
 		const self = this;
@@ -184,17 +201,33 @@ class DeviceList extends React.Component {
 						case 1:
 							referenceDevice = '洗衣机';
 							break;
+						case 2:
+							referenceDevice = '充电桩';
+							break;
+						case 3:
+							referenceDevice = 'GPRS模块洗衣机';
+							break;
 						default:
 							referenceDevice = '洗衣机';
+					}
+					let status = '';
+					switch (item.status) {
+						case 0:
+							status = '启用';
 							break;
+						case 9:
+							status = '停止';
+							break;
+						default:
+							status = '启用';
 					}
 					return {
 						key: item.id,
 						index: item.id,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
-						status: item.status,
-						address: item.address + item.label,
+						status: status,
+						address: item.address,
 						firstPulsePrice: item.firstPulsePrice/100,
 						secondPulsePrice: item.secondPulsePrice/100,
 						thirdPulsePrice: item.thirdPulsePrice/100,
@@ -213,11 +246,9 @@ class DeviceList extends React.Component {
 					</Breadcrumb>
 				</header>
 				<div className="toolbar">
-					<Button type="primary" className="item">
-						<Link to="/device/edit">
-							添加新设备
-						</Link>
-					</Button>
+					<Link to="/device/edit" className="ant-btn ant-btn-primary item">
+						添加新设备
+					</Link>
 				</div>
 				<section className="view-content">
 					<Table columns={columns}

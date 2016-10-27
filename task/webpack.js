@@ -1,9 +1,13 @@
 var _ = require('lodash');
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
+const sequence = require('run-sequence');
+var config = require('config');
+const shell = require('gulp-shell');
+var run = require('gulp-run');
 
-gulp.task('webpack-dev', function () {
-	return gulp.src('../package.json') // whatever sources
+gulp.task('webpack:dev', function () {
+	return gulp.src('../package.json')
 		.pipe(webpack(_.defaultsDeep({
 			watch: true,
 			output: {
@@ -13,8 +17,18 @@ gulp.task('webpack-dev', function () {
 		.pipe(gulp.dest('./src/build/static'));
 });
 
-gulp.task('webpack', function () {
-	return gulp.src('../package.json') // whatever sources
+gulp.task('webpack:prod', function () {
+	return gulp.src('../package.json')
 		.pipe(webpack(require('./webpack.config.js')))
 		.pipe(gulp.dest('./src/build/static'));
 });
+
+gulp.task('compile', shell.task([
+	'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build',
+]));
+
+gulp.task('build', () => {
+	return sequence('clean', 'copy:template', 'copy:img', 'webpack:prod', 'rev', 'rev:replace', 'minify');
+});
+
+

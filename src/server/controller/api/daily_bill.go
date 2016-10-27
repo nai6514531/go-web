@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/alipay"
-	"maizuo.com/smart-cinema/Godeps/_workspace/src/github.com/levigross/grequests"
+	"github.com/levigross/grequests"
 	"fmt"
 	"os"
 )
