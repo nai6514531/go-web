@@ -457,7 +457,7 @@ class UserForm extends React.Component {
 						>
 							{getFieldDecorator('type', {
 								rules: [
-									{ required: true, message: '请选择收款方式' },
+									{  message: '请选择收款方式' },
 								],
 								initialValue: initialValue.type,
 							})(
