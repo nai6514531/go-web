@@ -163,6 +163,10 @@ class AgentTable extends React.Component {
 			},
 		}
 	}
+	onTest() {
+		console.log('test suc');
+	}
+
 	render() {
 		// console.log(this.props);
 		const { list, detailTotal, params: {id} } = this.props;
@@ -227,13 +231,14 @@ class AgentTable extends React.Component {
 						</Breadcrumb>
 					}
 				</header>
-				<div className="toolbar">
-					<Button type="primary" className="item">
-						<Link to='/user/edit/new'>
+				{this.state.child?
+					<div className="toolbar">
+						<Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
 							添加新代理商
 						</Link>
-					</Button>
-				</div>
+					</div>:
+					''
+				}
 				<section className="view-content">
 					<Table columns={columns}
 						   rowKey={record => record.key}

@@ -68,6 +68,7 @@ class DeviceForm extends React.Component {
 		this.handleSelect = this.handleSelect.bind(this);
 		this.changePulseName = this.changePulseName.bind(this);
 		this.checkNumber = this.checkNumber.bind(this);
+		this.checkPrice = this.checkPrice.bind(this);
 	}
 	static contextTypes = {
 		router: React.PropTypes.object
@@ -112,7 +113,7 @@ class DeviceForm extends React.Component {
 				self.getSchool = 1;
 			}
 			if(this.getSchool
-					&& this.props.provinceSchool !== nextProps.provinceSchool
+				&& this.props.provinceSchool !== nextProps.provinceSchool
 				&& nextProps.provinceSchool
 				&& nextProps.provinceSchool.fetch == true){
 					const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
@@ -130,14 +131,25 @@ class DeviceForm extends React.Component {
 
 			}
 			if(self.saveDetail == 1){
-				const resultPostDetail = this.props.resultPostDetail;
-				if(resultPostDetail !== nextProps.resultPostDetail
-					&& nextProps.resultPostDetail.fetch == true){
+				const resultPutDetail = this.props.resultPutDetail;
+				if(resultPutDetail !== nextProps.resultPutDetail) {
+					if(nextProps.resultPutDetail.fetch == true) {
+						alert('修改设备成功');
+						self.context.router.goBack();
+					} else {
+						alert('修改设备失败');
+					}
+					self.saveDetail = -1;
+				}
+			}
+		}
+		if(self.saveDetail == 1){
+			const resultPostDetail = this.props.resultPostDetail;
+			if(resultPostDetail !== nextProps.resultPostDetail) {
+				if(nextProps.resultPostDetail.fetch == true) {
 					alert('添加设备成功');
 					self.context.router.goBack();
-					self.saveDetail = -1;
-				} else if(resultPostDetail !== nextProps.resultPostDetail
-					&& nextProps.resultPostDetail.fetch == false){
+				} else {
 					switch (nextProps.resultPostDetail.result.status){
 						case 3 || 1:
 							alert(nextProps.resultPostDetail.result.msg);
@@ -146,23 +158,11 @@ class DeviceForm extends React.Component {
 							alert('添加设备失败');
 							break;
 					}
-					self.saveDetail = -1;
-					alert('添加设备失败');
-					self.saveDetail = -1;
 				}
-				const resultPutDetail = this.props.resultPutDetail;
-				if(resultPutDetail !== nextProps.resultPutDetail
-					&& nextProps.resultPutDetail.fetch == true){
-					alert('修改设备成功');
-					self.context.router.goBack();
-					self.saveDetail = -1;
-				} else if(resultPutDetail !== nextProps.resultPutDetail
-					&& nextProps.resultPutDetail.fetch == false){
-					alert('修改设备失败');
-					self.saveDetail = -1;
-				}
+				self.saveDetail = -1;
 			}
 		}
+
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
 			const device = nextProps.detail.result.data;
 			self.firstPulseName = device.firstPulseName;
@@ -186,7 +186,7 @@ class DeviceForm extends React.Component {
 				"serialNumber": values.serialNumber,
 				"provinceId": self.provinceId,
 				"schoolId": self.schoolId,
-				'label': values.label,
+				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
 				"firstPulsePrice": parseFloat(values.firstPulsePrice)*100,
@@ -245,14 +245,32 @@ class DeviceForm extends React.Component {
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
-		// console.log('value',value);
-		if(value){
-			if(pattern.test(value)){
-				callback();
-			} else {
-				callback('只能为数字');
-			}
+		if(value && !pattern.test(value)){
+			callback('只能为数字');
+		} else {
+			callback();
 		}
+	}
+	checkPrice(rule, value, callback) {
+		var pattern=new RegExp(/\d+\.\d{2}$/g);
+		if(value && !pattern.test(value)){
+				callback('只能为数字,精确到小数点后两位');
+		} else {
+			callback();
+		}
+	}
+	// 待优化
+	checkOnePluse(rule,value,callback) {
+		this.checkPrice(rule,value,callback);
+	}
+	checkTwoPluse(rule,value,callback) {
+		this.checkPrice(rule,value,callback);
+	}
+	checkThreePluse(rule,value,callback) {
+		this.checkPrice(rule,value,callback);
+	}
+	checkFourPluse(rule,value,callback) {
+		this.checkPrice(rule,value,callback);
 	}
 	handleEnter(event) {
 		if (event.keyCode==13) {
@@ -291,7 +309,7 @@ class DeviceForm extends React.Component {
 					'serialNumber': device.serialNumber,
 					'school': device.schoolId,
 					'province': device.provinceId,
-					'label': device.label,
+					// 'label': device.label,
 					'address': device.address,
 					'referenceDevice': device.referenceDeviceId,
 					'firstPulsePrice': (device.firstPulsePrice/100).toString(),
@@ -315,7 +333,7 @@ class DeviceForm extends React.Component {
 		if(id) {
 			breadcrumb = '修改设备';
 		}
-		console.log('ids',this.provinceId,this.schoolId,this.provinceName,this.schoolName);
+		// console.log('ids',this.provinceId,this.schoolId,this.provinceName,this.schoolName);
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
@@ -351,26 +369,14 @@ class DeviceForm extends React.Component {
 						</div>
 						<FormItem
 							{...formItemLayout}
-							label="学校区域信息" >
+							label="楼道信息" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ required: true, max:30, message: '请输入学校区域信息,不超过三十个字' },
+									{ max:30, message: '请输入楼道信息,不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
-								<Input placeholder="请输入学校区域信息" />
-							)}
-						</FormItem>
-						<FormItem
-							{...formItemLayout}
-							label="楼层信息" >
-							{getFieldDecorator('label', {
-								rules: [
-									{ required: true, max:30, message: '请输入楼层信息,不超过三十个字' },
-								],
-								initialValue: initialValue.label,
-							})(
-								<Input placeholder="请输入楼层信息" />
+								<Input placeholder="请输入楼道信息" />
 							)}
 						</FormItem>
 						<FormItem
@@ -391,8 +397,8 @@ class DeviceForm extends React.Component {
 							label="单脱价格" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入单脱价格' },
-									{ validator: this.checkNumber },
+									{ message: '请输入单脱价格' },
+									{ validator: this.checkOnePluse.bind(this) },
 								],
 								initialValue: initialValue.firstPulsePrice,
 							})(
@@ -410,8 +416,8 @@ class DeviceForm extends React.Component {
 							label="快洗价格" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{  required: true, message: '请输入快洗价格' },
-									{ validator: this.checkNumber },
+									{ message: '请输入快洗价格' },
+									{ validator: this.checkTwoPluse.bind(this) },
 								],
 								initialValue: initialValue.secondPulsePrice,
 							})(
@@ -429,8 +435,8 @@ class DeviceForm extends React.Component {
 							label="标准洗价格">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{  required: true, message: '请输入标准洗价格'},
-									{ validator: this.checkNumber },
+									{  message: '请输入标准洗价格'},
+									{ validator: this.checkThreePluse.bind(this) },
 								],
 								initialValue: initialValue.thirdPulsePrice,
 							})(
@@ -448,8 +454,8 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{  required: true, message: '请输入大物洗价格'},
-									{ validator: this.checkNumber },
+									{  message: '请输入大物洗价格'},
+									{ validator: this.checkFourPluse.bind(this) },
 								],
 								initialValue: initialValue.fourthPulsePrice,
 							})(
