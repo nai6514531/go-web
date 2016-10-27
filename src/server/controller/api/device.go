@@ -314,36 +314,36 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.Label == "" {
-		result = &enity.Result{"01030306", nil, device_msg["01030306"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.Label == "" {
+	// 	result = &enity.Result{"01030306", nil, device_msg["01030306"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030307", nil, device_msg["01030307"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.FirstPulsePrice <= 0 {
-		result = &enity.Result{"01030308", nil, device_msg["01030308"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.SecondPulsePrice <= 0 {
-		result = &enity.Result{"01030309", nil, device_msg["01030309"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.ThirdPulsePrice <= 0 {
-		result = &enity.Result{"01030310", nil, device_msg["01030310"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.FourthPulsePrice <= 0 {
-		result = &enity.Result{"01030311", nil, device_msg["01030311"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.FirstPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030308", nil, device_msg["01030308"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.SecondPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030309", nil, device_msg["01030309"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.ThirdPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030310", nil, device_msg["01030310"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.FourthPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030311", nil, device_msg["01030311"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	//判断序列号名是否已经被使用了
 	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if (currentDevice != nil) && (currentDevice.Id != id) { //可以找到并且不为当前要修改的记录
@@ -410,36 +410,36 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.Label == "" {
-		result = &enity.Result{"01030506", nil, device_msg["01030506"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.Label == "" {
+	// 	result = &enity.Result{"01030506", nil, device_msg["01030506"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030507", nil, device_msg["01030507"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.FirstPulsePrice <= 0 {
-		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.SecondPulsePrice <= 0 {
-		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.ThirdPulsePrice <= 0 {
-		result = &enity.Result{"01030510", nil, device_msg["01030510"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.FourthPulsePrice <= 0 {
-		result = &enity.Result{"01030511", nil, device_msg["01030511"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.FirstPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030508", nil, device_msg["01030508"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.SecondPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030509", nil, device_msg["01030509"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.ThirdPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030510", nil, device_msg["01030510"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.FourthPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030511", nil, device_msg["01030511"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	device.UserId = userId
@@ -576,36 +576,36 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.Label == "" {
-		result = &enity.Result{"01030706", nil, device_msg["01030706"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.Label == "" {
+	// 	result = &enity.Result{"01030706", nil, device_msg["01030706"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030707", nil, device_msg["01030707"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.FirstPulsePrice <= 0 {
-		result = &enity.Result{"01030708", nil, device_msg["01030708"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.SecondPulsePrice <= 0 {
-		result = &enity.Result{"01030709", nil, device_msg["01030709"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.ThirdPulsePrice <= 0 {
-		result = &enity.Result{"01030710", nil, device_msg["01030710"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.FourthPulsePrice <= 0 {
-		result = &enity.Result{"01030711", nil, device_msg["01030711"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if device.FirstPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030708", nil, device_msg["01030708"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.SecondPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030709", nil, device_msg["01030709"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.ThirdPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030710", nil, device_msg["01030710"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
+	// if device.FourthPulsePrice <= 0 {
+	// 	result = &enity.Result{"01030711", nil, device_msg["01030711"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	//查找该序列号是否已经存在
 	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if currentDevice != nil {

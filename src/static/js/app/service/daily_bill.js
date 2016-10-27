@@ -22,7 +22,7 @@ const Service = {
 		})
 	},
 	updateSettlement: (data) => {
-		return api.put('/api/daily-bill/settlement', {
+		return api.put('/api/daily-bill/batch-pay', {
 			params: data
 		})
 	},
