@@ -1,22 +1,18 @@
 var gulp = require('gulp');
-var runSequence = require('run-sequence');
+var sequence = require('run-sequence');
 var bump = require('gulp-bump');
 var gutil = require('gulp-util');
 var git = require('gulp-git');
 var fs = require('fs');
+var config = require('config');
 
-gulp.task('bump-version', function () {
-// 注意：这里我硬编码了更新类型为 'patch'，但是更好的做法是用
-//      minimist (https://www.npmjs.com/package/minimist) 通过检测一个命令行参数来判断你正在做的更新是
-//      一个 'major'， 'minor' 还是一个 'patch'。
-	return gulp.src(['./bower.json', './package.json'])
-		.pipe(bump({type: "patch"}).on('error', gutil.log))
-		.pipe(gulp.dest('./'));
-});
+function getVersion() {
+	return JSON.parse(fs.readFileSync(`./config/${process.env.NODE_ENV || 'default'}.json`, 'utf8')).version;
+}
 
 gulp.task('git:commit', function () {
 	return gulp.src('.')
-		.pipe(git.commit('[Prerelease] Bumped version number', {args: '-a'}));
+		.pipe(git.commit('[Prerelease] Bumped v' + getVersion(), {args: '-a'}));
 });
 
 gulp.task('git:push', function (cb) {
@@ -24,24 +20,21 @@ gulp.task('git:push', function (cb) {
 });
 
 gulp.task('git:tag', function (cb) {
-	var version = getPackageJsonVersion();
-	git.tag(version, 'Created Tag for version: ' + version, function (error) {
+	var version = getVersion();
+	git.tag('v' + version, 'Created Tag for version: ' + version, function (error) {
 		if (error) {
 			return cb(error);
 		}
 		git.push('origin', 'master', {args: '--tags'}, cb);
 	});
-	function getPackageJsonVersion() {
-		return JSON.parse(fs.readFileSync('./package.json', 'utf8')).version;
-	}
+
 });
 
-gulp.task('release', function (callback) {
-	runSequence(
-		'bump-version',
-		'commit-changes',
-		'push-changes',
-		'create-new-tag',
+gulp.task('git:release', function (callback) {
+	sequence(
+		'git:commit',
+		'git:push',
+		'git:tag',
 		function (error) {
 			if (error) {
 				console.log(error.message);
