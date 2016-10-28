@@ -1,6 +1,6 @@
 {
   "name": "soda-manager",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "image": {
 	"url": "reg.miz.so"
   },
