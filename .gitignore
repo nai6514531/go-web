@@ -82,3 +82,4 @@ fabric.properties
 /Dockerfile
 /config/server/production.yaml
 /config/server/default.yaml
+/config/local.yaml

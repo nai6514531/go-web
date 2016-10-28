@@ -32,10 +32,12 @@ const columns = [{
 	title: '代理商名称',
 	dataIndex: 'user',
 	key: 'user',
+	className: 'table-col',
 }, {
 	title: '联系人',
 	dataIndex: 'contact',
 	key: 'contact',
+	className: 'table-col',
 }, {
 	title: '手机',
 	dataIndex: 'mobile',
@@ -44,6 +46,7 @@ const columns = [{
 	title: '地址',
 	dataIndex: 'address',
 	key: 'address',
+	className: 'table-col',
 }, {
 	title: '模块数量',
 	dataIndex: 'number',
@@ -107,7 +110,6 @@ class AgentTable extends React.Component {
 		})
 	}
 	componentWillUpdate(nextProps, nextState) {
-		console.log('update');
 		const self = this;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
 		// 加载子用户列表
@@ -142,14 +144,7 @@ class AgentTable extends React.Component {
 		}
 
 	}
-	initializePagination() {
-		let total = 1;
-		console.log('the child',this.state.child);
-		if(this.state.child){
-			if (this.props.list && this.props.list.fetch == true) {
-				total = this.props.list.result.data.total;
-			}
-		}
+	initializePagination(total) {
 		const self = this;
 		return {
 			total: total,
@@ -168,12 +163,20 @@ class AgentTable extends React.Component {
 			},
 		}
 	}
+	childPagination() {
+		let total = 1;
+		if(this.state.child){
+			if (this.props.list && this.props.list.fetch == true) {
+				total = this.props.list.result.data.total;
+			}
+		}
+		return this.initializePagination(total);
+	}
+	parentPagination() {
+		return this.initializePagination(1);
+	}
 	render() {
-		// console.log(this.props);
 		const { list, detailTotal, params: {id} } = this.props;
-		const pagination = this.initializePagination();
-		// page 的 total 已经是 1,为什么还没切换?
-		console.log('the page',pagination);
 		let data = '';
 		let dataSource = [];
 		const self = this;
@@ -223,7 +226,7 @@ class AgentTable extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					{this.state.child?
+					{id?
 						<Breadcrumb>
 							<Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>代理商管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>下级代理商</Breadcrumb.Item>
@@ -246,7 +249,7 @@ class AgentTable extends React.Component {
 					<Table columns={columns}
 						   rowKey={record => record.key}
 						   dataSource={dataSource}
-						   pagination={id?pagination:''}
+						   pagination={id?this.childPagination():this.parentPagination()}
 						   loading={this.loading ? this.loading : false}
 						   bordered
 					/>
