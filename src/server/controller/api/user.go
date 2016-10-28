@@ -388,11 +388,11 @@ func (self *UserController) Create(ctx *iris.Context) {
 	// 	ctx.JSON(iris.StatusOK, result)
 	// 	return
 	// }
-	if cashAccount.Account == "" {
-		result = &enity.Result{"01010409", nil, user_msg["01010409"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if cashAccount.Account == "" {
+	// 	result = &enity.Result{"01010409", nil, user_msg["01010409"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 
 	//插入user到user表
 	user.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
@@ -404,14 +404,17 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//插入结算账号信息
-	userNew, _ := userService.FindByAccount(user.Account) //得到新插入的条目
-	cashAccount.UserId = userNew.Id                       //cash记录的userid设置为新插入条目的id
-	ok = userCashAccountService.Create(cashAccount)
-	if !ok {
-		result = &enity.Result{"01010411", nil, user_msg["01010411"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if cashAccount.Type != 0 {
+		userNew, _ := userService.FindByAccount(user.Account) //得到新插入的条目
+		cashAccount.UserId = userNew.Id                       //cash记录的userid设置为新插入条目的id
+		ok = userCashAccountService.Create(cashAccount)
+		if !ok {
+			result = &enity.Result{"01010411", nil, user_msg["01010411"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
+
 	//插入一条用户角色记录（暂时所有调用此的api都是代理商角色）
 	userRoleRel := &model.UserRoleRel{}
 	userRoleRel.UserId = user.Id
@@ -509,11 +512,11 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// 	ctx.JSON(iris.StatusOK, result)
 	// 	return
 	// }
-	if cashAccount.Account == "" {
-		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if cashAccount.Account == "" {
+	// 	result = &enity.Result{"01010510", nil, user_msg["01010510"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 
 	//更新到user表
 	ok := userService.Update(&user)
@@ -523,11 +526,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 		return
 	}
 	//更新结算账号信息
-	ok = userCashAccountService.UpdateByUserId(cashAccount)
-	if !ok {
-		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if cashAccount.Type != 0 {
+		ok = userCashAccountService.UpdateByUserId(cashAccount)
+		if !ok {
+			result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
 	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
 	ctx.JSON(iris.StatusOK, &result)

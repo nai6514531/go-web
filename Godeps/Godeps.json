@@ -289,6 +289,11 @@
 			"Rev": "bb797dc4fb8320488f47bf11de07a733d7233e1f"
 		},
 		{
+			"ImportPath": "github.com/levigross/grequests",
+			"Comment": "0.8-8-gdded6b2",
+			"Rev": "dded6b2722f24a11a26b37ec6d30ab47501bc4b5"
+		},
+		{
 			"ImportPath": "github.com/magiconair/properties",
 			"Comment": "v1.6.0-1-gc81f9d7",
 			"Rev": "c81f9d71af8f8cba1466501d30326b99a4e56c19"

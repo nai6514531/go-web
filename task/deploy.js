@@ -10,7 +10,7 @@ const name = config.get('name');
 var run = require('gulp-run');
 
 gulp.task('docker:config', function () {
-	gulp
+	return gulp
 		.src('./config/docker/Dockerfile', {
 			base: './config/docker'
 		})
@@ -20,11 +20,6 @@ gulp.task('docker:config', function () {
 		}))
 		.pipe(gulp.dest('./'))
 });
-
-gulp.task('docker:login', shell.task([
-	'eval $(docker-machine env default)',
-	`docker login ${imageUrl}`
-],{interactive:true}));
 
 gulp.task('docker:build', shell.task([
 	`docker build -t ${imageUrl}/${author}/${name}:v${version} .`
@@ -39,7 +34,7 @@ gulp.task('docker:push', shell.task([
 ]));
 
 gulp.task('k8s:config', function () {
-	gulp
+	return gulp
 		.src('./config/k8s/*.yaml', {
 			base: './config/k8s'
 		})

@@ -70,8 +70,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-/config/prod.yaml
-/config/local.yaml
 /src/build/
 /node_modules/
 /log/
@@ -82,3 +80,6 @@ fabric.properties
 /k8s/
 /soda-manager
 /Dockerfile
+/config/server/production.yaml
+/config/server/default.yaml
+/config/local.yaml
