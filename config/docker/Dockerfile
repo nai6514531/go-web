@@ -13,8 +13,6 @@ ADD config/server/<%-env%>.yaml /soda-manager/config/server/<%-env%>.yaml
 
 ADD resource /<%-config.get('name')%>/resource
 
-RUN mkdir log
-
-RUN touch log/log.log
+RUN mkdir -p <%-config.get('log.path')%>
 
 CMD ["./<%-config.get('name')%>", "-conf", "config/server/<%-env%>"]
