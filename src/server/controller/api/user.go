@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/mitchellh/mapstructure"
@@ -9,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 /**
@@ -489,7 +489,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	cashAccount.UserId = userId
-	fmt.Println(cashAccount)
+	common.Logger.Debugln(cashAccount)
 	// //cash内容判断
 	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
 		//1-实时分账，2-财务结算

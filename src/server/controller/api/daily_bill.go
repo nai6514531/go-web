@@ -13,7 +13,6 @@ import (
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/alipay"
 	"github.com/levigross/grequests"
-	"fmt"
 	"os"
 )
 
@@ -48,9 +47,6 @@ var (
 	}
 )
 
-/**
-还未优化代码
- */
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	userRoleRelService := &service.UserRoleRelService{}
@@ -58,17 +54,16 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	params := ctx.URLParams()
 	page := functions.StringToInt(params["page"])
 	perPage := functions.StringToInt(params["perPage"])
-	cashAccounType := functions.StringToInt(params["cashAccountType"])      //提现方式
+	cashAccountType := functions.StringToInt(params["cashAccountType"])      //提现方式
 	var status []string
 	var _status []string
 	userId := -1
-	common.Logger.Debugln("status====================", params["status"])
 	if params["status"] != "" {
 		_status = strings.Split(params["status"], ",")  //结算状态和提现状态
 	}
 
-	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
-	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
+	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
+	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
 	if err != nil {
 		return
 	}
@@ -83,7 +78,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 			status = append(status, "3")
 			break
 		default:
-			userId = siginUserId
+			userId = signinUserId
 			break
 		}
 	} else {
@@ -99,7 +94,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 				break
 			default:
 				status = append(status, s)
-				userId = siginUserId
+				userId = signinUserId
 				break
 			}
 		}
@@ -117,13 +112,13 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		return
 	}
 
-	total, err := dailyBillService.TotalByAccountType(cashAccounType, status, billAt, userId)
+	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId)
 	if err != nil {
 		result = &enity.Result{"01060102", nil, daily_bill_msg["01060102"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccounType, status, billAt, userId, page, perPage)
+	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, billAt, userId, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01060101", nil, daily_bill_msg["01060101"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -258,7 +253,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		for _, _account := range *accountMap {
 			switch _account.Type {
 			case 1: //支付宝
-				//batchNum++       //计算批量结算请求中支付宝结算的日订单数,不可超过1000
 				aliPayUserIds = append(aliPayUserIds, strconv.Itoa(_account.UserId))
 				break
 			case 2: //微信
@@ -271,14 +265,14 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 
 		//update aliPay
 		if len(aliPayUserIds) > 0 {
-			fmt.Println("aliPayUserIds=====================", aliPayUserIds)
+			common.Logger.Debugln("aliPayUserIds=====================", aliPayUserIds)
 			for _, _userId := range aliPayUserIds {
 				_dailyBill := (*dailyBillMap)[functions.StringToInt(_userId)]
 				_userCashAccount := (*accountMap)[functions.StringToInt(_userId)]
 				//" + _userCashAccount.Account + "
 				aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^0.01^" + _userCashAccount.RealName +
 				"^" + strconv.Itoa(_dailyBill.TotalAmount) + "^" + "无" + "|"
-				batchNum++
+				batchNum++      //计算批量结算请求中支付宝结算的日订单数,不可超过1000
 			}
 
 		}
@@ -309,7 +303,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		if strings.HasSuffix(aliPayDetailDataStr, "|") {
 			aliPayDetailDataStr = aliPayDetailDataStr[:len(aliPayDetailDataStr)-1]
 		}
-		fmt.Println("aliPayDetailDataStr=============qqqqqqqqqqqq=======", aliPayDetailDataStr)
+		common.Logger.Debugln("aliPayDetailDataStr=============qqqqqqqqqqqq=======", aliPayDetailDataStr)
 		param["service"] = "batch_trans_notify"
 		param["partner"] = os.Getenv("ALIPAYID")
 		param["input_charset"] = "UTF-8"
@@ -324,7 +318,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		param["sign"] = alipay.CreateSign(param, 2)
 		param["sign_type"] = "MD5"
 
-		fmt.Println("param======================", param)
+		common.Logger.Debugln("param======================", param)
 
 		response, err := grequests.Post("https://mapi.alipay.com/gateway.do", &grequests.RequestOptions{
 			//Params: param,
@@ -361,7 +355,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 
 
 func (self *DailyBillController) Notification (ctx *iris.Context) {
-	fmt.Println("支付宝回调开始!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	common.Logger.Debugln("支付宝回调开始!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	notifyRequest := alipay.NotifyRequest{}
 	reqMap := make(map[string]interface{}, 0)
 	body := ctx.Request.Body()
@@ -381,12 +375,12 @@ func (self *DailyBillController) Notification (ctx *iris.Context) {
 	reqMap["fail_details"] = notifyRequest.FailDetails
 	common.Logger.Debugln("signTypesignTypesignTypesignTypesignType=====", notifyRequest.SignType)
 	if alipay.VerifySign(reqMap, notifyRequest.Sign) {
-		fmt.Println("success")
+		common.Logger.Debugln("success")
 		ctx.Response.SetBodyString("success")
 	} else {
 		ctx.Response.SetBodyString("fail")
 	}
-	fmt.Println("支付宝回调结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	common.Logger.Debugln("支付宝回调结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 }
 
