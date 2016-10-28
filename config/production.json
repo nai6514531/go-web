@@ -1,6 +1,6 @@
 {
   "name": "soda-manager",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "image": {
 	"url": "reg.maizuo.com"
   },

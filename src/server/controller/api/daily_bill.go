@@ -210,7 +210,7 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 /*
 支付宝批量支付接口
 */
-func AliBatchPay()
+func AliBatchPay(){}
 
 func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
