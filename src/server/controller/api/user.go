@@ -382,12 +382,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	//cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-		//1-实时分账(支付宝)，2-微信 3-银行
-		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
+	// 	//1-实时分账(支付宝)，2-微信 3-银行
+	// 	result = &enity.Result{"01010408", nil, user_msg["01010408"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if cashAccount.Account == "" {
 		result = &enity.Result{"01010409", nil, user_msg["01010409"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -503,12 +503,12 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount.UserId = userId
 	fmt.Println(cashAccount)
 	// //cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-		//1-实时分账，2-财务结算
-		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
+	// 	//1-实时分账，2-财务结算
+	// 	result = &enity.Result{"01010509", nil, user_msg["01010509"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if cashAccount.Account == "" {
 		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
 		ctx.JSON(iris.StatusOK, result)
