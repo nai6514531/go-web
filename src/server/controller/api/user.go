@@ -164,7 +164,6 @@ var (
 	}
 )
 
-
 func (self *UserController) SignInUser(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
@@ -176,6 +175,7 @@ func (self *UserController) SignInUser(ctx *iris.Context) {
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
+
 /**
 	@api {post} /api/signin 用户登陆
 	@apiName Signin
@@ -382,12 +382,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	//cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-		//1-实时分账(支付宝)，2-微信 3-银行
-		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
+	// 	//1-实时分账(支付宝)，2-微信 3-银行
+	// 	result = &enity.Result{"01010408", nil, user_msg["01010408"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if cashAccount.Account == "" {
 		result = &enity.Result{"01010409", nil, user_msg["01010409"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -503,12 +503,12 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount.UserId = userId
 	fmt.Println(cashAccount)
 	// //cash内容判断
-	if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-		//1-实时分账，2-财务结算
-		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
+	// 	//1-实时分账，2-财务结算
+	// 	result = &enity.Result{"01010509", nil, user_msg["01010509"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 	if cashAccount.Account == "" {
 		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -696,10 +696,16 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	user, err := userService.Basic(id)
 	if err != nil {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	//带上总设备数的信息
-	ids, _ := userService.SubChildIdsByUserId(id)       //计算每一条用户记录有多少个设备
-	ids = append(ids, id)                               //把自己也算上
+	var ids []int
+	ids = append(ids, id)                              //把自己也算上
+	childIds, _ := userService.SubChildIdsByUserId(id) //计算该用户下面的所有子子。。用户列表
+	if childIds != nil {
+		ids = append(ids, childIds...)
+	}
 	deviceTotal, _ := deviceService.TotalByUserIds(ids) //根据userid列表算出设备总数
 	user.DeviceTotal = deviceTotal
 	//返回
