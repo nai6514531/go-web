@@ -141,6 +141,11 @@ class SchoolTable extends React.Component {
 				self.loading = false;
 			}
 		}
+		const button = {
+			verticalAlign: 'text-bottom',
+			lineHeight: '23px',
+			height: '32px',
+		};
 		return (
 			<section className="view-user-list">
 				<header>
@@ -157,7 +162,7 @@ class SchoolTable extends React.Component {
 						perPage={this.state.perPage}
 						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
-					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item bar-button">
+					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item" style={button}>
 						添加新设备
 					</Link>
 				</div>
@@ -205,8 +210,11 @@ class SchoolFilter extends React.Component {
 			// })
 		}
 		const { getFieldDecorator } = this.props.form;
+		const schoolFilter = {
+			display: 'inline-block',
+		};
 		return (
-			<div className="school-filter">
+			<div className="school-filter" style={schoolFilter}>
 				<Form inline onSubmit={this.handleSubmit}>
 					<FormItem
 						id="select"
