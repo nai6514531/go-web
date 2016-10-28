@@ -87,11 +87,11 @@ class DeviceForm extends React.Component {
 		const pulseName = nextProps.pulseName;
 		if(this.theName == 0){
 			if(pulseName && pulseName.fetch == true) {
-				alert('脉冲名修改成功');
+				// alert('服务名修改成功');
 				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
 				this[pulseNameKey] = self.pulseName;
 			} else if (pulseName && pulseName.fetch == false) {
-				alert('脉冲名修改失败,请重试.');
+				alert('服务名修改失败,请重试.');
 			}
 			self.theName = 1;
 		}
