@@ -461,7 +461,7 @@ class UserForm extends React.Component {
 								rules: [
 									{  message: '请选择收款方式' },
 								],
-								initialValue: initialValue.type,
+								initialValue: initialValue.type? initialValue.type : this.state.alipay,
 							})(
 								<RadioGroup>
 									<Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">
