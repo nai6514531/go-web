@@ -32,10 +32,12 @@ const columns = [{
 	title: '代理商名称',
 	dataIndex: 'user',
 	key: 'user',
+	className: 'table-col',
 }, {
 	title: '联系人',
 	dataIndex: 'contact',
 	key: 'contact',
+	className: 'table-col',
 }, {
 	title: '手机',
 	dataIndex: 'mobile',
@@ -44,6 +46,7 @@ const columns = [{
 	title: '地址',
 	dataIndex: 'address',
 	key: 'address',
+	className: 'table-col',
 }, {
 	title: '模块数量',
 	dataIndex: 'number',
