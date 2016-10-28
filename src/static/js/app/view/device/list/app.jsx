@@ -238,7 +238,6 @@ class DeviceList extends React.Component {
 				})
 			}
 		}
-		console.log('datasource',dataSource);
 		return (
 			<section className="view-user-list">
 				<header>

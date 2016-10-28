@@ -10,25 +10,44 @@ const App = React.createClass({
 	getInitialState() {
 		return {
 			columns: [{
-				title: 'ID',
-				dataIndex: 'id',
-				key: 'id',
+				title: '序号',
+				dataIndex: 'key',
+				key: 'key',
 				sorter: (a, b) => +a.id - +b.id
 			}, {
 				title: '设备编号',
 				dataIndex: 'serialNumber',
 				key: 'serialNumber'
 			}, {
-				title: '账单日期',
-				dataIndex: 'billAt',
-				key: 'billAt'
+				title: '订单号',
+				dataIndex: 'id',
+				key: 'id'
+			}, {
+				title: '服务类型',
+				dataIndex: 'pulseType',
+				key: 'pulseType',
+				render: (data) => {
+					if (data == 601) {
+						return <div>单脱</div>
+					} else if (data == 602) {
+						return <div>快洗</div>
+					} else if (data == 603) {
+						return <div>标准</div>
+					} else if (data == 604) {
+						return <div>大件</div>
+					}
+				}
 			}, {
 				title: '金额',
 				dataIndex: 'amount',
 				key: 'amount',
 				render: (total_amount) => {
-					return total_amount / 100;
+					return total_amount / 100 + "元";
 				}
+			}, {
+				title: '下单时间',
+				dataIndex: 'billAt',
+				key: 'billAt'
 			}, {
 				title: '状态',
 				dataIndex: 'status',
@@ -95,8 +114,8 @@ const App = React.createClass({
 		return (<section className="view-daily-bill-detail">
 			<header>
 				<Breadcrumb>
-					<Breadcrumb.Item><a href="/#/settlement/">账单列表</a></Breadcrumb.Item>
-					<Breadcrumb.Item>账单详情</Breadcrumb.Item>
+					<Breadcrumb.Item><a href="/#/settlement/">结算管理</a></Breadcrumb.Item>
+					<Breadcrumb.Item>明细</Breadcrumb.Item>
 				</Breadcrumb>
 			</header>
 			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
