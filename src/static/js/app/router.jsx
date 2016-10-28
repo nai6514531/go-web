@@ -37,7 +37,7 @@ const router = (
 				callback(null, require('./view/user/school_device/app.jsx').default);
 			});
 		}} />
-		<Route path="/user/device/edit(/:id)" getComponent={(location, callback) => {
+		<Route path="/user/device/school/:schoolId/edit(/:id)" getComponent={(location, callback) => {
 			require.ensure([], (require) => {
 				callback(null, require('./view/user/device_edit/app.jsx').default);
 			});

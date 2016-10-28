@@ -10,14 +10,15 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
+import * as SchoolActions from '../../../actions/school';
 import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
 	const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultSerialNumber },
-		region: {provinceList, provinceSchool} } = state;
+		region: {provinceList, provinceSchool},school:{schoolDetail} } = state;
 	return { detail, status, result, refDevice, pulseName,
-		resultPutDetail, resultSerialNumber, provinceList, provinceSchool };
+		resultPutDetail, resultSerialNumber, provinceList, provinceSchool,schoolDetail };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -33,6 +34,9 @@ function mapDispatchToProps(dispatch) {
 		getProvinceList,
 		getProvinceSchoolList,
 	} = bindActionCreators(RegionActions, dispatch);
+	const {
+		getSchoolDetail,
+	} = bindActionCreators(SchoolActions, dispatch);
 	return {
 		getDeviceDetail,
 		putDeviceDetail,
@@ -42,6 +46,7 @@ function mapDispatchToProps(dispatch) {
 		getRefDevice,
 		getProvinceList,
 		getProvinceSchoolList,
+		getSchoolDetail,
 	};
 }
 const key = ['first','second','third','fourth'];
@@ -81,13 +86,15 @@ class DeviceForm extends React.Component {
 			this.setState({addNew: true});
 		}
 		this.props.getRefDevice();
+		const { schoolId } = this.props.params;
+		this.props.getSchoolDetail(schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
 		const pulseName = nextProps.pulseName;
 		if(this.theName == 0){
 			if(pulseName && pulseName.fetch == true) {
-				// alert('脉冲名修改成功');
+				// alert('服务名修改成功');
 				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
 				this[pulseNameKey] = self.pulseName;
 			} else if (pulseName && pulseName.fetch == false) {
@@ -185,10 +192,10 @@ class DeviceForm extends React.Component {
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
-				"firstPulsePrice": parseFloat(values.firstPulsePrice)*100,
-				"secondPulsePrice": parseFloat(values.secondPulsePrice)*100,
-				"thirdPulsePrice": parseFloat(values.thirdPulsePrice)*100,
-				"fourthPulsePrice": parseFloat(values.fourthPulsePrice)*100,
+				"firstPulsePrice": parseInt((+values.firstPulsePrice)*100),
+				"secondPulsePrice": parseInt((+values.secondPulsePrice)*100),
+				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*100),
+				"fourthPulsePrice": parseInt((+values.fourthPulsePrice)*100),
 				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
 				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
 				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
@@ -247,9 +254,10 @@ class DeviceForm extends React.Component {
 		}
 	}
 	checkPrice(rule, value, callback) {
-		var pattern=new RegExp(/\d+\.\d{2}$/g);
+		// 只要大于零的数字
+		var pattern=new RegExp(/\d+$/g);
 		if(value && !pattern.test(value)){
-			callback('只能为数字,精确到小数点后两位');
+			callback('只能为数字');
 		} else {
 			callback();
 		}
@@ -280,6 +288,11 @@ class DeviceForm extends React.Component {
 		}
 	}
 	render() {
+		const schoolDetail = this.props.schoolDetail;
+		let schoolName = '';
+		if(schoolDetail && schoolDetail.fetch == true){
+			schoolName = schoolDetail.result.data.name;
+		}
 		// 关联设备列表
 		const refDevice = this.props.refDevice;
 		let refDeviceNode = [];
@@ -295,7 +308,7 @@ class DeviceForm extends React.Component {
 		// 初始化参数
 		const self = this;
 		const detail = this.props.detail;
-		const { id } = this.props.params;
+		const { id, schoolId } = this.props.params;
 		let initialValue = {};
 		if(detail && id) {
 			if(detail.fetch == true){
@@ -330,11 +343,22 @@ class DeviceForm extends React.Component {
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
-					<Breadcrumb separator=">">
-						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
-					</Breadcrumb>
+					{
+						schoolId !== "-1" ?
+						<Breadcrumb >
+							<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to={"/user/device/school/"+ schoolId}>{schoolName?schoolName:'未分类学校'}</Link></Breadcrumb.Item>
+							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
+						</Breadcrumb>
+							:
+						<Breadcrumb >
+							<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
+						</Breadcrumb>
+					}
+
 				</header>
 				<section className="view-content">
 					<Form horizontal>
@@ -388,7 +412,7 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="单脱价格" >
+							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
 									{ required: true, message: '请输入单脱价格' },
@@ -407,7 +431,7 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="快洗价格" >
+							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
 									{ required: true, message: '请输入快洗价格' },
@@ -426,7 +450,7 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="标准洗价格">
+							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
 									{ required: true, message: '请输入标准洗价格'},
@@ -445,7 +469,7 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="大物洗价格">
+							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
 									{ required: true, message: '请输入大物洗价格'},

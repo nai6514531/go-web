@@ -87,11 +87,11 @@ class DeviceForm extends React.Component {
 		const pulseName = nextProps.pulseName;
 		if(this.theName == 0){
 			if(pulseName && pulseName.fetch == true) {
-				alert('脉冲名修改成功');
+				// alert('服务名修改成功');
 				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
 				this[pulseNameKey] = self.pulseName;
 			} else if (pulseName && pulseName.fetch == false) {
-				alert('脉冲名修改失败,请重试.');
+				alert('服务名修改失败,请重试.');
 			}
 			self.theName = 1;
 		}
@@ -178,6 +178,7 @@ class DeviceForm extends React.Component {
 			if (errors) {
 				return;
 			}
+			console.log('the ids',self.provinceId,self.schoolId);
 			if(!self.provinceId || !self.schoolId) {
 				alert('请选择学校和省份');
 				return;
@@ -189,10 +190,10 @@ class DeviceForm extends React.Component {
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
-				"firstPulsePrice": parseFloat(values.firstPulsePrice)*100,
-				"secondPulsePrice": parseFloat(values.secondPulsePrice)*100,
-				"thirdPulsePrice": parseFloat(values.thirdPulsePrice)*100,
-				"fourthPulsePrice": parseFloat(values.fourthPulsePrice)*100,
+				"firstPulsePrice": parseInt((+values.firstPulsePrice)*100),
+				"secondPulsePrice": parseInt((+values.secondPulsePrice)*100),
+				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*100),
+				"fourthPulsePrice": parseInt((+values.fourthPulsePrice)*100),
 				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
 				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
 				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
@@ -252,9 +253,10 @@ class DeviceForm extends React.Component {
 		}
 	}
 	checkPrice(rule, value, callback) {
-		var pattern=new RegExp(/\d+\.\d{2}$/g);
+		// 只要大于零的数字
+		var pattern=new RegExp(/\d+$/g);
 		if(value && !pattern.test(value)){
-				callback('只能为数字,精确到小数点后两位');
+				callback('只能为数字');
 		} else {
 			callback();
 		}
@@ -394,15 +396,18 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="单脱价格" >
+							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ message: '请输入单脱价格' },
+									{ required: true, message: '请输入单脱价格' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
 								initialValue: initialValue.firstPulsePrice,
 							})(
-								<Input placeholder="请输入单脱价格" />
+								<span>
+									<Input placeholder="请输入单脱价格" /> 
+									<span>元</span>
+								</span>
 							)}
 							{this.firstPulseName ?
 								<span>服务名称已修改为: {this.firstPulseName}
@@ -413,10 +418,10 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="快洗价格" >
+							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ message: '请输入快洗价格' },
+									{ required: true, message: '请输入快洗价格' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -432,10 +437,10 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="标准洗价格">
+							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{  message: '请输入标准洗价格'},
+									{  required: true, message: '请输入标准洗价格'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -454,7 +459,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{  message: '请输入大物洗价格'},
+									{  required: true, message: '请输入大物洗价格'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
 								initialValue: initialValue.fourthPulsePrice,

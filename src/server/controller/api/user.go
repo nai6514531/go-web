@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/kataras/iris"
 	"github.com/mitchellh/mapstructure"
@@ -9,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 /**
@@ -388,11 +388,11 @@ func (self *UserController) Create(ctx *iris.Context) {
 	// 	ctx.JSON(iris.StatusOK, result)
 	// 	return
 	// }
-	if cashAccount.Account == "" {
-		result = &enity.Result{"01010409", nil, user_msg["01010409"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if cashAccount.Account == "" {
+	// 	result = &enity.Result{"01010409", nil, user_msg["01010409"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 
 	//插入user到user表
 	user.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
@@ -403,7 +403,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//插入结算账号信息
+	//插入结算账号信息，type为0也新建
 	userNew, _ := userService.FindByAccount(user.Account) //得到新插入的条目
 	cashAccount.UserId = userNew.Id                       //cash记录的userid设置为新插入条目的id
 	ok = userCashAccountService.Create(cashAccount)
@@ -412,6 +412,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
 	//插入一条用户角色记录（暂时所有调用此的api都是代理商角色）
 	userRoleRel := &model.UserRoleRel{}
 	userRoleRel.UserId = user.Id
@@ -501,7 +502,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	cashAccount.UserId = userId
-	fmt.Println(cashAccount)
+	common.Logger.Debugln(cashAccount)
 	// //cash内容判断
 	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
 	// 	//1-实时分账，2-财务结算
@@ -509,11 +510,11 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// 	ctx.JSON(iris.StatusOK, result)
 	// 	return
 	// }
-	if cashAccount.Account == "" {
-		result = &enity.Result{"01010510", nil, user_msg["01010510"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	// if cashAccount.Account == "" {
+	// 	result = &enity.Result{"01010510", nil, user_msg["01010510"]}
+	// 	ctx.JSON(iris.StatusOK, result)
+	// 	return
+	// }
 
 	//更新到user表
 	ok := userService.Update(&user)
@@ -522,12 +523,26 @@ func (self *UserController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//更新结算账号信息
-	ok = userCashAccountService.UpdateByUserId(cashAccount)
-	if !ok {
-		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	//更新结算账号信息,如果传的不是0就直接更新
+	if cashAccount.Type != 0 {
+		ok = userCashAccountService.UpdateByUserId(cashAccount)
+		if !ok {
+			result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,方便还原上一条历史记录
+		current, err := userCashAccountService.BasicByUserId(userId)
+		if err == nil { //可以找到
+			//把该记录的type值取反
+			current.Type = -current.Type
+			ok = userCashAccountService.UpdateByUserId(current)
+			if !ok {
+				result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+		} //没有记录的不做处理
 	}
 	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
 	ctx.JSON(iris.StatusOK, &result)

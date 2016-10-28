@@ -11,7 +11,7 @@ export default function (state = initialState, action) {
 		case GET_SCHOOL_DETAIL:
 			return {
 				...state,
-				detail: action.result,
+				schoolDetail: action.result,
 			};
 		default:
 			return state;

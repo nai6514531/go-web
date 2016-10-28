@@ -5,9 +5,9 @@ import {
 } from '../constants/index';
 
 
-export function getSchoolDetail() {
+export function getSchoolDetail(schoolId) {
 	return dispatch => {
-		SchoolService.list().then((result) => {
+		SchoolService.detail(schoolId).then((result) => {
 			dispatch({
 				type: GET_SCHOOL_DETAIL,
 				result: { fetch: true, result },
