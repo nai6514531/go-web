@@ -45,7 +45,7 @@ class UserForm extends React.Component {
 		super(props, context);
 		this.state = {
 			type: "3",
-			alipay: 0,
+			payType: 0,
             provinceChange: false,
             cityChange: false,
 			unsaved: true,
@@ -72,13 +72,20 @@ class UserForm extends React.Component {
         const self = this;
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             if(nextProps.detail.result.data.cashAccount){
-				const type = nextProps.detail.result.data.cashAccount.type;
-				if(type && type == 3){
-					this.setState({ alipay: 3 });
-					const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-					this.props.getProvinceCityList(provinceId);
-				} else {
-					this.setState({ alipay: 1 });
+				const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
+				if(type) {
+					switch (type) {
+						case 1:
+							this.setState({ payType: 1 });
+							break;
+						case 3:
+							this.setState({ payType: 3 });
+							const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
+							this.props.getProvinceCityList(provinceId);
+							break;
+						default:
+							this.setState({ payType: 0 });
+					}
 				}
 			}
 		}
@@ -92,7 +99,6 @@ class UserForm extends React.Component {
 			} else if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == false){
 				const code = nextProps.resultPostDetail.result.status;
-				console.log(code);
 				switch (code) {
 					case 7:
 						alert('该手机号已存在');
@@ -173,11 +179,11 @@ class UserForm extends React.Component {
 
 	handleRadio(select) {
 		if (select === '3') {
-			this.setState({ alipay: 3 });
+			this.setState({ payType: 3 });
 		} else if (select === '1') {
-			this.setState({ alipay: 1 });
+			this.setState({ payType: 1 });
 		} else {
-			this.setState({ alipay: 0 });
+			this.setState({ payType: 0 });
 		}
 	}
 	handleEnter(event) {
@@ -237,21 +243,24 @@ class UserForm extends React.Component {
 				}
                 self.account = data.account;
 				let cashValues = {};
-				if(data.cashAccount && data.cashAccount.type == 3){
-					cashValues = {
-						type: data.cashAccount.type.toString(),
-						realName: data.cashAccount.realName,
-						bankName: data.cashAccount.bankName,
-						account: data.cashAccount.account,
-						bankMobile: data.cashAccount.mobile,
-						provinceId: data.cashAccount.provinceId.toString(),
-						cityId: data.cashAccount.cityId.toString(),
-					}
-				} else if (data.cashAccount && data.cashAccount.type == 1){
-					cashValues = {
-						type: data.cashAccount.type.toString(),
-						alipayAccount: data.cashAccount.account,
-						alipayName: data.cashAccount.realName,
+				if(data.cashAccount) {
+					const type = Math.abs(data.cashAccount.type);
+					if(type == 3) {
+						cashValues = {
+							type: data.cashAccount.type.toString(),
+							realName: data.cashAccount.realName,
+							bankName: data.cashAccount.bankName,
+							account: data.cashAccount.account,
+							bankMobile: data.cashAccount.mobile,
+							provinceId: data.cashAccount.provinceId.toString(),
+							cityId: data.cashAccount.cityId.toString(),
+						}
+					} else if (type == 1) {
+						cashValues = {
+							type: data.cashAccount.type.toString(),
+							alipayAccount: data.cashAccount.account,
+							alipayName: data.cashAccount.realName,
+						}
 					}
 				}
 				initialValue = Object.assign({}, baseValues, cashValues);
@@ -269,7 +278,7 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
-		if(this.state.alipay == 1){
+		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem
 					{...formItemLayout}
@@ -298,7 +307,7 @@ class UserForm extends React.Component {
 					)}
 				</FormItem>
 			</div>
-		} else if (this.state.alipay == 3){
+		} else if (this.state.payType == 3){
 			payNode = <div>
 				<FormItem
 					{...formItemLayout}
@@ -461,7 +470,7 @@ class UserForm extends React.Component {
 								rules: [
 									{  message: '请选择收款方式' },
 								],
-								initialValue: initialValue.type? initialValue.type : this.state.alipay,
+								initialValue: initialValue.type? (initialValue.type<="0"?"0":initialValue.type): this.state.payType.toString(),
 							})(
 								<RadioGroup>
 									<Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">

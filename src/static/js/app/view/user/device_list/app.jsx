@@ -157,6 +157,9 @@ class SchoolTable extends React.Component {
 						perPage={this.state.perPage}
 						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
+					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item bar-button">
+						添加新设备
+					</Link>
 				</div>
 				<section className="view-content">
 					<Table columns={columns}
