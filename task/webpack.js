@@ -2,9 +2,7 @@ var _ = require('lodash');
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
 const sequence = require('run-sequence');
-var config = require('config');
 const shell = require('gulp-shell');
-var run = require('gulp-run');
 
 gulp.task('webpack:dev', function () {
 	return gulp.src('../package.json')

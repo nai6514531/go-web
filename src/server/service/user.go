@@ -51,6 +51,23 @@ func (self *UserService) TotalOfDevice(userId int) (int, error) {
 	return total, nil
 }
 
+func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
+	list := []*muniu.SignInUser{}
+	sql := "select date(inserttime) as 'date',count(*) as 'count' from box_user " +
+		"where date(inserttime)>='2016-01-01' group by date(inserttime)"
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		signInUser := &muniu.SignInUser{}
+		common.MNDB.ScanRows(rows, signInUser)
+		list = append(list, signInUser)
+	}
+	return &list, nil
+}
+
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
 	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
@@ -129,18 +146,61 @@ func (self *UserService) ChildIdsByUserId(parentId int) ([]int, error) {
 
 //根据父用户递归列出所有（子子子。。）用户ids
 func (self *UserService) SubChildIdsByUserId(parentId int) ([]int, error) {
-	var childIds []int
-	ids, _ := self.ChildIdsByUserId(parentId)
-	if ids == nil { //没有找到
-		return nil, nil
-	} else {
+	//方式1：查询数据库次数过多
+	// var childIds []int
+	// ids, _ := self.ChildIdsByUserId(parentId)
+	// if ids == nil { //没有找到
+	// 	return nil, nil
+	// } else {
+	// 	childIds = append(childIds, ids...)
+	// 	for _, v := range ids {
+	// 		ids, _ := self.SubChildIdsByUserId(v)
+	// 		if ids != nil {
+	// 			childIds = append(childIds, ids...)
+	// 		}
+	// 	}
+	// 	return childIds, nil
+	// }
+	type fp func(pid int) []int
+	var subChildsByUse fp
+	//读回所有记录
+	type uid struct {
+		Id       int
+		ParentId int
+	}
+	db := []*uid{}
+	r := common.DB.Raw("select id,parent_id from user where deleted_at IS NULL").Find(&db)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	//函数1：以parentid找其直接子用户
+	findChildsByParent := func(p int) []int {
+		var re []int
+		for _, v := range db {
+			if v.ParentId == p && v.ParentId != v.Id {
+				re = append(re, v.Id)
+			}
+		}
+		return re
+	}
+
+	//函数2：递归查找其子子子。。用户
+	subChildsByUse = func(pid int) []int {
+		var childIds []int
+		ids := findChildsByParent(pid) //找第一级
+		if len(ids) == 0 {             //如果没有找到
+			return nil
+		}
 		childIds = append(childIds, ids...)
-		for _, v := range ids {
-			ids, _ := self.SubChildIdsByUserId(v)
+		//如果找到了
+		for _, id := range ids { //递归查找
+			ids := subChildsByUse(id)
 			if ids != nil {
 				childIds = append(childIds, ids...)
 			}
 		}
-		return childIds, nil
+		return childIds
 	}
+	return subChildsByUse(parentId), nil
 }

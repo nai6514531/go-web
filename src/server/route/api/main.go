@@ -28,8 +28,9 @@ func Api() {
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
 
-	api.Get("/daily-bill/recharge", dailyBill.Recharge)
-	api.Get("/daily-bill/consume", dailyBill.Consume)
+	api.Get("/stat/recharge", dailyBill.Recharge)
+	api.Get("/stat/consume", dailyBill.Consume)
+	api.Get("/stat/signin-user", user.SignInUser)
 
 	api.Get("/sync/user", sync.SyncUser)
 	api.Get("/sync/user-role", sync.SyncUserRole)

@@ -14,7 +14,7 @@ gulp.task('bump:minor', function () {
 	} else {
 		env = process.env.NODE_ENV;
 	}
-	gulp.src(`./config/${env}.json`)
+	return gulp.src(`./config/${env}.json`)
 		.pipe(bump(options))
 		.pipe(gulp.dest('./config'));
 });
@@ -25,7 +25,7 @@ gulp.task('bump:patch', function () {
 	} else {
 		env = process.env.NODE_ENV;
 	}
-	gulp.src(`./config/${env}.json`)
+	return gulp.src(`./config/${env}.json`)
 		.pipe(bump())
 		.pipe(gulp.dest('./config'));
 });
