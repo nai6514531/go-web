@@ -121,7 +121,9 @@ class SchoolSelect extends React.Component {
 		const that = this;
 		if(provinceList) {
 			if(provinceList.fetch == true){
-				provinceNode = provinceList.result.data.map(function(item, key){
+				provinceNode = provinceList.result.data.filter(function(item, key){
+					return item.id !== 820000 && item.id !== 810000 && item.id !== 710000;
+				}).map(function (item,key) {
 					return (
 						<Button key={key} onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</Button>
 					)
@@ -132,7 +134,9 @@ class SchoolSelect extends React.Component {
 		let schoolNode = '';
 		if(provinceSchool) {
 			if(provinceSchool.fetch == true){
-				schoolNode = provinceSchool.result.data.map(function(item, key){
+				schoolNode = provinceSchool.result.data.filter(function(item, key){
+					return item.id !== 0 && item.id !== 34093;
+				}).map(function(item, key){
 					return (
 						<span key={key} onClick={that.selectSchool.bind(that,item.id,item.name)}>{item.name}</span>
 					)

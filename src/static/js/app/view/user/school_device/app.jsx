@@ -7,10 +7,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
+import * as SchoolActions from '../../../actions/school';
 
 function mapStateToProps(state) {
-	const { device: { list, status, resultReset }, user: {schoolDevice} } = state;
-	return { list, status, resultReset, schoolDevice };
+	const { device: { list, status, resultReset }, user: {schoolDevice}, school:{schoolDetail} } = state;
+	return { list, status, resultReset, schoolDevice, schoolDetail };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -23,12 +24,16 @@ function mapDispatchToProps(dispatch) {
 	const {
 		getSchoolDevice,
 	} = bindActionCreators(UserActions, dispatch);
+	const {
+		getSchoolDetail,
+	} = bindActionCreators(SchoolActions, dispatch);
 	return {
 		getDeviceList,
 		deleteDevice,
 		patchDeviceStatus,
 		resetDevice,
 		getSchoolDevice,
+		getSchoolDetail,
 	};
 }
 
@@ -74,7 +79,7 @@ const columns = [{
 	key: 'action',
 	render: (text, record) => (
 		<span>
-			<Link to={"/user/device/edit/" + record.key}>修改</Link>
+			<Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link>
 			<span className="ant-divider" />
 			<Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
 				<a href="#">删除</a>
@@ -116,6 +121,7 @@ class DeviceTable extends React.Component {
 		const pager = { page: this.state.page, perPage: this.state.perPage };
 		this.props.getSchoolDevice(USER.id, schoolId, pager);
 		this.loading = true;
+		this.props.getSchoolDetail(schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
@@ -196,6 +202,11 @@ class DeviceTable extends React.Component {
 	render() {
 		const pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
+		const schoolDetail = this.props.schoolDetail;
+		let schoolName = '';
+		if(schoolDetail && schoolDetail.fetch == true){
+			schoolName = schoolDetail.result.data.name;
+		}
 		const schoolId = this.props.params.id;
 		const self = this;
 		let dataSource = [];
@@ -231,6 +242,7 @@ class DeviceTable extends React.Component {
 					return {
 						key: item.id,
 						index: item.id,
+						schoolId: schoolId,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
 						status: status,
@@ -251,14 +263,9 @@ class DeviceTable extends React.Component {
 					<Breadcrumb separator=">">
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-						<Breadcrumb.Item>学校</Breadcrumb.Item>
+						<Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
-				<div className="toolbar">
-					<Link to="/user/device/edit" className="ant-btn ant-btn-primary item">
-						添加新设备
-					</Link>
-				</div>
 				<section className="view-content">
 					<Table columns={columns}
 						   dataSource={dataSource}

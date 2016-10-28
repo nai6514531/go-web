@@ -35,6 +35,9 @@ var (
 		"01060301": "更新日账单状态失败",
 		"01060302": "更新日账单状态部分失败",
 		"01060303": "请求修改状态参数有误",
+		"01060304": "申请结账用户不能大于一位",
+		"01060305": "无该用户账户信息",
+		"01060306": "该用户账单不是通过银行结账,故不可申请结账",
 
 		"01060400": "日账单结账成功",
 		"01060401": "日账单结账失败",
@@ -150,8 +153,12 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
+/**
+	申请结账
+ */
 func (self *DailyBillController) Apply(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
+	userCashAccountService := &service.UserCashAccountService{}
 	params := ctx.URLParams()
 	userIdStr := params["userId"]
 	billAt := params["billAt"]
@@ -166,6 +173,22 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		return
 	}
 	userIds := strings.Split(userIdStr, ",")
+	if len(userIds) != 1 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060304", nil, daily_bill_msg["01060304"]})
+		return
+	}
+
+	//判断该用户的是否银行结算,其他方式不需或不给申请提现
+	account, err := userCashAccountService.BasicByUserId(functions.StringToInt(userIds[0]))
+	if err != nil {
+		common.Logger.Warningln(daily_bill_msg["01060305"], ":", err.Error())
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060305", nil, daily_bill_msg["01060305"]})
+		return
+	}
+	if account.Type != 3 {
+		ctx.JSON(iris.StatusOK, &enity.Result{"01060306", nil, daily_bill_msg["01060306"]})
+		return
+	}
 
 	rows, err := dailyBillService.UpdateStatus(status, billAt, userIds...)
 	if err != nil {
@@ -183,6 +206,11 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060300", nil, daily_bill_msg["01060300"]})
 }
+
+/*
+支付宝批量支付接口
+*/
+func AliBatchPay()
 
 func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
@@ -230,7 +258,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		userIds := strings.Split(userIdStr, ",")
 
 		//过滤掉未申请提现的用户
-		dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出已申请提现的用户
+		dailyBillMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)        //查询出银行结算方式中已申请提现的用户
 		if err != nil || len(*dailyBillMap) <=0 {
 			//ctx.JSON(iris.StatusOK, &enity.Result{"01060403", nil, daily_bill_msg["01060403"]})
 			continue
@@ -333,13 +361,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		common.Logger.Debugln(response.Error)
 		common.Logger.Debugln(response.Ok)
 		common.Logger.Debugln(response.StatusCode)
-		//common.Logger.Debugln(response.String())
-		//ctx.HTML(iris.StatusOK, response.String())
-		//a := string(response.Bytes())
-		b := []rune(response.String())
-		common.Logger.Warningln("aaaaaaaaaaaaaaaa-----------------------------------------", string(b))
-		//ctx.RedirectBytes(response.Bytes(), response.StatusCode)
-		//ctx.HTML(iris.StatusOK, response.String())
+		common.Logger.Debugln(response.String())
 
 	}
 

@@ -52,7 +52,7 @@ const App = React.createClass({
 				render: (status) => {
 					switch (status) {
 						case 0:
-							return <div className="status highlight">未结账</div>
+							return <div className="status">未申请提现</div>
 							break;
 						case 1:
 							return <div className="status">已申请提现</div>
@@ -63,6 +63,9 @@ const App = React.createClass({
 						case 3:
 							return <div className="status">结账中</div>
 							break;
+						case 4:
+							return <div className="status">结账失败</div>
+							break;
 					}
 				}
 			}, {
@@ -70,15 +73,16 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				render: (id, record) => {
+					console.log(record)
 					const roleId = this.state.roleId;
 					const status = record.status;
+					const accountType = record.accountType;
 					let data = {
 						id: record.id,
 						userId: record.userId,
 						billAt: moment(record.billAt).format('YYYY-MM-DD'),
 						willApplyStatus: status == 0 ? 1: 0 //即将提现改变的状态
 					}
-
 					let spanDiv = "";
 					switch (roleId) {
 						case 1:
@@ -89,26 +93,42 @@ const App = React.createClass({
 						case 2:
 						case 5: 
 							spanDiv = (
-								<span>
-									{
-										status == 0?(		
-											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>申请提现</a>
-					            </Popconfirm>
-										):(
-
-											<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>已申请提现</a>
-					            </Popconfirm>
-										)
-									}
-									<span> | </span>
-									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-			          </span>
+								accountType == 1? (
+									<span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								): status==0?(	
+									<span>	
+										<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+				              <a>申请提现</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								):(
+									<span>
+										<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+				              <a>已申请提现</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								)
+								/*status == 0?(		
+									<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+			              <a>申请提现</a>
+			            </Popconfirm>
+								):(
+									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+			              <a>已申请提现</a>
+			            </Popconfirm>
+								)*/
 							)
 							break;
 						case 3: 
-							spanDiv = (
+							spanDiv = (accountType == 1&&status!=4)? (
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+							) : (
 								<span>
 									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
 			              <a>结账</a>
@@ -331,7 +351,7 @@ const App = React.createClass({
 		  },
 		};
 
-    let footer = "";
+    let footer = ""; //底部结账按钮，第一期先保留 @！#不要删掉我哦
     if(this.state.roleId == 3){
     	if(this.state.selectedList.length == 0){
     		footer = (
@@ -350,6 +370,37 @@ const App = React.createClass({
     	footer = "";
     }
 
+    let orderSelectOption = "";
+    if(this.state.roleId == 3){
+    	orderSelectOption = (
+    		<Select
+					className="item"
+					defaultValue=""
+					style={{width: 120}}
+					onChange={this.handleStatusChange}>
+					<Option value="">请选择账单状态</Option>
+					<Option value="1">已申请提现</Option>
+					<Option value="2">已结账</Option>
+					<Option value="3">结账中</Option>
+					<Option value="4">结账失败</Option>
+				</Select>
+    	)
+    }else{
+    	orderSelectOption = (
+    		<Select
+					className="item"
+					defaultValue=""
+					style={{width: 120}}
+					onChange={this.handleStatusChange}>
+					<Option value="">请选择账单状态</Option>
+					<Option value="0">未申请提现</Option>
+					<Option value="1">已申请提现</Option>
+					<Option value="2">已结账</Option>
+					<Option value="4">结账失败</Option>
+				</Select>
+    	)
+    }
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -366,21 +417,11 @@ const App = React.createClass({
 					<Option value="2">微信</Option>
 					<Option value="3">银行</Option>
 				</Select>
-				<Select
-					className="item"
-					defaultValue=""
-					style={{width: 120}}
-					onChange={this.handleStatusChange}>
-					<Option value="">请选择账单状态</Option>
-					<Option value="2">已结账</Option>
-					<Option value="0,1,3">未结账</Option>
-					<Option value="1">已申请提现</Option>
-					<Option value="0">未申请提现</Option>
-				</Select>
+				{orderSelectOption}
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
 			</div>
-			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return footer}}/>
+			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return ""}}/>
 		</section>);
 	}
 });
