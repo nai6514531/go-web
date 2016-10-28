@@ -18,14 +18,14 @@ func (self *DailyBillDetailService) Basic(id int) (*model.DailyBillDetail, error
 	return dailyBillDetail, nil
 }
 
-func (self *DailyBillDetailService) DeleteByBillAt(billAt string) (bool, error) {
+/*func (self *DailyBillDetailService) DeleteByBillAt(billAt string) (bool, error) {
 	//r := common.DB.Delete(model.DailyBillDetail{},"bill_at > ?", billAt)
 	r := common.DB.Exec("delete from daily_bill_detail WHERE bill_at > ?", billAt)
 	if r.Error != nil {
 		return false, r.Error
 	}
 	return true, nil
-}
+}*/
 
 func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt string) (int, error) {
 	dailyBillDetail := &model.DailyBillDetail{}
