@@ -164,7 +164,6 @@ var (
 	}
 )
 
-
 func (self *UserController) SignInUser(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
@@ -176,6 +175,7 @@ func (self *UserController) SignInUser(ctx *iris.Context) {
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
+
 /**
 	@api {post} /api/signin 用户登陆
 	@apiName Signin
@@ -696,10 +696,16 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	user, err := userService.Basic(id)
 	if err != nil {
 		result = &enity.Result{"01010801", nil, user_msg["01010801"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	//带上总设备数的信息
-	ids, _ := userService.SubChildIdsByUserId(id)       //计算每一条用户记录有多少个设备
-	ids = append(ids, id)                               //把自己也算上
+	var ids []int
+	ids = append(ids, id)                              //把自己也算上
+	childIds, _ := userService.SubChildIdsByUserId(id) //计算该用户下面的所有子子。。用户列表
+	if childIds != nil {
+		ids = append(ids, childIds...)
+	}
 	deviceTotal, _ := deviceService.TotalByUserIds(ids) //根据userid列表算出设备总数
 	user.DeviceTotal = deviceTotal
 	//返回
