@@ -47,6 +47,7 @@ class SchoolSelect extends React.Component {
 	}
 	componentWillMount() {
 		this.props.getProvinceList();
+		this.hide = true;
 	}
 	componentWillReceiveProps(nextProps) {
 		// 如果父组件有变动,就改变内容
