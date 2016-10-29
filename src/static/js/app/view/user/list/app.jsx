@@ -223,6 +223,8 @@ class AgentTable extends React.Component {
 				}
 			}
 		}
+		const pagination =id? {'pagination':this.childPagination()}:{'pagination':false}
+		// const pagination = {};
 		return (
 			<section className="view-user-list">
 				<header>
@@ -249,7 +251,7 @@ class AgentTable extends React.Component {
 					<Table columns={columns}
 						   rowKey={record => record.key}
 						   dataSource={dataSource}
-						   pagination={id?this.childPagination():this.parentPagination()}
+							{...pagination}
 						   loading={this.loading ? this.loading : false}
 						   bordered
 					/>

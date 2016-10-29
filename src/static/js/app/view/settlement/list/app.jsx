@@ -105,7 +105,7 @@ const App = React.createClass({
 				            <span> | </span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 	          			</span>
-								):(
+								): (
 									<span>
 										<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
 				              <a>已申请提现</a>
@@ -128,14 +128,16 @@ const App = React.createClass({
 						case 3: 
 							spanDiv = (accountType == 1&&status!=4)? (
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-							) : (
+							) : (status == 1||status == 4)?(
 								<span>
-									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
-			              <a>结账</a>
+									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+			              <a>已申请提现</a>
 			            </Popconfirm>
-									<span> | </span>
+			            <span> | </span>
 									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-			          </span>
+          			</span>
+							):(
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							)
 							break;
 
