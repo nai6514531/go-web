@@ -61,6 +61,7 @@ class DeviceForm extends React.Component {
 			fourthPulseName: '',
 			visible: false,
 			unsaved: true,
+			tips:'',
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -180,6 +181,7 @@ class DeviceForm extends React.Component {
 			}
 			console.log('the ids',self.provinceId,self.schoolId);
 			if(!self.provinceId || !self.schoolId) {
+				self.setState({tips:'请选择学校和省份'});
 				alert('请选择学校和省份');
 				return;
 			}
@@ -254,7 +256,7 @@ class DeviceForm extends React.Component {
 	}
 	checkPrice(rule, value, callback) {
 		// 只要大于零的数字
-		var pattern=new RegExp(/\d+$/g);
+		var pattern=new RegExp(/^(0|[1-9][0-9]{0,9})(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 				callback('只能为数字');
 		} else {
@@ -369,6 +371,7 @@ class DeviceForm extends React.Component {
 										  provinceName={this.provinceName}
 										  schoolName={this.schoolName}
 							/>
+							<span>提示:{this.state.tips}</span>
 						</div>
 						<FormItem
 							{...formItemLayout}
@@ -405,7 +408,7 @@ class DeviceForm extends React.Component {
 								],
 								initialValue: initialValue.firstPulsePrice,
 							})(
-								<Input placeholder="请输入单脱价格" /> 
+								<Input placeholder="请输入单脱价格" />
 							)}
 							{this.firstPulseName ?
 								<span>服务名称已修改为: {this.firstPulseName}
@@ -454,7 +457,7 @@ class DeviceForm extends React.Component {
 						</FormItem>
 						<FormItem
 							{...formItemLayout}
-							label="大物洗价格">
+							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
 									{  required: true, message: '必填'},

@@ -255,7 +255,7 @@ class DeviceForm extends React.Component {
 	}
 	checkPrice(rule, value, callback) {
 		// 只要大于零的数字
-		var pattern=new RegExp(/\d+$/g);
+		var pattern=new RegExp(/^(0|[1-9][0-9]{0,9})(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
 		} else {
