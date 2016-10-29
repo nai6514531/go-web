@@ -66,6 +66,8 @@ class DeviceForm extends React.Component {
 			fourthPulseName: '',
 			visible: false,
 			unsaved: true,
+			tips: '',
+			resetName: 0,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -182,6 +184,11 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
+			if(!self.provinceId || !self.schoolId) {
+				self.setState({tips:'必填项'});
+				// alert('请选择学校和省份');
+				return;
+			}
 			if (errors) {
 				return;
 			}
@@ -213,6 +220,7 @@ class DeviceForm extends React.Component {
 	handleSelect(provinceId, schoolId) {
 		this.provinceId = provinceId;
 		this.schoolId = schoolId;
+		this.setState({tips:''});
 	}
 	changeName(currentPulse,e) {
 		e.preventDefault();
@@ -243,7 +251,8 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: true });
 	}
 	hideModal() {
-		this.setState({ visible: false });
+		// 取消就重置内部数据
+		this.setState({ visible: false ,resetName: this.state.currentPulse});
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -255,7 +264,7 @@ class DeviceForm extends React.Component {
 	}
 	checkPrice(rule, value, callback) {
 		// 只要大于零的数字
-		var pattern=new RegExp(/\d+$/g);
+		var pattern=new RegExp(/^(0|[1-9][0-9]{0,9})(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
 		} else {
@@ -367,7 +376,8 @@ class DeviceForm extends React.Component {
 							label="设备编号" >
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									{ required: true, len:10, message: '请输入设备编号,长度为十位' },
+									{ len:10, message: '长度为十位' },
+									{ required: true, message: '必填' },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
@@ -384,13 +394,15 @@ class DeviceForm extends React.Component {
 										  provinceName={this.provinceName}
 										  schoolName={this.schoolName}
 							/>
+							{this.state.tips?<span className="tip-error">{this.state.tips}</span>
+								:''}
 						</div>
 						<FormItem
 							{...formItemLayout}
 							label="楼道信息" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ max:30, message: '请输入楼道信息,不超过三十个字' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -415,7 +427,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入单脱价格' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
 								initialValue: initialValue.firstPulsePrice,
@@ -434,7 +446,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入快洗价格' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -453,7 +465,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入标准洗价格'},
+									{ required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -472,7 +484,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入大物洗价格'},
+									{ required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
 								initialValue: initialValue.fourthPulsePrice,
@@ -501,6 +513,7 @@ class DeviceForm extends React.Component {
 									   third={this.thirdPulseName}
 									   fourth={this.fourthPulseName}
 									   checkNumber={this.checkNumber}
+									   resetName={this.state.resetName}
 							/>
 						</div>
 					</Form>
@@ -531,7 +544,7 @@ class PulseName extends React.Component {
 		this.props.onCancel();
 	}
 	render() {
-		const { getFieldDecorator } = this.props.form;
+		const { getFieldDecorator, setFieldsValue } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 4 },
 			wrapperCol: { span: 20 },
@@ -558,8 +571,7 @@ class PulseName extends React.Component {
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
 				rules: [
-					{ required: true, max:30, message: '请输入服务名称,不超过三十个字'},
-					{ validator: this.props.checkNumber },
+					{ max:30, message: '不超过三十个字'},
 				],
 				initialValue:initialValue})(<Input type="text"/>)}
 		</FormItem>

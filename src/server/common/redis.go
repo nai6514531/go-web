@@ -13,8 +13,8 @@ func SetUpRedis() {
 	password := viper.GetString("server.redis.password")
 	database := viper.GetInt("server.redis.database")
 	//maxIdle := viper.GetInt("server.redis.maxidle")
-	maxActive := viper.GetInt("server.redis.max-active")
-	idleTimeout := time.Duration(viper.GetInt("server.redis.idle-timeout")) * time.Second
+	maxActive := viper.GetInt("server.redis.maxActive")
+	idleTimeout := time.Duration(viper.GetInt("server.redis.idleTimeout")) * time.Second
 
 	client := redis.NewClient(&redis.Options{
 		Addr:        addr,

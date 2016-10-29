@@ -1,11 +1,14 @@
 {
   "name": "soda-manager",
-  "version": "0.0.12",
+  "version": "0.0.16",
   "image": {
-	"url": "reg.miz.so"
+	"url": "reg.maizuo.com"
   },
   "domain": {
-	"url": "mng.huace.cn"
+	"url": "mng.huacetech.cn"
+  },
+  "server":{
+	"port":9999
   },
   "author": "soda",
   "log": {

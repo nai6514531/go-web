@@ -30,7 +30,7 @@ spec:
               memory: 512Mi
           volumeMounts:
             - name: <%-config.get('name')%>-vol
-              mountPath: /var/log
+              mountPath: <%-config.get('log.path')%>
       volumes:
         - name: <%-config.get('name')%>-vol
           hostPath:
