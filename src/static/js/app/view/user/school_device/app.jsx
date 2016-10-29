@@ -260,7 +260,7 @@ class DeviceTable extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					<Breadcrumb separator=">">
+					<Breadcrumb >
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>{schoolName}</Breadcrumb.Item>

@@ -10,12 +10,12 @@ import (
 
 func SetUpRateLimiter() {
 
-	addr := viper.GetString("server.rate-limiter.redis.addr")
-	password := viper.GetString("server.rate-limiter.redis.password")
-	database := viper.GetString("server.rate-limiter.redis.database")
-	prefix := viper.GetString("server.rate-limiter.redis.prefix")
-	maxRetry := viper.GetInt("server.rate-limiter.redis.max-retry")
-	_rate := viper.GetString("server.rate-limiter.rate")
+	addr := viper.GetString("server.rateLimiter.redis.addr")
+	password := viper.GetString("server.rateLimiter.redis.password")
+	database := viper.GetString("server.rateLimiter.redis.database")
+	prefix := viper.GetString("server.rateLimiter.redis.prefix")
+	maxRetry := viper.GetInt("server.rateLimiter.redis.maxRetry")
+	_rate := viper.GetString("server.rateLimiter.rate")
 
 	rate, err := limiter.NewRateFromFormatted(_rate)
 	if err != nil {

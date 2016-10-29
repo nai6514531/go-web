@@ -79,13 +79,17 @@ class SchoolSelect extends React.Component {
 		// console.log('provinceId',this.props.provinceId,nextProps.provinceId);
 		// console.log('provinceName',this.props.provinceName,nextProps.provinceName);
 	}
-	selectProvince(provinceId, provinceName) {
+	selectProvince(provinceId, provinceName,event) {
 		this.props.getProvinceSchoolList(provinceId);
 		this.setState({
 			provinceId: provinceId,
 			provinceName: provinceName,
 			chooseSchool: true,
 		});
+		// this.toggleLight(event);
+		// console.log(event.target);
+		this.hide = false;
+		// event.target.addClass('red');
 	}
 	selectSchool(schoolId, schoolName) {
 		if(this.state.chooseSchool){
@@ -99,6 +103,7 @@ class SchoolSelect extends React.Component {
 			});
 			this.toggleBox();
 			this.props.handleSelect(this.state.provinceId, schoolId);
+			this.hide = true;
 		} else {
 			alert('请先选择省份');
 		}
@@ -114,6 +119,10 @@ class SchoolSelect extends React.Component {
 			provinceName: this.state.defaultProvince.provinceName,
 			chooseSchool: false,
 		});
+		this.hide = true;
+	}
+	toggleLight(event) {
+		console.log('event',event);
 	}
 	render() {
 		const provinceList = this.props.provinceList;
@@ -132,13 +141,14 @@ class SchoolSelect extends React.Component {
 		}
 		const provinceSchool = this.props.provinceSchool;
 		let schoolNode = '';
+		const self = this;
 		if(provinceSchool) {
 			if(provinceSchool.fetch == true){
 				schoolNode = provinceSchool.result.data.filter(function(item, key){
 					return item.id !== 0 && item.id !== 34093;
 				}).map(function(item, key){
 					return (
-						<span key={key} onClick={that.selectSchool.bind(that,item.id,item.name)}>{item.name}</span>
+						<span className="btn-select" key={key} onClick={that.selectSchool.bind(that,item.id,item.name)}>{item.name}</span>
 					)
 				})
 			}
@@ -151,7 +161,7 @@ class SchoolSelect extends React.Component {
 						{provinceNode}
 					</div>
 					<div className="school">
-						{schoolNode ? schoolNode : '请先选择省份'}
+						{this.hide ? '请先选择省份' :(schoolNode ? schoolNode : '请先选择省份')}
 					</div>
 				</div>
 				<div onClick = {this.toggleBox.bind(this)} className="show">

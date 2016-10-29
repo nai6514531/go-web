@@ -72,7 +72,8 @@ class UserForm extends React.Component {
         const self = this;
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             if(nextProps.detail.result.data.cashAccount){
-				const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
+				// const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
+				const type = nextProps.detail.result.data.cashAccount.type;
 				if(type) {
 					switch (type) {
 						case 1:
@@ -116,7 +117,16 @@ class UserForm extends React.Component {
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == false){
-				alert('修改代理商失败');
+				const code = nextProps.resultPutDetail.result.status;
+				switch (code) {
+					case 8:
+					case 7:
+						alert('该手机号已存在');
+						break;
+					default:
+						alert('添加代理商失败');
+				}
+				// alert('修改代理商失败');
 				self.saveDetail = -1;
 			}
 		}
@@ -139,6 +149,10 @@ class UserForm extends React.Component {
 			if (errors) {
 				return;
 			}
+			if(values.cityId == -1) {
+				alert('请选择城市');
+				return false;
+			}
 			let cashAccount = {};
 			const user = {
 					"name": values.name,
@@ -158,11 +172,15 @@ class UserForm extends React.Component {
                     "cityId": parseInt(values.cityId),
                     "provinceId": parseInt(values.provinceId),
 				}
-			} else {
+			} else if(values.type == 1){
                 cashAccount = {
                     "type": parseInt(values.type),
                     "realName": values.alipayName,
                     "account": values.alipayAccount,
+				}
+			} else {
+				cashAccount = {
+					"type": parseInt(values.type),
 				}
 			}
             user.cashAccount = cashAccount;
@@ -200,10 +218,18 @@ class UserForm extends React.Component {
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
-		if(pattern.test(value)){
+		if(pattern.test(value) || !value){
 			callback();
 		} else {
 			callback('只能为数字');
+		}
+	}
+	checkAreaCode(rule, value, callback) {
+		var pattern = new RegExp(/^((0\d{2,3}-\d{7,8})|(1\d{10}))$/);
+		if(pattern.test(value) || !value){
+			callback();
+		} else {
+			callback('请填写正确号码');
 		}
 	}
 	render() {
@@ -418,7 +444,8 @@ class UserForm extends React.Component {
 							label="代理商名称" >
 							{getFieldDecorator('name', {
 								rules: [
-									{ required: true, max:30, message: '请输入代理商名称,不超过三十个字' },
+									{required: true, message: '必填'},
+									{max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.name,
 							})(
@@ -430,7 +457,8 @@ class UserForm extends React.Component {
 							label="联系人" >
 							{getFieldDecorator('contact', {
 								rules: [
-									{ required: true, max:30, message: '请输入联系人,不超过三十个字' },
+									{ required: true, message: '必填' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.contact,
 							})(
@@ -442,7 +470,8 @@ class UserForm extends React.Component {
 							label="地址" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ required: true, max:30, message: '请输入地址,不超过三十个字' },
+									{ required: true, message: '必填' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -454,7 +483,8 @@ class UserForm extends React.Component {
 							label="手机号" >
 							{getFieldDecorator('mobile', {
 								rules: [
-									{ required: true, len: 11, message: '请输入11位手机号' },
+									{ len: 11, message: '请输入11位' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.mobile,
@@ -470,7 +500,7 @@ class UserForm extends React.Component {
 								rules: [
 									{  message: '请选择收款方式' },
 								],
-								initialValue: initialValue.type? (initialValue.type<="0"?"0":initialValue.type): this.state.payType.toString(),
+								initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
 							})(
 								<RadioGroup>
 									<Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">
@@ -491,8 +521,9 @@ class UserForm extends React.Component {
 							label="服务电话" >
 							{getFieldDecorator('telephone', {
 								rules: [
-									{ required: true, max:30, message: '请输入服务电话,长度不超过三十位' },
-									{ validator: this.checkNumber },
+									{ required: true, message: '必填' },
+									{ max:30, message: '长度不超过三十位' },
+									{ validator: this.checkAreaCode },
 								],
 								initialValue: initialValue.telephone,
 

@@ -118,6 +118,7 @@ class DeviceList extends React.Component {
 		const pager = { page : this.state.page, perPage: this.state.perPage};
 		if(this.theStatus !== -1) {
 			const status = nextProps.status;
+			console.log('status',nextProps.status);
 			if(status){
 				if(status.fetch == true){
 					this.props.getDeviceList(pager);
@@ -241,7 +242,7 @@ class DeviceList extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					<Breadcrumb separator=">">
+					<Breadcrumb>
 						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
