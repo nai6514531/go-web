@@ -86,9 +86,8 @@ class SchoolSelect extends React.Component {
 			provinceName: provinceName,
 			chooseSchool: true,
 		});
-		// console.log(event.target);
-		console.log(event.currentTarget)
-		console.log(event.currentTarget.setAttribute('className','red'))
+		// console.log(event.currentTarget)
+		// console.log(event.currentTarget.setAttribute('className','red'))
 		this.hide = false;
 		// event.target.addClass('red');
 	}
@@ -122,12 +121,6 @@ class SchoolSelect extends React.Component {
 		});
 		this.hide = true;
 	}
-	toggleLight(event) {
-		console.log('event',event);
-	}
-	onBlur(event) {
-		console.log(event.currentTarget.removeAttribute('className'))
-	}
 	render() {
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
@@ -138,7 +131,7 @@ class SchoolSelect extends React.Component {
 					return item.id !== 820000 && item.id !== 810000 && item.id !== 710000;
 				}).map(function (item,key) {
 					return (
-						<Button key={key} onBlur={this.onBlur.bind(this)} onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</Button>
+						<Button key={key}  onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</Button>
 					)
 				})
 			}
