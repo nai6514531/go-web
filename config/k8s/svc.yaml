@@ -10,7 +10,7 @@ spec:
   ports:
     - name: <%-config.get('name')%>
       port: 80
-      targetPort: 9999
+      targetPort: <%-config.get('server.port')%>
   selector:
     app: <%-config.get('name')%>
 
