@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type DailyBillService struct {
@@ -88,7 +89,7 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		params = append(params, billAt)
 	}
 
-	sql += " order by bill.id desc, bill.status limit " + _perPage + " offset " + _offset
+	sql += " order by bill.id DESC limit " + _perPage + " offset " + _offset
 	common.Logger.Debugln("params===========", params)
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()
@@ -137,18 +138,24 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 
 func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int64, error) {
 	var r *gorm.DB
-	tx := common.DB.Begin()
-	txmn := common.MNDB.Begin()
-
+	mnUserIds := []string{}
 	//update mnzn database
 	//如果status本来为1,需要更新的也为1时,返回的受影响行数为0
+	txmn := common.MNDB.Begin()
 	statusStr := strconv.Itoa(status)
 	boxStatBill := &muniu.BoxStatBill{Status: statusStr}
 	timeNow := time.Now().Local().Format("2006-01-02 15:04:05")
 	if status == 2 {
 		boxStatBill.BillDate = timeNow
 	}
-	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", userIds, billAt).Update(boxStatBill)
+	//mnzn用户id减1
+	for _, _userId :=range userIds {
+		_mnUserId := functions.StringToInt(_userId) - 1
+		if (_mnUserId >= 0) {
+			mnUserIds  = append(mnUserIds, strconv.Itoa(_mnUserId))
+		}
+	}
+	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error.Error())
 		txmn.Rollback()
@@ -156,7 +163,8 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 	}
 
 	//update soda-manager
-	//因为每次update时`updated_at`都会更新
+	//因为每次update时`updated_at`都会更新,所以基本上只要操作数据库成功返回受影响的行数都为1
+	tx := common.DB.Begin()
 	dailyBill := &model.DailyBill{Status: status}
 	if status == 2 {
 		dailyBill.SettledAt = timeNow
