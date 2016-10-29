@@ -176,13 +176,12 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-			if (errors) {
-				return;
-			}
-			console.log('the ids',self.provinceId,self.schoolId);
 			if(!self.provinceId || !self.schoolId) {
 				self.setState({tips:'请选择学校和省份'});
-				alert('请选择学校和省份');
+				// alert('请选择学校和省份');
+				return;
+			}
+			if (errors) {
 				return;
 			}
 			const deviceValue = {
@@ -214,6 +213,7 @@ class DeviceForm extends React.Component {
 	handleSelect(provinceId, schoolId) {
 		this.provinceId = provinceId;
 		this.schoolId = schoolId;
+		this.setState({tips:''});
 	}
 	changeName(currentPulse,e) {
 		e.preventDefault();
@@ -337,7 +337,6 @@ class DeviceForm extends React.Component {
 		if(id) {
 			breadcrumb = '修改设备';
 		}
-		// console.log('ids',this.provinceId,this.schoolId,this.provinceName,this.schoolName);
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
@@ -371,7 +370,8 @@ class DeviceForm extends React.Component {
 										  provinceName={this.provinceName}
 										  schoolName={this.schoolName}
 							/>
-							<span>提示:{this.state.tips}</span>
+							{this.state.tips?<span className="tip-error">{this.state.tips}</span>
+							:''}
 						</div>
 						<FormItem
 							{...formItemLayout}
