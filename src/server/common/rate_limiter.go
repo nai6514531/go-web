@@ -19,7 +19,7 @@ func SetUpRateLimiter() {
 
 	rate, err := limiter.NewRateFromFormatted(_rate)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	pool := redis.NewPool(func() (redis.Conn, error) {
@@ -48,7 +48,7 @@ func SetUpRateLimiter() {
 		limiter.StoreOptions{Prefix: prefix, MaxRetry: maxRetry})
 
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	iris.UseFunc(middleware.NewRateLimiter(limiter.NewLimiter(store, rate)).MiddlewareFunc)
