@@ -1,5 +1,5 @@
 import React from 'react';
-import './../school_device/app.less';
+import './app.less';
 import { Table, Breadcrumb, Form, Select, Button } from 'antd';
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -141,11 +141,6 @@ class SchoolTable extends React.Component {
 				self.loading = false;
 			}
 		}
-		const button = {
-			verticalAlign: 'text-bottom',
-			lineHeight: '23px',
-			height: '32px',
-		};
 		return (
 			<section className="view-user-list">
 				<header>
@@ -162,7 +157,7 @@ class SchoolTable extends React.Component {
 						perPage={this.state.perPage}
 						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
-					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item" style={button}>
+					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item add-btn">
 						添加新设备
 					</Link>
 				</div>
@@ -201,7 +196,7 @@ class SchoolFilter extends React.Component {
 			for(let i = 0; i < schoolList.length; i++) {
 				const id = schoolList[i].id.toString();
 				const name = schoolList[i].name;
-				const item = <Option key={id} value={id}>{name}</Option>;
+				const item = <Option style={{textOverflow: 'ellipsis'}} key={id} value={id}>{name}</Option>;
 				schoolNode.push(item);
 			}
 			// schoolNode = schoolList.map(function (item, key) {
@@ -215,7 +210,9 @@ class SchoolFilter extends React.Component {
 		};
 		return (
 			<div className="school-filter" style={schoolFilter}>
-				<Form inline onSubmit={this.handleSubmit}>
+				<Form inline onSubmit={this.handleSubmit}
+					  className="filter-form"
+				>
 					<FormItem
 						id="select"
 						labelCol={{ span: 6 }}
@@ -226,7 +223,7 @@ class SchoolFilter extends React.Component {
 								{ required: true, message: '请选择学校' },
 							],
 						})(
-							<Select id="school" style={{ width: 120 }} >
+							<Select id="school" style={{width:200}} dropdownClassName="test">
 								{schoolNode}
 							</Select>
 						)}

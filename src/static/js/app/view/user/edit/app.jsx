@@ -140,6 +140,10 @@ class UserForm extends React.Component {
 			if (errors) {
 				return;
 			}
+			if(values.cityId == -1) {
+				alert('请选择城市');
+				return false;
+			}
 			let cashAccount = {};
 			const user = {
 					"name": values.name,
@@ -291,7 +295,6 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
-		console.log('this.state.payType',this.state.payType);
 		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem

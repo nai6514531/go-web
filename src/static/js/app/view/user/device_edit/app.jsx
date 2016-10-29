@@ -66,6 +66,7 @@ class DeviceForm extends React.Component {
 			fourthPulseName: '',
 			visible: false,
 			unsaved: true,
+			tips: '',
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -182,6 +183,11 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
+			if(!self.provinceId || !self.schoolId) {
+				self.setState({tips:'必填项'});
+				// alert('请选择学校和省份');
+				return;
+			}
 			if (errors) {
 				return;
 			}
@@ -213,6 +219,7 @@ class DeviceForm extends React.Component {
 	handleSelect(provinceId, schoolId) {
 		this.provinceId = provinceId;
 		this.schoolId = schoolId;
+		this.setState({tips:''});
 	}
 	changeName(currentPulse,e) {
 		e.preventDefault();
@@ -385,6 +392,8 @@ class DeviceForm extends React.Component {
 										  provinceName={this.provinceName}
 										  schoolName={this.schoolName}
 							/>
+							{this.state.tips?<span className="tip-error">{this.state.tips}</span>
+								:''}
 						</div>
 						<FormItem
 							{...formItemLayout}
