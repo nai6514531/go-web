@@ -42,7 +42,6 @@ func SetUpLogger() {
 			"@timestamp":"2016-10-25 17:03:12.3330174 +0800 CST",
 		})
 	}
-
 }
 
 func TeardownLogger() {
