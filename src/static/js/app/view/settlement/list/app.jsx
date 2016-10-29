@@ -55,7 +55,11 @@ const App = React.createClass({
 							return <div className="status">未申请提现</div>
 							break;
 						case 1:
-							return <div className="status">已申请提现</div>
+							if(this.state.roleId == 3){
+								return <div className="status">未结账</div>
+							}else{
+								return <div className="status">已申请提现</div>
+							}
 							break;
 						case 2:
 							return <div className="status">已结账</div>
@@ -73,7 +77,6 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				render: (id, record) => {
-					console.log(record)
 					const roleId = this.state.roleId;
 					const status = record.status;
 					const accountType = record.accountType;
@@ -130,8 +133,8 @@ const App = React.createClass({
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
-									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-			              <a>已申请提现</a>
+									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+			              <a>结账</a>
 			            </Popconfirm>
 			            <span> | </span>
 									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -381,7 +384,7 @@ const App = React.createClass({
 					style={{width: 120}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
-					<Option value="1">已申请提现</Option>
+					<Option value="1">未结账</Option>
 					<Option value="2">已结账</Option>
 					<Option value="3">结账中</Option>
 					<Option value="4">结账失败</Option>
@@ -423,7 +426,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
-			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return ""}}/>
+			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
 		</section>);
 	}
 });
