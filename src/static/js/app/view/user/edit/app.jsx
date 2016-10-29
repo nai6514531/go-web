@@ -311,7 +311,8 @@ class UserForm extends React.Component {
 					label="支付宝账号">
 					{getFieldDecorator('alipayAccount', {
 						rules: [
-							{required: true, max:30, message: '请输入支付宝账号,不超过三十个字符'},
+							{required: true,  message: '必填'},
+							{ max:30, message: '不超过三十个字符'},
 						],
 						initialValue: initialValue.alipayAccount,
 
@@ -324,7 +325,8 @@ class UserForm extends React.Component {
 					label="支付宝姓名">
 					{getFieldDecorator('alipayName', {
 						rules: [
-							{required: true, max:30, message: '请输入支付宝姓名,不超过三十个字'},
+							{required: true, message: '必填'},
+							{max:30, message: '不超过三十个字'},
 						],
 						initialValue: initialValue.alipayName,
 
@@ -340,7 +342,8 @@ class UserForm extends React.Component {
 					label="转账户名">
 					{getFieldDecorator('realName', {
 						rules: [
-							{required: true, max:30, message: '请输入转账户名,不超过三十个字'},
+							{required: true, message: '必填'},
+							{max:30, message: '不超过三十个字'},
 						],
 						initialValue: initialValue.realName,
 
@@ -353,7 +356,8 @@ class UserForm extends React.Component {
 					label="开户行">
 					{getFieldDecorator('bankName', {
 						rules: [
-							{required: true, max:30, message: '请输入开户行,不超过三十个字'},
+							{required: true, message: '必填'},
+							{max:30, message: '不超过三十个字'},
 						],
 						initialValue: initialValue.bankName,
 
@@ -366,7 +370,8 @@ class UserForm extends React.Component {
 					label="账号">
 					{getFieldDecorator('account', {
 						rules: [
-							{required: true, max:30, message: '请输入账号,长度不超过三十位'},
+							{required: true, message: '必填'},
+							{max:30, message: '不超过三十位'},
 							{ validator: this.checkNumber },
 						],
 						initialValue: initialValue.account,
@@ -380,7 +385,8 @@ class UserForm extends React.Component {
 					label="短信通知手机号">
 					{getFieldDecorator('bankMobile', {
 						rules: [
-							{required: true, len: 11, message: '请输入11位短信通知手机号'},
+							{required: true, message: '必填'},
+							{len: 11, message: '请输入11位短信通知手机号'},
 						],
 						initialValue: initialValue.bankMobile,
 
