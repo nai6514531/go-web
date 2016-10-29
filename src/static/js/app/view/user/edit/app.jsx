@@ -117,7 +117,16 @@ class UserForm extends React.Component {
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == false){
-				alert('修改代理商失败');
+				const code = nextProps.resultPutDetail.result.status;
+				switch (code) {
+					case 8:
+					case 7:
+						alert('该手机号已存在');
+						break;
+					default:
+						alert('添加代理商失败');
+				}
+				// alert('修改代理商失败');
 				self.saveDetail = -1;
 			}
 		}

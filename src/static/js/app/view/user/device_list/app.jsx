@@ -144,7 +144,7 @@ class SchoolTable extends React.Component {
 		return (
 			<section className="view-user-list">
 				<header>
-					<Breadcrumb separator=">">
+					<Breadcrumb >
 						<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>

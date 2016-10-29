@@ -250,6 +250,7 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: true });
 	}
 	hideModal() {
+		// 取消就重置内部数据
 		this.setState({ visible: false });
 	}
 	checkNumber(rule, value, callback) {
@@ -568,8 +569,7 @@ class PulseName extends React.Component {
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
 				rules: [
-					{ required: true, max:30, message: '请输入服务名称,不超过三十个字'},
-					{ validator: this.props.checkNumber },
+					{ max:30, message: '不超过三十个字'},
 				],
 				initialValue:initialValue})(<Input type="text"/>)}
 		</FormItem>

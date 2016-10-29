@@ -340,7 +340,7 @@ class DeviceForm extends React.Component {
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
-					<Breadcrumb separator=">">
+					<Breadcrumb>
 						<Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 					</Breadcrumb>
@@ -548,7 +548,12 @@ class PulseName extends React.Component {
 		}
 		// 四个脉冲的初始值
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
-			{getFieldDecorator(itemKey,{initialValue:initialValue})(<Input type="text"/>)}
+			{getFieldDecorator(itemKey,{
+				rules: [
+					{ max:30, message: '不超过三十个字'},
+				],
+				initialValue:initialValue
+			})(<Input type="text"/>)}
 		</FormItem>
 		return (
 			<div onKeyDown={this.handleEnter.bind(this)}>
