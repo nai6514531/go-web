@@ -1,6 +1,6 @@
 {
   "name": "soda-manager",
-  "version": "0.15.0",
+  "version": "0.0.18",
   "image": {
 	"url": "reg.miz.so"
   },
@@ -8,7 +8,7 @@
 	"url": "mng.huace.cn"
   },
   "server":{
-	"port":8080
+	"port":9999
   },
   "author": "soda",
   "log": {

@@ -19,11 +19,11 @@ func SetUpSession() {
 		Addr:          viper.GetString("server.session.redis.addr"),
 		Password:      viper.GetString("server.session.redis.password"),
 		Database:      viper.GetString("server.session.redis.database"),
-		MaxIdle:       viper.GetInt("server.session.redis.max-idle"),
-		MaxActive:     viper.GetInt("server.session.redis.max-active"),
-		IdleTimeout:   time.Duration(viper.GetInt("server.session.redis.idle-timeout")) * time.Second,
+		MaxIdle:       viper.GetInt("server.session.redis.maxIdle"),
+		MaxActive:     viper.GetInt("server.session.redis.maxActive"),
+		IdleTimeout:   time.Duration(viper.GetInt("server.session.redis.idleTimeout")) * time.Second,
 		Prefix:        viper.GetString("server.session.redis.prefix"),
-		MaxAgeSeconds: viper.GetInt("server.session.redis.max-age-seconds"),
+		MaxAgeSeconds: viper.GetInt("server.session.redis.maxAgeSeconds"),
 	})
 
 	iris.UseSessionDB(db)
