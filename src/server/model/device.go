@@ -25,5 +25,5 @@ type Device struct {
 }
 
 func (Device) TableName() string {
-	return "device"
+	return "device_new"
 }
