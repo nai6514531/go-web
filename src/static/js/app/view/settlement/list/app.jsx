@@ -419,7 +419,7 @@ const App = React.createClass({
 				</Select>
 				{orderSelectOption}
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
-				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>过滤</Button>
+				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
 			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => {return ""}}/>
 		</section>);
