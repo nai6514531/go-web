@@ -351,7 +351,8 @@ class DeviceForm extends React.Component {
 							label="设备编号" >
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									{ required: true, len:10, message: '请输入设备编号,长度为十位' },
+									{ len:10, message: '长度为十位' },
+									{ required: true, message: '必填' },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
@@ -374,7 +375,7 @@ class DeviceForm extends React.Component {
 							label="楼道信息" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ max:30, message: '请输入楼道信息,不超过三十个字' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -399,15 +400,12 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入单脱价格' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
 								initialValue: initialValue.firstPulsePrice,
 							})(
-								<span>
-									<Input placeholder="请输入单脱价格" /> 
-									<span>元</span>
-								</span>
+								<Input placeholder="请输入单脱价格" /> 
 							)}
 							{this.firstPulseName ?
 								<span>服务名称已修改为: {this.firstPulseName}
@@ -421,7 +419,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ required: true, message: '请输入快洗价格' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
 								initialValue: initialValue.secondPulsePrice,
@@ -440,7 +438,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{  required: true, message: '请输入标准洗价格'},
+									{  required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
 								initialValue: initialValue.thirdPulsePrice,
@@ -459,7 +457,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{  required: true, message: '请输入大物洗价格'},
+									{  required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
 								initialValue: initialValue.fourthPulsePrice,
