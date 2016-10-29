@@ -68,6 +68,11 @@ class SchoolTable extends React.Component {
 		this.props.getAllSchool(USER.id, schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
+		console.log(nextProps.school);
+		if(this.getSchool == 1 && nextProps.school) {
+			this.loading = false;
+			this.getSchool = 0;
+		}
 		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
 		// const school = this.props.school;
 		// if(nextProps.school && nextProps.school.fetch == true){
@@ -109,12 +114,14 @@ class SchoolTable extends React.Component {
 				self.setState(pager);
 				self.loading = true;
 				self.props.getUserSchool(USER.id, schoolId, pager);
+				self.getSchool = 1;
 			},
 			onChange(current) {
 				const pager = { page: current, perPage: self.state.perPage};
 				self.setState(pager);
 				self.loading = true;
 				self.props.getUserSchool(USER.id, schoolId, pager);
+				self.getSchool = 1;
 			},
 		}
 	}

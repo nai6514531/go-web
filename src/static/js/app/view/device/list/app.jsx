@@ -77,7 +77,7 @@ const columns = [{
 				<a href="#">删除</a>
 			</Popconfirm>
 			<span className="ant-divider" />
-			{record.status == 9 ?
+			{record.statusCode == 9 ?
 				<Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
 					<a href="#">启用</a>
 				</Popconfirm>
@@ -227,6 +227,7 @@ class DeviceList extends React.Component {
 						index: item.id,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
+						statusCode: item.status,
 						status: status,
 						address: item.address,
 						firstPulsePrice: item.firstPulsePrice/100,
