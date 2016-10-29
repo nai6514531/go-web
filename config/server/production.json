@@ -68,6 +68,16 @@
 	  "maxIdle": 50,
 	  "maxOpen": 50
 	},
+	"mndbprod": {
+	  "dialect": "mysql",
+	  "host": "120.24.248.223",
+	  "port": 3306,
+	  "user": "boxadmin",
+	  "password": "db@ba1306",
+	  "database": "mnzn",
+	  "maxIdle": 20,
+	  "maxOpen": 20
+	},
 	"redis": {
 	  "addr": "r-bp1e08c5fc1fcad4.redis.rds.aliyuncs.com:6379",
 	  "password": "r-bp1e08c5fc1fcad4:Hyx12345",
