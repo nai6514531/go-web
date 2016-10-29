@@ -88,6 +88,7 @@ func (self *DeviceService) Create(device *model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Create(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
@@ -107,6 +108,7 @@ func (self *DeviceService) Update(device model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
@@ -126,6 +128,7 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
@@ -145,6 +148,7 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
@@ -165,6 +169,7 @@ func (self *DeviceService) Reset(id int) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 1).Scan(device)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//重置，在木牛数据库
@@ -186,6 +191,7 @@ func (self *DeviceService) Delete(id int) bool {
 	//硬删除记录
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Scan(device).Unscoped().Delete(&model.Device{})
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//重置，在木牛数据库

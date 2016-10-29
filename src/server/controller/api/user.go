@@ -243,7 +243,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 		return
 	}
 
-	captchaKey := viper.GetString("server.captcha.Key")
+	captchaKey := viper.GetString("server.captcha.key")
 	captchaCache := ctx.Session().GetString(captchaKey)
 	if captchaCache == "" {
 		//不存在

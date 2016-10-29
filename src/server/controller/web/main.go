@@ -69,8 +69,8 @@ func (self *WebController) Stat(ctx *iris.Context) {
 
 func (self *WebController) Captcha(ctx *iris.Context) {
 	_cap := captcha.New()
-	fontPath := viper.GetString("server.captcha.font-path")
-	captchaKey := viper.GetString("server.captcha.Key")
+	fontPath := viper.GetString("server.captcha.fontPath")
+	captchaKey := viper.GetString("server.captcha.key")
 	if err := _cap.SetFont(fontPath); err != nil {
 		panic(err.Error())
 	}

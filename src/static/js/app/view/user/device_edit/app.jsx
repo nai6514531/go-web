@@ -67,7 +67,6 @@ class DeviceForm extends React.Component {
 			visible: false,
 			unsaved: true,
 			tips: '',
-			resetName: 0,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -252,7 +251,7 @@ class DeviceForm extends React.Component {
 	}
 	hideModal() {
 		// 取消就重置内部数据
-		this.setState({ visible: false ,resetName: this.state.currentPulse});
+		this.setState({ visible: false });
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -513,7 +512,6 @@ class DeviceForm extends React.Component {
 									   third={this.thirdPulseName}
 									   fourth={this.fourthPulseName}
 									   checkNumber={this.checkNumber}
-									   resetName={this.state.resetName}
 							/>
 						</div>
 					</Form>
@@ -534,6 +532,7 @@ class PulseName extends React.Component {
 	constructor(props) {
 		super(props);
 		this.handleSubmit = this.handleSubmit.bind(this);
+		this.onCancel = this.onCancel.bind(this);
 	}
 	handleSubmit() {
 		const currentPulse = this.props.currentPulse;
@@ -542,6 +541,26 @@ class PulseName extends React.Component {
 		// 修改后的当前脉冲的值
 		this.props.changePulseName(pulseName);
 		this.props.onCancel();
+	}
+	onCancel() {
+		this.props.onCancel();
+		const { setFieldsValue } = this.props.form;
+		// 脉冲字段,四个脉冲分别设置四种 name
+		const currentPulse = this.props.currentPulse;
+		switch (currentPulse){
+			case 1:
+				setFieldsValue({'firstPulseName':this.props.first});
+				break;
+			case 2:
+				setFieldsValue({'secondPulseName':this.props.second});
+				break;
+			case 3:
+				setFieldsValue({'thirdPulseName':this.props.third});
+				break;
+			case 4:
+				setFieldsValue({'fourthPulseName':this.props.fourth});
+				break;
+		}
 	}
 	render() {
 		const { getFieldDecorator, setFieldsValue } = this.props.form;
@@ -577,7 +596,7 @@ class PulseName extends React.Component {
 		</FormItem>
 		return (
 			<div>
-				<Modal title="修改服务名称" visible={this.props.visible} onOk={this.handleSubmit} onCancel={this.props.onCancel}>
+				<Modal title="修改服务名称" visible={this.props.visible} onOk={this.handleSubmit} onCancel={this.onCancel}>
 					<Form horizontal>
 						{itemNode}
 					</Form>
