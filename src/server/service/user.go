@@ -74,6 +74,7 @@ func (self *UserService) Create(user *model.User) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Create(user)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
@@ -94,6 +95,7 @@ func (self *UserService) Update(user *model.User) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.User{}).Updates(user).Scan(user)
 	if r.Error != nil || r.RowsAffected <= 0 {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
