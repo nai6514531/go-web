@@ -205,7 +205,7 @@ class UserForm extends React.Component {
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
-		if(pattern.test(value)){
+		if(pattern.test(value) || !value){
 			callback();
 		} else {
 			callback('只能为数字');
@@ -432,7 +432,8 @@ class UserForm extends React.Component {
 							label="代理商名称" >
 							{getFieldDecorator('name', {
 								rules: [
-									{ required: true, max:30, message: '请输入代理商名称,不超过三十个字' },
+									{required: true, message: '必填'},
+									{max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.name,
 							})(
@@ -444,7 +445,8 @@ class UserForm extends React.Component {
 							label="联系人" >
 							{getFieldDecorator('contact', {
 								rules: [
-									{ required: true, max:30, message: '请输入联系人,不超过三十个字' },
+									{ required: true, message: '必填' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.contact,
 							})(
@@ -456,7 +458,8 @@ class UserForm extends React.Component {
 							label="地址" >
 							{getFieldDecorator('address', {
 								rules: [
-									{ required: true, max:30, message: '请输入地址,不超过三十个字' },
+									{ required: true, message: '必填' },
+									{ max:30, message: '不超过三十个字' },
 								],
 								initialValue: initialValue.address,
 							})(
@@ -468,7 +471,8 @@ class UserForm extends React.Component {
 							label="手机号" >
 							{getFieldDecorator('mobile', {
 								rules: [
-									{ required: true, len: 11, message: '请输入11位手机号' },
+									{ len: 11, message: '请输入11位' },
+									{ required: true, message: '必填' },
 									{ validator: this.checkNumber },
 								],
 								initialValue: initialValue.mobile,
@@ -484,7 +488,7 @@ class UserForm extends React.Component {
 								rules: [
 									{  message: '请选择收款方式' },
 								],
-								initialValue: initialValue.type? (initialValue.type<="0"?"0":initialValue.type): this.state.payType.toString(),
+								initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
 							})(
 								<RadioGroup>
 									<Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">
@@ -505,7 +509,8 @@ class UserForm extends React.Component {
 							label="服务电话" >
 							{getFieldDecorator('telephone', {
 								rules: [
-									{ required: true, max:30, message: '请输入服务电话,长度不超过三十位' },
+									{ required: true, message: '必填' },
+									{ max:30, message: '长度不超过三十位' },
 									{ validator: this.checkAreaCode },
 								],
 								initialValue: initialValue.telephone,
