@@ -86,8 +86,8 @@ class SchoolSelect extends React.Component {
 			provinceName: provinceName,
 			chooseSchool: true,
 		});
-		this.toggleLight(event);
-		console.log(event.target);
+		// this.toggleLight(event);
+		// console.log(event.target);
 		this.hide = false;
 		// event.target.addClass('red');
 	}

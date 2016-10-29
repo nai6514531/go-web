@@ -567,28 +567,6 @@ class PulseName extends React.Component {
 				initialValue = this.props.fourth;
 				break;
 		}
-		console.log('itemKey',itemKey);
-		console.log('this.resetName',this.props.resetName);
-		if(this.props.resetName == 1) {
-			setFieldsValue({itemKey:this.props.first});
-		}
-		// switch (this.props.resetName) {
-		// 	case 0:
-		// 		// setFieldsValue({itemKey:''});
-		// 		break;
-		// 	case 1:
-		// 		setFieldsValue({itemKey:this.props.first});
-		// 		break;
-		// 	case 2:
-		// 		setFieldsValue({itemKey:this.props.second});
-		// 		break;
-		// 	case 3:
-		// 		setFieldsValue({itemKey:this.props.third});
-		// 		break;
-		// 	case 4:
-		// 		setFieldsValue({itemKey:this.props.fourth});
-		// 		break;
-		// }
 		// 四个脉冲的初始值
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
