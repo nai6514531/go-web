@@ -18,7 +18,7 @@ func initLog() *log.Logger {
 		if err != nil {
 			log.Fatalf("open file error :%s \n", logFilePath)
 		}
-		return log.New(logFile, "[h5-mall-if] ", log.Ldate|log.Ltime|log.Llongfile)
+		return log.New(logFile, "[soda-manager] ", log.Ldate|log.Ltime|log.Llongfile)
 	}
 }
 
@@ -31,8 +31,8 @@ func SetUpDB() {
 	database := viper.GetString("server.db.database")
 	host := viper.GetString("server.db.host")
 	port := viper.GetString("server.db.port")
-	maxIdle := viper.GetInt("server.db.max-idle")
-	maxOpen := viper.GetInt("server.db.max-open")
+	maxIdle := viper.GetInt("server.db.maxIdle")
+	maxOpen := viper.GetInt("server.db.maxOpen")
 
 	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
 
@@ -59,8 +59,8 @@ func SetUpMNDB() {
 	database := viper.GetString("server.mndb.database")
 	host := viper.GetString("server.mndb.host")
 	port := viper.GetString("server.mndb.port")
-	maxIdle := viper.GetInt("server.mndb.max-idle")
-	maxOpen := viper.GetInt("server.mndb.max-open")
+	maxIdle := viper.GetInt("server.mndb.maxIdle")
+	maxOpen := viper.GetInt("server.mndb.maxOpen")
 
 	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
 
