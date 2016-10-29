@@ -211,6 +211,14 @@ class UserForm extends React.Component {
 			callback('只能为数字');
 		}
 	}
+	checkAreaCode(rule, value, callback) {
+		var pattern = new RegExp(/^((0\d{2,3}-\d{7,8})|(1\d{10}))$/);
+		if(pattern.test(value) || !value){
+			callback();
+		} else {
+			callback('请填写正确号码');
+		}
+	}
 	render() {
 		let ProvinceNode = [];
 		if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -498,7 +506,7 @@ class UserForm extends React.Component {
 							{getFieldDecorator('telephone', {
 								rules: [
 									{ required: true, max:30, message: '请输入服务电话,长度不超过三十位' },
-									{ validator: this.checkNumber },
+									{ validator: this.checkAreaCode },
 								],
 								initialValue: initialValue.telephone,
 
