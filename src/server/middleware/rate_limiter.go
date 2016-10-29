@@ -20,7 +20,7 @@ func (self *RateLimiter) MiddlewareFunc(ctx *iris.Context) {
 	key := ctx.RequestIP() + ":" + ctx.PathString() + ":" + ctx.MethodString()
 	context, err := self.Limiter.Get(key)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	ctx.SetHeader("X-RateLimit-Limit", strconv.FormatInt(context.Limit, 10))
 	ctx.SetHeader("X-RateLimit-Remaining", strconv.FormatInt(context.Remaining, 10))
