@@ -67,6 +67,7 @@ class DeviceForm extends React.Component {
 			visible: false,
 			unsaved: true,
 			tips: '',
+			resetName: 0,
 		};
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.showModal = this.showModal.bind(this);
@@ -251,7 +252,7 @@ class DeviceForm extends React.Component {
 	}
 	hideModal() {
 		// 取消就重置内部数据
-		this.setState({ visible: false });
+		this.setState({ visible: false ,resetName: this.state.currentPulse});
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -512,6 +513,7 @@ class DeviceForm extends React.Component {
 									   third={this.thirdPulseName}
 									   fourth={this.fourthPulseName}
 									   checkNumber={this.checkNumber}
+									   resetName={this.state.resetName}
 							/>
 						</div>
 					</Form>
@@ -542,7 +544,7 @@ class PulseName extends React.Component {
 		this.props.onCancel();
 	}
 	render() {
-		const { getFieldDecorator } = this.props.form;
+		const { getFieldDecorator, setFieldsValue } = this.props.form;
 		const formItemLayout = {
 			labelCol: { span: 4 },
 			wrapperCol: { span: 20 },
@@ -565,6 +567,28 @@ class PulseName extends React.Component {
 				initialValue = this.props.fourth;
 				break;
 		}
+		console.log('itemKey',itemKey);
+		console.log('this.resetName',this.props.resetName);
+		if(this.props.resetName == 1) {
+			setFieldsValue({itemKey:this.props.first});
+		}
+		// switch (this.props.resetName) {
+		// 	case 0:
+		// 		// setFieldsValue({itemKey:''});
+		// 		break;
+		// 	case 1:
+		// 		setFieldsValue({itemKey:this.props.first});
+		// 		break;
+		// 	case 2:
+		// 		setFieldsValue({itemKey:this.props.second});
+		// 		break;
+		// 	case 3:
+		// 		setFieldsValue({itemKey:this.props.third});
+		// 		break;
+		// 	case 4:
+		// 		setFieldsValue({itemKey:this.props.fourth});
+		// 		break;
+		// }
 		// 四个脉冲的初始值
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{

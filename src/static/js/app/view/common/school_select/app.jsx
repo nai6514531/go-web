@@ -88,6 +88,7 @@ class SchoolSelect extends React.Component {
 		});
 		this.toggleLight(event);
 		console.log(event.target);
+		this.hide = false;
 		// event.target.addClass('red');
 	}
 	selectSchool(schoolId, schoolName) {
@@ -102,6 +103,7 @@ class SchoolSelect extends React.Component {
 			});
 			this.toggleBox();
 			this.props.handleSelect(this.state.provinceId, schoolId);
+			this.hide = true;
 		} else {
 			alert('请先选择省份');
 		}
@@ -117,6 +119,7 @@ class SchoolSelect extends React.Component {
 			provinceName: this.state.defaultProvince.provinceName,
 			chooseSchool: false,
 		});
+		this.hide = true;
 	}
 	toggleLight(event) {
 		console.log('event',event);
@@ -158,7 +161,7 @@ class SchoolSelect extends React.Component {
 						{provinceNode}
 					</div>
 					<div className="school">
-						{schoolNode ? schoolNode : '请先选择省份'}
+						{this.hide ? '请先选择省份' :(schoolNode ? schoolNode : '请先选择省份')}
 					</div>
 				</div>
 				<div onClick = {this.toggleBox.bind(this)} className="show">
