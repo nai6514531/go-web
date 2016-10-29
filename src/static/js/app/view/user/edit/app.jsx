@@ -158,11 +158,15 @@ class UserForm extends React.Component {
                     "cityId": parseInt(values.cityId),
                     "provinceId": parseInt(values.provinceId),
 				}
-			} else {
+			} else if(values.type == 1){
                 cashAccount = {
                     "type": parseInt(values.type),
                     "realName": values.alipayName,
                     "account": values.alipayAccount,
+				}
+			} else {
+				cashAccount = {
+					"type": parseInt(values.type),
 				}
 			}
             user.cashAccount = cashAccount;
