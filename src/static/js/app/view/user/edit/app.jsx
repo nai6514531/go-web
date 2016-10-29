@@ -72,7 +72,8 @@ class UserForm extends React.Component {
         const self = this;
 		if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             if(nextProps.detail.result.data.cashAccount){
-				const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
+				// const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
+				const type = nextProps.detail.result.data.cashAccount.type;
 				if(type) {
 					switch (type) {
 						case 1:
@@ -282,6 +283,7 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
+		console.log('this.state.payType',this.state.payType);
 		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem
