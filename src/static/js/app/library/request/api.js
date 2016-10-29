@@ -25,6 +25,8 @@ const api = axios.create({
 				if (data.status == -1) {
 					alert(data.msg);
 					window.location.href = '/';
+				}else{
+					alert(data.msg);
 				}
 			} else {
 				data.status = parseInt(data.status.substr(-2));
@@ -33,7 +35,6 @@ const api = axios.create({
 		} else {
 			return alert('服务器返回数据异常!');
 		}
-
 	}]
 });
 
