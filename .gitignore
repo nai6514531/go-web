@@ -83,3 +83,4 @@ fabric.properties
 /config/server/prerelease.json
 /config/server/preview.json
 /config/server/default.json
+/config/server/production.json

@@ -20,20 +20,20 @@ func SetUpCommon() {
 
 	iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
 		result := &enity.Result{"-2", nil, common_msg["-2"]}
+		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
-		return
 	})
 
 	iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
 		result := &enity.Result{"-3", nil, common_msg["-3"]}
+		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
-		return
 	})
 
 	iris.OnError(iris.StatusTooManyRequests, func(ctx *iris.Context) {
 		result := &enity.Result{"-4", nil, common_msg["-4"]}
+		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
-		return
 	})
 
 }
@@ -43,11 +43,10 @@ var (
 		userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 		if userId > 0 {
 			ctx.Next()
-			return
 		} else {
 			result := &enity.Result{"-1", nil, common_msg["-1"]}
+			Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
-			return
 		}
 	}
 
