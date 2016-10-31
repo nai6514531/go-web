@@ -494,7 +494,7 @@ class UserForm extends React.Component {
 							label="手机号" >
 							{getFieldDecorator('mobile', {
 								rules: [
-									{ len: 11, message: '请输入11位' },
+									{ len: 11, message: '请输入11位手机号' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkNumber },
 								],

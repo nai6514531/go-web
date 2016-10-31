@@ -31,7 +31,7 @@ function mapDispatchToProps(dispatch) {
 
 const columns = [{
 	title: 'ID',
-	dataIndex: 'index',
+	dataIndex: 'key',
 	key: 'index',
 }, {
 	title: '编号',
@@ -122,7 +122,6 @@ class DeviceList extends React.Component {
 			if(status){
 				if(status.fetch == true){
 					this.props.getDeviceList(pager);
-					// alert('操作成功');
 				} else {
 					alert('操作失败!');
 					console.log(nextProps.status.result.msg);
@@ -135,7 +134,6 @@ class DeviceList extends React.Component {
 			if(remove){
 				if(remove.fetch == true){
 					this.props.getDeviceList(pager);
-					// alert('删除成功');
 					self.loading = true;
 				} else {
 					alert('删除失败!');
@@ -174,7 +172,12 @@ class DeviceList extends React.Component {
 	remove(id) {
 		this.props.deleteDevice(id);
 		this.removeDevice = 1;
-		// 这边执行完并不会触发 componentWillReceiveProps ?
+		const { page } = this.state;
+		if(this.dataLen == 1) {
+			if(page > 1){
+				this.pagination.onChange(page-1);
+			}
+		}
 	}
 	changeStatus(id,start) {
 		const self = this;
@@ -189,13 +192,14 @@ class DeviceList extends React.Component {
 		}
 	}
 	render() {
-		const pagination = this.initializePagination();
+		this.pagination = this.initializePagination();
 		const self = this;
 		const list = this.props.list;
 		let dataSource = [];
 		if(list) {
 			if(list.fetch == true){
 				const data = list.result.data.list;
+				self.dataLen = data.length;
 				dataSource = data.map(function (item, key) {
 					let referenceDevice = '';
 					switch (item.referenceDeviceId){
@@ -224,7 +228,7 @@ class DeviceList extends React.Component {
 					}
 					return {
 						key: item.id,
-						index: item.id,
+						index: key,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
 						statusCode: item.status,
@@ -255,7 +259,7 @@ class DeviceList extends React.Component {
 				<section className="view-content">
 					<Table columns={columns}
 						   dataSource={dataSource}
-						   pagination={pagination}
+						   pagination={this.pagination}
 						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
