@@ -55,7 +55,7 @@ func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
 	list := []*muniu.SignInUser{}
 	sql := "select date(inserttime) as 'date',count(*) as 'count' from box_user " +
 		"where date(inserttime)>='2016-01-01' group by date(inserttime)"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err

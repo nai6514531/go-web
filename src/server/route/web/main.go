@@ -22,6 +22,7 @@ func Web() {
 	iris.Get("/captcha.png", web.Captcha)
 
 	iris.Get("/500", func(ctx *iris.Context) {
+		panic(500)
 		ctx.EmitError(iris.StatusInternalServerError)
 	})
 
