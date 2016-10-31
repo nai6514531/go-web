@@ -151,6 +151,7 @@ class UserForm extends React.Component {
 				return;
 			}
 			if(values.cityId == -1) {
+				self.cityIdHelp = {'help':'请选择城市','className':'has-error'};
 				alert('请选择城市');
 				return false;
 			}
@@ -305,6 +306,7 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
+		this.cityIdHelp = {};
 		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem
@@ -413,6 +415,7 @@ class UserForm extends React.Component {
 				<FormItem
 					{...formItemLayout}
 					label="城市"
+					{...this.cityIdHelp}
 				>
 					{getFieldDecorator('cityId', {
 						rules: [
