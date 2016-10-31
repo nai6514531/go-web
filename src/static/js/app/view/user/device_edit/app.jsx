@@ -187,7 +187,7 @@ class DeviceForm extends React.Component {
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
 			if(!self.provinceId || !self.schoolId) {
-				self.setState({tips:'必填'});
+				self.setState({tips:'必选'});
 				// alert('请选择学校和省份');
 				return;
 			}
@@ -266,7 +266,7 @@ class DeviceForm extends React.Component {
 	}
 	checkPrice(rule, value, callback) {
 		// 只要大于零的数字
-		var pattern=new RegExp(/^(0|[1-9][0-9]{0,9})(\.[0-9]*)?$/g);
+		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
 		} else {
@@ -429,6 +429,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
@@ -448,6 +449,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
@@ -467,6 +469,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
@@ -486,6 +489,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
