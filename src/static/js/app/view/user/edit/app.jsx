@@ -101,6 +101,7 @@ class UserForm extends React.Component {
 				&& nextProps.resultPostDetail.fetch == false){
 				const code = nextProps.resultPostDetail.result.status;
 				switch (code) {
+					case 13:
 					case 7:
 						alert('该手机号已存在');
 						break;
@@ -124,7 +125,7 @@ class UserForm extends React.Component {
 						alert('该手机号已存在');
 						break;
 					default:
-						alert('添加代理商失败');
+						alert('修改代理商失败');
 				}
 				// alert('修改代理商失败');
 				self.saveDetail = -1;
