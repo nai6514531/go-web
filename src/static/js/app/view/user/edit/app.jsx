@@ -404,7 +404,7 @@ class UserForm extends React.Component {
 				>
 					{getFieldDecorator('provinceId', {
 						rules: [
-							{ required: true, message: '请选择省份' },
+							{ required: true, message: '必选' },
 						],
 						initialValue: initialValue.provinceId,
 					})(
@@ -420,7 +420,7 @@ class UserForm extends React.Component {
 				>
 					{getFieldDecorator('cityId', {
 						rules: [
-							{ required: true, message: '请选择城市' },
+							{ required: true, message: '必选' },
 						],
 						initialValue: initialValue.cityId,
 					})(
