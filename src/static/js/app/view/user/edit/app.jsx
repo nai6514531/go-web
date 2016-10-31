@@ -148,13 +148,12 @@ class UserForm extends React.Component {
 		e.preventDefault();
         const self = this;
 		this.props.form.validateFields((errors, values) => {
-			if (errors) {
-				return;
-			}
 			if(values.cityId == -1) {
 				self.cityIdHelp = {'help':'必选','className':'has-error'};
-				// alert('请选择城市');
 				return false;
+			}
+			if (errors) {
+				return;
 			}
 			let cashAccount = {};
 			const user = {
