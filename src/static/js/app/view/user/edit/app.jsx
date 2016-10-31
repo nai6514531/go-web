@@ -316,7 +316,7 @@ class UserForm extends React.Component {
 					{getFieldDecorator('alipayAccount', {
 						rules: [
 							{required: true,  message: '必填'},
-							{ max:30, message: '不超过三十个字符'},
+							{ max:30, message: '不超过三十个字'},
 						],
 						initialValue: initialValue.alipayAccount,
 
