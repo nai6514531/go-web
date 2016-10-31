@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
 )
@@ -112,11 +113,15 @@ func (self *RegionController) Province(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := regionService.Province()
 	if err != nil {
-		result = &enity.Result{"01020101", nil, region_msg["01020101"]}
-	} else {
-		result = &enity.Result{"01020100", list, region_msg["01020100"]}
+		result = &enity.Result{"01020101", err, region_msg["01020101"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
 	}
+	result = &enity.Result{"01020100", list, region_msg["01020100"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
+	return
 }
 
 /**
@@ -159,11 +164,13 @@ func (self *RegionController) City(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := regionService.City()
 	if err != nil {
-		result = &enity.Result{"01020201", nil, region_msg["01020101"]}
+		result = &enity.Result{"01020201", err, region_msg["01020101"]}
+		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"01020200", list, region_msg["01020200"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -207,8 +214,9 @@ func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
 	result := &enity.Result{}
 	districts, err := regionService.DistrictsOfCity(id)
 	if err != nil {
-		result = &enity.Result{"01020301", nil, region_msg["01020301"]}
+		result = &enity.Result{"01020301", err, region_msg["01020301"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	if districts == nil {
@@ -218,6 +226,7 @@ func (self *RegionController) DistrictOfCity(ctx *iris.Context) {
 	}
 	result = &enity.Result{"01020300", districts, region_msg["01020300"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -259,11 +268,14 @@ func (self *RegionController) ProvinceDetail(ctx *iris.Context) {
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
-		result = &enity.Result{"01020401", nil, region_msg["01020401"]}
+		result = &enity.Result{"01020401", err, region_msg["01020401"]}
+		common.Log(ctx, result)
+		return
 	} else {
 		result = &enity.Result{"01020400", province, region_msg["01020400"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -305,11 +317,13 @@ func (self *RegionController) CityDetail(ctx *iris.Context) {
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
-		result = &enity.Result{"01020501", nil, region_msg["01020501"]}
+		result = &enity.Result{"01020501", err, region_msg["01020501"]}
+		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"01020500", province, region_msg["01020500"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -351,11 +365,14 @@ func (self *RegionController) DistrictDetail(ctx *iris.Context) {
 	result := &enity.Result{}
 	province, err := regionService.Detail(id)
 	if err != nil {
-		result = &enity.Result{"01020601", nil, region_msg["01020601"]}
+		result = &enity.Result{"01020601", err, region_msg["01020601"]}
+		common.Log(ctx, result)
+		return
 	} else {
 		result = &enity.Result{"01020600", province, region_msg["01020600"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -399,8 +416,9 @@ func (self *RegionController) CityOfProvince(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := regionService.CitiesOfProvince(id)
 	if err != nil {
-		result = &enity.Result{"01020701", nil, region_msg["01020701"]}
+		result = &enity.Result{"01020701", err, region_msg["01020701"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	if list == nil {
@@ -410,6 +428,7 @@ func (self *RegionController) CityOfProvince(ctx *iris.Context) {
 	}
 	result = &enity.Result{"01020700", list, region_msg["01020700"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -445,8 +464,9 @@ func (self *RegionController) SchoolOfProvince(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := regionService.SchoolOfProvince(id)
 	if err != nil {
-		result = &enity.Result{"01020801", nil, region_msg["01020801"]}
+		result = &enity.Result{"01020801", err, region_msg["01020801"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	if list == nil {
@@ -456,4 +476,5 @@ func (self *RegionController) SchoolOfProvince(ctx *iris.Context) {
 	}
 	result = &enity.Result{"01020800", list, region_msg["01020800"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
 )
@@ -43,11 +44,14 @@ func (self *ReferenceDeviceController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	referenceDevice, err := referenceDeviceService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01040101", nil, reference_device_msg["01040101"]}
-	} else {
-		result = &enity.Result{"01040100", referenceDevice, reference_device_msg["01040100"]}
+		result = &enity.Result{"01040101", err, reference_device_msg["01040101"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
 	}
+	result = &enity.Result{"01040100", referenceDevice, reference_device_msg["01040100"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -91,8 +95,11 @@ func (self *ReferenceDeviceController) List(ctx *iris.Context) {
 	list, err := referenceDeviceService.List(page, perPage)
 	if err != nil {
 		result = &enity.Result{"01040201", nil, reference_device_msg["01040201"]}
-	} else {
-		result = &enity.Result{"01040200", list, reference_device_msg["01040200"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
 	}
+	result = &enity.Result{"01040200", list, reference_device_msg["01040200"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
