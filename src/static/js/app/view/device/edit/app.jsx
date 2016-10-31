@@ -152,7 +152,8 @@ class DeviceForm extends React.Component {
 					self.context.router.goBack();
 				} else {
 					switch (nextProps.resultPostDetail.result.status){
-						case 3 || 1:
+						case 3:
+						case 1:
 							alert(nextProps.resultPostDetail.result.msg);
 							break;
 						default:
@@ -571,6 +572,7 @@ class PulseName extends React.Component {
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
 				rules: [
+					{ require: true, message: '必填'},
 					{ max:30, message: '不超过三十个字'},
 				],
 				initialValue:initialValue

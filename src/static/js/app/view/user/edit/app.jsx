@@ -74,6 +74,7 @@ class UserForm extends React.Component {
             if(nextProps.detail.result.data.cashAccount){
 				// const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
 				const type = nextProps.detail.result.data.cashAccount.type;
+				console.log('the type',type);
 				if(type) {
 					switch (type) {
 						case 1:
