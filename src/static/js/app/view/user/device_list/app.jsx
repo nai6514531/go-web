@@ -229,6 +229,7 @@ class SchoolFilter extends React.Component {
 							rules: [
 								{ required: true, message: '请选择学校' },
 							],
+							initialValue: "-1",
 						})(
 							<Select id="school" style={{width:200}} dropdownClassName="test">
 								{schoolNode}
