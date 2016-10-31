@@ -212,7 +212,6 @@ func BatchAliPay(batchNum int, aliPayDetailDataStr string) bool {
 		return false
 	}
 	param := make(map[string]string, 0)
-	common.Logger.Debugln("-------------------------", strings.HasSuffix(aliPayDetailDataStr, "|"))
 	if strings.HasSuffix(aliPayDetailDataStr, "|") {
 		aliPayDetailDataStr = aliPayDetailDataStr[:len(aliPayDetailDataStr)-1]
 	}
@@ -325,7 +324,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		}
 
 
-		//update aliPay
+		//aliPay bill
 		if len(aliPayUserIds) > 0 {
 			for _, _userId := range aliPayUserIds {
 				_userCashAccount := (*accountMap)[functions.StringToInt(_userId)]
@@ -341,7 +340,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 
 		//update bankPay
 		if len(bankPayUserIds) > 0 {
-			rows, err := dailyBillService.UpdateStatus(2, billAt, bankPayUserIds...)
+			rows, err := dailyBillService.UpdateStatus(2, billAt, bankPayUserIds...)        //新旧系统的订单id不一致,所以分开更新
 			if err != nil {
 				common.Logger.Warningln("银行结算更新失败")
 				isSuccessed = false
@@ -351,6 +350,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 				isSuccessed = false
 			}
 		}
+
 	}
 
 	//发起支付宝请求
@@ -381,8 +381,10 @@ func (self *DailyBillController) Notification (ctx *iris.Context) {
 	common.Logger.Debugln("支付宝通知 Body:", string(body))
 	err := json.Unmarshal(body, &notifyRequest)
 	if err != nil {
-
+		common.Logger.Warningln("解析支付宝回调信息失败!")
+		ctx.Response.SetBodyString("fail")
 	}
+
 	reqMap["notify_time"] = notifyRequest.NotifyTime
 	reqMap["notify_type"] = notifyRequest.NotifyType
 	reqMap["notify_dd"] = notifyRequest.NotifyId
