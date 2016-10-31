@@ -6,12 +6,11 @@ import (
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/route/api"
 	"maizuo.com/soda-manager/src/server/route/web"
-	"github.com/iris-contrib/middleware/recovery"
 )
 
 func SetUpServer() {
 
-	iris.Use(recovery.New())
+	//iris.Use(recovery.Handler)
 
 	isDevelopment := viper.GetBool("isDevelopment")
 	staticSystemPath := viper.GetString("staticSystemPath")

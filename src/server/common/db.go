@@ -78,7 +78,36 @@ func SetUpMNDB() {
 
 }
 
+func SetUpMNDBPROD() {
+
+	isDevelopment := viper.GetBool("isDevelopment")
+	dialect := viper.GetString("server.mndbprod.dialect")
+	user := viper.GetString("server.mndbprod.user")
+	password := viper.GetString("server.mndbprod.password")
+	database := viper.GetString("server.mndbprod.database")
+	host := viper.GetString("server.mndbprod.host")
+	port := viper.GetString("server.mndbprod.port")
+	maxIdle := viper.GetInt("server.mndbprod.maxIdle")
+	maxOpen := viper.GetInt("server.mndbprod.maxOpen")
+
+	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
+
+	db, err := gorm.Open(dialect, url)
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	db.LogMode(isDevelopment)
+
+	db.DB().SetMaxIdleConns(maxIdle)
+	db.DB().SetMaxOpenConns(maxOpen)
+
+	MNDBPROD = db
+
+}
+
 var (
 	DB   *gorm.DB
 	MNDB *gorm.DB
+	MNDBPROD *gorm.DB
 )
