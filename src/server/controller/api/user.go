@@ -5,10 +5,10 @@ import (
 	"github.com/kataras/iris"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
-	"maizuo.com/soda-manager/src/server/common"
 )
 
 /**
@@ -33,8 +33,6 @@ import (
 	@apiParam (错误码) {String} 01010404 密码不能为空
 	@apiParam (错误码) {String} 01010406 联系人手机不能为空
 	@apiParam (错误码) {String} 01010407 登陆账号已被注册
-	@apiParam (错误码) {String} 01010408 请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行
-	@apiParam (错误码) {String} 01010409 结算账号不能为空
 	@apiParam (错误码) {String} 01010410 新增用户记录失败
 	@apiParam (错误码) {String} 01010411 新增用户结算账号失败
 	@apiParam (错误码) {String} 01010412 新增用户角色记录失败
@@ -49,8 +47,7 @@ import (
 	@apiParam (错误码) {String} 01010506 联系人手机不能为空
 	@apiParam (错误码) {String} 01010507 登陆账号已被注册
 	@apiParam (错误码) {String} 01010508 手机号码已被使用
-	@apiParam (错误码) {String} 01010509 请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行!
-	@apiParam (错误码) {String} 01010510 结算账号不能为空
+
 	@apiParam (错误码) {String} 01010511 修改用户记录失败
 	@apiParam (错误码) {String} 01010512 修改用户结算账号失败
 	@apiParam (错误码) {String} 01010513 请输入11位的手机号
@@ -113,8 +110,6 @@ var (
 		"01010404": "密码不能为空!",
 		"01010406": "联系人手机不能为空!",
 		"01010407": "登陆账号已被注册!",
-		"01010408": "请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行!",
-		"01010409": "结算账号不能为空",
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
 		"01010412": "新增用户角色记录失败",
@@ -129,8 +124,6 @@ var (
 		"01010506": "联系人手机不能为空!",
 		"01010507": "登陆账号已被注册!",
 		"01010508": "手机号码已被使用!",
-		"01010509": "请填写正确的type值1-支付宝(实时分账)，2-微信,3-银行!",
-		"01010510": "结算账号不能为空",
 		"01010511": "修改用户记录失败",
 		"01010512": "修改用户结算账号失败",
 		"01010513": "请输入11位的手机号!",
@@ -531,11 +524,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,方便还原上一条历史记录
+	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,原来是-1的话还是-1，方便还原上一条历史记录
 		current, err := userCashAccountService.BasicByUserId(userId)
 		if err == nil { //可以找到
-			//把该记录的type值取反
-			current.Type = -current.Type
+			if current.Type > 0 {
+				//把该记录的type值取反
+				current.Type = -current.Type
+			}
 			ok = userCashAccountService.UpdateByUserId(current)
 			if !ok {
 				result = &enity.Result{"01010512", nil, user_msg["01010512"]}
