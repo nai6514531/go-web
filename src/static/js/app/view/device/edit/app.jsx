@@ -45,6 +45,7 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 const key = ['first','second','third','fourth'];
+const nameList = ['单脱价格','快洗价格','标准洗价格','大物洗价格'];
 
 class DeviceForm extends React.Component {
 	constructor(props, context) {
@@ -411,7 +412,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入单脱价格" />
 							)}
-							{this.firstPulseName ?
+							{this.firstPulseName !== nameList[0] ?
 								<span>服务名称已修改为: {this.firstPulseName}
 									<a href="#" onClick={this.changeName.bind(this,1)}>修改</a>
 										</span> :
@@ -430,7 +431,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入快洗价格"/>
 							)}
-							{this.secondPulseName ?
+							{this.secondPulseName!== nameList[1] ?
 								<span>服务名称已修改为: {this.secondPulseName}
 									<a href="#" onClick={this.changeName.bind(this,2)}>修改</a>
 										</span> :
@@ -449,7 +450,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入标准洗价格"/>
 							)}
-							{this.thirdPulseName?
+							{this.thirdPulseName !== nameList[2] ?
 								<span>服务名称已修改为: {this.thirdPulseName}
 									<a href="#" onClick={this.changeName.bind(this,3)}>修改</a>
 										</span> :
@@ -469,7 +470,7 @@ class DeviceForm extends React.Component {
 								<Input placeholder="请输入大物洗价格"/>
 							)}
 							{
-								this.fourthPulseName ?
+								this.fourthPulseName !== nameList[3] ?
 									<span>服务名称已修改为: {this.fourthPulseName}
 										<a href="#" onClick={this.changeName.bind(this,4)}>修改</a>
 										</span> :
@@ -515,9 +516,15 @@ class PulseName extends React.Component {
 		const currentPulse = this.props.currentPulse;
 		const itemKey = key[currentPulse-1] + 'PulseName';
 		const pulseName = this.props.form.getFieldsValue()[itemKey];
-		// 修改后的当前脉冲的值
-		this.props.changePulseName(pulseName);
-		this.props.onCancel();
+		this.props.form.validateFields((errors, values) => {
+			if(errors){
+				return false;
+			} else {
+				// 修改后的当前脉冲的值
+				this.props.changePulseName(pulseName);
+				this.props.onCancel();
+			}
+		})
 	}
 	handleEnter(event) {
 		if (event.keyCode==13) {
@@ -572,8 +579,8 @@ class PulseName extends React.Component {
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
 				rules: [
-					{ require: true, message: '必填'},
-					{ max:30, message: '不超过三十个字'},
+					{ required: true, message: '必填' },
+					{ max:30, message: '不超过三十个字'}
 				],
 				initialValue:initialValue
 			})(<Input type="text"/>)}
