@@ -74,7 +74,6 @@ class UserForm extends React.Component {
             if(nextProps.detail.result.data.cashAccount){
 				// const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
 				const type = nextProps.detail.result.data.cashAccount.type;
-				console.log('the type',type);
 				if(type) {
 					switch (type) {
 						case 1:
@@ -143,6 +142,7 @@ class UserForm extends React.Component {
     }
     cityChange(event) {
         this.setState({cityChange:true});
+		this.cityIdHelp = {};
     }
 	handleSubmit(e) {
 		e.preventDefault();
@@ -152,8 +152,8 @@ class UserForm extends React.Component {
 				return;
 			}
 			if(values.cityId == -1) {
-				self.cityIdHelp = {'help':'请选择城市','className':'has-error'};
-				alert('请选择城市');
+				self.cityIdHelp = {'help':'必选','className':'has-error'};
+				// alert('请选择城市');
 				return false;
 			}
 			let cashAccount = {};
@@ -307,7 +307,9 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
-		this.cityIdHelp = {};
+		if(!this.cityIdHelp){
+			this.cityIdHelp = {};
+		}
 		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem
