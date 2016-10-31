@@ -7,6 +7,8 @@ import (
 	"github.com/kataras/iris"
 	"maizuo.com/soda-manager/src/server/enity"
 	"time"
+	"strconv"
+	"strings"
 )
 
 func SetUpLogger() {
@@ -42,23 +44,30 @@ var (
 		endAt := time.Now().UnixNano() / 1000000
 		processTime := endAt - startAt
 		body := string(ctx.PostBody()[:])
+		handle := strings.Split(ctx.GetHandlerName(), "/")
+		_interface := handle[1] + ":" + handle[len(handle) - 2] + ":" + handle[len(handle) - 1]
+		_status, _ := strconv.Atoi(result.Status[len(result.Status) - 1 : len(result.Status)])
+		if _status != 0 {
+			_interface += ":error"
+		}
 		Logger := logrus.WithFields(logrus.Fields{
-			"@source":ctx.RemoteAddr(),
+			"@source":ctx.LocalAddr().String(),
 			"@timestamp":time.Now().Format("2006-01-02 15:04:05"),
 			"@fields":map[string]interface{}{
 				"fromtype":"soda-manager",
 				"host":ctx.HostString(),
-				"interface":ctx.PathString(),
+				"interface":_interface,
 				"method":ctx.MethodString(),
-				"ip":ctx.LocalAddr().String(),
+				"ip":ctx.RemoteAddr(),
 				"query":ctx.URLParams(),
 				"param":ctx.Params.String(),
 				"body":body,
+				"alarmID":"1",
 				"path":ctx.PathString(),
 				"processTime":processTime,
 				"result":result,
-				"errorMsg":result.Msg,
-				"errorStatus":result.Status,
+				"msg":result.Msg,
+				"status":result.Status,
 				"system":"soda-manager",
 				"totype":"soda-manager",
 			},
