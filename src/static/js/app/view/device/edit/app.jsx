@@ -412,7 +412,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入单脱价格" />
 							)}
-							{this.firstPulseName !== nameList[0] ?
+							{this.firstPulseName !== nameList[0] && this.firstPulseName?
 								<span>服务名称已修改为: {this.firstPulseName}
 									<a href="#" onClick={this.changeName.bind(this,1)}>修改</a>
 										</span> :
@@ -431,7 +431,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入快洗价格"/>
 							)}
-							{this.secondPulseName!== nameList[1] ?
+							{this.secondPulseName!== nameList[1] && this.secondPulseName?
 								<span>服务名称已修改为: {this.secondPulseName}
 									<a href="#" onClick={this.changeName.bind(this,2)}>修改</a>
 										</span> :
@@ -450,7 +450,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入标准洗价格"/>
 							)}
-							{this.thirdPulseName !== nameList[2] ?
+							{this.thirdPulseName !== nameList[2] && this.thirdPulseName?
 								<span>服务名称已修改为: {this.thirdPulseName}
 									<a href="#" onClick={this.changeName.bind(this,3)}>修改</a>
 										</span> :
@@ -469,8 +469,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入大物洗价格"/>
 							)}
-							{
-								this.fourthPulseName !== nameList[3] ?
+							{this.fourthPulseName !== nameList[3] && this.fourthPulseName?
 									<span>服务名称已修改为: {this.fourthPulseName}
 										<a href="#" onClick={this.changeName.bind(this,4)}>修改</a>
 										</span> :
@@ -538,16 +537,16 @@ class PulseName extends React.Component {
 		const currentPulse = this.props.currentPulse;
 		switch (currentPulse){
 			case 1:
-				setFieldsValue({'firstPulseName':this.props.first});
+				setFieldsValue({'firstPulseName':this.props.first?this.props.first:nameList[0]});
 				break;
 			case 2:
-				setFieldsValue({'secondPulseName':this.props.second});
+				setFieldsValue({'secondPulseName':this.props.second?this.props.second:nameList[1]});
 				break;
 			case 3:
-				setFieldsValue({'thirdPulseName':this.props.third});
+				setFieldsValue({'thirdPulseName':this.props.third?this.props.third:nameList[2]});
 				break;
 			case 4:
-				setFieldsValue({'fourthPulseName':this.props.fourth});
+				setFieldsValue({'fourthPulseName':this.props.fourth?this.props.fourth:nameList[3]});
 				break;
 		}
 	}
@@ -563,16 +562,16 @@ class PulseName extends React.Component {
 		let initialValue = '';
 		switch (currentPulse) {
 			case 1:
-				initialValue = this.props.first;
+				initialValue = this.props.first?this.props.first:nameList[0];
 				break;
 			case 2:
-				initialValue = this.props.second;
+				initialValue = this.props.second?this.props.second:nameList[1];
 				break;
 			case 3:
-				initialValue = this.props.third;
+				initialValue = this.props.third?this.props.third:nameList[2];
 				break;
 			case 4:
-				initialValue = this.props.fourth;
+				initialValue = this.props.fourth?this.props.fourth:nameList[3];
 				break;
 		}
 		// 四个脉冲的初始值
