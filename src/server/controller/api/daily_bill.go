@@ -272,7 +272,10 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	}
 
 	var params map[string]interface{}
-	json.Unmarshal(ctx.PostBody(), &params)
+	if json.Unmarshal(ctx.PostBody(), &params) != nil {
+		common.Logger.Warningln("解析json异常")
+		return
+	}
 	if params["params"] == nil {
 		common.Logger.Warningln(daily_bill_msg["01060001"])
 		return
@@ -315,7 +318,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			common.Logger.Debugln(billAt, "==>aliPayUserIds:", aliPayUserIds)
 		}
 
-		accountMap, err := userCashAccountService.BasicMapByUserId(userIds)     //按每天查出所选当天的所有用户结算账号信息
+		accountMap, err := userCashAccountService.BasicMapByUserId(userIds)     //按天查出管理员所选当天的所有用户结算账号信息
 		if err != nil || len(*accountMap) <= 0 {
 			common.Logger.Warningln(billAt, "==>", daily_bill_msg["01060404"])
 			continue        //查询不到用户的账户信息就没有必要往下执行
@@ -326,7 +329,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		if len(aliPayUserIds) > 0 {
 			for _, _userId := range aliPayUserIds {
 				_userCashAccount := (*accountMap)[functions.StringToInt(_userId)]
-				if _userCashAccount.Type == 1 {         //判断结算方式是否为支付宝
+				if _userCashAccount != nil && _userCashAccount.Type == 1 {         //判断结算方式是否为支付宝
 					//" + _userCashAccount.Account + "
 					aliPayDetailDataStr += _userId + "^0.01^" + _userCashAccount.RealName +
 						"^" + _userId + "^" + "无" + "|"
