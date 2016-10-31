@@ -52,8 +52,8 @@ var (
 		"01030505": "请选择学校!",
 		"01030506": "请填写楼层信息!",
 		"01030507": "请选择关联设备!",
-		"01030508": "请填写单脱价格!",
-		"01030509": "请填写快洗价格!",
+		"01030508": "该序列号不存在!",
+		"01030509": "请操作属于你或未被注册的设备!",
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
 
@@ -442,6 +442,18 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	// }
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//判断一下这个设备的用户id是否为1或者自己
+	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if err != nil {
+		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if current.UserId != userId && current.UserId != 1 {
+		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	device.UserId = userId
 	success := deviceService.UpdateBySerialNumber(&device)
 	if !success {
