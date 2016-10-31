@@ -101,8 +101,8 @@ class UserForm extends React.Component {
 				&& nextProps.resultPostDetail.fetch == false){
 				const code = nextProps.resultPostDetail.result.status;
 				switch (code) {
-					case 13:
 					case 7:
+					case 13:
 						alert('该手机号已存在');
 						break;
 					default:
@@ -120,14 +120,13 @@ class UserForm extends React.Component {
 				&& nextProps.resultPutDetail.fetch == false){
 				const code = nextProps.resultPutDetail.result.status;
 				switch (code) {
-					case 8:
 					case 7:
+					case 8:
 						alert('该手机号已存在');
 						break;
 					default:
 						alert('修改代理商失败');
 				}
-				// alert('修改代理商失败');
 				self.saveDetail = -1;
 			}
 		}

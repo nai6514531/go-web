@@ -156,8 +156,9 @@ class DeviceForm extends React.Component {
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
 					switch (nextProps.resultSerialNumber.result.status){
-						case 3:
 						case 1:
+						case 3:
+						case 12:
 							alert(nextProps.resultSerialNumber.result.msg);
 							break;
 						default:
@@ -548,7 +549,7 @@ class PulseName extends React.Component {
 				this.props.onCancel();
 			}
 		})
-		
+
 	}
 	onCancel() {
 		this.props.onCancel();

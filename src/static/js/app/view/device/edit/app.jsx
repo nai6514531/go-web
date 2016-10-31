@@ -153,8 +153,9 @@ class DeviceForm extends React.Component {
 					self.context.router.goBack();
 				} else {
 					switch (nextProps.resultPostDetail.result.status){
-						case 3:
 						case 1:
+						case 3:
+						case 12:
 							alert(nextProps.resultPostDetail.result.msg);
 							break;
 						default:
