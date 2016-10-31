@@ -177,7 +177,7 @@ class DeviceForm extends React.Component {
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
 			if(!self.provinceId || !self.schoolId) {
-				self.setState({tips:'必填项'});
+				self.setState({tips:'必填'});
 				// alert('请选择学校和省份');
 				return;
 			}
