@@ -524,11 +524,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,方便还原上一条历史记录
+	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,原来是-1的话还是-1，方便还原上一条历史记录
 		current, err := userCashAccountService.BasicByUserId(userId)
 		if err == nil { //可以找到
-			//把该记录的type值取反
-			current.Type = -current.Type
+			if current.Type > 0 {
+				//把该记录的type值取反
+				current.Type = -current.Type
+			}
 			ok = userCashAccountService.UpdateByUserId(current)
 			if !ok {
 				result = &enity.Result{"01010512", nil, user_msg["01010512"]}
