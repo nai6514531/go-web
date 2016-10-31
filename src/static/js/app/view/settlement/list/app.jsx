@@ -401,6 +401,7 @@ const App = React.createClass({
 					<Option value="0">未申请提现</Option>
 					<Option value="1">已申请提现</Option>
 					<Option value="2">已结账</Option>
+					<Option value="3">结账中</Option>
 					<Option value="4">结账失败</Option>
 				</Select>
     	)
