@@ -136,7 +136,26 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 	return &dailyBillMap, nil
 }
 
-func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int64, error) {
+func (self *DailyBillService) Update(id int, dailyBill *model.DailyBill) (int, error) {
+	r := common.DB.Model(&model.DailyBill{}).Where(" id  = ? ", id).Update(dailyBill)
+	if r.Error != nil {
+		common.Logger.Debugln(r.Error.Error())
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
+
+}
+
+func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
+	r := common.DB.Model(&model.DailyBill{}).Updates(&list)
+	if r.Error != nil {
+		common.Logger.Debugln(r.Error.Error())
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
+}
+
+func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []string{}
 	//update mnzn database
@@ -157,9 +176,9 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 	}
 	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
-		common.Logger.Warningln(r.Error.Error())
+		common.Logger.Debugln(r.Error.Error())
 		txmn.Rollback()
-		return int64(0), r.Error
+		return 0, r.Error
 	}
 
 	//update soda-manager
@@ -171,15 +190,15 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 	}
 	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update(dailyBill)
 	if r.Error != nil {
-		common.Logger.Warningln(r.Error.Error())
+		common.Logger.Debugln(r.Error.Error())
 		tx.Rollback()
 		txmn.Rollback()
-		return int64(0), r.Error
+		return 0, r.Error
 	}
 
 	tx.Commit()
 	txmn.Commit()
-	return r.RowsAffected, nil
+	return int(r.RowsAffected), nil
 }
 
 func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
