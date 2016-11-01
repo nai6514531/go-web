@@ -364,13 +364,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//判断登陆名是否已经存在
-	currentUser, err := userService.FindByAccount(user.Account)
-	if err != nil {
-		result = &enity.Result{"01010415", err, user_msg["01010415"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	currentUser, _ := userService.FindByAccount(user.Account)
 	if currentUser != nil {
 		//可以找到
 		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
@@ -378,13 +372,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//判断手机号是否存在
-	currentUser, err = userService.FindByMobile(user.Mobile)
-	if err != nil {
-		result = &enity.Result{"01010415", err, user_msg["01010415"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	currentUser, _ = userService.FindByMobile(user.Mobile)
 	if currentUser != nil {
 		result = &enity.Result{"01010413", nil, user_msg["01010413"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -494,13 +482,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 	//user信息校验
 	//判断登陆名是否已经存在
 	if user.Account != "" { //如果有登陆账号传入
-		currentUser, err := userService.FindByAccount(user.Account)
-		if err != nil {
-			result = &enity.Result{"01010514", nil, user_msg["01010514"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
+		currentUser, _ := userService.FindByAccount(user.Account)
 		if (currentUser != nil) && (currentUser.Id != userId) {
 			//可以找到,并且不为将要修改的那一条记录
 			result = &enity.Result{"01010507", nil, user_msg["01010507"]}
@@ -517,13 +499,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 			return
 		}
 		//判断手机号是否已被别人使用
-		currentUser, err := userService.FindByMobile(user.Mobile)
-		if err != nil {
-			result = &enity.Result{"01010514", nil, user_msg["01010514"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
+		currentUser, _ := userService.FindByMobile(user.Mobile)
 		if (currentUser != nil) && (currentUser.Id != userId) {
 			//可以找到,并且不为将要修改的那一条记录
 			result = &enity.Result{"01010508", nil, user_msg["01010508"]}
