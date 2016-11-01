@@ -73,28 +73,6 @@ class SchoolTable extends React.Component {
 			this.loading = false;
 			this.getSchool = 0;
 		}
-		// 确保 schoolList 内的数据永远是当前用户所有的,逻辑还可再优化
-		// const school = this.props.school;
-		// if(nextProps.school && nextProps.school.fetch == true){
-		// 	if(school == undefined){
-		// 		this.setState({
-		// 			schoolList: nextProps.school.result.data,
-		// 		});
-		// 	} else {
-		// 		if(this.state.schoolList.length <= school.result.data.length) {
-		// 			if(school.result.data.length >= nextProps.school.result.data.length) {
-		// 				this.setState({
-		// 					schoolList: school.result.data,
-		// 				});
-		// 			} else {
-		// 				this.setState({
-		// 					schoolList: nextProps.school.result.data,
-		// 				});
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 	}
 	initializePagination() {
 		let total = 1;
@@ -229,6 +207,7 @@ class SchoolFilter extends React.Component {
 							rules: [
 								{ required: true, message: '请选择学校' },
 							],
+							initialValue: "-1",
 						})(
 							<Select id="school" style={{width:200}} dropdownClassName="test">
 								{schoolNode}

@@ -102,6 +102,7 @@ class UserForm extends React.Component {
 				const code = nextProps.resultPostDetail.result.status;
 				switch (code) {
 					case 7:
+					case 13:
 						alert('该手机号已存在');
 						break;
 					default:
@@ -119,14 +120,13 @@ class UserForm extends React.Component {
 				&& nextProps.resultPutDetail.fetch == false){
 				const code = nextProps.resultPutDetail.result.status;
 				switch (code) {
-					case 8:
 					case 7:
+					case 8:
 						alert('该手机号已存在');
 						break;
 					default:
-						alert('添加代理商失败');
+						alert('修改代理商失败');
 				}
-				// alert('修改代理商失败');
 				self.saveDetail = -1;
 			}
 		}
@@ -141,17 +141,18 @@ class UserForm extends React.Component {
     }
     cityChange(event) {
         this.setState({cityChange:true});
+		this.cityIdHelp = {};
     }
 	handleSubmit(e) {
 		e.preventDefault();
         const self = this;
 		this.props.form.validateFields((errors, values) => {
+			if(values.cityId == -1) {
+				self.cityIdHelp = {'help':'必选','className':'has-error'};
+				return false;
+			}
 			if (errors) {
 				return;
-			}
-			if(values.cityId == -1) {
-				alert('请选择城市');
-				return false;
 			}
 			let cashAccount = {};
 			const user = {
@@ -304,6 +305,9 @@ class UserForm extends React.Component {
 			breadcrumb = '修改代理商';
 		}
 		let payNode = '';
+		if(!this.cityIdHelp){
+			this.cityIdHelp = {};
+		}
 		if(this.state.payType == 1){
 			payNode = <div>
 				<FormItem
@@ -312,7 +316,7 @@ class UserForm extends React.Component {
 					{getFieldDecorator('alipayAccount', {
 						rules: [
 							{required: true,  message: '必填'},
-							{ max:30, message: '不超过三十个字符'},
+							{ max:30, message: '不超过三十个字'},
 						],
 						initialValue: initialValue.alipayAccount,
 
@@ -400,7 +404,7 @@ class UserForm extends React.Component {
 				>
 					{getFieldDecorator('provinceId', {
 						rules: [
-							{ required: true, message: '请选择省份' },
+							{ required: true, message: '必选' },
 						],
 						initialValue: initialValue.provinceId,
 					})(
@@ -412,10 +416,11 @@ class UserForm extends React.Component {
 				<FormItem
 					{...formItemLayout}
 					label="城市"
+					{...this.cityIdHelp}
 				>
 					{getFieldDecorator('cityId', {
 						rules: [
-							{ required: true, message: '请选择城市' },
+							{ required: true, message: '必选' },
 						],
 						initialValue: initialValue.cityId,
 					})(
@@ -489,7 +494,7 @@ class UserForm extends React.Component {
 							label="手机号" >
 							{getFieldDecorator('mobile', {
 								rules: [
-									{ len: 11, message: '请输入11位' },
+									{ len: 11, message: '请输入11位手机号' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkNumber },
 								],

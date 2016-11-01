@@ -32,7 +32,6 @@ func SetUpCommon() {
 
 	iris.OnError(iris.StatusTooManyRequests, func(ctx *iris.Context) {
 		result := &enity.Result{"-4", nil, common_msg["-4"]}
-		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 	})
 

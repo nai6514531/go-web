@@ -50,6 +50,7 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 const key = ['first','second','third','fourth'];
+const nameList = ['单脱价格','快洗价格','标准洗价格','大物洗价格'];
 
 class DeviceForm extends React.Component {
 	constructor(props, context) {
@@ -155,7 +156,9 @@ class DeviceForm extends React.Component {
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
 					switch (nextProps.resultSerialNumber.result.status){
-						case 3 || 1:
+						case 1:
+						case 3:
+						case 12:
 							alert(nextProps.resultSerialNumber.result.msg);
 							break;
 						default:
@@ -184,7 +187,7 @@ class DeviceForm extends React.Component {
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
 			if(!self.provinceId || !self.schoolId) {
-				self.setState({tips:'必填项'});
+				self.setState({tips:'必选'});
 				// alert('请选择学校和省份');
 				return;
 			}
@@ -263,7 +266,7 @@ class DeviceForm extends React.Component {
 	}
 	checkPrice(rule, value, callback) {
 		// 只要大于零的数字
-		var pattern=new RegExp(/^(0|[1-9][0-9]{0,9})(\.[0-9]*)?$/g);
+		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
 		} else {
@@ -426,6 +429,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
@@ -433,7 +437,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入单脱价格" />
 							)}
-							{this.firstPulseName ?
+							{this.firstPulseName !== nameList[0] && this.firstPulseName?
 								<span>服务名称已修改为: {this.firstPulseName}
 									<a href="#" onClick={this.changeName.bind(this,1)}>修改</a>
 										</span> :
@@ -445,6 +449,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
@@ -452,7 +457,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入快洗价格"/>
 							)}
-							{this.secondPulseName ?
+							{this.secondPulseName !== nameList[1] && this.secondPulseName?
 								<span>服务名称已修改为: {this.secondPulseName}
 									<a href="#" onClick={this.changeName.bind(this,2)}>修改</a>
 										</span> :
@@ -464,6 +469,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
@@ -471,7 +477,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入标准洗价格"/>
 							)}
-							{this.thirdPulseName?
+							{this.thirdPulseName !== nameList[2] && this.thirdPulseName?
 								<span>服务名称已修改为: {this.thirdPulseName}
 									<a href="#" onClick={this.changeName.bind(this,3)}>修改</a>
 										</span> :
@@ -483,6 +489,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
+									{ max: 10, message: '不超过十位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
@@ -490,8 +497,7 @@ class DeviceForm extends React.Component {
 							})(
 								<Input placeholder="请输入大物洗价格"/>
 							)}
-							{
-								this.fourthPulseName ?
+							{this.fourthPulseName !== nameList[3] && this.fourthPulseName?
 									<span>服务名称已修改为: {this.fourthPulseName}
 										<a href="#" onClick={this.changeName.bind(this,4)}>修改</a>
 										</span> :
@@ -538,9 +544,16 @@ class PulseName extends React.Component {
 		const currentPulse = this.props.currentPulse;
 		const itemKey = key[currentPulse-1] + 'PulseName';
 		const pulseName = this.props.form.getFieldsValue()[itemKey];
-		// 修改后的当前脉冲的值
-		this.props.changePulseName(pulseName);
-		this.props.onCancel();
+		this.props.form.validateFields((errors, values) => {
+			if(errors){
+				return false;
+			} else {
+				// 修改后的当前脉冲的值
+				this.props.changePulseName(pulseName);
+				this.props.onCancel();
+			}
+		})
+
 	}
 	onCancel() {
 		this.props.onCancel();
@@ -549,16 +562,16 @@ class PulseName extends React.Component {
 		const currentPulse = this.props.currentPulse;
 		switch (currentPulse){
 			case 1:
-				setFieldsValue({'firstPulseName':this.props.first});
+				setFieldsValue({'firstPulseName':this.props.first?this.props.first:nameList[0]});
 				break;
 			case 2:
-				setFieldsValue({'secondPulseName':this.props.second});
+				setFieldsValue({'secondPulseName':this.props.second?this.props.second:nameList[1]});
 				break;
 			case 3:
-				setFieldsValue({'thirdPulseName':this.props.third});
+				setFieldsValue({'thirdPulseName':this.props.third?this.props.third:nameList[2]});
 				break;
 			case 4:
-				setFieldsValue({'fourthPulseName':this.props.fourth});
+				setFieldsValue({'fourthPulseName':this.props.fourth?this.props.fourth:nameList[3]});
 				break;
 		}
 	}
@@ -574,23 +587,24 @@ class PulseName extends React.Component {
 		let initialValue = '';
 		switch (currentPulse) {
 			case 1:
-				initialValue = this.props.first;
+				initialValue = this.props.first?this.props.first:nameList[0];
 				break;
 			case 2:
-				initialValue = this.props.second;
+				initialValue = this.props.second?this.props.second:nameList[1];
 				break;
 			case 3:
-				initialValue = this.props.third;
+				initialValue = this.props.third?this.props.third:nameList[2];
 				break;
 			case 4:
-				initialValue = this.props.fourth;
+				initialValue = this.props.fourth?this.props.fourth:nameList[3];
 				break;
 		}
 		// 四个脉冲的初始值
 		const itemNode = <FormItem {...formItemLayout} label="服务名称" >
 			{getFieldDecorator(itemKey,{
 				rules: [
-					{ max:30, message: '不超过三十个字'},
+					{ required: true, message: '必填' },
+					{ max:30, message: '不超过三十个字'}
 				],
 				initialValue:initialValue})(<Input type="text"/>)}
 		</FormItem>

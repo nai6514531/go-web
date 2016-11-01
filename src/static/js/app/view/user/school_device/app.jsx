@@ -39,7 +39,7 @@ function mapDispatchToProps(dispatch) {
 
 const columns = [{
 	title: 'ID',
-	dataIndex: 'index',
+	dataIndex: 'key',
 	key: 'index',
 }, {
 	title: '编号',
@@ -186,6 +186,12 @@ class DeviceTable extends React.Component {
 	remove(id) {
 		this.props.resetDevice(id);
 		this.reset = 1;
+		const { page } = this.state;
+		if(this.dataLen == 1) {
+			if(page > 1){
+				this.pagination.onChange(page-1);
+			}
+		}
 	}
 	changeStatus(id,start) {
 		const self = this;
@@ -200,7 +206,7 @@ class DeviceTable extends React.Component {
 		}
 	}
 	render() {
-		const pagination = this.initializePagination();
+		this.pagination = this.initializePagination();
 		const schoolDevice = this.props.schoolDevice;
 		const schoolDetail = this.props.schoolDetail;
 		let schoolName = '';
@@ -213,6 +219,7 @@ class DeviceTable extends React.Component {
 		if(schoolDevice) {
 			if(schoolDevice.fetch == true){
 				const data = schoolDevice.result.data.list;
+				self.dataLen = data.length;
 				dataSource = data.map(function (item, key) {
 					let referenceDevice = '';
 					switch (item.referenceDeviceId){
@@ -241,7 +248,7 @@ class DeviceTable extends React.Component {
 					}
 					return {
 						key: item.id,
-						index: item.id,
+						index: key,
 						schoolId: schoolId,
 						serialNumber: item.serialNumber,
 						referenceDevice: referenceDevice,
@@ -270,7 +277,7 @@ class DeviceTable extends React.Component {
 				<section className="view-content">
 					<Table columns={columns}
 						   dataSource={dataSource}
-						   pagination={pagination}
+						   pagination={this.pagination}
 						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/kataras/iris"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
 )
@@ -40,8 +41,11 @@ func (self *SchoolController) Basic(ctx *iris.Context) {
 	school, err := schoolService.Basic(id)
 	if err != nil {
 		result = &enity.Result{"01050101", nil, school_msg["01050101"]}
-	} else {
-		result = &enity.Result{"01050100", school, school_msg["01050100"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
 	}
+	result = &enity.Result{"01050100", school, school_msg["01050100"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }

@@ -87,7 +87,7 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int
 func (self *DeviceService) Create(device *model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Create(device).Scan(device)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("DB Create BoxInfo:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -96,7 +96,7 @@ func (self *DeviceService) Create(device *model.Device) bool {
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Create(boxInfo)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("MNDB Create BoxInfo:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -107,29 +107,61 @@ func (self *DeviceService) Create(device *model.Device) bool {
 
 func (self *DeviceService) Update(device model.Device) bool {
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device).Scan(&device)
-	if  r.Error != nil {
-		common.Logger.Warningln("DB Update BoxInfo:", r.Error.Error())
+	mnTransAction := common.MNDB.Begin()
+	//==========================更新到新数据库========================
+	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update Device:", r.Error.Error())
 		transAction.Rollback()
+		mnTransAction.Rollback()
 		return false
 	}
-	//更新到木牛数据库
+	//再次单独更新几个价格避免价格为0的时候不能更新成功
+	var devicePrice = make(map[string]interface{})
+	devicePrice["firstPulsePrice"] = device.FirstPulsePrice
+	devicePrice["secondPulsePrice"] = device.SecondPulsePrice
+	devicePrice["thirdPulsePrice"] = device.ThirdPulsePrice
+	devicePrice["fourthPulsePrice"] = device.FourthPulsePrice
+	r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(devicePrice).Scan(&device)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	//================更新到木牛数据库======================
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
-	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(device)
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfo)
 	if r.Error != nil {
 		common.Logger.Warningln("MNDB Update BoxInfo:", r.Error.Error())
 		transAction.Rollback()
+		mnTransAction.Rollback()
 		return false
 	}
+	//再次单独更新几个价格避免价格为0的时候不能更新成功
+	var boxInfoPrice = make(map[string]interface{})
+	boxInfoPrice["PRICE_601"] = boxInfo.Price_601
+	boxInfoPrice["PRICE_602"] = boxInfo.Price_602
+	boxInfoPrice["PRICE_603"] = boxInfo.Price_603
+	boxInfoPrice["PRICE_604"] = boxInfo.Price_604
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfoPrice)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	//======================================================
 	transAction.Commit()
+	mnTransAction.Commit()
 	return true
 }
 
 func (self *DeviceService) UpdateStatus(device model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-STATUS:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -138,7 +170,7 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", boxInfo.Status)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("MNDB Update BoxInfo-STATUS:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -150,7 +182,7 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -159,7 +191,7 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
-	if  r.Error != nil {
+	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		return false
@@ -172,7 +204,7 @@ func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 1).Scan(device)
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-Reset:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -181,7 +213,7 @@ func (self *DeviceService) Reset(id int) bool {
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("COMPANYID", "0")
-	if  r.Error != nil {
+	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Update BoxInfo-Reset:", r.Error.Error())
 		return false
@@ -195,7 +227,7 @@ func (self *DeviceService) Delete(id int) bool {
 	transAction := common.DB.Begin()
 	//硬删除记录
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Scan(device).Unscoped().Delete(&model.Device{})
-	if  r.Error != nil {
+	if r.Error != nil {
 		common.Logger.Warningln("DB Delete BoxInfo:", r.Error.Error())
 		transAction.Rollback()
 		return false
@@ -204,7 +236,7 @@ func (self *DeviceService) Delete(id int) bool {
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
 	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
-	if  r.Error != nil {
+	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Delete BoxInfo:", r.Error.Error())
 		return false

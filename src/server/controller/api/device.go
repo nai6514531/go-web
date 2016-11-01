@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
@@ -52,8 +53,8 @@ var (
 		"01030505": "请选择学校!",
 		"01030506": "请填写楼层信息!",
 		"01030507": "请选择关联设备!",
-		"01030508": "请填写单脱价格!",
-		"01030509": "请填写快洗价格!",
+		"01030508": "该序列号不存在!",
+		"01030509": "请操作属于你或未被注册的设备!",
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
 
@@ -98,7 +99,8 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	device, err := deviceService.Basic(id)
 	if err != nil {
 		//如果没有找到条目不做处理
-		result = &enity.Result{"01030001", nil, device_msg["01030001"]}
+		result = &enity.Result{"01030001", err, device_msg["01030001"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -153,11 +155,14 @@ func (self *DeviceController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	device, err := deviceService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01030101", nil, device_msg["01030101"]}
-	} else {
-		result = &enity.Result{"01030100", device, device_msg["01030100"]}
+		result = &enity.Result{"01030101", err, device_msg["01030101"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+	result = &enity.Result{"01030100", device, device_msg["01030100"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -209,13 +214,22 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	list, err := deviceService.ListByUser(userId, page, perPage)
-	total, _ := deviceService.TotalByUser(userId)
 	if err != nil {
-		result = &enity.Result{"01030401", nil, device_msg["01030401"]}
-	} else {
-		result = &enity.Result{"01030400", &enity.Pagination{total, list}, device_msg["01030400"]}
+		result = &enity.Result{"01030401", err, device_msg["01030401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+	total, err := deviceService.TotalByUser(userId)
+	if err != nil {
+		result = &enity.Result{"01030401", err, device_msg["01030401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01030400", &enity.Pagination{total, list}, device_msg["01030400"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -253,11 +267,13 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	success := deviceService.UpdateStatus(device)
 	if !success {
 		result = &enity.Result{"01030201", nil, device_msg["01030201"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	result = &enity.Result{"01030200", nil, device_msg["01030200"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -345,7 +361,13 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	// 	return
 	// }
 	//判断序列号名是否已经被使用了
-	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
+	currentDevice, err := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if err != nil {
+		result = &enity.Result{"01030301", err, device_msg["01030301"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	if (currentDevice != nil) && (currentDevice.Id != id) { //可以找到并且不为当前要修改的记录
 		result = &enity.Result{"01030313", nil, device_msg["01030313"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -355,11 +377,13 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	success := deviceService.Update(device)
 	if !success {
 		result = &enity.Result{"01030301", nil, device_msg["01030301"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	result = &enity.Result{"01030300", nil, device_msg["01030300"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -442,15 +466,30 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	// }
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//判断一下这个设备的用户id是否为1或者自己
+	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if err != nil {
+		result = &enity.Result{"01030508", err, device_msg["01030508"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if current.UserId != userId && current.UserId != 1 {
+		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	device.UserId = userId
 	success := deviceService.UpdateBySerialNumber(&device)
 	if !success {
 		result = &enity.Result{"01030501", nil, device_msg["01030501"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	result = &enity.Result{"01030500", nil, device_msg["01030500"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -474,7 +513,13 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	currentDevice, _ := deviceService.Basic(id)
+	currentDevice, err := deviceService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01030601", err, device_msg["01030601"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
 	if currentDevice == nil || currentDevice.UserId == 1 { //设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -484,10 +529,12 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 	if !success {
 		result = &enity.Result{"01030601", nil, device_msg["01030601"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	result = &enity.Result{"01030600", nil, device_msg["01030600"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -511,7 +558,14 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	currentDevice, _ := deviceService.Basic(id)
+	currentDevice, err := deviceService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01030901", err, device_msg["01030901"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+
+	}
 	if currentDevice == nil || currentDevice.UserId != 1 { //设备正在使用了或不存在
 		result = &enity.Result{"01030903", nil, device_msg["01030903"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -521,10 +575,12 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 	if !success {
 		result = &enity.Result{"01030901", nil, device_msg["01030901"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	result = &enity.Result{"01030900", nil, device_msg["01030900"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -607,7 +663,13 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	// 	return
 	// }
 	//查找该序列号是否已经存在
-	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
+	currentDevice, err := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if err != nil {
+		result = &enity.Result{"01030701", err, device_msg["01030701"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
 	if currentDevice != nil {
 		result = &enity.Result{"01030712", nil, device_msg["01030712"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -619,10 +681,12 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	if !success {
 		result = &enity.Result{"01030701", nil, device_msg["01030701"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	result = &enity.Result{"01030700", nil, device_msg["01030700"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
 
 /**
@@ -668,8 +732,10 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	if !success {
 		result = &enity.Result{"01030801", nil, device_msg["01030801"]}
 		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
 		return
 	}
 	result = &enity.Result{"01030800", nil, device_msg["01030800"]}
 	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
 }
