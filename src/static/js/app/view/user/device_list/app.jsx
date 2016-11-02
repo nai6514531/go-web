@@ -106,9 +106,12 @@ class SchoolTable extends React.Component {
 	changeSchoolId(schoolId) {
 		this.setState({schoolId:schoolId})
 	}
+	changePage() {
+		this.setState({page:1});
+	}
 	render() {
 		const self = this;
-		const pagination = this.initializePagination();
+		this.pagination = this.initializePagination();
 		const school = this.props.school;
 		let dataSource = [];
 		let list = [];
@@ -138,8 +141,8 @@ class SchoolTable extends React.Component {
 					<SchoolFilter
 						allSchool={this.props.allSchool}
 						getUserSchool={this.props.getUserSchool}
-						page={this.state.page}
 						perPage={this.state.perPage}
+						changePage={this.changePage.bind(this)}
 						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
 					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item add-btn">
@@ -149,7 +152,7 @@ class SchoolTable extends React.Component {
 				<section className="view-content">
 					<Table columns={columns}
 						   dataSource={dataSource}
-						   pagination={pagination}
+						   pagination={this.pagination}
 						   loading={this.loading}
 						   onChange={this.handleTableChange}
 						   bordered
@@ -167,8 +170,11 @@ class SchoolFilter extends React.Component {
 	handleSubmit(e) {
 		e.preventDefault();
 		const schoolId = parseInt(this.props.form.getFieldsValue().school);
+		// 必要时下面两个方式可合并
 		this.props.changeSchoolId(schoolId);
-		const pager = {page: this.props.page, perPage: this.props.perPage};
+		this.props.changePage();
+		const pager = {page: 1, perPage: this.props.perPage};
+		// 筛选后,page 回到第一页,直接调用下面方法可能会导致分页不刷新
 		this.props.getUserSchool(USER.id, schoolId, pager);
 	}
 	render() {
