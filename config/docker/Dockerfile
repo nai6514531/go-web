@@ -9,10 +9,10 @@ ADD src/build /<%-config.get('name')%>/src/build
 
 ADD <%-config.get('name')%> /<%-config.get('name')%>/
 
-ADD config/server/<%-env%>.json /soda-manager/config/server/<%-env%>.json
+ADD config/<%-env%>.json /soda-manager/config/<%-env%>.json
 
 ADD resource /<%-config.get('name')%>/resource
 
 RUN mkdir -p <%-config.get('log.path')%>
 
-CMD ["./<%-config.get('name')%>", "-conf", "config/server/<%-env%>"]
+CMD ["./<%-config.get('name')%>", "-conf", "config/<%-env%>"]

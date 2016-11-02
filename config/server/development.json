@@ -1,4 +1,5 @@
 {
+  "version": "0.0.28",
   "isDevelopment": true,
   "staticSystemPath": "./src/build/static",
   "staticRequestPath": "/static",
