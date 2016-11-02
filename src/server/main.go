@@ -14,8 +14,6 @@ func SetUpServer() {
 
 	iris.Use(recovery.Handler)
 
-	iris.UseFunc(middleware.LoggerHandler)
-
 	isDevelopment := viper.GetBool("isDevelopment")
 	staticSystemPath := viper.GetString("staticSystemPath")
 	staticRequestPath := viper.GetString("staticRequestPath")
