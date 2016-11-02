@@ -358,7 +358,7 @@ class DeviceForm extends React.Component {
 						<FormItem
 							{...formItemLayout}
 							{...serialNumberHelp}
-							label="设备编号" 
+							label="设备编号"
 						>
 							{getFieldDecorator('serialNumber', {
 								rules: [
@@ -413,7 +413,7 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ max: 10, message: '不超过十位' },
+									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
@@ -433,7 +433,7 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ max: 10, message: '不超过十位' },
+									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
@@ -453,7 +453,7 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ max: 10, message: '不超过十位' },
+									{ max: 7, message: '不超过七位' },
 									{  required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
@@ -473,7 +473,7 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ max: 10, message: '不超过十位' },
+									{ max: 7, message: '不超过七位' },
 									{  required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
