@@ -7,6 +7,8 @@ import 'babel-polyfill';
 import 'whatwg-fetch';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'antd/dist/antd.min.css';
+// import './app.less';
 import App from './app.js';
 ReactDOM.render(<App />, document.getElementById('main'));
+import 'antd/dist/antd.min.css';
+
