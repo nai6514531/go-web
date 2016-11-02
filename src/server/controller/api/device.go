@@ -361,13 +361,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	// 	return
 	// }
 	//判断序列号名是否已经被使用了
-	currentDevice, err := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if err != nil {
-		result = &enity.Result{"01030301", err, device_msg["01030301"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if (currentDevice != nil) && (currentDevice.Id != id) { //可以找到并且不为当前要修改的记录
 		result = &enity.Result{"01030313", nil, device_msg["01030313"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -467,13 +461,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//判断一下这个设备的用户id是否为1或者自己
-	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if err != nil {
-		result = &enity.Result{"01030508", err, device_msg["01030508"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	current, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if current.UserId != userId && current.UserId != 1 {
 		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -663,13 +651,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	// 	return
 	// }
 	//查找该序列号是否已经存在
-	currentDevice, err := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if err != nil {
-		result = &enity.Result{"01030701", err, device_msg["01030701"]}
-		ctx.JSON(iris.StatusOK, result)
-		common.Log(ctx, result)
-		return
-	}
+	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if currentDevice != nil {
 		result = &enity.Result{"01030712", nil, device_msg["01030712"]}
 		ctx.JSON(iris.StatusOK, result)
