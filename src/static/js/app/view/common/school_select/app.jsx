@@ -43,6 +43,7 @@ class SchoolSelect extends React.Component {
 				provinceName:'',
 			},
 			chooseSchool: false,
+			boxHide: 'box-hide',
 		};
 	}
 	componentWillMount() {
@@ -102,19 +103,21 @@ class SchoolSelect extends React.Component {
 					provinceName: this.state.provinceName,
 				}
 			});
-			this.toggleBox();
+			this.hideBox();
 			this.props.handleSelect(this.state.provinceId, schoolId);
 			this.hide = true;
 		} else {
 			alert('请先选择省份');
 		}
 	}
-	toggleBox() {
-		this.refs.box.classList.toggle('box-show');
-		this.refs.mask.classList.toggle('box-show');
+	showBox() {
+		this.setState({boxHide:''});
+	}
+	hideBox() {
+		this.setState({boxHide:'box-hide'});
 	}
 	onCancle() {
-		this.toggleBox();
+		this.hideBox();
 		this.setState({
 			provinceId: this.state.defaultProvince.provinceId,
 			provinceName: this.state.defaultProvince.provinceName,
@@ -153,8 +156,8 @@ class SchoolSelect extends React.Component {
 		}
 		return (
 			<div className="filter">
-				<div  ref="mask" className="mask box-show" onClick={this.onCancle.bind(this)}></div>
-				<div ref="box" className="box box-show" >
+				<div  ref="mask" className={"mask "+this.state.boxHide} onClick={this.onCancle.bind(this)}></div>
+				<div ref="box" className={"box "+this.state.boxHide} >
 					<div className="province">
 						{provinceNode}
 					</div>
@@ -162,7 +165,7 @@ class SchoolSelect extends React.Component {
 						{this.hide ? '请先选择省份' :(schoolNode ? schoolNode : '请先选择省份')}
 					</div>
 				</div>
-				<div onClick = {this.toggleBox.bind(this)} className="show">
+				<div onClick = {this.showBox.bind(this)} className="show">
 					{this.state.provinceName ?
 						<div>
 							{this.state.provinceName}-

@@ -3,7 +3,7 @@ import NProgress from "nprogress";
 
 const api = axios.create({
 	headers: {
-    	'Content-Type': 'application/json'
+    	'Content-Type': 'application/json;charset=utf-8'
   	},
 	transformRequest: [(data) => {
 		NProgress.start();
