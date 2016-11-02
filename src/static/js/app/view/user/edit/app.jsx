@@ -518,7 +518,7 @@ class UserForm extends React.Component {
 										无
 									</Radio>
 									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-										实时分账(必须拥有支付宝,收取 x% 手续费)
+										自动分账(必须拥有支付宝,收取 x% 手续费)
 									</Radio>
 									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
 										财务定期结账(需提供正确银行卡号)
