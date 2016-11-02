@@ -80,7 +80,7 @@ fabric.properties
 /k8s/
 /soda-manager
 /Dockerfile
-/config/server/prerelease.json
-/config/server/preview.json
-/config/server/default.json
-/config/server/production.json
+/config/prerelease.json
+/config/preview.json
+/config/default.json
+/config/production.json
