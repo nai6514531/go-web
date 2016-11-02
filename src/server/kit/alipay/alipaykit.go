@@ -2,12 +2,12 @@ package alipay
 
 import (
 	"crypto/md5"
-	"strings"
 	"encoding/hex"
 	"sort"
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"os"
+	"strings"
 )
 
 type AlipayKit struct {
@@ -54,15 +54,22 @@ func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
 			signStrings = signStrings + k + "=" + value + "&"
 		}
 	}
+
+	if strings.HasSuffix(signStrings, "&") {
+		signStrings = signStrings[: len(signStrings) - 1 ]
+	}
+
 	//STEP3, 在键值对的最后加上key=API_KEY
 	if apiKey != "" {
-		signStrings = signStrings + "key=" + apiKey
+		signStrings = signStrings + apiKey
 	}
+	common.Logger.Debugln("signStrings=============", signStrings)
 	//STEP4, 进行MD5签名并且将所有字符转为大写.
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(signStrings))
 	cipherStr := md5Ctx.Sum(nil)
-	upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
+	upperSign := hex.EncodeToString(cipherStr)
+	//upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
 	common.Logger.Debugln("upperSign====================================", upperSign)
 	return upperSign
 }

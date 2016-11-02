@@ -95,7 +95,44 @@ const App = React.createClass({
 							break;
 						case 2:
 						case 5: 
-							spanDiv = (
+
+							if(accountType == 1){
+								spanDiv = (
+									<span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								)
+							}else{
+								if(status == 0){
+									spanDiv = (	
+										<span>	
+											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>申请提现</a>
+					            </Popconfirm>
+					            <span> | </span>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+		          			</span>
+									)
+								}else if(status == 2 || status == 3){
+									spanDiv = (
+										<span>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+		          			</span>
+									)
+								}else{
+									spanDiv = (
+										<span>
+											<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>取消提现申请</a>
+					            </Popconfirm>
+					            <span> | </span>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+		          			</span>
+									)
+								}
+							}
+
+							/*spanDiv = (
 								accountType == 1? (
 									<span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -110,23 +147,14 @@ const App = React.createClass({
 	          			</span>
 								): (
 									<span>
-										<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-				              <a>已申请提现</a>
+										<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
+				              <a>取消提现申请</a>
 				            </Popconfirm>
 				            <span> | </span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 	          			</span>
 								)
-								/*status == 0?(		
-									<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-			              <a>申请提现</a>
-			            </Popconfirm>
-								):(
-									<Popconfirm title="取消申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-			              <a>已申请提现</a>
-			            </Popconfirm>
-								)*/
-							)
+							)*/
 							break;
 						case 3: 
 							spanDiv = (accountType == 1&&status!=4)? (

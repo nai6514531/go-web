@@ -8,7 +8,7 @@ import "time"
 type BatchPayRequest struct {
 	Service          string  `json:"service"`
 	Partner          string  `json:"partner"`
-	InputCharset     string  `json:"input_charset"`
+	InputCharset     string  `json:"_input_charset"`
 	SignType         string  `json:"sign_type"`
 	Sign             string  `json:"sign"`
 	NotifyUrl        string  `json:"notify_url"`         //可空
