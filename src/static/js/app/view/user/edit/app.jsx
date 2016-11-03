@@ -226,7 +226,7 @@ class UserForm extends React.Component {
 		}
 	}
 	checkAreaCode(rule, value, callback) {
-		var pattern = new RegExp(/^((0\d{2,3}-\d{7,8})|(1\d{10}))$/);
+		var pattern = new RegExp(/^[0-9\-]+$/);
 		if(pattern.test(value) || !value){
 			callback();
 		} else {
