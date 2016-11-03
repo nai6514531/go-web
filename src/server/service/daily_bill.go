@@ -136,7 +136,29 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 	return &dailyBillMap, nil
 }
 
-func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int64, error) {
+/**
+	如果参数全为0时有可能出现不会更新的问题
+ */
+func (self *DailyBillService) Update(id int, dailyBill *model.DailyBill) (int, error) {
+	r := common.DB.Model(&model.DailyBill{}).Where(" id  = ? ", id).Update(dailyBill)
+	if r.Error != nil {
+		common.Logger.Debugln(r.Error.Error())
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
+
+}
+
+func (self *DailyBillService) Updates(list ...*model.DailyBill) (int, error) {
+	r := common.DB.Model(&model.DailyBill{}).Updates(&list)
+	if r.Error != nil {
+		common.Logger.Debugln(r.Error.Error())
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
+}
+
+func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []string{}
 	//update mnzn database
@@ -157,29 +179,34 @@ func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ..
 	}
 	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
-		common.Logger.Warningln(r.Error.Error())
+		common.Logger.Debugln(r.Error.Error())
 		txmn.Rollback()
-		return int64(0), r.Error
+		return 0, r.Error
 	}
+	common.Logger.Debugln("------------------------------------------------------")
 
 	//update soda-manager
 	//因为每次update时`updated_at`都会更新,所以基本上只要操作数据库成功返回受影响的行数都为1
 	tx := common.DB.Begin()
-	dailyBill := &model.DailyBill{Status: status}
+	//dailyBill := &model.DailyBill{Status: status} //如果参数默认都为初始值的话,可能不会执行update
+	param := make(map[string]interface{}, 0)
+	param["status"] = status
 	if status == 2 {
-		dailyBill.SettledAt = timeNow
+		//dailyBill.SettledAt = timeNow
+		param["settled_at"] = timeNow
 	}
-	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update(dailyBill)
+	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update(param)
 	if r.Error != nil {
-		common.Logger.Warningln(r.Error.Error())
+		common.Logger.Debugln(r.Error.Error())
 		tx.Rollback()
 		txmn.Rollback()
-		return int64(0), r.Error
+		return 0, r.Error
 	}
 
 	tx.Commit()
 	txmn.Commit()
-	return r.RowsAffected, nil
+	common.Logger.Debugln("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	return int(r.RowsAffected), nil
 }
 
 func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
