@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -96,11 +96,11 @@ class DeviceForm extends React.Component {
 		const pulseName = nextProps.pulseName;
 		if(this.theName == 0){
 			if(pulseName && pulseName.fetch == true) {
-				// alert('服务名修改成功');
+				message.success('服务名修改成功',3);
 				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
 				this[pulseNameKey] = self.pulseName;
 			} else if (pulseName && pulseName.fetch == false) {
-				alert('服务名修改失败,请重试.');
+				message.error('服务名修改失败,请重试.',3);
 			}
 			self.theName = 1;
 		}
@@ -134,7 +134,7 @@ class DeviceForm extends React.Component {
 					}
 				}
 				else {
-					alert(nextProps.provinceSchool.result.msg);
+					message.error(nextProps.provinceSchool.result.msg,3);
 				}
 				this.getSchool = 0;
 
@@ -152,17 +152,17 @@ class DeviceForm extends React.Component {
 			if(resultSerialNumber !== nextProps.resultSerialNumber) {
 				if( nextProps.resultSerialNumber.fetch == true) {
 					self.context.router.goBack();
-					alert('添加设备成功');
+					message.success('添加设备成功',3);
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
 					switch (nextProps.resultSerialNumber.result.status){
 						case 1:
 						case 3:
 						case 12:
-							alert(nextProps.resultSerialNumber.result.msg);
+							message.error(nextProps.resultSerialNumber.result.msg,3);
 							break;
 						default:
-							alert('添加设备失败');
+							message.error('添加设备失败',3);
 							break;
 					}
 				}
@@ -171,11 +171,11 @@ class DeviceForm extends React.Component {
 			const resultPutDetail = this.props.resultPutDetail;
 			if(resultPutDetail !== nextProps.resultPutDetail) {
 				if(nextProps.resultPutDetail.fetch == true){
-					alert('修改设备成功');
+					message.success('修改设备成功',3);
 					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(nextProps.resultPutDetail.fetch == false) {
-					alert('修改设备失败');
+					message.error('修改设备失败',3);
 					self.saveDetail = -1;
 				}
 			}

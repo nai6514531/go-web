@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Cascader, Button } from 'antd';
+import { Cascader, Button, message } from 'antd';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -107,7 +107,7 @@ class SchoolSelect extends React.Component {
 			this.props.handleSelect(this.state.provinceId, schoolId);
 			this.hide = true;
 		} else {
-			alert('请先选择省份');
+			message.error('请先选择省份',3);
 		}
 	}
 	showBox() {

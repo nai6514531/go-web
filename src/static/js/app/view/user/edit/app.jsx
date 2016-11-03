@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -94,7 +94,7 @@ class UserForm extends React.Component {
 			const resultPostDetail = this.props.resultPostDetail;
 			if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == true){
-				alert('添加代理商成功');
+				message.success('添加代理商成功',3);
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPostDetail !== nextProps.resultPostDetail
@@ -103,17 +103,17 @@ class UserForm extends React.Component {
 				switch (code) {
 					case 7:
 					case 13:
-						alert('该手机号已存在');
+						message.error('该手机号已存在',3);
 						break;
 					default:
-						alert('添加代理商失败');
+						message.error('添加代理商失败',3);
 				}
 				self.saveDetail = -1;
 			}
 			const resultPutDetail = this.props.resultPutDetail;
 			if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == true){
-				alert('修改代理商成功');
+				message.success('修改代理商成功',3);
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
@@ -122,10 +122,10 @@ class UserForm extends React.Component {
 				switch (code) {
 					case 7:
 					case 8:
-						alert('该手机号已存在');
+						message.error('该手机号已存在',3);
 						break;
 					default:
-						alert('修改代理商失败');
+						message.error('修改代理商失败',3);
 				}
 				self.saveDetail = -1;
 			}
