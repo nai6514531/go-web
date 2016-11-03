@@ -4,6 +4,7 @@ import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, messag
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const confirm = Modal.confirm;
 import SchoolSelect from '../../common/school_select/app.jsx';
 
 import { connect } from 'react-redux';
@@ -292,10 +293,14 @@ class DeviceForm extends React.Component {
 		}
 	}
 	goBack() {
+		const self = this;
 		if(this.state.unsaved) {
-			if(confirm('确定取消?')){
-				this.context.router.goBack();
-			}
+			confirm({
+				title: '确定取消?',
+				onOk() {
+					self.context.router.goBack();
+				},
+			});
 		}
 	}
 	render() {

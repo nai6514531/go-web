@@ -1,10 +1,11 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
+const confirm = Modal.confirm;
 import { Link } from 'react-router';
 
 
@@ -211,10 +212,14 @@ class UserForm extends React.Component {
 		}
 	}
 	goBack() {
+		const self = this;
 		if(this.state.unsaved) {
-			if(confirm('确定取消?')){
-				this.context.router.goBack();
-			}
+			confirm({
+				title: '确定取消?',
+				onOk() {
+					self.context.router.goBack();
+				},
+			});
 		}
 	}
 	checkNumber(rule, value, callback) {
