@@ -252,7 +252,7 @@ func (self *DeviceService) ListSchoolIdByUser(userId int) (*[]int, error) {
 	}
 	lists := &[]*MyDevice{}
 	//带去重
-	r := common.DB.Raw("SELECT DISTINCT school_id FROM device_new WHERE user_id = ? AND deleted_at IS NULL", userId).Scan(lists)
+	r := common.DB.Raw("SELECT DISTINCT school_id FROM device WHERE user_id = ? AND deleted_at IS NULL", userId).Scan(lists)
 	if r.Error != nil {
 		return nil, r.Error
 	}
