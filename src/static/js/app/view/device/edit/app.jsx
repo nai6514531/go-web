@@ -266,7 +266,9 @@ class DeviceForm extends React.Component {
 		// 只要大于零的数字
 		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
-				callback('只能为数字');
+			callback('只能为数字');
+		} else if(value >= 10000000){
+			callback('不超过七位数');
 		} else {
 			callback();
 		}
@@ -414,7 +416,6 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
@@ -434,7 +435,6 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
@@ -454,7 +454,6 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{  required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
@@ -474,7 +473,6 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{  required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],
