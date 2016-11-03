@@ -325,7 +325,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.SchoolId <= 0 {
+	if device.SchoolId < 0 {
 		result = &enity.Result{"01030305", nil, device_msg["01030305"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -423,7 +423,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.SchoolId <= 0 {
+	if device.SchoolId < 0 {
 		result = &enity.Result{"01030505", nil, device_msg["01030505"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -615,7 +615,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.SchoolId <= 0 {
+	if device.SchoolId < 0 {
 		result = &enity.Result{"01030705", nil, device_msg["01030705"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
