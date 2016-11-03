@@ -63,16 +63,19 @@ class SchoolSelect extends React.Component {
 				defaultProvinceName: nextProps.provinceName,
 			});
 		}
-		if(this.props.schoolId == undefined && nextProps.schoolId) {
-			// 如果ID是0,则表示为未分类
-			let schoolId = nextProps.schoolId;
-			if(nextProps.schoolId == 0) {
-				schoolId = -nextProps.provinceId;
+		if(this.props.schoolId == undefined) {
+			if(nextProps.schoolId){
+				this.setState({schoolId: nextProps.schoolId});
+			} else if(nextProps.schoolId == 0) {
+				this.setState({schoolId: -nextProps.provinceId});
 			}
-			this.setState({schoolId: schoolId});
 		}
-		if(this.props.schoolName == undefined && nextProps.schoolName) {
-			this.setState({schoolName: nextProps.schoolName});
+		if(this.props.schoolName == undefined) {
+			if(nextProps.schoolName){
+				this.setState({schoolName: nextProps.schoolName});
+			} else {
+				this.setState({schoolName: '其它'});
+			}
 		}
 	}
 	selectProvince(provinceId, provinceName, event) {
@@ -150,7 +153,7 @@ class SchoolSelect extends React.Component {
 				// 该省ID取反为该市未分类的学校ID,主要是为了在高亮时区分是哪个省的未分类
 				const noClassSchoolId = -(self.state.provinceId);
 				const buttonStyle = noClassSchoolId == self.state.schoolId?{color:'#2db7f5'}:{};
-				const noClassSchool = <span className="btn-select" style={buttonStyle} key={-1} onClick={self.selectSchool.bind(self,noClassSchoolId,'未分类学校')}>未分类学校</span>
+				const noClassSchool = <span className="btn-select" style={buttonStyle} key={-1} onClick={self.selectSchool.bind(self,noClassSchoolId,'其它')}>其它</span>
 				schoolNode.push(noClassSchool);
 			}
 		}
