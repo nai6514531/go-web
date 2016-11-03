@@ -715,7 +715,7 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 		return
 	}
 	device.Id = id
-	success := deviceService.Update(device)
+	success := deviceService.UpdatePulseName(device)
 	if !success {
 		result = &enity.Result{"01030801", nil, device_msg["01030801"]}
 		ctx.JSON(iris.StatusOK, result)

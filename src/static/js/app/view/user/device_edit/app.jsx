@@ -1,9 +1,10 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message} from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
+const confirm = Modal.confirm;
 import SchoolSelect from '../../common/school_select/app.jsx';
 
 import { connect } from 'react-redux';
@@ -50,7 +51,7 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 const key = ['first','second','third','fourth'];
-const nameList = ['单脱价格','快洗价格','标准洗价格','大物洗价格'];
+const nameList = ['单脱','快洗','标准洗','大物洗'];
 
 class DeviceForm extends React.Component {
 	constructor(props, context) {
@@ -93,17 +94,6 @@ class DeviceForm extends React.Component {
 	}
 	componentWillReceiveProps(nextProps) {
 		const self = this;
-		const pulseName = nextProps.pulseName;
-		if(this.theName == 0){
-			if(pulseName && pulseName.fetch == true) {
-				// alert('服务名修改成功');
-				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
-				this[pulseNameKey] = self.pulseName;
-			} else if (pulseName && pulseName.fetch == false) {
-				alert('服务名修改失败,请重试.');
-			}
-			self.theName = 1;
-		}
 		// 修改详情时 设置初始省市 ID
 		const deviceId = this.props.params.id;
 		if(deviceId) {
@@ -121,6 +111,7 @@ class DeviceForm extends React.Component {
 				this.props.getProvinceSchoolList(provinceId);
 				self.getSchool = 1;
 			}
+			// 可以优化为通过拉取学校详情来设置初始值
 			if(this.getSchool
 				&& this.props.provinceSchool !== nextProps.provinceSchool
 				&& nextProps.provinceSchool
@@ -134,12 +125,12 @@ class DeviceForm extends React.Component {
 					}
 				}
 				else {
-					alert(nextProps.provinceSchool.result.msg);
+					message.error(nextProps.provinceSchool.result.msg,3);
 				}
 				this.getSchool = 0;
-
 			}
 		}
+		// 初始化服务名
 		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
 			const device = nextProps.detail.result.data;
 			self.firstPulseName = device.firstPulseName;
@@ -147,22 +138,36 @@ class DeviceForm extends React.Component {
 			self.thirdPulseName = device.thirdPulseName;
 			self.fourthPulseName = device.fourthPulseName;
 		}
+		const pulseName = nextProps.pulseName;
+		// 修改服务名的反馈
+		if(this.theName == 0){
+			if(pulseName && pulseName.fetch == true) {
+				message.success('服务名修改成功',3);
+				const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
+				this[pulseNameKey] = self.pulseName;
+			} else if (pulseName && pulseName.fetch == false) {
+				message.error('服务名修改失败,请重试.',3);
+			}
+			self.theName = 1;
+		}
+		// 修改设备或者添加设备的反馈
 		if(this.saveDetail == 1){
 			const resultSerialNumber = this.props.resultSerialNumber;
 			if(resultSerialNumber !== nextProps.resultSerialNumber) {
 				if( nextProps.resultSerialNumber.fetch == true) {
 					self.context.router.goBack();
-					alert('添加设备成功');
+					message.success('添加设备成功',3);
 					self.saveDetail = -1;
 				} else if(nextProps.resultSerialNumber.fetch == false) {
 					switch (nextProps.resultSerialNumber.result.status){
 						case 1:
 						case 3:
+						case 8:
 						case 12:
-							alert(nextProps.resultSerialNumber.result.msg);
+							message.error(nextProps.resultSerialNumber.result.msg,3);
 							break;
 						default:
-							alert('添加设备失败');
+							message.error('添加设备失败',3);
 							break;
 					}
 				}
@@ -171,11 +176,11 @@ class DeviceForm extends React.Component {
 			const resultPutDetail = this.props.resultPutDetail;
 			if(resultPutDetail !== nextProps.resultPutDetail) {
 				if(nextProps.resultPutDetail.fetch == true){
-					alert('修改设备成功');
+					message.success('修改设备成功',3);
 					self.context.router.goBack();
 					self.saveDetail = -1;
 				} else if(nextProps.resultPutDetail.fetch == false) {
-					alert('修改设备失败');
+					message.error('修改设备失败',3);
 					self.saveDetail = -1;
 				}
 			}
@@ -186,10 +191,11 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-			if(!self.provinceId || !self.schoolId) {
-				self.setState({tips:'必选'});
-				// alert('请选择学校和省份');
-				return;
+			if(!this.props.params.id) {
+				if(!self.provinceId || !self.schoolId) {
+					self.setState({tips:'必选'});
+					return;
+				}
 			}
 			if (errors) {
 				return;
@@ -197,7 +203,7 @@ class DeviceForm extends React.Component {
 			const deviceValue = {
 				"serialNumber": values.serialNumber,
 				"provinceId": self.provinceId,
-				"schoolId": self.schoolId,
+				"schoolId": self.schoolId<0?0:self.schoolId,
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
@@ -269,6 +275,8 @@ class DeviceForm extends React.Component {
 		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
+		} else if(value >= 10000000){
+			callback('不超过七位数');
 		} else {
 			callback();
 		}
@@ -292,10 +300,14 @@ class DeviceForm extends React.Component {
 		}
 	}
 	goBack() {
+		const self = this;
 		if(this.state.unsaved) {
-			if(confirm('确定取消?')){
-				this.context.router.goBack();
-			}
+			confirm({
+				title: '确定取消?',
+				onOk() {
+					self.context.router.goBack();
+				},
+			});
 		}
 	}
 	render() {
@@ -326,6 +338,7 @@ class DeviceForm extends React.Component {
 				const device = detail.result.data;
 				initialValue = {
 					'serialNumber': device.serialNumber,
+					// 这里的初始化没什么意义
 					'school': device.schoolId,
 					'province': device.provinceId,
 					// 'label': device.label,
@@ -351,6 +364,7 @@ class DeviceForm extends React.Component {
 		if(id) {
 			breadcrumb = '修改设备';
 		}
+		console.log('省市ID和名字',this.provinceId,this.provinceName,this.schoolId,this.schoolName);
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
@@ -429,7 +443,6 @@ class DeviceForm extends React.Component {
 							label="单脱价格(元)" >
 							{getFieldDecorator('firstPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkOnePluse.bind(this) },
 								],
@@ -449,7 +462,6 @@ class DeviceForm extends React.Component {
 							label="快洗价格(元)" >
 							{getFieldDecorator('secondPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填' },
 									{ validator: this.checkTwoPluse.bind(this) },
 								],
@@ -469,7 +481,6 @@ class DeviceForm extends React.Component {
 							label="标准洗价格(元)">
 							{getFieldDecorator('thirdPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkThreePluse.bind(this) },
 								],
@@ -489,7 +500,6 @@ class DeviceForm extends React.Component {
 							label="大物洗价格(元)">
 							{getFieldDecorator('fourthPulsePrice', {
 								rules: [
-									{ max: 7, message: '不超过七位' },
 									{ required: true, message: '必填'},
 									{ validator: this.checkFourPluse.bind(this) },
 								],

@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Cascader, Button } from 'antd';
+import { Cascader, Button, message } from 'antd';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -38,77 +38,64 @@ class SchoolSelect extends React.Component {
 			provinceName: '',
 			schoolId: '',
 			schoolName: '',
-			defaultProvince:{
-				provinceId:'',
-				provinceName:'',
-			},
+			defaultProvinceId:'',
+			defaultProvinceName:'',
 			chooseSchool: false,
 			boxHide: 'box-hide',
 		};
 	}
 	componentWillMount() {
+		// 这里的 list 可以和父组件公用
 		this.props.getProvinceList();
-		this.hide = true;
+		this.hide = false;
 	}
 	componentWillReceiveProps(nextProps) {
-		// 如果父组件有变动,就改变内容
-		if(this.props.provinceId !== nextProps.provinceId) {
+		// 需要初始化省学校信息
+		if(this.props.provinceId == undefined && nextProps.provinceId) {
 			this.setState({
 				provinceId: nextProps.provinceId,
-				defaultProvince: {
-					provinceId: nextProps.provinceId,
-					provinceName: this.state.defaultProvince.provinceName,
-				}
+				defaultProvinceId: nextProps.provinceId,
 			});
 		}
-		if(this.props.provinceName !== nextProps.provinceName) {
+		if(this.props.provinceName == undefined && nextProps.provinceName) {
 			this.setState({
 				provinceName: nextProps.provinceName,
-				defaultProvince: {
-					provinceId: this.state.defaultProvince.provinceId,
-					provinceName: nextProps.provinceName,
-				}
+				defaultProvinceName: nextProps.provinceName,
 			});
 		}
-		if(this.props.schoolId !== nextProps.schoolId) {
-			this.setState({schoolId: nextProps.schoolId});
+		if(this.props.schoolId == undefined) {
+			if(nextProps.schoolId){
+				this.setState({schoolId: nextProps.schoolId});
+			} else if(nextProps.schoolId == 0) {
+				this.setState({schoolId: -nextProps.provinceId});
+			}
 		}
-		if(this.props.schoolName !== nextProps.schoolName) {
-			this.setState({schoolName: nextProps.schoolName});
+		if(this.props.schoolName == undefined) {
+			if(nextProps.schoolName){
+				this.setState({schoolName: nextProps.schoolName});
+			} else {
+				this.setState({schoolName: '其它'});
+			}
 		}
-		// console.log('schoolId',this.props.schoolId,nextProps.schoolId);
-		// console.log('schoolName',this.props.schoolName,nextProps.schoolName);
-		// console.log('provinceId',this.props.provinceId,nextProps.provinceId);
-		// console.log('provinceName',this.props.provinceName,nextProps.provinceName);
 	}
-	selectProvince(provinceId, provinceName,event) {
+	selectProvince(provinceId, provinceName, event) {
 		this.props.getProvinceSchoolList(provinceId);
 		this.setState({
 			provinceId: provinceId,
 			provinceName: provinceName,
 			chooseSchool: true,
 		});
-		// console.log(event.currentTarget)
-		// console.log(event.currentTarget.setAttribute('className','red'))
 		this.hide = false;
-		// event.target.addClass('red');
 	}
 	selectSchool(schoolId, schoolName) {
-		if(this.state.chooseSchool){
-			this.setState({
-				schoolId: schoolId,
-				schoolName: schoolName,
-				defaultProvince: {
-					provinceId: this.state.provinceId,
-					provinceName: this.state.provinceName,
-				}
-			});
-			this.hideBox();
-			this.props.handleSelect(this.state.provinceId, schoolId);
-			this.hide = true;
-		} else {
-			alert('请先选择省份');
-		}
+		this.setState({
+			schoolId: schoolId,
+			schoolName: schoolName,
+			defaultProvinceId: this.state.provinceId,
+			defaultProvinceName: this.state.provinceName,
+		});
+		this.hideBox();
+		this.props.handleSelect(this.state.provinceId, schoolId);
 	}
 	showBox() {
 		this.setState({boxHide:''});
@@ -116,47 +103,63 @@ class SchoolSelect extends React.Component {
 	hideBox() {
 		this.setState({boxHide:'box-hide'});
 	}
-	onCancle() {
+	showSelectList() {
+		if(!this.state.provinceName) {
+			this.hide = true;
+		}
+		if(this.props.provinceId){
+			this.props.getProvinceSchoolList(this.props.provinceId);
+		}
+		this.showBox();
+		console.log(this.state);
+	}
+	onCancel() {
 		this.hideBox();
 		this.setState({
-			provinceId: this.state.defaultProvince.provinceId,
-			provinceName: this.state.defaultProvince.provinceName,
+			provinceId: this.state.defaultProvinceId,
+			provinceName: this.state.defaultProvinceName,
 			chooseSchool: false,
 		});
-		this.hide = true;
 	}
 	render() {
 		const provinceList = this.props.provinceList;
 		let provinceNode = '';
-		const that = this;
+		const self = this;
 		if(provinceList) {
 			if(provinceList.fetch == true){
 				provinceNode = provinceList.result.data.filter(function(item, key){
 					return item.id !== 820000 && item.id !== 810000 && item.id !== 710000;
 				}).map(function (item,key) {
+					const buttonStyle = item.id == self.state.provinceId?{type:'primary'}:{};
 					return (
-						<Button key={key}  onClick={that.selectProvince.bind(that,item.id,item.name)}>{item.name}</Button>
+						<Button key={key} {...buttonStyle} onClick={self.selectProvince.bind(self,item.id,item.name)}>{item.name}</Button>
 					)
 				})
 			}
 		}
 		const provinceSchool = this.props.provinceSchool;
 		let schoolNode = '';
-		const self = this;
 		if(provinceSchool) {
 			if(provinceSchool.fetch == true){
-				schoolNode = provinceSchool.result.data.filter(function(item, key){
+				const list = provinceSchool.result.data;
+				schoolNode = list.filter(function(item, key){
 					return item.id !== 0 && item.id !== 34093;
 				}).map(function(item, key){
+					const buttonStyle = item.id == self.state.schoolId?{color:'#2db7f5'}:{};
 					return (
-						<span className="btn-select" key={key} onClick={that.selectSchool.bind(that,item.id,item.name)}>{item.name}</span>
+						<span className="btn-select" style={buttonStyle} key={key} onClick={self.selectSchool.bind(self,item.id,item.name)}>{item.name}</span>
 					)
 				})
+				// 该省ID取反为该市未分类的学校ID,主要是为了在高亮时区分是哪个省的未分类
+				const noClassSchoolId = -(self.state.provinceId);
+				const buttonStyle = noClassSchoolId == self.state.schoolId?{color:'#2db7f5'}:{};
+				const noClassSchool = <span className="btn-select" style={buttonStyle} key={-1} onClick={self.selectSchool.bind(self,noClassSchoolId,'其它')}>其它</span>
+				schoolNode.push(noClassSchool);
 			}
 		}
 		return (
 			<div className="filter">
-				<div  ref="mask" className={"mask "+this.state.boxHide} onClick={this.onCancle.bind(this)}></div>
+				<div  ref="mask" className={"mask "+this.state.boxHide} onClick={this.onCancel.bind(this)}></div>
 				<div ref="box" className={"box "+this.state.boxHide} >
 					<div className="province">
 						{provinceNode}
@@ -165,7 +168,7 @@ class SchoolSelect extends React.Component {
 						{this.hide ? '请先选择省份' :(schoolNode ? schoolNode : '请先选择省份')}
 					</div>
 				</div>
-				<div onClick = {this.showBox.bind(this)} className="show">
+				<div onClick = {this.showSelectList.bind(this)} className="show">
 					{this.state.provinceName ?
 						<div>
 							{this.state.provinceName}-
