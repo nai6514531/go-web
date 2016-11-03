@@ -4,6 +4,8 @@ import (
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
+	"github.com/iris-contrib/middleware/recovery"
+	"time"
 )
 
 var (
@@ -17,6 +19,15 @@ var (
 )
 
 func SetUpCommon() {
+
+	iris.Use(recovery.Handler)
+
+	iris.UseFunc(func(ctx *iris.Context) {
+		startAt := time.Now().UnixNano() / 1000000
+		ctx.Set("startAt", startAt)
+		ctx.Response.Header.Set("X-Powered-By", "soda-manager")
+		ctx.Next()
+	})
 
 	iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
 		result := &enity.Result{"-2", nil, common_msg["-2"]}

@@ -19,7 +19,6 @@ func Api() {
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
-		ctx.Response.Header.Set("X-Powered-By", ctx.RemoteAddr())
 		ctx.Next()
 	})
 
@@ -38,8 +37,10 @@ func Api() {
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
+
 	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
 	api.Get("/updatetest", dailyBill.UpdateTest)
+
 	api.UseFunc(common.RequireSignin)
 
 	api.Get("/user", user.ListByParent)
