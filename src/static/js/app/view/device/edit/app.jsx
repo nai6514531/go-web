@@ -46,7 +46,7 @@ function mapDispatchToProps(dispatch) {
 	};
 }
 const key = ['first','second','third','fourth'];
-const nameList = ['单脱价格','快洗价格','标准洗价格','大物洗价格'];
+const nameList = ['单脱','快洗','标准洗','大物洗'];
 
 class DeviceForm extends React.Component {
 	constructor(props, context) {
@@ -185,10 +185,11 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-			if(!self.provinceId || !self.schoolId) {
-				self.setState({tips:'必选'});
-				// alert('请选择学校和省份');
-				return;
+			if(!this.props.params.id) {
+				if(!self.provinceId || !self.schoolId) {
+					self.setState({tips:'必选'});
+					return;
+				}
 			}
 			if (errors) {
 				return;
@@ -196,7 +197,7 @@ class DeviceForm extends React.Component {
 			const deviceValue = {
 				"serialNumber": values.serialNumber,
 				"provinceId": self.provinceId,
-				"schoolId": self.schoolId,
+				"schoolId": self.schoolId<0?0:self.schoolId,
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
