@@ -186,7 +186,8 @@ const App = React.createClass({
 			selectedList: [],   //勾选的账单
 			clickLock: false,   //重复点击的锁
 			roleId: window.USER.role.id,
-			nowAjaxStatus: {}   //保存ajax请求字段状态
+			nowAjaxStatus: {},   //保存ajax请求字段状态
+			currentPage: 1
 		};
 	},
 	list(data) {
@@ -228,9 +229,7 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-	changeSettlementStatus(data) {
-		this.list(this.state.nowAjaxStatus)
-	},
+	
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -251,14 +250,32 @@ const App = React.createClass({
 			message.info(err)
 		})
 	},
+	changeSettlementStatus(data) {
+		let list = this.state.list;
+		for(var i=0; i<data.length; i++){
+			for(var j=0; j<list.length; j++){
+				if(data[i].idArr.indexOf(list[j].id) >= 0){
+					if(list[j].accountType == 1){
+						list[j].status = 3;
+					}else if(list[j].accountType == 3){
+						list[j].status = 2;
+					}
+				}
+			}
+		}
+		this.setState({list: list})
+		//this.list(this.state.nowAjaxStatus)
+	},
 	settle(data) {
 		let params = [];
+		let idArr = [];
+		idArr.push(data.id)
 		let paramsObj = {
+			"idArr": idArr,
 			"userId": data.userId+"",
 			"billAt": data.billAt,
 		};
-		params.push(paramsObj)
-
+		params.push(paramsObj);
 		this.settleAjax(params);
 	},
 	multiSettle() {
@@ -272,6 +289,7 @@ const App = React.createClass({
 
 		let billAtObj = {};
 		let userIdArr = [];
+		let idArr = [];
 		this.state.selectedList.map((item, i)=>{
 			let billAt = moment(item.billAt).format('YYYY-MM-DD')
 			if(!billAtObj[billAt]){
@@ -286,18 +304,21 @@ const App = React.createClass({
 			for(var j=0; j<billAtObj[i].length; j++){
 				console.log(billAtObj[i][j].userId);
 				userIdArr.push(billAtObj[i][j].userId);
+				idArr.push(billAtObj[i][j].id)
 			}
 			paramsObj.userId = userIdArr.join(',');
+			paramsObj.idArr = idArr;
 			params.push(paramsObj);
 		}
-		console.log(params);
 		this.settleAjax(params);
 	},
 	settleAjax(data) {
+		this.changeSettlementStatus(data)
+		return
+
 		let self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
-		console.log()
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "0"){
@@ -314,6 +335,7 @@ const App = React.createClass({
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		this.setState({currentPage: 1})
 		this.list({
 			cashAccountType: cashAccountType,
 			status: status,
@@ -348,6 +370,7 @@ const App = React.createClass({
 	},
 	initializePagination(){
 		var self = this;
+
 		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
 		return {
 			total: total,
@@ -359,6 +382,7 @@ const App = React.createClass({
 				self.list(listObj);
 			},
 			onChange(page) {
+				self.setState({currentPage: this.current})
 				let listObj = self.state.nowAjaxStatus;
 				listObj.page = this.current;
 				listObj.perPage = this.pageSize;
@@ -370,6 +394,7 @@ const App = React.createClass({
 		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
+		pagination.current = this.state.currentPage;
 
 		const rowSelection = {
 		  onChange(selectedRowKeys, selectedRows) {
@@ -455,7 +480,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
-			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
 		</section>);
 	}
 });
