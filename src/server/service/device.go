@@ -181,22 +181,35 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 
 func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device).Scan(device)
+	mnTransAction := common.MNDB.Begin()
+	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	//再单独更新一次学校id因为传入的学校id可以为0
+	r = transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Update("school_id", device.SchoolId).Scan(device)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
-	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
 	if r.Error != nil {
 		transAction.Rollback()
+		mnTransAction.Rollback()
 		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		return false
 	}
+	//单独更新一次学校id
 	transAction.Commit()
+	mnTransAction.Commit()
 	return true
 }
 

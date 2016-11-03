@@ -461,7 +461,12 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//判断一下这个设备的用户id是否为1或者自己
-	current, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
+	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
+	if err != nil { //设备不存在
+		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	if current.UserId != userId && current.UserId != 1 {
 		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
 		ctx.JSON(iris.StatusOK, result)
