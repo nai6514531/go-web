@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal,Tooltip } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -523,7 +523,9 @@ class UserForm extends React.Component {
 										无
 									</Radio>
 									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-										自动分账(必须拥有支付宝,收取 x% 手续费)
+										<Tooltip title="我是 TIPS ">
+											<span>自动分账(必须拥有支付宝,收取 x% 手续费)</span>
+										</Tooltip>
 									</Radio>
 									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
 										财务定期结账(需提供正确银行卡号)
