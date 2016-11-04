@@ -115,101 +115,9 @@
   }
 }
 
-.head {
-  height: 75px;
-  border-bottom: 1px solid #ddd;
-  width: 100%;
-  background: white;
-  position: relative;
-  line-height: 75px;
-  .left {
-	display: inline-block;
-	width: 50%;
-	height: 100%;
-	vertical-align: top;
-	img {
-	  position: absolute;
-	  margin: auto;
-	  top: 0;
-	  bottom: 0;
-	  left: 1rem;
-	  height: 80%;
-	}
-	h1 {
-	  margin-left: 6rem;
-	}
-  }
-  .right {
-	display: inline-block;
-	width: 50%;
-	height: 100%;
-	span {
-	  margin: auto 0.5rem;
-	  position: absolute;
-	}
-	.account {
-	  right: 6rem;
-	}
-	.role {
-	  right: 3rem;
-	}
-	a {
-	  position: absolute;
-	  right: 1rem;
-	}
-  }
-}
-
-html, body, #main, .app-main, .index {
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-.detail {
-  height: 100%;
-  .detail-head {
-	border-bottom: 1px solid #ddd;
-	height: 50px;
-	line-height: 50px;
-	padding-left: 15px;
-	margin-bottom: 15px;
-  }
-  .detail-body {
-	margin: 0.3rem;
-	height: 80%;
-  }
-  .detail-form {
-	margin-bottom: 1.5rem;
-	button {
-	  margin: 0.2rem;
-	}
-  }
-  .detail-filter {
-	padding: 0.3rem;
-  }
-}
-
-.hide {
-  display: none;
-}
-
-.show {
-  display: block;
-}
-
-.body-panel {
-  height: 100%;
-}
-
-.detail {
-  width: 100%;
-}
-
 
 // 为了兼容暂时放在这
 @border: 1px solid #d9d9d9;
-
 .filter {
   vertical-align: top;
   .mask {
@@ -298,14 +206,7 @@ html, body, #main, .app-main, .index {
 .box-hide {
   display: none !important;
 }
-.btn-select{
 
-}
-
-.red {
-  color: red;
-  font-size: 20px;
-}
 
 .select-school {
   margin-left: 0;
@@ -346,10 +247,6 @@ html, body, #main, .app-main, .index {
   width: 100%;
 }
 
-.filter-button {
-  vertical-align: top;
-  color: red;
-}
 
 .toolbar {
   .school-filter {
@@ -359,14 +256,6 @@ html, body, #main, .app-main, .index {
 	vertical-align: text-bottom;
 	line-height: 23px;
 	height: 32px;
-  }
-}
-.filter-select {
-  width: 10em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  li {
   }
 }
 
@@ -383,55 +272,6 @@ html, body, #main, .app-main, .index {
   }
 }
 
-
-.province-filter {
-  margin-left: 0;
-  margin-right: 0;
-  margin-bottom: 24px;
-  width: 100%;
-  label {
-	text-align: right;
-	vertical-align: middle;
-	padding: 7px 0;
-	display: inline-block;
-	width: 29.16666667%;
-	&:before {
-	  display: inline-block;
-	  margin-right: 4px;
-	  content: "*";
-	  font-family: SimSun;
-	  font-size: 12px;
-	  color: #f50;
-	}
-	&:after {
-	  content: ":";
-	  margin: 0 8px 0 2px;
-	  position: relative;
-	  top: -.5px;
-	}
-  }
-  & > select {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	width: 50%;
-	color: #666;
-	border: 1px solid #d9d9d9;
-	border-radius: 6px;
-	padding: 6px 7px;
-	height: 32px;
-	background: white;
-  }
-  & >span {
-	display: inline-block;
-	position: relative;
-	right: 20px;
-	&:after {
-	  content: '\25BC';
-	}
-  }
-
-}
 .radio-block {
   display: block;
 }
