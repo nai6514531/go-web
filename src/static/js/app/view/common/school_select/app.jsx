@@ -1,5 +1,5 @@
-import React from 'react';
 import './app.less';
+import React from 'react';
 import { Cascader, Button, message } from 'antd';
 
 import { connect } from 'react-redux';
@@ -145,14 +145,14 @@ class SchoolSelect extends React.Component {
 				schoolNode = list.filter(function(item, key){
 					return item.id !== 0 && item.id !== 34093;
 				}).map(function(item, key){
-					const buttonStyle = item.id == self.state.schoolId?{color:'#2db7f5'}:{};
+					const buttonStyle = item.id == self.state.schoolId?{color:'#2db7f5',border:'1px solid #2db7f5'}:{};
 					return (
 						<span className="btn-select" style={buttonStyle} key={key} onClick={self.selectSchool.bind(self,item.id,item.name)}>{item.name}</span>
 					)
 				})
 				// 该省ID取反为该市未分类的学校ID,主要是为了在高亮时区分是哪个省的未分类
 				const noClassSchoolId = -(self.state.provinceId);
-				const buttonStyle = noClassSchoolId == self.state.schoolId?{color:'#2db7f5'}:{};
+				const buttonStyle = noClassSchoolId == self.state.schoolId?{color:'#2db7f5',border:'1px solid #2db7f5'}:{};
 				const noClassSchool = <span className="btn-select" style={buttonStyle} key={-1} onClick={self.selectSchool.bind(self,noClassSchoolId,'其它')}>其它</span>
 				schoolNode.push(noClassSchool);
 			}
