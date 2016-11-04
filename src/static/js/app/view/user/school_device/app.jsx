@@ -128,7 +128,7 @@ class DeviceTable extends React.Component {
 		// 成功才拉取,失败就提示
 		const schoolId = this.props.params.id;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
-		if(this.theStatus !== -1) {
+		if(this.theStatus !== -1 && this.theStatus !== undefined) {
 			const status = nextProps.status;
 			if(status) {
 				if(status.fetch == true) {
@@ -142,7 +142,7 @@ class DeviceTable extends React.Component {
 				self.theStatus = -1;
 			}
 		}
-		if(this.reset !== -1) {
+		if(this.reset !== -1 && this.reset !== undefined) {
 			const reset = nextProps.resultReset;
 			if(reset) {
 				if(reset.fetch == true) {
