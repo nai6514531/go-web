@@ -7,6 +7,10 @@ const Navbar = React.createClass({
 	getInitialState() {
 		return {
 			current: '',
+			icons:[
+				{'title':'代理商管理','icon':'user'},
+				{'title':'结算管理','icon':'pay-circle-o'},
+				{'title':'设备管理','icon':'calculator'}]
 		};
 	},
 	logout() {
@@ -41,6 +45,7 @@ const Navbar = React.createClass({
 	render() {
 		const {location} = this.props;
 		const menus = USER.menu || [];
+		const self = this;
 		return (<aside>
 			<h2 onClick={this.changeSelect}><a href="#/"><img src={require('./logo.png')}/></a></h2>
 			<nav>
@@ -49,7 +54,13 @@ const Navbar = React.createClass({
 					  selectedKeys={[this.state.current]}
 					  onClick={this.onClick}>
 					{menus.map(function (item) {
-						return <Menu.Item key={item.url}>{item.name}</Menu.Item>
+						return <Menu.Item key={item.url}>
+							<Icon type={self.state.icons.filter(function (icon) {
+								return icon.title == item.name
+							})[0].icon}
+							/>
+							{item.name}
+						</Menu.Item>
 					})}
 				</Menu>
 				<footer>
