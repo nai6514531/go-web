@@ -17,8 +17,7 @@ func (self *SyncService) SyncUser() bool {
 	userService := &UserService{}
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
@@ -38,7 +37,7 @@ func (self *SyncService) SyncUser() bool {
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) SyncUserRole() bool {
@@ -48,7 +47,7 @@ func (self *SyncService) SyncUserRole() bool {
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
@@ -83,7 +82,7 @@ func (self *SyncService) SyncUserRole() bool {
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) SyncUserCashAccount() bool {
@@ -93,7 +92,7 @@ func (self *SyncService) SyncUserCashAccount() bool {
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
@@ -113,7 +112,7 @@ func (self *SyncService) SyncUserCashAccount() bool {
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) SyncDevice() bool {
@@ -123,7 +122,7 @@ func (self *SyncService) SyncDevice() bool {
 	deviceService := &DeviceService{}
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxInfo List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxInfo := range *list {
@@ -142,7 +141,7 @@ func (self *SyncService) SyncDevice() bool {
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) SyncDailyBill() bool {
@@ -152,11 +151,11 @@ func (self *SyncService) SyncDailyBill() bool {
 	dailyBillService := &DailyBillService{}
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxStatBill List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxStatBill := range *list {
-		userId:=(boxStatBill.CompanyId+1)
+		userId := (boxStatBill.CompanyId + 1)
 		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
 		if dailyBill == nil && err != nil {
 			boo = syncService.AddDailyBill(boxStatBill)
@@ -172,7 +171,7 @@ func (self *SyncService) SyncDailyBill() bool {
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) SyncDailyBillDetail() bool {
@@ -184,11 +183,11 @@ func (self *SyncService) SyncDailyBillDetail() bool {
 	dailyBillDetailService := &DailyBillDetailService{}
 	if r.Error != nil {
 		common.Logger.Warningln("common.MNDB.Find BoxWash List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	hasDeleted, err := dailyBillDetailService.DeleteByBillAt(billAt)
 	if !hasDeleted || err != nil {
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxWash := range *list {
@@ -198,7 +197,7 @@ func (self *SyncService) SyncDailyBillDetail() bool {
 			break
 		}
 	}
-	return boo
+	return boo, nil
 }
 
 func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) bool {
@@ -215,10 +214,10 @@ func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) bool {
 		Status:       boxWash.Status,
 	}
 	r := common.DB.Create(dailyBillDetail)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) bool {
@@ -233,10 +232,10 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) bool {
 		Status:      status,
 	}
 	r := common.DB.Create(dailyBill)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) bool {
@@ -251,10 +250,10 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) bool {
 		Status:      status,
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", dailyBill.UserId, dailyBill.BillAt).Updates(dailyBill)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) bool {
@@ -279,10 +278,10 @@ func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) bool {
 		Status:            status,
 	}
 	r := common.DB.Create(device)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	if r.Error != nil {
 		return false
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) bool {
@@ -307,10 +306,10 @@ func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) bool {
 		Status:            status,
 	}
 	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", boxInfo.DeviceNo).Updates(device)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
@@ -327,10 +326,10 @@ func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
 	}
 	user.Id = (boxAdmin.LocalId + 1)
 	r := common.DB.Create(user)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
@@ -347,10 +346,10 @@ func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
 	}
 	user.Id = (boxAdmin.LocalId + 1)
 	r := common.DB.Save(user)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
@@ -366,10 +365,10 @@ func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 		Mobile:   boxAdmin.ContactNum,
 	}
 	r := common.DB.Create(userCashAccount)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
@@ -385,10 +384,10 @@ func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 		Mobile:   boxAdmin.ContactNum,
 	}
 	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
 func (self *SyncService) AddUserRoleRel(userId int, roleId int) bool {
@@ -397,20 +396,20 @@ func (self *SyncService) AddUserRoleRel(userId int, roleId int) bool {
 		RoleId: roleId,
 	}
 	r := common.DB.Create(userRoleRel)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) bool {
+func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) bool,error {
 	userRoleRel := &model.UserRoleRel{
 		UserId: userId,
 		RoleId: roleId,
 	}
 	r := common.DB.Model(&model.UserRoleRel{}).Where("user_id = ?", userId).Updates(userRoleRel)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
