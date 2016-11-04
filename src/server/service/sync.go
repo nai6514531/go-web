@@ -75,7 +75,7 @@ func (self *SyncService) SyncUserRole() bool {
 				break
 			}
 		} else {
-			boo = syncService.UpdateUserRoleRel(userId, roleId)
+			boo, _= syncService.UpdateUserRoleRel(userId, roleId)
 			if !boo {
 				common.Logger.Warningln("AddUserRoleRef:", userId, roleId)
 				break
@@ -402,7 +402,7 @@ func (self *SyncService) AddUserRoleRel(userId int, roleId int) bool {
 	return true, nil
 }
 
-func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) bool,error {
+func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) (bool,error) {
 	userRoleRel := &model.UserRoleRel{
 		UserId: userId,
 		RoleId: roleId,
