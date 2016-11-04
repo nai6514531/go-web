@@ -57,6 +57,7 @@ var (
 		"01030509": "请操作属于你或未被注册的设备!",
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
+		"01030512": "你已经添加了该设备!",
 
 		"01030600": "重置设备成功!",
 		"01030601": "重置设备失败!",
@@ -464,6 +465,11 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if err != nil { //设备不存在
 		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if current.UserId == userId { //如果用户id为自己说明已经添加过了
+		result = &enity.Result{"01030512", nil, device_msg["01030512"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
