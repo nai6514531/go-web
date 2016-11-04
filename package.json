@@ -7,9 +7,9 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git@192.168.1.216:table/soda-manager.git"
+    "url": "git@192.168.1.216:soda/soda-manager.git"
   },
-  "author": "table",
+  "author": "soda",
   "license": "ISC",
   "dependencies": {
     "antd": "^2.0.1",
