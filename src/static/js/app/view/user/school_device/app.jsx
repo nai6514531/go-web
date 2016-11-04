@@ -1,6 +1,6 @@
 import React from 'react';
 import '../device_list/app.less';
-import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -134,8 +134,9 @@ class DeviceTable extends React.Component {
 				if(status.fetch == true) {
 					this.props.getSchoolDevice(USER.id, schoolId, pager);
 					self.loading = true;
+					message.success('修改成功!',3);
 				} else {
-					alert('修改失败!');
+					message.error('修改失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.theStatus = -1;
@@ -147,8 +148,9 @@ class DeviceTable extends React.Component {
 				if(reset.fetch == true) {
 					this.props.getSchoolDevice(USER.id, schoolId, pager);
 					self.loading = true;
+					message.success('删除成功!',3);
 				} else {
-					alert('删除失败!');
+					message.error('删除失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.reset = -1;
