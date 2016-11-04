@@ -1,8 +1,9 @@
 import React from 'react';
-import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message} from 'antd';
+import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
+import FormDiv from './form.jsx';
 import moment from 'moment';
 const App = React.createClass({
 	getInitialState() {
@@ -131,30 +132,6 @@ const App = React.createClass({
 									)
 								}
 							}
-
-							/*spanDiv = (
-								accountType == 1? (
-									<span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								): status==0?(	
-									<span>	
-										<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-				              <a>申请提现</a>
-				            </Popconfirm>
-				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								): (
-									<span>
-										<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
-				              <a>取消提现申请</a>
-				            </Popconfirm>
-				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								)
-							)*/
 							break;
 						case 3: 
 							spanDiv = (accountType == 1&&status!=4)? (
@@ -187,7 +164,10 @@ const App = React.createClass({
 			clickLock: false,   //重复点击的锁
 			roleId: window.USER.role.id,
 			nowAjaxStatus: {},   //保存ajax请求字段状态
-			currentPage: 1
+			currentPage: 1,
+			payModalVisible: false,  //支付modal的状态 false:hide true:show
+			payList: {},  //支付宝数据
+			selectedRowKeys: [],
 		};
 	},
 	list(data) {
@@ -202,6 +182,7 @@ const App = React.createClass({
 					loading: false,
 				});
 				if (data && data.status == 0) {
+					this.clearSelectRows(); //清空结账勾选
 					this.setState({
 						total: data.data.total,
 						list: data.data.list.map((item) => {
@@ -219,6 +200,9 @@ const App = React.createClass({
 				});
 			})
 	},
+	setPayModalVisible(status) {
+    this.setState({ payModalVisible: status });
+  },
 	changeApplyStatus(orderId, willApplyStatus) {
 		const self = this;
 		let newList = this.state.list;
@@ -238,7 +222,7 @@ const App = React.createClass({
 
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-			if(res.status == "0"){
+			if(res.status == 0){
 				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
@@ -263,7 +247,8 @@ const App = React.createClass({
 				}
 			}
 		}
-		this.setState({list: list})
+		this.setState({list: list});
+		this.clearSelectRows();
 		//this.list(this.state.nowAjaxStatus)
 	},
 	settle(data) {
@@ -313,15 +298,35 @@ const App = React.createClass({
 		this.settleAjax(params);
 	},
 	settleAjax(data) {
-		this.changeSettlementStatus(data)
-		return
+		/*this.setState({
+			payList: {
+				service: "batch_trans_notify",
+				partner: "ALIPAYID",
+				_input_charset: "utf-8",
+				notify_url: "http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification",
+				account_name: "深圳市华策网络科技有限公司",
+				detail_data: "aliPayDetailDataStr",
+				batch_no: "batch_no",
+				batch_num: "batch_num",
+				batch_fee: "batch_fee",
+				email: "email",
+				pay_date: "pay_date",
+				sign: "sign",
+				sign_type: "sign_type",
+				request_url: "request_url",
+				billAt: data[0].billAt
+			}
+		})
+		this.setPayModalVisible(true);
+		this.changeSettlementStatus(data);
+		return*/
 
 		let self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
-			if(res.status == "0"){
+			if(res.status == 0){
 				//message.info(res.msg)
 				self.changeSettlementStatus(data);
 			}else{
@@ -344,7 +349,6 @@ const App = React.createClass({
 		});
 	},
 	componentWillMount() {
-
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
 		this.list({
 			cashAccountType: cashAccountType,
@@ -390,21 +394,47 @@ const App = React.createClass({
 			},
 		};
 	},
+	clearSelectRows() { //清空勾选
+		this.setState({selectedRowKeys: []})
+	},
 	render(){
 		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
 		pagination.current = this.state.currentPage;
 
+		const selectedRowKeys = this.state.selectedRowKeys;
 		const rowSelection = {
+			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
-		  	self.setState({selectedList: selectedRows})
+		  	console.log(3)
+		  	let newSelectedRows = [];
+		  	let newSelectedRowKeys = [];
+		  	for(var i=0; i<selectedRows.length; i++){
+		  		let status = selectedRows[i].status;
+		  		if( status!=2 && status!=3 ){
+		  			newSelectedRows.push(selectedRows[i]);
+		  			newSelectedRowKeys.push(selectedRows[i].key);
+		  		}
+		  	}
+		  	self.setState({
+		  		selectedList: newSelectedRows,
+		  		selectedRowKeys: newSelectedRowKeys
+		  	})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
 		  onSelect(record, selected, selectedRows) {
 		    //console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
+
+		  	if(changeRows.length < 10){
+		  		self.setState({
+			  		selectedList: [],
+			  		selectedRowKeys: []
+			  	})
+		  	}
+		  	
 		    //console.log(selected, selectedRows, changeRows);
 		  },
 		};
@@ -434,7 +464,7 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120}}
+					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
 					<Option value="1">未结账</Option>
@@ -448,7 +478,7 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120}}
+					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
 					<Option value="0">未申请提现</Option>
@@ -460,6 +490,8 @@ const App = React.createClass({
     	)
     }
 
+    const payList = this.state.payList;
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -469,7 +501,7 @@ const App = React.createClass({
 			<div className="filter">
 				<Select className="item"
 						defaultValue="0"
-						style={{width: 120}}
+						style={{width: 120, display: "none"}}
 						onChange={this.handleCashAccountTypeChange}>
 					<Option value="0">请选择收款方式</Option>
 					<Option value="1">支付宝</Option>
@@ -481,6 +513,15 @@ const App = React.createClass({
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
 			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+			<Modal
+        title="支付二次确认"
+        wrapClassName="playModal"
+        visible={this.state.payModalVisible}
+        onOk={() => this.setPayModalVisible(false)}
+        onCancel={() => this.setPayModalVisible(false)}
+      >
+        <FormDiv payList={payList} />
+      </Modal>
 		</section>);
 	}
 });
