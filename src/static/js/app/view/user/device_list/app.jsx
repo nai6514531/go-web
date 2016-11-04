@@ -135,7 +135,6 @@ class SchoolTable extends React.Component {
 						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
-				<button onClick={this.onClick.bind(this)}>CLICKME</button>
 				<div className="toolbar">
 					<SchoolFilter
 						allSchool={this.props.allSchool}
