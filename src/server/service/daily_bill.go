@@ -122,7 +122,7 @@ func (self *DailyBillService) BasicByUserIdAndBillAt(userId int, billAt string) 
 	return dailyBill, nil
 }
 
-func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...string) (*map[int]*model.DailyBill, error) {
+func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...string) (map[int]*model.DailyBill, error) {
 	list := &[]*model.DailyBill{}
 	dailyBillMap := make(map[int]*model.DailyBill)
 	r := common.DB.Where("user_id in (?) and status = ? and bill_at = ?", userIds, status, billAt).Find(list)
@@ -133,7 +133,7 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 	for _, dailyBill := range *list {
 		dailyBillMap[dailyBill.UserId] = dailyBill
 	}
-	return &dailyBillMap, nil
+	return dailyBillMap, nil
 }
 
 /**
@@ -149,8 +149,36 @@ func (self *DailyBillService) Update(id int, dailyBill *model.DailyBill) (int, e
 
 }
 
-func (self *DailyBillService) Updates(list ...*model.DailyBill) (int, error) {
-	r := common.DB.Model(&model.DailyBill{}).Updates(&list)
+func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
+	tx := common.DB.Begin()
+	var r *gorm.DB
+	var rows int
+	rows = 0
+	for _, _bill := range *list {
+		r = tx.Model(&model.DailyBill{}).Update(&_bill)
+		if r.Error != nil {
+			common.Logger.Debugln(r.Error.Error())
+			tx.Rollback()
+			return 0, r.Error
+		}else {
+			rows += int(r.RowsAffected)
+		}
+
+	}
+	return rows, nil
+}
+
+/**
+	只更新新系统数据
+ */
+func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface{}) (int, error) {
+	param := make(map[string]interface{}, 0)
+	param["status"] = status
+	timeNow := time.Now().Local().Format("2006-01-02 15:04:05")
+	if status == 2 {
+		param["settled_at"] = timeNow
+	}
+	r := common.DB.Model(&model.DailyBill{}).Where(" id in (?) ", ids...).Update(param)
 	if r.Error != nil {
 		common.Logger.Debugln(r.Error.Error())
 		return 0, r.Error
@@ -158,7 +186,10 @@ func (self *DailyBillService) Updates(list ...*model.DailyBill) (int, error) {
 	return int(r.RowsAffected), nil
 }
 
-func (self *DailyBillService) UpdateStatus(status int, billAt string, userIds ...string) (int, error) {
+/**
+	新旧系统数据库更新
+ */
+func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userIds ...string) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []string{}
 	//update mnzn database

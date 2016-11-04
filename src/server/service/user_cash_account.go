@@ -27,7 +27,7 @@ func (self *UserCashAccountService) BasicByUserId(userId int) (*model.UserCashAc
 	return userCashAccount, nil
 }
 
-func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (*map[int]*model.UserCashAccount, error) {
+func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (map[int]*model.UserCashAccount, error) {
 	list := &[]*model.UserCashAccount{}
 	accountMap := make(map[int]*model.UserCashAccount)
 	r := common.DB.Where("user_id in (?)", userIds).Find(list)
@@ -38,7 +38,7 @@ func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (*map[
 	for _, account := range *list {
 		accountMap[account.UserId] = account
 	}
-	return &accountMap, nil
+	return accountMap, nil
 }
 
 func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
