@@ -148,7 +148,7 @@ class SchoolTable extends React.Component {
             添加新设备
           </Link>
         </div>
-        <section className="view-content">
+        <article>
           <Table columns={columns}
                dataSource={dataSource}
                pagination={pagination}
@@ -156,7 +156,7 @@ class SchoolTable extends React.Component {
                onChange={this.handleTableChange}
                bordered
           />
-        </section>
+        </article>
       </section>
     );
   }

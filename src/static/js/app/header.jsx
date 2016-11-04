@@ -2,6 +2,14 @@ import React from "react";
 import {Menu, Button, Icon} from "antd";
 
 const Header = React.createClass({
+  propTypes: {
+    onHamburgClick: React.PropTypes.func
+  },
+  getDefaultProps: function () {
+    return {
+      onHamburgClick: function () {}
+    };
+  },
   logout() {
     let boo = confirm('确认退出登录吗?');
     if (!boo) {
@@ -30,22 +38,21 @@ const Header = React.createClass({
   render() {
     const {location} = this.props;
     const menus = USER.menu || [];
-    return (<div className="header">
-      <ul className="navbar-right">
-        <li>
-          <span className="avatar">
-            <img src="static/img/app/a5.jpg" alt=""/>
-          </span>
-        </li>
-        <li>
-          <span className="name">
-            {USER.name},您好!
-          </span>
-        </li>
-        <li >
-          <Icon type="logout" onClick={this.logout}/>
-        </li>
-      </ul>
+    return (<div className="application-header">
+      <span className="hamburg">
+        <Button type="ghost" icon="bars" onClick={this.props.onHamburgClick} />
+      </span>
+      <div className="right">
+        <span className="avatar">
+          <img src="static/img/app/a5.jpg" alt="" />
+        </span>
+        <span className="name">
+          {USER.name}, 您好!
+        </span>
+        <span className="logout">
+          <Icon type="logout" onClick={this.logout} />
+        </span>
+      </div>
     </div>)
   }
 });

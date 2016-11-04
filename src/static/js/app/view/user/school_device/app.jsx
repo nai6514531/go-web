@@ -276,7 +276,7 @@ class DeviceTable extends React.Component {
             <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
           </Breadcrumb>
         </header>
-        <section className="view-content">
+        <article>
           <Table columns={columns}
                dataSource={dataSource}
                pagination={this.pagination}
@@ -284,7 +284,7 @@ class DeviceTable extends React.Component {
                onChange={this.handleTableChange}
                bordered
           />
-        </section>
+        </article>
       </section>
     );
   }
