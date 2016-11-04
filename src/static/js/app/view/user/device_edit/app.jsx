@@ -262,6 +262,14 @@ class DeviceForm extends React.Component {
 		// 取消就重置内部数据
 		this.setState({ visible: false });
 	}
+	checkChinese(rule, value, callback) {
+		var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
+		if(value && !pattern.test(value)){
+			callback('不能输入中文');
+		} else {
+			callback();
+		}
+	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
 		if(value && !pattern.test(value)){
@@ -394,6 +402,7 @@ class DeviceForm extends React.Component {
 								rules: [
 									{ len:10, message: '长度为十位' },
 									{ required: true, message: '必填' },
+									{ validator: this.checkChinese.bind(this) },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
