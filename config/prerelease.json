@@ -7,11 +7,97 @@
   "domain": {
 	"url": "mng.huace.cn"
   },
-  "server":{
-	"port":9999
-  },
   "author": "soda",
   "log": {
 	"path": "/data/logs"
+  },
+  "isDevelopment": true,
+  "staticSystemPath": "./src/build/static",
+  "staticRequestPath": "/static",
+  "templateServe": "./src/build/template",
+  "templateSuffix": ".html",
+  "faviconPath": "./src/build/static/img/favicon.ico",
+  "logFilePath": "/data/logs/maizuo.log",
+  "pay": {
+	"wechat": {
+	  "appId": "",
+	  "mchId": "",
+	  "apiKey": ""
+	}
+  },
+  "server": {
+	"host": "0.0.0.0",
+	"port": 9999,
+	"captcha": {
+	  "key": "CAPTCHA",
+	  "fontPath": "./resource/font/comic.ttf"
+	},
+	"rateLimiter": {
+	  "rate": "10-M",
+	  "redis": {
+		"addr": "r-bp1e08c5fc1fcad4.redis.rds.aliyuncs.com:6379",
+		"password": "r-bp1e08c5fc1fcad4:Hyx12345",
+		"database": 1,
+		"prefix": "soda-manager-rate-limiter:",
+		"maxRetry": 3
+	  }
+	},
+	"session": {
+	  "user": {
+		"id": "USER_ID",
+		"key": "USER"
+	  },
+	  "cookie": "sess",
+	  "expires": 3600,
+	  "redis": {
+		"addr": "r-bp1e08c5fc1fcad4.redis.rds.aliyuncs.com:6379",
+		"password": "r-bp1e08c5fc1fcad4:Hyx12345",
+		"database": 1,
+		"prefix": "soda-manager-session:",
+		"maxIdle": 500,
+		"maxActive": 500,
+		"maxAgeSeconds": 3600,
+		"idleTimeout": 60
+	  }
+	},
+	"db": {
+	  "dialect": "mysql",
+	  "host": "rm-bp10fuvm9l74dx8b7.mysql.rds.aliyuncs.com",
+	  "port": 3306,
+	  "user": "soda_mng_wr",
+	  "password": "X4UoIkzkebLzngQb",
+	  "database": "soda-manager",
+	  "maxIdle": 50,
+	  "maxOpen": 50
+	},
+	"mndb": {
+	  "dialect": "mysql",
+	  "host": "rm-bp10fuvm9l74dx8b7.mysql.rds.aliyuncs.com",
+	  "port": 3306,
+	  "user": "soda_mng_wr",
+	  "password": "X4UoIkzkebLzngQb",
+	  "database": "soda-manager",
+	  "maxIdle": 50,
+	  "maxOpen": 50
+	},
+	"mndbprod": {
+	  "dialect": "mysql",
+	  "host": "120.24.248.223",
+	  "port": 3306,
+	  "user": "boxadmin",
+	  "password": "db@ba1306",
+	  "database": "mnzn",
+	  "maxIdle": 20,
+	  "maxOpen": 20
+	},
+	"redis": {
+	  "addr": "r-bp1e08c5fc1fcad4.redis.rds.aliyuncs.com:6379",
+	  "password": "r-bp1e08c5fc1fcad4:Hyx12345",
+	  "database": 1,
+	  "prefix": "soda-manager:",
+	  "maxIdle": 500,
+	  "maxActive": 500,
+	  "idleTimeout": 60
+	}
   }
 }
