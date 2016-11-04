@@ -27,7 +27,6 @@ function mapDispatchToProps(dispatch) {
 		putDeviceDetail,
 		postDeviceDetail,
 		patchPulseName,
-		putSerialNumber,
 		getRefDevice,
 	} = bindActionCreators(DeviceActions, dispatch);
 	const {
@@ -39,7 +38,6 @@ function mapDispatchToProps(dispatch) {
 		putDeviceDetail,
 		postDeviceDetail,
 		patchPulseName,
-		putSerialNumber,
 		getRefDevice,
 		getProvinceList,
 		getProvinceSchoolList,
