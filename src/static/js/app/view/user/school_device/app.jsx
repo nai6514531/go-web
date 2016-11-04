@@ -1,6 +1,6 @@
 import React from 'react';
 import '../device_list/app.less';
-import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -128,27 +128,29 @@ class DeviceTable extends React.Component {
 		// 成功才拉取,失败就提示
 		const schoolId = this.props.params.id;
 		const pager = { page : this.state.page, perPage: this.state.perPage};
-		if(this.theStatus !== -1) {
+		if(this.theStatus !== -1 && this.theStatus !== undefined) {
 			const status = nextProps.status;
 			if(status) {
 				if(status.fetch == true) {
 					this.props.getSchoolDevice(USER.id, schoolId, pager);
 					self.loading = true;
+					message.success('修改成功!',3);
 				} else {
-					alert('修改失败!');
+					message.error('修改失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.theStatus = -1;
 			}
 		}
-		if(this.reset !== -1) {
+		if(this.reset !== -1 && this.reset !== undefined) {
 			const reset = nextProps.resultReset;
 			if(reset) {
 				if(reset.fetch == true) {
 					this.props.getSchoolDevice(USER.id, schoolId, pager);
 					self.loading = true;
+					message.success('删除成功!',3);
 				} else {
-					alert('删除失败!');
+					message.error('删除失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.reset = -1;

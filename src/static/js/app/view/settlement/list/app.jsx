@@ -1,8 +1,9 @@
 import React from 'react';
-import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message} from 'antd';
+import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
+import FormDiv from './form.jsx';
 import moment from 'moment';
 const App = React.createClass({
 	getInitialState() {
@@ -131,30 +132,6 @@ const App = React.createClass({
 									)
 								}
 							}
-
-							/*spanDiv = (
-								accountType == 1? (
-									<span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								): status==0?(	
-									<span>	
-										<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-				              <a>申请提现</a>
-				            </Popconfirm>
-				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								): (
-									<span>
-										<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
-				              <a>取消提现申请</a>
-				            </Popconfirm>
-				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
-								)
-							)*/
 							break;
 						case 3: 
 							spanDiv = (accountType == 1&&status!=4)? (
@@ -186,7 +163,11 @@ const App = React.createClass({
 			selectedList: [],   //勾选的账单
 			clickLock: false,   //重复点击的锁
 			roleId: window.USER.role.id,
-			nowAjaxStatus: {}   //保存ajax请求字段状态
+			nowAjaxStatus: {},   //保存ajax请求字段状态
+			currentPage: 1,
+			payModalVisible: false,  //支付modal的状态 false:hide true:show
+			payList: {},  //支付宝数据
+			selectedRowKeys: [],
 		};
 	},
 	list(data) {
@@ -201,6 +182,7 @@ const App = React.createClass({
 					loading: false,
 				});
 				if (data && data.status == 0) {
+					this.clearSelectRows(); //清空结账勾选
 					this.setState({
 						total: data.data.total,
 						list: data.data.list.map((item) => {
@@ -218,6 +200,9 @@ const App = React.createClass({
 				});
 			})
 	},
+	setPayModalVisible(status) {
+    this.setState({ payModalVisible: status });
+  },
 	changeApplyStatus(orderId, willApplyStatus) {
 		const self = this;
 		let newList = this.state.list;
@@ -228,9 +213,7 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-	changeSettlementStatus(data) {
-		this.list(this.state.nowAjaxStatus)
-	},
+	
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -239,7 +222,7 @@ const App = React.createClass({
 
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-			if(res.status == "0"){
+			if(res.status == 0){
 				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
@@ -251,14 +234,33 @@ const App = React.createClass({
 			message.info(err)
 		})
 	},
+	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
+		let list = this.state.list;
+		for(var i=0; i<data.length; i++){
+			for(var j=0; j<list.length; j++){
+				if(data[i].idArr.indexOf(list[j].id) >= 0){
+					if(list[j].accountType == 1 && resStatus == 0){
+						list[j].status = 3;
+					}else if(list[j].accountType == 3){
+						list[j].status = 2;
+					}
+				}
+			}
+		}
+		this.setState({list: list});
+		this.clearSelectRows();
+		//this.list(this.state.nowAjaxStatus)
+	},
 	settle(data) {
 		let params = [];
+		let idArr = [];
+		idArr.push(data.id)
 		let paramsObj = {
+			"idArr": idArr,
 			"userId": data.userId+"",
 			"billAt": data.billAt,
 		};
-		params.push(paramsObj)
-
+		params.push(paramsObj);
 		this.settleAjax(params);
 	},
 	multiSettle() {
@@ -272,6 +274,7 @@ const App = React.createClass({
 
 		let billAtObj = {};
 		let userIdArr = [];
+		let idArr = [];
 		this.state.selectedList.map((item, i)=>{
 			let billAt = moment(item.billAt).format('YYYY-MM-DD')
 			if(!billAtObj[billAt]){
@@ -284,28 +287,38 @@ const App = React.createClass({
 			paramsObj.billAt = i;
 			userIdArr = [];
 			for(var j=0; j<billAtObj[i].length; j++){
-				console.log(billAtObj[i][j].userId);
 				userIdArr.push(billAtObj[i][j].userId);
+				idArr.push(billAtObj[i][j].id)
 			}
 			paramsObj.userId = userIdArr.join(',');
+			paramsObj.idArr = idArr;
 			params.push(paramsObj);
 		}
-		console.log(params);
 		this.settleAjax(params);
 	},
 	settleAjax(data) {
 		let self = this;
+		
+		/*var res = {"status":"2","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};*/
+
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
-		console.log()
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
-			if(res.status == "0"){
-				//message.info(res.msg)
-				self.changeSettlementStatus(data);
-			}else{
-				message.info(res.msg)
+			
+			if(res.status == 0){
+				if(res.data.batch_no){
+					self.setState({ payList: res.data });
+					self.setPayModalVisible(true);
+				}
+				self.changeSettlementStatus(data, res.status);
+			}else if(res.status == 1){
+				message.info("结账操作失败，请稍后重试！")
+			}else if(res.status == 2){
+				self.changeSettlementStatus(data, res.status);
+				message.info("银行结账成功，支付宝结账失败")
 			}
+
 		}).catch((err)=>{
 			message.info(err)
 			this.setState({clickLock: false});
@@ -314,6 +327,7 @@ const App = React.createClass({
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		this.setState({currentPage: 1})
 		this.list({
 			cashAccountType: cashAccountType,
 			status: status,
@@ -322,7 +336,6 @@ const App = React.createClass({
 		});
 	},
 	componentWillMount() {
-
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
 		this.list({
 			cashAccountType: cashAccountType,
@@ -348,6 +361,7 @@ const App = React.createClass({
 	},
 	initializePagination(){
 		var self = this;
+
 		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
 		return {
 			total: total,
@@ -359,6 +373,7 @@ const App = React.createClass({
 				self.list(listObj);
 			},
 			onChange(page) {
+				self.setState({currentPage: this.current})
 				let listObj = self.state.nowAjaxStatus;
 				listObj.page = this.current;
 				listObj.perPage = this.pageSize;
@@ -366,20 +381,45 @@ const App = React.createClass({
 			},
 		};
 	},
+	clearSelectRows() { //清空勾选
+		this.setState({selectedRowKeys: []})
+	},
 	render(){
 		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
+		pagination.current = this.state.currentPage;
 
+		const selectedRowKeys = this.state.selectedRowKeys;
 		const rowSelection = {
+			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
-		  	self.setState({selectedList: selectedRows})
+		  	let newSelectedRows = [];
+		  	let newSelectedRowKeys = [];
+		  	for(var i=0; i<selectedRows.length; i++){
+		  		let status = selectedRows[i].status;
+		  		if( status!=2 && status!=3 ){
+		  			newSelectedRows.push(selectedRows[i]);
+		  			newSelectedRowKeys.push(selectedRows[i].key);
+		  		}
+		  	}
+		  	self.setState({
+		  		selectedList: newSelectedRows,
+		  		selectedRowKeys: newSelectedRowKeys
+		  	})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
 		  onSelect(record, selected, selectedRows) {
 		    //console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
+		  	if(changeRows.length < 10){
+		  		self.setState({
+			  		selectedList: [],
+			  		selectedRowKeys: []
+			  	})
+		  	}
+		  	
 		    //console.log(selected, selectedRows, changeRows);
 		  },
 		};
@@ -409,7 +449,7 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120}}
+					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
 					<Option value="1">未结账</Option>
@@ -423,7 +463,7 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120}}
+					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
 					<Option value="0">未申请提现</Option>
@@ -435,6 +475,8 @@ const App = React.createClass({
     	)
     }
 
+    const payList = this.state.payList;
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -444,7 +486,7 @@ const App = React.createClass({
 			<div className="filter">
 				<Select className="item"
 						defaultValue="0"
-						style={{width: 120}}
+						style={{width: 120, display: "none"}}
 						onChange={this.handleCashAccountTypeChange}>
 					<Option value="0">请选择收款方式</Option>
 					<Option value="1">支付宝</Option>
@@ -455,7 +497,16 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
-			<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+			<Modal
+        title="支付二次确认"
+        wrapClassName="playModal"
+        visible={this.state.payModalVisible}
+        onOk={() => this.setPayModalVisible(false)}
+        onCancel={() => this.setPayModalVisible(false)}
+      >
+        <FormDiv payList={payList} />
+      </Modal>
 		</section>);
 	}
 });

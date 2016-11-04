@@ -7,11 +7,97 @@
   "domain": {
 	"url": "mng.huace.cn"
   },
-  "server":{
-	"port":8080
-  },
   "author": "soda",
   "log": {
 	"path": "/data/logs"
+  },
+  "isDevelopment": false,
+  "staticSystemPath": "./src/build/static",
+  "staticRequestPath": "/static",
+  "templateServe": "./src/template",
+  "templateSuffix": ".html",
+  "faviconPath": "./src/build/static/img/favicon.ico",
+  "logFilePath": "./log/log.log",
+  "pay": {
+	"wechat": {
+	  "appId": "",
+	  "mchId": "",
+	  "apiKey": ""
+	}
+  },
+  "server": {
+	"host": "0.0.0.0",
+	"port": 8080,
+	"captcha": {
+	  "key": "CAPTCHA",
+	  "fontPath": "./resource/font/comic.ttf"
+	},
+	"rateLimiter": {
+	  "rate": "10-M",
+	  "redis": {
+		"addr": "127.0.0.1:6379",
+		"password": "",
+		"database": 10,
+		"prefix": "soda-manager-rate-limiter:",
+		"maxRetry": 3
+	  }
+	},
+	"session": {
+	  "user": {
+		"id": "USER_ID",
+		"key": "USER"
+	  },
+	  "cookie": "sess",
+	  "expires": 3600,
+	  "redis": {
+		"addr": "127.0.0.1:6379",
+		"password": "",
+		"database": 10,
+		"prefix": "soda-manager-session:",
+		"maxIdle": 20,
+		"maxActive": 50,
+		"maxAgeSeconds": 3600,
+		"idleTimeout": 60
+	  }
+	},
+	"db": {
+	  "dialect": "mysql",
+	  "host": "127.0.0.1",
+	  "port": 3306,
+	  "user": "root",
+	  "password": "",
+	  "database": "soda-manager",
+	  "maxIdle": 20,
+	  "maxOpen": 20
+	},
+	"mndb": {
+	  "dialect": "mysql",
+	  "host": "127.0.0.1",
+	  "port": 3306,
+	  "user": "root",
+	  "password": "",
+	  "database": "soda-manager",
+	  "maxIdle": 20,
+	  "maxOpen": 20
+	},
+	"mndbprod": {
+	  "dialect": "mysql",
+	  "host": "127.0.0.1",
+	  "port": 3306,
+	  "user": "root",
+	  "password": "",
+	  "database": "soda-manager",
+	  "maxIdle": 20,
+	  "maxOpen": 20
+	},
+	"redis": {
+	  "addr": "127.0.0.1:6379",
+	  "password": "",
+	  "database": 10,
+	  "prefix": "soda-manager:",
+	  "maxIdle": 20,
+	  "maxActive": 50,
+	  "idleTimeout": 60
+	}
   }
 }

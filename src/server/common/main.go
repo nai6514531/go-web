@@ -16,6 +16,7 @@ var (
 		"-4": "你所请求的API超过频率限制,请稍后再试!",
 		"-5": "你没有操作该用户id的权限",
 	}
+
 )
 
 func SetUpCommon() {
@@ -25,7 +26,7 @@ func SetUpCommon() {
 	iris.UseFunc(func(ctx *iris.Context) {
 		startAt := time.Now().UnixNano() / 1000000
 		ctx.Set("startAt", startAt)
-		ctx.Response.Header.Set("X-Powered-By", "soda-manager")
+		ctx.Response.Header.Set("X-Powered-By", "soda-manager/v" + viper.GetString("version"))
 		ctx.Next()
 	})
 

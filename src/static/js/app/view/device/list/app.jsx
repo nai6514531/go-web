@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Breadcrumb, Popconfirm } from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message} from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -122,8 +122,9 @@ class DeviceList extends React.Component {
 			if(status){
 				if(status.fetch == true){
 					this.props.getDeviceList(pager);
+					message.success('操作成功!',3);
 				} else {
-					alert('操作失败!');
+					message.error('操作失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.theStatus = -1;
@@ -135,8 +136,9 @@ class DeviceList extends React.Component {
 				if(remove.fetch == true){
 					this.props.getDeviceList(pager);
 					self.loading = true;
+					message.success('删除成功!',3);
 				} else {
-					alert('删除失败!');
+					message.error('删除失败!',3);
 					console.log(nextProps.status.result.msg);
 				}
 				self.removeDevice = -1;
