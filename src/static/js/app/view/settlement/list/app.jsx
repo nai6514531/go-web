@@ -234,12 +234,12 @@ const App = React.createClass({
 			message.info(err)
 		})
 	},
-	changeSettlementStatus(data) {
+	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let list = this.state.list;
 		for(var i=0; i<data.length; i++){
 			for(var j=0; j<list.length; j++){
 				if(data[i].idArr.indexOf(list[j].id) >= 0){
-					if(list[j].accountType == 1){
+					if(list[j].accountType == 1 && resStatus == 0){
 						list[j].status = 3;
 					}else if(list[j].accountType == 3){
 						list[j].status = 2;
@@ -287,7 +287,6 @@ const App = React.createClass({
 			paramsObj.billAt = i;
 			userIdArr = [];
 			for(var j=0; j<billAtObj[i].length; j++){
-				console.log(billAtObj[i][j].userId);
 				userIdArr.push(billAtObj[i][j].userId);
 				idArr.push(billAtObj[i][j].id)
 			}
@@ -298,40 +297,28 @@ const App = React.createClass({
 		this.settleAjax(params);
 	},
 	settleAjax(data) {
-		/*this.setState({
-			payList: {
-				service: "batch_trans_notify",
-				partner: "ALIPAYID",
-				_input_charset: "utf-8",
-				notify_url: "http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification",
-				account_name: "深圳市华策网络科技有限公司",
-				detail_data: "aliPayDetailDataStr",
-				batch_no: "batch_no",
-				batch_num: "batch_num",
-				batch_fee: "batch_fee",
-				email: "email",
-				pay_date: "pay_date",
-				sign: "sign",
-				sign_type: "sign_type",
-				request_url: "request_url",
-				billAt: data[0].billAt
-			}
-		})
-		this.setPayModalVisible(true);
-		this.changeSettlementStatus(data);
-		return*/
-
 		let self = this;
+		
+		/*var res = {"status":"2","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};*/
+
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
+			
 			if(res.status == 0){
-				//message.info(res.msg)
-				self.changeSettlementStatus(data);
-			}else{
-				message.info(res.msg)
+				if(res.data.batch_no){
+					self.setState({ payList: res.data });
+					self.setPayModalVisible(true);
+				}
+				self.changeSettlementStatus(data, res.status);
+			}else if(res.status == 1){
+				message.info("结账操作失败，请稍后重试！")
+			}else if(res.status == 2){
+				self.changeSettlementStatus(data, res.status);
+				message.info("银行结账成功，支付宝结账失败")
 			}
+
 		}).catch((err)=>{
 			message.info(err)
 			this.setState({clickLock: false});
@@ -407,7 +394,6 @@ const App = React.createClass({
 		const rowSelection = {
 			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
-		  	console.log(3)
 		  	let newSelectedRows = [];
 		  	let newSelectedRowKeys = [];
 		  	for(var i=0; i<selectedRows.length; i++){
@@ -427,7 +413,6 @@ const App = React.createClass({
 		    //console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
-
 		  	if(changeRows.length < 10){
 		  		self.setState({
 			  		selectedList: [],
