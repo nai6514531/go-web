@@ -4,7 +4,7 @@ import {Button} from 'antd';
 const FormList = React.createClass({
 	getInitialState() {
 		return {
-			
+
 		};
 	},
 	componentWillMount() {
@@ -16,7 +16,7 @@ const FormList = React.createClass({
 		const payList = this.props.payList;
 		console.log(payList)
 		return (
-			<form name="alipayment" action={payList.request_url} method="post" target="_blank">
+			<form name="alipayment" action={payList.request_url+"?_input_charset="+payList._input_charset} method="post" target="_blank">
       	<div id="body">
 					<input onChange={this.inputChange} value={payList.service} name="service" />
 					<input onChange={this.inputChange} value={payList.partner} name="partner" />
