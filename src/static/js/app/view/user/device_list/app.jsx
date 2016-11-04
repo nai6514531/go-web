@@ -68,7 +68,6 @@ class SchoolTable extends React.Component {
 		this.props.getAllSchool(USER.id, schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
-		console.log(nextProps.school);
 		if(this.getSchool == 1 && nextProps.school) {
 			this.loading = false;
 			this.getSchool = 0;
@@ -110,6 +109,7 @@ class SchoolTable extends React.Component {
 	render() {
 		const self = this;
 		const pagination = this.initializePagination();
+		pagination.current = this.state.page;
 		const school = this.props.school;
 		let dataSource = [];
 		let list = [];
@@ -135,7 +135,6 @@ class SchoolTable extends React.Component {
 						<Breadcrumb.Item>设备管理</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
-				<button onClick={this.onClick.bind(this)}>CLICKME</button>
 				<div className="toolbar">
 					<SchoolFilter
 						allSchool={this.props.allSchool}
@@ -173,9 +172,7 @@ class SchoolFilter extends React.Component {
 		this.props.changeSchoolId(schoolId);
 		const pager = {page: this.props.page, perPage: this.props.perPage};
 		this.props.getUserSchool(USER.id, schoolId, pager);
-		// console.log(schoolId);
 		if(schoolId == -1) {
-			console.log('所有学校');
 			// 调所有学校的接口
 			this.props.pagination.onChange(1);
 		}
