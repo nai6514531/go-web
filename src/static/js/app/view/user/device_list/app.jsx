@@ -68,7 +68,6 @@ class SchoolTable extends React.Component {
 		this.props.getAllSchool(USER.id, schoolId);
 	}
 	componentWillReceiveProps(nextProps) {
-		console.log(nextProps.school);
 		if(this.getSchool == 1 && nextProps.school) {
 			this.loading = false;
 			this.getSchool = 0;
@@ -77,7 +76,7 @@ class SchoolTable extends React.Component {
 	initializePagination() {
 		let total = 1;
 		if (this.props.school && this.props.school.fetch == true) {
-			total = this.props.school.result.data.total;
+			total = this.props.school.result.data.length;
 		}
 		const self = this;
 		let schoolId = -1;
@@ -87,6 +86,7 @@ class SchoolTable extends React.Component {
 		return {
 			total: total,
 			showSizeChanger: true,
+			defaultCurrent: 1,
 			onShowSizeChange(current, pageSize) {
 				const pager = { page : current, perPage: pageSize};
 				self.setState(pager);
@@ -109,6 +109,7 @@ class SchoolTable extends React.Component {
 	render() {
 		const self = this;
 		const pagination = this.initializePagination();
+		pagination.current = this.state.page;
 		const school = this.props.school;
 		let dataSource = [];
 		let list = [];
@@ -140,6 +141,7 @@ class SchoolTable extends React.Component {
 						getUserSchool={this.props.getUserSchool}
 						page={this.state.page}
 						perPage={this.state.perPage}
+						pagination={pagination}
 						changeSchoolId={this.changeSchoolId.bind(this)}
 					/>
 					<Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item add-btn">
@@ -170,6 +172,10 @@ class SchoolFilter extends React.Component {
 		this.props.changeSchoolId(schoolId);
 		const pager = {page: this.props.page, perPage: this.props.perPage};
 		this.props.getUserSchool(USER.id, schoolId, pager);
+		if(schoolId == -1) {
+			// 调所有学校的接口
+			this.props.pagination.onChange(1);
+		}
 	}
 	render() {
 		const allSchool = this.props.allSchool;

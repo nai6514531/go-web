@@ -11,11 +11,6 @@ func Web() {
 		web = &controller.WebController{}
 	)
 
-	iris.UseFunc(func(ctx *iris.Context) {
-		ctx.Response.Header.Set("X-Powered-By", ctx.RemoteAddr())
-		ctx.Next()
-	})
-
 	iris.Get("/", web.Index)
 	iris.Get("/signin", web.Signin)
 	iris.Get("/stat", web.Stat)

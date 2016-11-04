@@ -1,10 +1,11 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal,Tooltip } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
+const confirm = Modal.confirm;
 import { Link } from 'react-router';
 
 
@@ -94,7 +95,7 @@ class UserForm extends React.Component {
 			const resultPostDetail = this.props.resultPostDetail;
 			if(resultPostDetail !== nextProps.resultPostDetail
 				&& nextProps.resultPostDetail.fetch == true){
-				alert('添加代理商成功');
+				message.success('添加代理商成功',3);
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPostDetail !== nextProps.resultPostDetail
@@ -103,17 +104,17 @@ class UserForm extends React.Component {
 				switch (code) {
 					case 7:
 					case 13:
-						alert('该手机号已存在');
+						message.error('该手机号已存在',3);
 						break;
 					default:
-						alert('添加代理商失败');
+						message.error('添加代理商失败',3);
 				}
 				self.saveDetail = -1;
 			}
 			const resultPutDetail = this.props.resultPutDetail;
 			if(resultPutDetail !== nextProps.resultPutDetail
 				&& nextProps.resultPutDetail.fetch == true){
-				alert('修改代理商成功');
+				message.success('修改代理商成功',3);
 				self.context.router.goBack();
 				self.saveDetail = -1;
 			} else if(resultPutDetail !== nextProps.resultPutDetail
@@ -122,10 +123,10 @@ class UserForm extends React.Component {
 				switch (code) {
 					case 7:
 					case 8:
-						alert('该手机号已存在');
+						message.error('该手机号已存在',3);
 						break;
 					default:
-						alert('修改代理商失败');
+						message.error('修改代理商失败',3);
 				}
 				self.saveDetail = -1;
 			}
@@ -211,10 +212,14 @@ class UserForm extends React.Component {
 		}
 	}
 	goBack() {
+		const self = this;
 		if(this.state.unsaved) {
-			if(confirm('确定取消?')){
-				this.context.router.goBack();
-			}
+			confirm({
+				title: '确定取消?',
+				onOk() {
+					self.context.router.goBack();
+				},
+			});
 		}
 	}
 	checkNumber(rule, value, callback) {
@@ -226,7 +231,7 @@ class UserForm extends React.Component {
 		}
 	}
 	checkAreaCode(rule, value, callback) {
-		var pattern = new RegExp(/^((0\d{2,3}-\d{7,8})|(1\d{10}))$/);
+		var pattern = new RegExp(/^[0-9\-]+$/);
 		if(pattern.test(value) || !value){
 			callback();
 		} else {
@@ -518,7 +523,9 @@ class UserForm extends React.Component {
 										无
 									</Radio>
 									<Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-										实时分账(必须拥有支付宝,收取 x% 手续费)
+										<Tooltip title="我是 TIPS ">
+											<span>自动分账(必须拥有支付宝,收取 x% 手续费)</span>
+										</Tooltip>
 									</Radio>
 									<Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
 										财务定期结账(需提供正确银行卡号)

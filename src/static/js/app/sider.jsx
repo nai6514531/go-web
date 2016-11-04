@@ -4,6 +4,11 @@ import {Menu, Button, Icon} from 'antd';
 import Menus from './menus.jsx'
 
 const Navbar = React.createClass({
+	getInitialState() {
+		return {
+			current: '',
+		};
+	},
 	logout() {
 		let boo = confirm('确认退出登录吗?');
 		if (!boo) {
@@ -28,25 +33,23 @@ const Navbar = React.createClass({
 		if (/^#|\//.test(item.key)) {
 			window.location.href = item.key;
 		}
+		this.setState({current: item.key})
+	},
+	changeSelect() {
+		this.setState({current: ''})
 	},
 	render() {
 		const {location} = this.props;
 		const menus = USER.menu || [];
 		return (<aside>
-			<h2><a href="#/"><img src={require('./logo.png')}/></a></h2>
+			<h2 onClick={this.changeSelect}><a href="#/"><img src={require('./logo.png')}/></a></h2>
 			<nav>
 				<Menu mode="inline"
 					  theme="dark"
-					  defaultOpenKeys={['data']}
-					  selectedKeys={['#' + location.pathname]}
+					  selectedKeys={[this.state.current]}
 					  onClick={this.onClick}>
-
-					{Menus.map(function (_menu) {
-						return <Menu.SubMenu key={_menu.key} title={<div><Icon type={_menu.icon}/> {_menu.text}</div>}>
-							{menus.map(function (item) {
-								return <Menu.Item key={item.url}>{item.name}</Menu.Item>
-							})}
-						</Menu.SubMenu>
+					{menus.map(function (item) {
+						return <Menu.Item key={item.url}>{item.name}</Menu.Item>
 					})}
 				</Menu>
 				<footer>
