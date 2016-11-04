@@ -73,7 +73,7 @@ class SchoolSelect extends React.Component {
 		if(this.props.schoolName == undefined) {
 			if(nextProps.schoolName){
 				this.setState({schoolName: nextProps.schoolName});
-			} else {
+			} else if(nextProps.schoolId == 0) {
 				this.setState({schoolName: '其它'});
 			}
 		}
