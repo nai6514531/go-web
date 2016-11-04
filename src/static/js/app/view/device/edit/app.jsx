@@ -259,7 +259,7 @@ class DeviceForm extends React.Component {
 	checkChinese(rule, value, callback) {
 		var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
 		if(value && !pattern.test(value)){
-			callback('不能输入中文');
+			callback('请输入正确的设备编号');
 		} else {
 			callback();
 		}
@@ -276,7 +276,7 @@ class DeviceForm extends React.Component {
 		// 只要大于零的数字
 		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
-			callback('只能为数字');
+			callback('请输入正确价格');
 		} else if(value >= 10000000){
 			callback('不超过七位数');
 		} else {
