@@ -258,7 +258,7 @@ class DeviceList extends React.Component {
             添加新设备
           </Link>
         </div>
-        <section className="view-content">
+        <article>
           <Table columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
@@ -266,7 +266,7 @@ class DeviceList extends React.Component {
             onChange={this.handleTableChange}
             bordered
             />
-        </section>
+        </article>
       </section>
     );
   }

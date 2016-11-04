@@ -3,66 +3,74 @@
 .application {
   height: 100%;
   width: 100%;
-  & > .application-main {
+  .application-main {
     height: 100%;
     min-height: 500px;
-    margin: 0 0 0 (200px + 32px);
+    margin: 50px 0 0 (200px + 32px);
+    padding: 16px;
     border: 1px solid rgba(0,0,0,0);
-    section.content {
-      padding: 16px;
-      margin-top: 50px;
-      section > header {
+    & > section {
+      & > header {
         border-bottom: 1px solid #ddd;
         height: 50px;
         line-height: 50px;
         padding-left: 15px;
         margin-bottom: 15px;
       }
-      div.toolbar {
+      & > .toolbar {
         margin-bottom: 15px;
-        height: 50px;
         line-height: 50px;
         .item {
           margin: 5px 10px;
         }
       }
-      section.view-content {
+      & > article {
         margin-bottom: 15px;
         button {
           margin: 0.2rem;
         }
       }
     }
-    & > * > header {
-      margin: 28px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 1.17em;
-      font-weight: bold;
-    }
     .ant-table table, .ant-table-thead > tr > th {
       text-align: center;
     }
+    @media (max-width: 768px) {
+      margin: 50px 0 0 0;
+    }
   }
-  & > div.header {
-    height: 50px;
-    background-color: #fff;
-    border-bottom: 1px solid #eee;
+  .application-header {
     position: fixed;
     top: 0;
-    width: 100%;
+    left: 200px + 32px;
+    right: 0;
+    height: 50px;
     z-index: 99;
-    padding-left: 232px;
-    padding-right: 16px;
-    ul.navbar-right {
-      float: right;
-      line-height: 50px;
-      li {
-        float: left;
-        margin: 0 10px;
-        span {
+    padding: 0 16px;
+    line-height: 50px;
+    background-color: #fff;
+    background-image: linear-gradient(0,rgba(0,0,0,0.042),#fff);
+    border-bottom: 1px solid #eee;
+    & > span {
+      margin: 0 10px;
+      display: inline-block;
+      &.hamburg {
+        display: none;
+        @media (max-width: 768px) {
           display: inline-block;
         }
-        span.avatar img {
+      }
+    }
+    .right {
+      float: right;
+      & > span {
+        margin: 0 10px;
+        display: inline-block;
+        &.name {
+          @media (max-width: 768px) {
+            display: none;
+          }
+        }
+        &.avatar img {
           width: 30px;
           height: auto;
           max-width: 100%;
@@ -75,26 +83,39 @@
         }
       }
     }
+    @media (max-width: 768px) {
+      left: 0;
+    }
   }
-  & > aside {
-    background-color: @dark-bg-color;
+  .application-sider {
     position: fixed;
     top: 0;
     bottom: 0;
     width: 200px + 32px;
-    padding: 16px;
     z-index: 100;
-    h2 {
-      text-align: center;
-      a {
+    padding: 16px;
+    background-color: @dark-bg-color;
+    .close {
+      display: none;
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      @media (max-width: 768px) {
         display: block;
+      }
+    }
+    h2 {
+      padding: 36px 0;
+      font-size: 14px;
+      height: 120px + (36px * 2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      a {
         color: #eee;
         text-shadow: 0 -1px 1px #111;
-        height: 100px;
         img {
-          width: 50%;
-          height: 100%;
-          margin: 0 auto;
+          width: 120px;
         }
       }
     }
@@ -107,8 +128,25 @@
         border-bottom: 1px dashed #777;
       }
       footer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
         padding: 36px 0;
         text-align: center;
+        .close {
+          display: none;
+          @media (max-width: 768px) {
+            display: block;
+          }
+        }
+      }
+    }
+    @media (max-width: 768px) {
+      display: none;
+      width: 100%;
+      &.show {
+        display: block;
       }
     }
   }

@@ -453,7 +453,7 @@ class UserForm extends React.Component {
           }
 
         </header>
-        <section className="view-content">
+        <article>
           <Form horizontal>
             <FormItem
               {...formItemLayout}
@@ -554,7 +554,7 @@ class UserForm extends React.Component {
               <Button type="primary" onClick={this.handleSubmit}>保存</Button>
             </FormItem>
           </Form>
-        </section>
+        </article>
       </section>
     );
   }

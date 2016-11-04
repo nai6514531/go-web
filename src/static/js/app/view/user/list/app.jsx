@@ -247,7 +247,7 @@ class AgentTable extends React.Component {
           </div>:
           ''
         }
-        <section className="view-content">
+        <article>
           <Table columns={columns}
                rowKey={record => record.key}
                dataSource={dataSource}
@@ -255,7 +255,7 @@ class AgentTable extends React.Component {
                loading={this.loading ? this.loading : false}
                bordered
           />
-        </section>
+        </article>
       </section>
     );
   }

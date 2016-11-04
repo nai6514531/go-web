@@ -385,7 +385,7 @@ class DeviceForm extends React.Component {
           }
 
         </header>
-        <section className="view-content">
+        <article>
           <Form horizontal>
             <FormItem
               {...formItemLayout}
@@ -531,7 +531,7 @@ class DeviceForm extends React.Component {
               />
             </div>
           </Form>
-        </section>
+        </article>
       </section>
 
     );
