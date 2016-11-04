@@ -364,7 +364,7 @@ class DeviceForm extends React.Component {
 		if(id) {
 			breadcrumb = '修改设备';
 		}
-		console.log('省市ID和名字',this.provinceId,this.provinceName,this.schoolId,this.schoolName);
+		// console.log('省市ID和名字',this.provinceId,this.provinceName,this.schoolId,this.schoolName);
 		return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
