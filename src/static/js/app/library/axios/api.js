@@ -1,6 +1,7 @@
 import axios from 'axios';
 import NProgress from "nprogress";
-import { message } from 'antd';
+import { message, Modal } from 'antd';
+const confirm = Modal.confirm;
 
 const api = axios.create({
   headers: {
@@ -30,8 +31,12 @@ function handleResponse(promise, resolve, reject) {
       if (parseInt(data.status) < 0) {
         data.status = parseInt(data.status);
         if (data.status == -1) {
-          message.error(data.msg,3);
-          window.location.href = '/';
+          confirm({
+            title: data.msg,
+            onOk() {
+              window.location.href = '/';
+            },
+          });
         }else{
           message.info(data.msg,3);
         }
