@@ -519,7 +519,8 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
               })(
-                <RadioGroup>
+                id !== 'new'?
+                <RadioGroup disabled>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
                     无
                   </Radio>
@@ -532,6 +533,20 @@ class UserForm extends React.Component {
                       <p className="tips">请确保输入正确的银行卡相关信息</p>
                   </Radio>
                 </RadioGroup>
+                  :
+                  <RadioGroup >
+                    <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
+                      无
+                    </Radio>
+                    <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
+                      <span>自动分账-无须手动申请结账</span>
+                      <p className="tips">必须有支付宝账号,按每笔账单的0.5%收服务费,保底1元,封顶25元</p>
+                    </Radio>
+                    <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
+                      <span>财务定期结账-需手动申请结账</span>
+                      <p className="tips">请确保输入正确的银行卡相关信息</p>
+                    </Radio>
+                  </RadioGroup>
               )}
             </FormItem>
             {payNode}
