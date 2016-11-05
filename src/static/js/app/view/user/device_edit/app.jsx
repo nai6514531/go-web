@@ -3,6 +3,7 @@ import './app.less';
 import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message} from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
+const Option = Select.Option;
 const RadioGroup = Radio.Group;
 const confirm = Modal.confirm;
 import SchoolSelect from '../../common/school_select/app.jsx';
@@ -77,6 +78,7 @@ class DeviceForm extends React.Component {
     this.changePulseName = this.changePulseName.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
     this.checkPrice = this.checkPrice.bind(this);
+    this.provinceChange = this.provinceChange.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
@@ -91,6 +93,10 @@ class DeviceForm extends React.Component {
     this.props.getRefDevice();
     const { schoolId } = this.props.params;
     this.props.getSchoolDetail(schoolId);
+    // 默认北京市所有学校
+    this.props.getProvinceList();
+    this.props.getProvinceSchoolList(110000);
+
   }
   componentWillReceiveProps(nextProps) {
     const self = this;
@@ -99,35 +105,7 @@ class DeviceForm extends React.Component {
     if(deviceId) {
       if(this.props.provinceList !== nextProps.provinceList) {
         const provinceId = nextProps.detail.result.data.provinceId;
-        const schoolId = nextProps.detail.result.data.schoolId;
-        const provinceName = nextProps.provinceList.result.data.filter(function (item) {
-          return item.id == provinceId;
-        });
-        self.provinceId = provinceId;
-        self.schoolId = schoolId;
-        if(provinceName.length >= 1){
-          self.provinceName = provinceName[0].name;
-        }
         this.props.getProvinceSchoolList(provinceId);
-        self.getSchool = 1;
-      }
-      // 可以优化为通过拉取学校详情来设置初始值
-      if(this.getSchool
-        && this.props.provinceSchool !== nextProps.provinceSchool
-        && nextProps.provinceSchool
-        && nextProps.provinceSchool.fetch == true){
-        const schoolName = nextProps.provinceSchool.result.data.filter(function (item) {
-          return item.id == self.schoolId;
-        })
-        if(schoolName){
-          if(schoolName.length > 0 ){
-            self.schoolName = schoolName[0].name;
-          }
-        }
-        else {
-          message.error(nextProps.provinceSchool.result.msg,3);
-        }
-        this.getSchool = 0;
       }
     }
     // 初始化服务名
@@ -190,19 +168,17 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-			if(!this.props.params.id) {
-				if(!self.provinceId || !self.schoolId) {
-					self.setState({tips:'必选'});
-					return;
-				}
-			}
+      if(values.schoolId == -1) {
+        self.schoolIdHelp = {'help':'必选','className':'has-error'};
+        return false;
+      }
 			if (errors) {
 				return;
 			}
 			const deviceValue = {
 				"serialNumber": values.serialNumber,
-				"provinceId": self.provinceId,
-				"schoolId": self.schoolId<0?0:self.schoolId,
+				"provinceId": parseInt(values.provinceId),
+				"schoolId": parseInt(values.schoolId),
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
@@ -317,11 +293,41 @@ class DeviceForm extends React.Component {
 			});
 		}
 	}
-	render() {
+  provinceChange(event) {
+    this.props.getProvinceSchoolList(event);
+    const { setFieldsValue } = this.props.form;
+    setFieldsValue({'schoolId':'-1'});
+  }
+  schoolChange(event) {
+    this.schoolIdHelp = {};
+  }
+  render() {
+    // 省份列表
+    let ProvinceNode = [];
+    if(this.props.provinceList && this.props.provinceList.fetch == true){
+      ProvinceNode = this.props.provinceList.result.data.filter(function(item, key){
+        return item.id !== 820000 && item.id !== 810000 && item.id !== 710000;
+      }).map(function (item, key) {
+        return <Option key={key} value={item.id.toString()}>{item.name}</Option>
+      })
+    }
+    // 学校列表
+    let schoolNode = [];
+    if(this.props.provinceSchool && this.props.provinceSchool.fetch == true){
+        const firstNode = <Option key="-1" value="-1">请选择学校</Option>;
+        schoolNode.push(firstNode);
+        const list = this.props.provinceSchool.result.data;
+        for(let i = 0;i<list.length; i++) {
+            const item = <Option key={i+1} value={list[i].id.toString()}>{list[i].name}</Option>;
+            schoolNode.push(item);
+        }
+        const lastItem = <Option key="0" value="0">其它</Option>;
+        schoolNode.push(lastItem);
+    }
 		const schoolDetail = this.props.schoolDetail;
 		let schoolName = '';
 		if(schoolDetail && schoolDetail.fetch == true){
-			schoolName = schoolDetail.result.data.name;
+			  schoolName = schoolDetail.result.data.name;
 		}
 		// 关联设备列表
 		const refDevice = this.props.refDevice;
@@ -345,9 +351,8 @@ class DeviceForm extends React.Component {
 				const device = detail.result.data;
 				initialValue = {
 					'serialNumber': device.serialNumber,
-					// 这里的初始化没什么意义
-					'school': device.schoolId,
-					'province': device.provinceId,
+					'schoolId': device.schoolId.toString(),
+					'provinceId': device.provinceId.toString(),
 					// 'label': device.label,
 					'address': device.address,
 					'referenceDevice': device.referenceDeviceId,
@@ -371,8 +376,10 @@ class DeviceForm extends React.Component {
 		if(id) {
 			breadcrumb = '修改设备';
 		}
-		// console.log('省市ID和名字',this.provinceId,this.provinceName,this.schoolId,this.schoolName);
-		return (
+    if(!this.cityIdHelp){
+      this.cityIdHelp = {};
+    }
+    return (
 			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
 				<header>
 					{
@@ -410,17 +417,37 @@ class DeviceForm extends React.Component {
 								<Input placeholder="请输入设备编号" />
 							)}
 						</FormItem>
-						<div className="select-school">
-							<label className="select-title">省份学校</label>
-							<SchoolSelect handleSelect={this.handleSelect}
-										  provinceId={this.provinceId}
-										  schoolId={this.schoolId}
-										  provinceName={this.provinceName}
-										  schoolName={this.schoolName}
-							/>
-							{this.state.tips?<span className="tip-error">{this.state.tips}</span>
-								:''}
-						</div>
+            <FormItem
+              {...formItemLayout}
+              label="省份"
+            >
+              {getFieldDecorator('provinceId', {
+                rules: [
+                  { required: true, message: '必选' },
+                ],
+                initialValue: initialValue.provinceId,
+              })(
+                <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
+                  {ProvinceNode}
+                </Select>
+              )}
+            </FormItem>
+            <FormItem
+              {...formItemLayout}
+              label="学校"
+              {...this.schoolIdHelp}
+            >
+              {getFieldDecorator('schoolId', {
+                rules: [
+                  { required: true, message: '必选' },
+                ],
+                initialValue: initialValue.schoolId,
+              })(
+                <Select placeholder="请选择学校" onChange={this.schoolChange.bind(this)}>
+                  {schoolNode}
+                </Select>
+              )}
+            </FormItem>
 						<FormItem
 							{...formItemLayout}
 							label="楼道信息" >
