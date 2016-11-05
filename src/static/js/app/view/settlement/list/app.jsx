@@ -95,7 +95,7 @@ const App = React.createClass({
 							)
 							break;
 						case 2:
-						case 5: 
+						case 5:
 
 							if(accountType == 1){
 								spanDiv = (
@@ -105,8 +105,8 @@ const App = React.createClass({
 								)
 							}else{
 								if(status == 0){
-									spanDiv = (	
-										<span>	
+									spanDiv = (
+										<span>
 											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
 					              <a>申请提现</a>
 					            </Popconfirm>
@@ -133,7 +133,7 @@ const App = React.createClass({
 								}
 							}
 							break;
-						case 3: 
+						case 3:
 							if( status==2||status==3 ){
 								spanDiv = (
 									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -196,7 +196,7 @@ const App = React.createClass({
 				self.setState({
 					loading: false,
 				});
-				if (data && data.status == 0) {
+				if (data && data.status == "00") {
 					this.clearSelectRows(); //清空结账勾选
 					this.setState({
 						total: data.data.total,
@@ -228,7 +228,7 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-	
+
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
@@ -237,7 +237,7 @@ const App = React.createClass({
 
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
-			if(res.status == 0){
+			if(res.status == "00"){
 				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
@@ -314,24 +314,26 @@ const App = React.createClass({
 	settleAjax(data) {
 		let self = this;
 		/*var res = {"status":"2","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};*/
-		
+
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
-			
-			if(res.status == 0){
+			console.log(res)
+			if(res.status == "00"){
 				if(res.data.batch_no){
 					self.setState({ payList: res.data });
 					self.setPayModalVisible(true);
 				}
 				self.changeSettlementStatus(data, res.status);
-			}else if(res.status == 1){
+			}else if(res.status == "01"){
 				message.info("结账操作失败，请稍后重试！")
-			}else if(res.status == 2){
+			}else if(res.status == "02"){
 				self.changeSettlementStatus(data, res.status);
 				message.info("银行结账成功，支付宝结账失败")
-			}
+			}else(
+        message.info(res.msg)
+      )
 
 		}).catch((err)=>{
 			message.info(err)
@@ -434,7 +436,7 @@ const App = React.createClass({
 			  		selectedRowKeys: []
 			  	})
 		  	}
-		  	
+
 		    //console.log(selected, selectedRows, changeRows);
 		  },
 		};

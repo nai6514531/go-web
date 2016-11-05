@@ -77,7 +77,7 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        if (data && data.status == '0') {
+        if (data && data.status == '00') {
           this.setState({
             total: data.data.total,
             list: data.data.list.map((item) => {
