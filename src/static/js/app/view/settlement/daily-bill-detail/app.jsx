@@ -86,7 +86,7 @@ const App = React.createClass({
             })
           });
         } else {
-          alert(data.msg);
+          message.info(data.msg);
         }
       })
   },
@@ -118,7 +118,7 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
     </section>);
   }
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import {Menu, Button, Icon} from "antd";
+import {Menu, Button, Icon ,message } from "antd";
 
 const Header = React.createClass({
   propTypes: {
@@ -24,7 +24,7 @@ const Header = React.createClass({
         if (data && data.status && parseInt(data.status.substr(-2)) == 0) {
           window.location.reload();
         } else {
-          alert(data.msg || '系统异常,请重试!')
+          message.error(data.msg || '系统异常,请重试!');
         }
       });
   },

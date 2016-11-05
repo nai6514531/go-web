@@ -259,7 +259,7 @@ class UserForm extends React.Component {
       // })
     }
     const self = this;
-        const { id } = this.props.params;
+    const { id } = this.props.params;
     const userId = USER.id;
         const { detail, provinceCity, provinceList } = this.props;
     let initialValue = {};
@@ -504,7 +504,8 @@ class UserForm extends React.Component {
                   { validator: this.checkNumber },
                 ],
                 initialValue: initialValue.mobile,
-              })(
+              })(id !== 'new'? 
+                <Input disabled placeholder="请输入手机号" />:
                 <Input placeholder="请输入手机号" />
               )}
             </FormItem>
@@ -518,22 +519,34 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
               })(
-                <RadioGroup>
-                  <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block">
+                id !== 'new'?
+                <RadioGroup disabled>
+                  <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
                     无
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                    <span>自动分账(无须手动申请结账,必须有支付宝账号,需收取服务费&nbsp;
-                        <Tooltip title="支付宝按每笔账单金额的0.5%收取服务费,保底1元,封顶25元">
-                           <Icon className="icon"  type="question-circle-o" />
-                        </Tooltip>
-                      )</span>
-                    
+                    <span>自动分账-无须手动申请结账</span>
+                    <p className="tips">必须有支付宝账号,按每笔账单的0.5%收服务费,保底1元,封顶25元</p>
                   </Radio>
                   <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                    财务定期结账(需手动申请结账,请确保输入正确银行卡号)
+                      <span>财务定期结账-需手动申请结账</span>
+                      <p className="tips">请确保输入正确的银行卡相关信息</p>
                   </Radio>
                 </RadioGroup>
+                  :
+                  <RadioGroup >
+                    <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
+                      无
+                    </Radio>
+                    <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
+                      <span>自动分账-无须手动申请结账</span>
+                      <p className="tips">必须有支付宝账号,按每笔账单的0.5%收服务费,保底1元,封顶25元</p>
+                    </Radio>
+                    <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
+                      <span>财务定期结账-需手动申请结账</span>
+                      <p className="tips">请确保输入正确的银行卡相关信息</p>
+                    </Radio>
+                  </RadioGroup>
               )}
             </FormItem>
             {payNode}

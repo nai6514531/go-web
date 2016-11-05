@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
@@ -50,16 +51,20 @@ const App = React.createClass({
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
-				render: (status) => {
+				render: (status, record) => {
 					switch (status) {
 						case 0:
-							return <div className="status">未申请提现</div>
-							break;
-						case 1:
-							if(this.state.roleId == 3){
+							if(this.state.roleId == 3 || record.accountType == 1){
 								return <div className="status">未结账</div>
 							}else{
-								return <div className="status">已申请提现</div>
+								return <div className="status">未结账</div>
+							}
+							break;
+						case 1:
+							if(this.state.roleId == 3 || record.accountType == 1){
+								return <div className="status">未结账</div>
+							}else{
+								return <div className="status">已申请结账</div>
 							}
 							break;
 						case 2:
@@ -77,6 +82,8 @@ const App = React.createClass({
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
+				width: 150,
+				fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -85,7 +92,7 @@ const App = React.createClass({
 						id: record.id,
 						userId: record.userId,
 						billAt: moment(record.billAt).format('YYYY-MM-DD'),
-						willApplyStatus: status == 0 ? 1: 0 //即将提现改变的状态
+						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
 					switch (roleId) {
@@ -107,8 +114,8 @@ const App = React.createClass({
 								if(status == 0){
 									spanDiv = (
 										<span>
-											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>申请提现</a>
+											<Popconfirm title="申请结账吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>申请结账</a>
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -120,11 +127,21 @@ const App = React.createClass({
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 		          			</span>
 									)
+								}else if(status == 4){
+									spanDiv = (
+										<span>
+											<Popconfirm title="重新申请结账吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>重新申请</a>
+					            </Popconfirm>
+					            <span> | </span>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+		          			</span>
+									)
 								}else{
 									spanDiv = (
 										<span>
-											<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>取消提现申请</a>
+											<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>取消申请</a>
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -137,6 +154,16 @@ const App = React.createClass({
 							if( status==2||status==3 ){
 								spanDiv = (
 									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+								)
+							}else if( status == 4){
+								spanDiv = (
+									<span>
+										<Popconfirm title="确认重新结账吗?" onConfirm={this.settle.bind(this, data)}>
+				              <a>重新结账</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
 								)
 							}else{
 								spanDiv = (
@@ -207,7 +234,7 @@ const App = React.createClass({
 						})
 					});
 				} else {
-					alert(data.msg);
+					message.info(data.msg);
 				}
 			})
 			.catch((e)=> {
@@ -219,7 +246,7 @@ const App = React.createClass({
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });
   },
-  closePayModalVisible() {
+  closePayModalVisible() {	//二次支付框取消按钮触发函数
   	const data = this.state.payList;
   	DailyBillService.billCancel(data).then((res)=>{
   		if(res.status == "00"){
@@ -253,7 +280,7 @@ const App = React.createClass({
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
-				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
+				let msg = data.willApplyStatus==1?"已成功申请结账":"已成功取消结账"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
@@ -345,8 +372,8 @@ const App = React.createClass({
 		let self = this;
 		/*var res = {"status":"00","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955pp^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};
 		if(res.status == "00"){
-			if(res.data.batch_no){
-				self.setState({ payList: res.data });
+			if(res.data != undefined){
+				self.setState({ payList: res.data, nowSettlement: data });
 				self.setPayModalVisible(true);
 			}
 			self.changeSettlementStatus(data, res.status);
@@ -364,9 +391,13 @@ const App = React.createClass({
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
-				if(res.data.batch_no){
+				if(res.data != undefined){
 					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
+					self.changeSettlementStatus(data, res.status);
+				}else{
+					message.success(res.msg)
+					self.changeSettlementStatus("结账成功");
 				}
 				self.changeSettlementStatus(data, res.status);
 			}else if(res.status == "01"){
@@ -423,6 +454,7 @@ const App = React.createClass({
 
 		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
 		return {
+			size: "small",
 			total: total,
 			showSizeChanger: true,
 			onShowSizeChange(page, perPage) {
@@ -526,8 +558,8 @@ const App = React.createClass({
 					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
-					<Option value="0">未申请提现</Option>
-					<Option value="1">已申请提现</Option>
+					<Option value="0">未申请结账</Option>
+					<Option value="1">已申请结账</Option>
 					<Option value="2">已结账</Option>
 					<Option value="3">结账中</Option>
 					<Option value="4">结账失败</Option>
@@ -538,9 +570,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 980 }} className="table" rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 980 }} className="table" dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
@@ -572,7 +604,7 @@ const App = React.createClass({
         onOk={() => this.setPayModalVisible(false)}
         onCancel={() => this.closePayModalVisible()}
       >
-        <FormDiv closePayModalVisible={this.closePayModalVisible} payList={payList} />
+        <FormDiv closePayModalVisible={this.closePayModalVisible} setPayModalVisible={_.bind(self.setPayModalVisible, self, false)} payList={payList} />
       </Modal>
 		</section>);
 	}

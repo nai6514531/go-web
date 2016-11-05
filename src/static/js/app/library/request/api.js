@@ -38,13 +38,21 @@ const api = axios.create({
   }]
 });
 
+api.interceptors.request.use(function (config) {
+  var timestamp =new Date().getTime();
+  if(config.url.indexOf('?')>0){
+    config.url = config.url + `&_t=${timestamp}`;
+  } else {
+    config.url = config.url + `?_t=${timestamp}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response)=> {
     if (!response.data) {
       return Promise.reject('服务器返回数据异常!');
     }
-    var timestamp =new Date().getTime();
-    response.url = response.url + `?_t${timestamp}`;
     return response.data;
   },
   (error) => {

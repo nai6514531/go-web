@@ -43,6 +43,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => <Link to={"/user/device/school/" + record.key}>查看模块</Link>,
 }];
 
@@ -87,6 +89,7 @@ class SchoolTable extends React.Component {
       total: total,
       showSizeChanger: true,
       defaultCurrent: 1,
+      size:'small',
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
@@ -149,7 +152,9 @@ class SchoolTable extends React.Component {
           </Link>
         </div>
         <article>
-          <Table columns={columns}
+          <Table
+            scroll={{ x: 980 }}
+            columns={columns}
                dataSource={dataSource}
                pagination={pagination}
                loading={this.loading}

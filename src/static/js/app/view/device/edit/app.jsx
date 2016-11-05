@@ -107,11 +107,17 @@ class DeviceForm extends React.Component {
     const deviceId = this.props.params.id;
     if(deviceId) {
       if(this.props.provinceList !== nextProps.provinceList) {
-        if(nextProps.provinceList.fetch == true) {
-          const provinceId = nextProps.detail.result.data.provinceId;
-          this.props.getProvinceSchoolList(provinceId);
-        } else if(nextProps.provinceList.fetch == false) {
+        if(nextProps.detail) {
+          if(nextProps.provinceList.fetch == true) {
+            const provinceId = nextProps.detail.result.data.provinceId;
+            if(provinceId!==0){
+              this.props.getProvinceSchoolList(provinceId);
+            } else {
+              // message.error('无省份信息',3);
+            }
+          } else if(nextProps.provinceList.fetch == false) {
             message.error('获取省份列表失败,请重试',3);
+          }
         }
       }
       if(self.saveDetail == 1){
@@ -233,7 +239,8 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: false });
 	}
 	checkChinese(rule, value, callback) {
-		var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
+    var pattern=new RegExp(/^[0-9a-zA-Z]*$/);
+    // var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
 		if(value && !pattern.test(value)){
 			callback('请输入正确的设备编号');
 		} else {
@@ -407,7 +414,7 @@ class DeviceForm extends React.Component {
                 rules: [
                   { required: true, message: '必选' },
                 ],
-                initialValue: initialValue.provinceId,
+                initialValue: initialValue.provinceId == "0"?'':initialValue.provinceId,
               })(
                 <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}

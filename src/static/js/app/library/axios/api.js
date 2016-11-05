@@ -1,10 +1,13 @@
 import axios from 'axios';
 import NProgress from "nprogress";
+import { message, Modal } from 'antd';
+const confirm = Modal.confirm;
 
 const api = axios.create({
   headers: {
-      'Content-Type': 'application/json;charset=utf-8'
-    },
+      'Content-Type': 'application/json;charset=utf-8',
+      'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+  },
   transformRequest: [(data) => {
     NProgress.start();
     if (!data) {
@@ -14,7 +17,6 @@ const api = axios.create({
   }],
   transformResponse: [(data) => {
     NProgress.done();
-
     if (!data) {
       return '';
     }
@@ -30,10 +32,14 @@ function handleResponse(promise, resolve, reject) {
       if (parseInt(data.status) < 0) {
         data.status = parseInt(data.status);
         if (data.status == -1) {
-          alert(data.msg);
-          window.location.href = '/';
+          confirm({
+            title: data.msg,
+            onOk() {
+              window.location.href = '/';
+            },
+          });
         }else{
-          alert(data.msg);
+          message.info(data.msg,3);
         }
       } else {
         data.status = parseInt(data.status.substr(-2));
@@ -45,14 +51,18 @@ function handleResponse(promise, resolve, reject) {
       }
     } else {
       reject(data);
-      return alert('服务器返回数据异常!');
+      return message.error('服务器返回数据异常',3);
     }
   });
 }
 
 api.interceptors.request.use(function (config) {
   var timestamp =new Date().getTime();
-  config.url = config.url + `?_t${timestamp}`;
+  if(config.url.indexOf('?')>0){
+    config.url = config.url + `&_t=${timestamp}`;
+  } else {
+    config.url = config.url + `?_t=${timestamp}`;
+  }
   return config;
 });
 

@@ -77,6 +77,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link>
@@ -130,7 +132,7 @@ class DeviceTable extends React.Component {
     const pager = { page : this.state.page, perPage: this.state.perPage};
     if(this.theStatus !== -1 && this.theStatus !== undefined) {
       const status = nextProps.status;
-      if(status) {
+      if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true) {
           this.props.getSchoolDevice(USER.id, schoolId, pager);
           self.loading = true;
@@ -171,6 +173,7 @@ class DeviceTable extends React.Component {
     return {
       total: total,
       showSizeChanger: true,
+      size:'small',
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
@@ -277,7 +280,9 @@ class DeviceTable extends React.Component {
           </Breadcrumb>
         </header>
         <article>
-          <Table columns={columns}
+          <Table
+            scroll={{ x: 980 }}
+            columns={columns}
                dataSource={dataSource}
                pagination={this.pagination}
                loading={this.loading}

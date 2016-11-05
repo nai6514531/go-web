@@ -55,6 +55,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={'/user/edit/' + record.key}>修改</Link>
@@ -149,6 +151,7 @@ class AgentTable extends React.Component {
     return {
       total: total,
       showSizeChanger: true,
+      size:'small',
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
@@ -239,7 +242,7 @@ class AgentTable extends React.Component {
             </Breadcrumb>
           }
         </header>
-        {this.state.child?
+        {id?
           <div className="toolbar">
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新代理商
@@ -249,6 +252,7 @@ class AgentTable extends React.Component {
         }
         <article>
           <Table
+            scroll={{ x: 980 }}
             className="table"
                  columns={columns}
                rowKey={record => record.key}
