@@ -51,13 +51,17 @@ const App = React.createClass({
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
-				render: (status) => {
+				render: (status, record) => {
 					switch (status) {
 						case 0:
-							return <div className="status">未申请提现</div>
+							if(this.state.roleId == 3 || record.accountType == 1){
+								return <div className="status">未结账</div>
+							}else{
+								return <div className="status">未申请提现</div>
+							}
 							break;
 						case 1:
-							if(this.state.roleId == 3){
+							if(this.state.roleId == 3 || record.accountType == 1){
 								return <div className="status">未结账</div>
 							}else{
 								return <div className="status">已申请提现</div>
