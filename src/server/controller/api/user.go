@@ -293,6 +293,8 @@ func (self *UserController) Signin(ctx *iris.Context) {
 **/
 func (self *UserController) Signout(ctx *iris.Context) {
 	ctx.SessionDestroy()
+	sess:=viper.GetString("server.session.cookie")
+	ctx.RemoveCookie(sess)
 	result := &enity.Result{"00100200", nil, user_msg["00100200"]}
 	ctx.JSON(iris.StatusOK, &result)
 	common.Log(ctx, nil)

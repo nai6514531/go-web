@@ -45,15 +45,18 @@ var (
 		processTime := endAt - startAt
 
 		body := string(ctx.PostBody()[:])
-		handle := strings.Split(ctx.GetHandlerName(), "/")
-		_interface := handle[1] + ":" + handle[len(handle) - 2] + ":" + handle[len(handle) - 1]
 
 		if result == nil {
 			result = &enity.Result{"00", nil, "success"}
 		}
+
+		alarmID := "0"
+		handle := strings.Split(ctx.GetHandlerName(), "/")
+		_interface := handle[1] + ":" + handle[len(handle) - 2] + ":" + handle[len(handle) - 1]
 		_status, _ := strconv.Atoi(result.Status[len(result.Status) - 2 : len(result.Status)])
 		if _status != 0 {
 			_interface += ":error"
+			alarmID = "1"
 		}
 
 		Logger := logrus.WithFields(logrus.Fields{
@@ -68,7 +71,7 @@ var (
 				"query":ctx.URLParams(),
 				"param":ctx.Params.String(),
 				"body":body,
-				"alarmID":"1",
+				"alarmID":alarmID,
 				"path":ctx.PathString(),
 				"processTime":processTime,
 				"result":result,

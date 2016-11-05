@@ -7,8 +7,9 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{js,json,html,ejs,tpl,jsx,vue}]
-indent_style = tab
+[*.{js,json,html,ejs,tpl,jsx,vue,less,yaml}]
+indent_style = space
+indent_size = 2
 
 [*.json]
 insert_final_newline = false
@@ -22,7 +23,3 @@ indent_style = tab
 [*.go]
 indent_style = tab
 indent_size = 8
-
-[*.yaml]
-indent_style = space
-indent_size = 2

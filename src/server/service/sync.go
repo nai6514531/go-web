@@ -11,44 +11,43 @@ import (
 type SyncService struct {
 }
 
-func (self *SyncService) SyncUser() bool {
+func (self *SyncService) SyncUser() (bool, error) {
 	list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userService := &UserService{}
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
 		userId := boxAdmin.LocalId + 1
 		user, err := userService.Basic(userId)
 		if user == nil && err != nil {
-			boo = syncService.AddBoxAdmin(boxAdmin)
+			boo, _ = syncService.AddBoxAdmin(boxAdmin)
 			if !boo {
-				common.Logger.Warningln("AddBoxAdmin id:", userId)
+				common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", userId)
 				break
 			}
 		} else {
-			boo = syncService.UpdateBoxAdmin(boxAdmin)
+			boo, _ = syncService.UpdateBoxAdmin(boxAdmin)
 			if !boo {
-				common.Logger.Warningln("UpdateBoxAdmin id:", userId)
+				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", userId)
 				break
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) SyncUserRole() bool {
+func (self *SyncService) SyncUserRole() (bool, error) {
 	list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userRoleRelService := &UserRoleRelService{}
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxAdmin:List:", r.Error.Error())
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
@@ -70,112 +69,112 @@ func (self *SyncService) SyncUserRole() bool {
 		userId := (boxAdmin.LocalId + 1)
 		userRoleRel, err := userRoleRelService.BasicByUserId(userId)
 		if userRoleRel == nil && err != nil {
-			boo = syncService.AddUserRoleRel(userId, roleId)
+			boo, _ = syncService.AddUserRoleRel(userId, roleId)
 			if !boo {
-				common.Logger.Warningln("AddUserRoleRef:", userId, roleId)
+				common.Logger.Warningln("Soda_Sync_Error:AddUserRoleRel:UserId:RoleId:", userId, roleId)
 				break
 			}
 		} else {
-			boo = syncService.UpdateUserRoleRel(userId, roleId)
+			boo, _ = syncService.UpdateUserRoleRel(userId, roleId)
 			if !boo {
-				common.Logger.Warningln("AddUserRoleRef:", userId, roleId)
+				common.Logger.Warningln("Soda_Sync_Error:UpdateUserRoleRel:UserId:RoleId:", userId, roleId)
 				break
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) SyncUserCashAccount() bool {
+func (self *SyncService) SyncUserCashAccount() (bool, error) {
 	list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userCashAccountService := &UserCashAccountService{}
 	r := common.MNDB.Find(list)
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxAdmin List:", r.Error.Error())
-		return false
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxAdmin:List:", r.Error.Error())
+		return false, r.Error
 	}
 	boo := true
 	for _, boxAdmin := range *list {
 		userId := (boxAdmin.LocalId + 1)
 		userCashAccount, err := userCashAccountService.BasicByUserId(userId)
 		if userCashAccount == nil && err != nil {
-			boo = syncService.AddUserCashAccount(boxAdmin)
+			boo, _ = syncService.AddUserCashAccount(boxAdmin)
 			if !boo {
-				common.Logger.Warningln("AddUserCashAccount id:", userId)
+				common.Logger.Warningln("Soda_Sync_Error:AddUserCashAccount:UserId:", userId)
 				break
 			}
 		} else {
-			boo = syncService.UpdateUserCashAccount(boxAdmin)
+			boo, _ = syncService.UpdateUserCashAccount(boxAdmin)
 			if !boo {
-				common.Logger.Warningln("UpdateUserCashAccount id:", userId)
+				common.Logger.Warningln("Soda_Sync_Error:UpdateUserCashAccount:UserId:", userId)
 				break
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) SyncDevice() bool {
+func (self *SyncService) SyncDevice() (bool, error) {
 	list := &[]*muniu.BoxInfo{}
 	r := common.MNDB.Find(list)
 	syncService := &SyncService{}
 	deviceService := &DeviceService{}
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxInfo List:", r.Error.Error())
-		return false
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxInfo:List:", r.Error.Error())
+		return false, r.Error
 	}
 	boo := true
 	for _, boxInfo := range *list {
 		device, err := deviceService.BasicBySerialNumber(boxInfo.DeviceNo)
 		if device == nil && err != nil {
-			boo = syncService.AddDevice(boxInfo)
+			boo, _ = syncService.AddDevice(boxInfo)
 			if !boo {
-				common.Logger.Warningln("AddDevice DeviceNo:", boxInfo.DeviceNo)
+				common.Logger.Warningln("Soda_Sync_Error:AddDevice:DeviceNo:", boxInfo.DeviceNo)
 				break
 			}
 		} else {
-			boo = syncService.UpdateDevice(boxInfo)
+			boo, _ = syncService.UpdateDevice(boxInfo)
 			if !boo {
-				common.Logger.Warningln("UpdateDevice DeviceNo:", boxInfo.DeviceNo)
+				common.Logger.Warningln("Soda_Sync_Error:UpdateDevice:DeviceNo:", boxInfo.DeviceNo)
 				break
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) SyncDailyBill() bool {
+func (self *SyncService) SyncDailyBill() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
 	r := common.MNDB.Where("status = 0 or status =1").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxStatBill List:", r.Error.Error())
-		return false
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
+		return false, r.Error
 	}
 	boo := true
 	for _, boxStatBill := range *list {
-		userId:=(boxStatBill.CompanyId+1)
+		userId := (boxStatBill.CompanyId + 1)
 		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
 		if dailyBill == nil && err != nil {
-			boo = syncService.AddDailyBill(boxStatBill)
+			boo, _ = syncService.AddDailyBill(boxStatBill)
 			if !boo {
-				common.Logger.Warningln("AddDailyBill:", userId, boxStatBill.PeriodStart)
+				common.Logger.Warningln("Soda_Sync_Error:AddDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		} else {
-			boo = syncService.UpdateDailyBill(boxStatBill)
+			boo, _ = syncService.UpdateDailyBill(boxStatBill)
 			if !boo {
-				common.Logger.Warningln("UpdateDailyBill:", userId, boxStatBill.PeriodStart)
+				common.Logger.Warningln("Soda_Sync_Error:UpdateDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) SyncDailyBillDetail() bool {
+func (self *SyncService) SyncDailyBillDetail() (bool, error) {
 	list := &[]*muniu.BoxWash{}
 	//最近15个月
 	billAt := time.Now().AddDate(0, -15, 0).Format("2006-01-02")
@@ -183,25 +182,25 @@ func (self *SyncService) SyncDailyBillDetail() bool {
 	syncService := &SyncService{}
 	dailyBillDetailService := &DailyBillDetailService{}
 	if r.Error != nil {
-		common.Logger.Warningln("common.MNDB.Find BoxWash List:", r.Error.Error())
-		return false
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxWash:List:", r.Error.Error())
+		return false, r.Error
 	}
 	hasDeleted, err := dailyBillDetailService.DeleteByBillAt(billAt)
 	if !hasDeleted || err != nil {
-		return false
+		return false, r.Error
 	}
 	boo := true
 	for _, boxWash := range *list {
-		boo = syncService.AddDailyBillDetail(boxWash)
+		boo, _ = syncService.AddDailyBillDetail(boxWash)
 		if !boo {
-			common.Logger.Warningln("AddDailyBillDetail:", (boxWash.UserId + 1), boxWash.DeviceId)
+			common.Logger.Warningln("Soda_Sync_Error:AddDailyBillDetail:UserId:DeviceId:", (boxWash.UserId + 1), boxWash.DeviceId)
 			break
 		}
 	}
-	return boo
+	return boo, nil
 }
 
-func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) bool {
+func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) (bool, error) {
 	//2016-03-14T00:00:10+08:00
 	insertTime, _ := time.Parse(time.RFC3339, boxWash.InsertTime)
 	billAt := insertTime.Format("2006-01-02 15:04:05")
@@ -215,13 +214,13 @@ func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) bool {
 		Status:       boxWash.Status,
 	}
 	r := common.DB.Create(dailyBillDetail)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) bool {
+func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) (bool, error) {
 	status, _ := strconv.Atoi(boxStatBill.Status)
 	dailyBill := &model.DailyBill{
 		UserId:      (boxStatBill.CompanyId + 1),
@@ -233,13 +232,13 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) bool {
 		Status:      status,
 	}
 	r := common.DB.Create(dailyBill)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) bool {
+func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) (bool, error) {
 	status, _ := strconv.Atoi(boxStatBill.Status)
 	dailyBill := &model.DailyBill{
 		UserId:      (boxStatBill.CompanyId + 1),
@@ -251,13 +250,13 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) bool {
 		Status:      status,
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", dailyBill.UserId, dailyBill.BillAt).Updates(dailyBill)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) bool {
+func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) (bool, error) {
 	status, _ := strconv.Atoi(boxInfo.Status)
 	deviceType, _ := strconv.Atoi(boxInfo.DeviceType)
 	deviceType += 1
@@ -272,20 +271,20 @@ func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) bool {
 		SecondPulsePrice:  int(boxInfo.Price_602 * 100),
 		ThirdPulsePrice:   int(boxInfo.Price_603 * 100),
 		FourthPulsePrice:  int(boxInfo.Price_604 * 100),
-		FirstPulseName:    "单洗价格",
-		SecondPulseName:   "快洗价格",
-		ThirdPulseName:    "标准洗价格",
-		FourthPulseName:   "大物洗价格",
+		FirstPulseName:    "单洗",
+		SecondPulseName:   "快洗",
+		ThirdPulseName:    "标准洗",
+		FourthPulseName:   "大物洗",
 		Status:            status,
 	}
 	r := common.DB.Create(device)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) bool {
+func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) (bool, error) {
 	status, _ := strconv.Atoi(boxInfo.Status)
 	deviceType, _ := strconv.Atoi(boxInfo.DeviceType)
 	deviceType += 1
@@ -300,20 +299,20 @@ func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) bool {
 		SecondPulsePrice:  int(boxInfo.Price_602 * 100),
 		ThirdPulsePrice:   int(boxInfo.Price_603 * 100),
 		FourthPulsePrice:  int(boxInfo.Price_604 * 100),
-		FirstPulseName:    "单洗价格",
-		SecondPulseName:   "快洗价格",
-		ThirdPulseName:    "标准洗价格",
-		FourthPulseName:   "大物洗价格",
+		FirstPulseName:    "单洗",
+		SecondPulseName:   "快洗",
+		ThirdPulseName:    "标准洗",
+		FourthPulseName:   "大物洗",
 		Status:            status,
 	}
 	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", boxInfo.DeviceNo).Updates(device)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
+func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	_parentId, _ := strconv.Atoi(boxAdmin.AgencyId)
 	_parentId += 1
 	user := &model.User{
@@ -327,13 +326,13 @@ func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
 	}
 	user.Id = (boxAdmin.LocalId + 1)
 	r := common.DB.Create(user)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
+func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	_parentId, _ := strconv.Atoi(boxAdmin.AgencyId)
 	_parentId += 1
 	user := &model.User{
@@ -347,13 +346,13 @@ func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) bool {
 	}
 	user.Id = (boxAdmin.LocalId + 1)
 	r := common.DB.Save(user)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
+func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	payType, _ := strconv.Atoi(boxAdmin.PayType)
 	payType += 1
 	userId := (boxAdmin.LocalId + 1)
@@ -366,13 +365,13 @@ func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 		Mobile:   boxAdmin.ContactNum,
 	}
 	r := common.DB.Create(userCashAccount)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
+func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	payType, _ := strconv.Atoi(boxAdmin.PayType)
 	payType += 1
 	userId := (boxAdmin.LocalId + 1)
@@ -385,32 +384,32 @@ func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) bool {
 		Mobile:   boxAdmin.ContactNum,
 	}
 	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) AddUserRoleRel(userId int, roleId int) bool {
+func (self *SyncService) AddUserRoleRel(userId int, roleId int) (bool, error) {
 	userRoleRel := &model.UserRoleRel{
 		UserId: userId,
 		RoleId: roleId,
 	}
 	r := common.DB.Create(userRoleRel)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
 
-func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) bool {
+func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) (bool, error) {
 	userRoleRel := &model.UserRoleRel{
 		UserId: userId,
 		RoleId: roleId,
 	}
 	r := common.DB.Model(&model.UserRoleRel{}).Where("user_id = ?", userId).Updates(userRoleRel)
-	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+	if r.Error != nil {
+		return false, r.Error
 	}
-	return true
+	return true, nil
 }
