@@ -528,8 +528,8 @@ class DeviceForm extends React.Component {
 							}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
-							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
+							<Button className="button" type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
+							<Button className="button" type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 						<div>
 							<PulseName changePulseName={this.changePulseName}
