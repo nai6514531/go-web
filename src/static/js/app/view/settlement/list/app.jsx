@@ -82,7 +82,7 @@ const App = React.createClass({
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
-				width: 100,
+				width: 150,
 				fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
@@ -127,11 +127,21 @@ const App = React.createClass({
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 		          			</span>
 									)
+								}else if(status == 4){
+									spanDiv = (
+										<span>
+											<Popconfirm title="重新申请结账吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>重新申请</a>
+					            </Popconfirm>
+					            <span> | </span>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+		          			</span>
+									)
 								}else{
 									spanDiv = (
 										<span>
 											<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>取消结账申请</a>
+					              <a>取消申请</a>
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -374,6 +384,10 @@ const App = React.createClass({
 				if(res.data != undefined){
 					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
+					self.changeSettlementStatus(data, res.status);
+				}else{
+					message.success(res.msg)
+					self.changeSettlementStatus(data, res.status);
 				}
 				self.changeSettlementStatus(data, res.status);
 			}else if(res.status == "01"){
