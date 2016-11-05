@@ -492,6 +492,12 @@ const App = React.createClass({
 
     const payList = this.state.payList;
 
+    const tableDiv = this.state.roleId == 3?(
+    	<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    ):(
+    	<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    )
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -512,7 +518,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
-			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+			{tableDiv}
 			<Modal
         title="支付二次确认"
         wrapClassName="playModal"
