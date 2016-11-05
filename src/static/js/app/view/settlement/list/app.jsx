@@ -134,7 +134,22 @@ const App = React.createClass({
 							}
 							break;
 						case 3: 
-							spanDiv = (accountType == 1&&status!=4)? (
+							if( status==2||status==3 ){
+								spanDiv = (
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+								)
+							}else{
+								spanDiv = (
+									<span>
+										<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+				              <a>结账</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								)
+							}
+							/*spanDiv = (accountType == 1&&status!=4)? (
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
@@ -146,7 +161,7 @@ const App = React.createClass({
           			</span>
 							):(
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-							)
+							)*/
 							break;
 
 					}
@@ -412,7 +427,8 @@ const App = React.createClass({
 		    //console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
-		  	if(changeRows.length < 10){
+		  	var len = self.state.list.length;
+		  	if(changeRows.length < len){
 		  		self.setState({
 			  		selectedList: [],
 			  		selectedRowKeys: []
