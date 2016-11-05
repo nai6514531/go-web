@@ -109,7 +109,11 @@ class DeviceForm extends React.Component {
       if(this.props.provinceList !== nextProps.provinceList) {
         if(nextProps.provinceList.fetch == true) {
           const provinceId = nextProps.detail.result.data.provinceId;
-          this.props.getProvinceSchoolList(provinceId);
+          if(provinceId!==0){
+            this.props.getProvinceSchoolList(provinceId);
+          } else {
+            // message.error('无省份信息',3);
+          }
         } else if(nextProps.provinceList.fetch == false) {
             message.error('获取省份列表失败,请重试',3);
         }
@@ -407,7 +411,7 @@ class DeviceForm extends React.Component {
                 rules: [
                   { required: true, message: '必选' },
                 ],
-                initialValue: initialValue.provinceId,
+                initialValue: initialValue.provinceId == "0"?'其它':initialValue.provinceId,
               })(
                 <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}
