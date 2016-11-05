@@ -5,8 +5,9 @@ const confirm = Modal.confirm;
 
 const api = axios.create({
   headers: {
-      'Content-Type': 'application/json;charset=utf-8'
-    },
+      'Content-Type': 'application/json;charset=utf-8',
+      'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+  },
   transformRequest: [(data) => {
     NProgress.start();
     if (!data) {
