@@ -15,7 +15,8 @@ const Header = React.createClass({
     if (!boo) {
       return false;
     }
-    fetch('/api/signout', {
+    var timestamp =new Date().getTime();
+    fetch(`/api/signout?_t=${timestamp}`, {
       method: 'get',
       credentials: 'same-origin'
     }).then(response=>response.json())

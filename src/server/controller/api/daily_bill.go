@@ -55,6 +55,11 @@ var (
 
 		"01060500": "更新账单成功",
 		"01060501": "更新账单失败",
+
+		"01060600": "取消支付宝批量支付成功",
+		"01060601": "取消支付宝批量支付失败,请联系技术人员解锁提交账单",
+		"01060602": "无取消订单号",
+		"01060603":"参数异常",
 	}
 )
 
@@ -562,6 +567,112 @@ func (self *DailyBillController) Notification (ctx *iris.Context) {
 	common.Logger.Debugln("支付宝回调结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	common.Log(ctx, nil)
 	ctx.Render("batch_alipay_notify.html", map[string]interface{}{"msg": "success"})
+}
+
+/**
+	取消提交支付宝批量付款申请
+ */
+func (self *DailyBillController) CancelBatchAliPay(ctx *iris.Context) {
+	dailyBillService := &service.DailyBillService{}
+	billBatchNoService := &service.BillBatchNoService{}
+	var result *enity.Result
+	sign := ""
+	detail_data := ""
+	billIds := make([]string, 0)
+	param := make(map[string]interface{}, 0)
+	var err error
+	err = json.Unmarshal(ctx.PostBody(), &param)
+	if err != nil {
+		common.Logger.Debugln("解析json失败")
+		result = &enity.Result{"01060601", nil, daily_bill_msg["01060601"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if param["sign"] == nil {
+		common.Logger.Debugln(daily_bill_msg["01060603"], ":", param)
+		result = &enity.Result{"01060603", nil, daily_bill_msg["01060603"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	sign = param["sign"].(string)
+	delete(param, "sign")
+	if param["sign_type"] != nil {
+		delete(param, "sign_type")
+	}
+	if param["request_url"] != nil {
+		delete(param, "request_url")
+	}
+	if !alipay.VerifySign(param, sign) {
+		common.Logger.Debugln("校验不通过")
+		result = &enity.Result{"01060601", nil, daily_bill_msg["01060601"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if param["detail_data"] == nil {
+		common.Logger.Debugln(daily_bill_msg["01060603"], ":", param)
+		result = &enity.Result{"01060603", nil, daily_bill_msg["01060603"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	detail_data = param["detail_data"].(string)
+	details := strings.Split(detail_data, "|")
+	for _, _detail :=range details {
+		info := strings.Split(_detail, "^")
+		billIds = append(billIds, info[0])
+	}
+	if len(billIds) <= 0 {
+		common.Logger.Debugln(daily_bill_msg["01060602"])
+		result = &enity.Result{"01060602", nil, daily_bill_msg["01060602"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//两个更新暂时没有保持事务
+	_, err = dailyBillService.BatchUpdateStatusById(1, billIds)      //将"结算中"的状态改成"已申请"
+	if err != nil {
+		common.Logger.Debugln("更新账单状态'结算中'为'已申请'失败:", billIds)
+		result = &enity.Result{"01060601", nil, daily_bill_msg["01060601"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	_, err = billBatchNoService.Delete(billIds)
+	if err != nil {
+		common.Logger.Debugln("取消批次号绑定失败:", billIds)
+		result = &enity.Result{"01060601", nil, daily_bill_msg["01060601"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	result = &enity.Result{"01060600", nil, daily_bill_msg["01060600"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+
+}
+
+/**
+	定时修改"未结算"的支付宝账单状态为"已申请"
+ */
+func (self *DailyBillController) TimedApplyAliPayBill(ctx *iris.Context) {
+	dailyBillService := &service.DailyBillService{}
+	userCashAccountService := &service.UserCashAccountService{}
+	userIds := make([]int, 0)
+	var err error
+	accountList, err := userCashAccountService.List(1)  //支付宝账户
+	if err != nil {
+
+	}
+	for _, _account := range *accountList {
+		userIds = append(userIds, _account.UserId)
+	}
+	_, err = dailyBillService.UpdateStausByUserIdAndStatus(0, 1, userIds...)
+	if err != nil {
+	}
 }
 
 func (self *DailyBillController) Recharge(ctx *iris.Context) {

@@ -50,6 +50,12 @@ function handleResponse(promise, resolve, reject) {
   });
 }
 
+api.interceptors.request.use(function (config) {
+  var timestamp =new Date().getTime();
+  config.url = config.url + `?_t${timestamp}`;
+  return config;
+});
+
 export function apiGet(url) {
   return new Promise((resolve, reject) => {
     const promise = api.get(url);

@@ -104,9 +104,14 @@ class DeviceForm extends React.Component {
     const deviceId = this.props.params.id;
     if(deviceId) {
       if(this.props.provinceList !== nextProps.provinceList) {
-        const provinceId = nextProps.detail.result.data.provinceId;
-        this.props.getProvinceSchoolList(provinceId);
+        if(nextProps.provinceList.fetch == true) {
+          const provinceId = nextProps.detail.result.data.provinceId;
+          this.props.getProvinceSchoolList(provinceId);
+        } else if(nextProps.provinceList.fetch == false) {
+          message.error('获取省份列表失败,请重试',3);
+        }
       }
+      
     }
     // 初始化服务名
     if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
@@ -443,7 +448,7 @@ class DeviceForm extends React.Component {
                 ],
                 initialValue: initialValue.schoolId,
               })(
-                <Select placeholder="请选择学校" onChange={this.schoolChange.bind(this)}>
+                <Select dropdownStyle={{minWidth:'200 !important'}} placeholder="请选择学校" onChange={this.schoolChange.bind(this)}>
                   {schoolNode}
                 </Select>
               )}
@@ -550,8 +555,8 @@ class DeviceForm extends React.Component {
 							}
 						</FormItem>
 						<FormItem wrapperCol={{ span: 12, offset: 7 }}>
-							<Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
-							<Button type="primary" onClick={this.handleSubmit}>保存</Button>
+							<Button className="button" type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
+							<Button className="button" type="primary" onClick={this.handleSubmit}>保存</Button>
 						</FormItem>
 						<div>
 							<PulseName changePulseName={this.changePulseName}
