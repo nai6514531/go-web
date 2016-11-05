@@ -55,6 +55,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={'/user/edit/' + record.key}>修改</Link>
@@ -250,6 +252,7 @@ class AgentTable extends React.Component {
         }
         <article>
           <Table
+            scroll={{ x: 980 }}
             className="table"
                  columns={columns}
                rowKey={record => record.key}

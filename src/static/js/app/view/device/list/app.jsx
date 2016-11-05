@@ -69,6 +69,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={"/device/edit/" + record.key}>修改</Link>
@@ -259,7 +261,9 @@ class DeviceList extends React.Component {
           </Link>
         </div>
         <article>
-          <Table columns={columns}
+          <Table
+            scroll={{ x: 980 }}
+            columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
             loading={this.loading}
