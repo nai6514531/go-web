@@ -1,5 +1,6 @@
 import axios from 'axios';
 import NProgress from "nprogress";
+import { message } from 'antd';
 
 const api = axios.create({
   headers: {
@@ -29,10 +30,10 @@ function handleResponse(promise, resolve, reject) {
       if (parseInt(data.status) < 0) {
         data.status = parseInt(data.status);
         if (data.status == -1) {
-          alert(data.msg);
+          message.error(data.msg,3);
           window.location.href = '/';
         }else{
-          alert(data.msg);
+          message.info(data.msg,3);
         }
       } else {
         data.status = parseInt(data.status.substr(-2));
@@ -44,7 +45,7 @@ function handleResponse(promise, resolve, reject) {
       }
     } else {
       reject(data);
-      return alert('服务器返回数据异常!');
+      return message.error('服务器返回数据异常',3);
     }
   });
 }
