@@ -434,7 +434,7 @@ class DeviceForm extends React.Component {
                 rules: [
                   { required: true, message: '必选' },
                 ],
-                initialValue: initialValue.provinceId,
+                initialValue: initialValue.provinceId == "0"?'':initialValue.provinceId,
               })(
                 <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}
