@@ -3,6 +3,7 @@ package main
 import (
 	"maizuo.com/soda-manager/src/server"
 	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/timed"
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 
 	//common.SetUpSecure()
 
-	server.SetUpServer()
+	timed.SetUpCron()
 
+	server.SetUpServer()
 }
