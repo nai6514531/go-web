@@ -118,8 +118,7 @@ class DeviceList extends React.Component {
     const pager = { page : this.state.page, perPage: this.state.perPage};
     if(this.theStatus !== -1) {
       const status = nextProps.status;
-      // console.log('status',nextProps.status);
-      if(status){
+      if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true){
           this.props.getDeviceList(pager);
           message.success('操作成功!',3);
