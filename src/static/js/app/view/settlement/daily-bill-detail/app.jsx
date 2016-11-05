@@ -86,7 +86,7 @@ const App = React.createClass({
             })
           });
         } else {
-          alert(data.msg);
+          message.info(data.msg);
         }
       })
   },
