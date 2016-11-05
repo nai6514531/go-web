@@ -85,3 +85,13 @@ func (self *UserCashAccountService) ListByUserIds(userIds string) (*[]*model.Use
 	}
 	return list, nil
 }
+
+func (self *UserCashAccountService) List(payType ...int) (*[]*model.UserCashAccount, error) {
+	list := &[]*model.UserCashAccount{}
+	r := common.DB.Model(&model.UserCashAccount{}).Where("type in (?)", payType).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
