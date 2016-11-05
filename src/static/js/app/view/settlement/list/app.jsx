@@ -90,7 +90,7 @@ const App = React.createClass({
 						id: record.id,
 						userId: record.userId,
 						billAt: moment(record.billAt).format('YYYY-MM-DD'),
-						willApplyStatus: status == 0 ? 1: 0 //即将提现改变的状态
+						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
 					switch (roleId) {
@@ -112,8 +112,8 @@ const App = React.createClass({
 								if(status == 0){
 									spanDiv = (
 										<span>
-											<Popconfirm title="申请提现吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>申请提现</a>
+											<Popconfirm title="申请结账吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>申请结账</a>
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -128,8 +128,8 @@ const App = React.createClass({
 								}else{
 									spanDiv = (
 										<span>
-											<Popconfirm title="取消提现申请吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>取消提现申请</a>
+											<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>
+					              <a>取消结账申请</a>
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
@@ -258,7 +258,7 @@ const App = React.createClass({
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
-				let msg = data.willApplyStatus==1?"已成功申请提现":"已成功取消提现"
+				let msg = data.willApplyStatus==1?"已成功申请结账":"已成功取消结账"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
@@ -532,8 +532,8 @@ const App = React.createClass({
 					style={{width: 120, display: "none"}}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择账单状态</Option>
-					<Option value="0">未申请提现</Option>
-					<Option value="1">已申请提现</Option>
+					<Option value="0">未申请结账</Option>
+					<Option value="1">已申请结账</Option>
 					<Option value="2">已结账</Option>
 					<Option value="3">结账中</Option>
 					<Option value="4">结账失败</Option>
