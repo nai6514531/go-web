@@ -2,17 +2,16 @@ package common
 
 import (
 	"net"
-	"errors"
 )
 
 type CommonKit struct {
 
 }
 
-func (CommonKit)ExternalIP() (string, error) {
+func (CommonKit)ExternalIP() (string) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return ""
 	}
 	for _, iface := range ifaces {
 		if iface.Flags & net.FlagUp == 0 {
@@ -23,7 +22,7 @@ func (CommonKit)ExternalIP() (string, error) {
 		}
 		addrs, err := iface.Addrs()
 		if err != nil {
-			return "", err
+			return ""
 		}
 		for _, addr := range addrs {
 			var ip net.IP
@@ -40,8 +39,8 @@ func (CommonKit)ExternalIP() (string, error) {
 			if ip == nil {
 				continue // not an ipv4 address
 			}
-			return ip.String(), nil
+			return ip.String()
 		}
 	}
-	return "", errors.New("are you connected to the network?")
+	return ""
 }

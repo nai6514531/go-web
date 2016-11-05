@@ -1,6 +1,6 @@
 import React from "react";
-import {Menu, Button, Icon ,message } from "antd";
-
+import {Menu, Button, Icon,Modal} from "antd";
+const confirm = Modal.confirm;
 const Header = React.createClass({
   propTypes: {
     onHamburgClick: React.PropTypes.func
@@ -11,22 +11,23 @@ const Header = React.createClass({
     };
   },
   logout() {
-    let boo = confirm('确认退出登录吗?');
-    if (!boo) {
-      return false;
-    }
-    var timestamp =new Date().getTime();
-    fetch(`/api/signout?_t=${timestamp}`, {
-      method: 'get',
-      credentials: 'same-origin'
-    }).then(response=>response.json())
-      .then(function (data) {
-        if (data && data.status && parseInt(data.status.substr(-2)) == 0) {
-          window.location.reload();
-        } else {
-          message.error(data.msg || '系统异常,请重试!');
-        }
-      });
+    confirm({
+      title: '确认退出登录吗?',
+      onOk() {
+        var timestamp =new Date().getTime();
+        fetch(`/api/signout?_t=${timestamp}`, {
+          method: 'get',
+          credentials: 'same-origin'
+        }).then(response=>response.json())
+          .then(function (data) {
+            if (data && data.status && parseInt(data.status.substr(-2)) == 0) {
+              window.location.reload();
+            } else {
+              alert(data.msg || '系统异常,请重试!')
+            }
+          });
+      },
+    });
   },
   onClick(item) {
     if (item.key.includes('logout')) {

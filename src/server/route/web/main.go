@@ -3,6 +3,8 @@ package web
 import (
 	"github.com/kataras/iris"
 	"maizuo.com/soda-manager/src/server/controller/web"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/common"
 )
 
 func Web() {
@@ -19,6 +21,31 @@ func Web() {
 	iris.Get("/500", func(ctx *iris.Context) {
 		panic(500)
 		ctx.EmitError(iris.StatusInternalServerError)
+	})
+
+	iris.Get("/ip-test", func(ctx *iris.Context) {
+
+		type IP struct {
+			LocalAddr     string
+			RemoteAddr    string
+			RequestIP     string
+			XForwardedFor string
+			XRealIP       string
+			ExternalIP string
+		}
+
+		ip := &IP{
+			ctx.LocalAddr().String(),
+			ctx.RemoteAddr(),
+			ctx.RequestIP(),
+			ctx.RequestHeader("X-Forwarded-For"),
+			ctx.RequestHeader("X-Real-IP"),
+			common.CommonKit{}.ExternalIP(),
+		}
+
+		result := &enity.Result{"0", ip, "", }
+
+		ctx.JSON(iris.StatusOK, result)
 	})
 
 }
