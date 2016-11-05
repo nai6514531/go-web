@@ -77,6 +77,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link>
@@ -278,7 +280,9 @@ class DeviceTable extends React.Component {
           </Breadcrumb>
         </header>
         <article>
-          <Table columns={columns}
+          <Table
+            scroll={{ x: 980 }}
+            columns={columns}
                dataSource={dataSource}
                pagination={this.pagination}
                loading={this.loading}
