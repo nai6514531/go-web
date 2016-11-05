@@ -82,6 +82,8 @@ const App = React.createClass({
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
+				width: 100,
+				fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -544,9 +546,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table className="table" rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 1300 }} className="table" rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table className="table" dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 1300 }} className="table" dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
