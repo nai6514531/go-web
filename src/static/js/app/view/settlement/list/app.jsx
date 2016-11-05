@@ -51,13 +51,17 @@ const App = React.createClass({
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
-				render: (status) => {
+				render: (status, record) => {
 					switch (status) {
 						case 0:
-							return <div className="status">未申请提现</div>
+							if(this.state.roleId == 3 || record.accountType == 1){
+								return <div className="status">未结账</div>
+							}else{
+								return <div className="status">未申请提现</div>
+							}
 							break;
 						case 1:
-							if(this.state.roleId == 3){
+							if(this.state.roleId == 3 || record.accountType == 1){
 								return <div className="status">未结账</div>
 							}else{
 								return <div className="status">已申请提现</div>
@@ -346,8 +350,8 @@ const App = React.createClass({
 		let self = this;
 		/*var res = {"status":"00","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955pp^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};
 		if(res.status == "00"){
-			if(res.data.batch_no){
-				self.setState({ payList: res.data });
+			if(res.data != undefined){
+				self.setState({ payList: res.data, nowSettlement: data });
 				self.setPayModalVisible(true);
 			}
 			self.changeSettlementStatus(data, res.status);
@@ -365,7 +369,7 @@ const App = React.createClass({
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
-				if(res.data.batch_no){
+				if(res.data != undefined){
 					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
 				}
@@ -424,6 +428,7 @@ const App = React.createClass({
 
 		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
 		return {
+			size: "small",
 			total: total,
 			showSizeChanger: true,
 			onShowSizeChange(page, perPage) {
@@ -539,9 +544,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table className="table" rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table className="table" dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
