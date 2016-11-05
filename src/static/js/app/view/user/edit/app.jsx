@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal,Tooltip } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Breadcrumb, message, Modal,Tooltip, Icon } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -22,22 +22,22 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   const {
-    postUserDetail,
-    putUserDetail,
-    getUserDetail,
+      postUserDetail,
+      putUserDetail,
+      getUserDetail,
   } = bindActionCreators(UserActions, dispatch);
   const {
-    getProvinceList,
-    getCityList,
-        getProvinceCityList,
+      getProvinceList,
+      getCityList,
+      getProvinceCityList,
   } = bindActionCreators(regionActions, dispatch);
   return {
-    postUserDetail,
-    putUserDetail,
-    getUserDetail,
-    getProvinceList,
-    getCityList,
-        getProvinceCityList,
+      postUserDetail,
+      putUserDetail,
+      getUserDetail,
+      getProvinceList,
+      getCityList,
+      getProvinceCityList,
   };
 }
 
@@ -47,8 +47,8 @@ class UserForm extends React.Component {
     this.state = {
       type: "3",
       payType: 0,
-            provinceChange: false,
-            cityChange: false,
+      provinceChange: false,
+      cityChange: false,
       unsaved: true,
     }
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -132,7 +132,7 @@ class UserForm extends React.Component {
       }
     }
   }
-    provinceChange(event) {
+  provinceChange(event) {
     this.props.getProvinceCityList(event);
     const { setFieldsValue } = this.props.form;
     setFieldsValue({'cityId':'-1'});
@@ -523,12 +523,15 @@ class UserForm extends React.Component {
                     无
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                    <Tooltip title="我是 TIPS ">
-                      <span>自动分账(必须拥有支付宝,收取 x% 手续费)</span>
-                    </Tooltip>
+                    <span>自动分账(无须手动申请结账,必须有支付宝账号,需收取服务费
+                        <Tooltip title="支付宝按每笔账单金额的0.5%收取服务费,保底一元,封顶25元">
+                            <Icon type="info-circle-o" />
+                        </Tooltip>
+                      )</span>
+                    
                   </Radio>
                   <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                    财务定期结账(需提供正确银行卡号)
+                    财务定期结账(需手动申请结账,请确保输入正确银行卡号)
                   </Radio>
                 </RadioGroup>
               )}
