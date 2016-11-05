@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
@@ -219,7 +220,7 @@ const App = React.createClass({
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });
   },
-  closePayModalVisible() {
+  closePayModalVisible() {	//二次支付框取消按钮触发函数
   	const data = this.state.payList;
   	DailyBillService.billCancel(data).then((res)=>{
   		if(res.status == "00"){
@@ -572,7 +573,7 @@ const App = React.createClass({
         onOk={() => this.setPayModalVisible(false)}
         onCancel={() => this.closePayModalVisible()}
       >
-        <FormDiv closePayModalVisible={this.closePayModalVisible} payList={payList} />
+        <FormDiv closePayModalVisible={this.closePayModalVisible} setPayModalVisible={_.bind(self.setPayModalVisible, self, false)} payList={payList} />
       </Modal>
 		</section>);
 	}
