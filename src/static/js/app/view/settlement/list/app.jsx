@@ -57,14 +57,14 @@ const App = React.createClass({
 							if(this.state.roleId == 3 || record.accountType == 1){
 								return <div className="status">未结账</div>
 							}else{
-								return <div className="status">未申请提现</div>
+								return <div className="status">未结账</div>
 							}
 							break;
 						case 1:
 							if(this.state.roleId == 3 || record.accountType == 1){
 								return <div className="status">未结账</div>
 							}else{
-								return <div className="status">已申请提现</div>
+								return <div className="status">已申请结账</div>
 							}
 							break;
 						case 2:
@@ -212,7 +212,7 @@ const App = React.createClass({
 						})
 					});
 				} else {
-					alert(data.msg);
+					message.info(data.msg);
 				}
 			})
 			.catch((e)=> {
