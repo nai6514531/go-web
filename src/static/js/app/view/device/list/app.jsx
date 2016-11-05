@@ -130,7 +130,7 @@ class DeviceList extends React.Component {
         self.theStatus = -1;
       }
     }
-    if(this.removeDevice !== -1) {
+    if(this.removeDevice !== -1 && this.removeDevice !== undefined) {
       const remove = nextProps.resultRemove;
       if(remove){
         if(remove.fetch == true){
