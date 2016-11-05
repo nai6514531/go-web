@@ -155,6 +155,16 @@ const App = React.createClass({
 								spanDiv = (
 									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 								)
+							}else if( status == 4){
+								spanDiv = (
+									<span>
+										<Popconfirm title="确认重新结账吗?" onConfirm={this.settle.bind(this, data)}>
+				              <a>重新结账</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								)
 							}else{
 								spanDiv = (
 									<span>
