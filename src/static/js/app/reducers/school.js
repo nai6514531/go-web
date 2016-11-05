@@ -1,21 +1,21 @@
 import {
-	GET_SCHOOL_DETAIL,
+  GET_SCHOOL_DETAIL,
 } from '../constants/index';
 
 const initialState = {
-	device: {},
+  device: {},
 };
 
 export default function (state = initialState, action) {
-	switch (action.type) {
-		case GET_SCHOOL_DETAIL:
-			return {
-				...state,
-				schoolDetail: action.result,
-			};
-		default:
-			return state;
-	}
+  switch (action.type) {
+    case GET_SCHOOL_DETAIL:
+      return {
+        ...state,
+        schoolDetail: action.result,
+      };
+    default:
+      return state;
+  }
 }
 
 

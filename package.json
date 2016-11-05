@@ -7,9 +7,9 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git@192.168.1.216:table/soda-manager.git"
+    "url": "git@192.168.1.216:soda/soda-manager.git"
   },
-  "author": "table",
+  "author": "soda",
   "license": "ISC",
   "dependencies": {
     "antd": "^2.0.1",
@@ -30,6 +30,7 @@
     "normalize.css": "^4.2.0",
     "nprogress": "^0.2.0",
     "react": "^15.3.2",
+    "react-addons-css-transition-group": "^15.3.2",
     "react-dom": "^15.2.0",
     "react-redux": "^4.4.5",
     "react-router": "^2.5.2",

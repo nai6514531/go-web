@@ -7,10 +7,10 @@ import school from './school';
 
 
 const rootReducer = combineReducers({
-	device,
-	user,
-	region,
-	school,
+  device,
+  user,
+  region,
+  school,
 });
 
 export default rootReducer;

@@ -134,7 +134,22 @@ const App = React.createClass({
 							}
 							break;
 						case 3: 
-							spanDiv = (accountType == 1&&status!=4)? (
+							if( status==2||status==3 ){
+								spanDiv = (
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+								)
+							}else{
+								spanDiv = (
+									<span>
+										<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+				              <a>结账</a>
+				            </Popconfirm>
+				            <span> | </span>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+	          			</span>
+								)
+							}
+							/*spanDiv = (accountType == 1&&status!=4)? (
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
@@ -146,7 +161,7 @@ const App = React.createClass({
           			</span>
 							):(
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-							)
+							)*/
 							break;
 
 					}
@@ -298,9 +313,8 @@ const App = React.createClass({
 	},
 	settleAjax(data) {
 		let self = this;
-		
 		/*var res = {"status":"2","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};*/
-
+		
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
@@ -413,7 +427,8 @@ const App = React.createClass({
 		    //console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
-		  	if(changeRows.length < 10){
+		  	var len = self.state.list.length;
+		  	if(changeRows.length < len){
 		  		self.setState({
 			  		selectedList: [],
 			  		selectedRowKeys: []
@@ -477,6 +492,12 @@ const App = React.createClass({
 
     const payList = this.state.payList;
 
+    const tableDiv = this.state.roleId == 3?(
+    	<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    ):(
+    	<Table dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    )
+
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -497,7 +518,7 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
 			</div>
-			<Table rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+			{tableDiv}
 			<Modal
         title="支付二次确认"
         wrapClassName="playModal"

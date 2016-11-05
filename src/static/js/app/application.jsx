@@ -5,18 +5,32 @@ import "./application.less";
 import Header from "./header.jsx";
 
 const Application = React.createClass({
-	render() {
-		const { location, children } = this.props;
-		return (<div className="application">
-			<Sider location={location} />
-			<Header/>
-			<div className="application-main">
-				<section className="content">
-					{children}
-				</section>
-			</div>
-		</div>);
-	}
+  getInitialState() {
+    return {
+      forceShowSider: false
+    };
+  },
+  showSider() {
+    this.setState({
+      forceShowSider: true
+    });
+  },
+  hideSider() {
+    this.setState({
+      forceShowSider: false
+    });
+  },
+  render() {
+    const { location, children } = this.props;
+    const { forceShowSider } = this.state;
+    return (<div className="application">
+      <Sider key={1} location={location} forceShow={forceShowSider} onClickClose={this.hideSider} onRedirect={this.hideSider} />
+      <Header onHamburgClick={this.showSider} />
+      <div className="application-main">
+        {children}
+      </div>
+    </div>);
+  }
 });
 
 export default Application;
