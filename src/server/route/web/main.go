@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris"
 	"maizuo.com/soda-manager/src/server/controller/web"
 	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/common"
 )
 
 func Web() {
@@ -30,6 +31,7 @@ func Web() {
 			RequestIP     string
 			XForwardedFor string
 			XRealIP       string
+			ExternalIP string
 		}
 
 		ip := &IP{
@@ -38,6 +40,7 @@ func Web() {
 			ctx.RequestIP(),
 			ctx.RequestHeader("X-Forwarded-For"),
 			ctx.RequestHeader("X-Real-IP"),
+			common.CommonKit{}.ExternalIP(),
 		}
 
 		result := &enity.Result{"0", ip, "", }
