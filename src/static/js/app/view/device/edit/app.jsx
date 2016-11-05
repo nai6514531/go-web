@@ -107,8 +107,12 @@ class DeviceForm extends React.Component {
     const deviceId = this.props.params.id;
     if(deviceId) {
       if(this.props.provinceList !== nextProps.provinceList) {
-        const provinceId = nextProps.detail.result.data.provinceId;
-        this.props.getProvinceSchoolList(provinceId);
+        if(nextProps.provinceList.fetch == true) {
+          const provinceId = nextProps.detail.result.data.provinceId;
+          this.props.getProvinceSchoolList(provinceId);
+        } else if(nextProps.provinceList.fetch == false) {
+            message.error('获取省份列表失败,请重试',3);
+        }
       }
       if(self.saveDetail == 1){
         const resultPutDetail = this.props.resultPutDetail;

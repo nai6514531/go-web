@@ -524,7 +524,7 @@ class UserForm extends React.Component {
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
                     <span>自动分账(无须手动申请结账,必须有支付宝账号,需收取服务费&nbsp;
-                        <Tooltip title="支付宝按每笔账单金额的0.5%收取服务费,保底一元,封顶25元">
+                        <Tooltip title="支付宝按每笔账单金额的0.5%收取服务费,保底1元,封顶25元">
                            <Icon className="icon"  type="question-circle-o" />
                         </Tooltip>
                       )</span>
