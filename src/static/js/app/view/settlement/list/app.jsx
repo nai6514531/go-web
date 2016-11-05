@@ -397,7 +397,7 @@ const App = React.createClass({
 					self.changeSettlementStatus(data, res.status);
 				}else{
 					message.success(res.msg)
-					self.changeSettlementStatus(data, res.status);
+					self.changeSettlementStatus("结账成功");
 				}
 				self.changeSettlementStatus(data, res.status);
 			}else if(res.status == "01"){
