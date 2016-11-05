@@ -240,7 +240,7 @@ class AgentTable extends React.Component {
             </Breadcrumb>
           }
         </header>
-        {this.state.child?
+        {id?
           <div className="toolbar">
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新代理商
