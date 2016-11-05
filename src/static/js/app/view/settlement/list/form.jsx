@@ -15,6 +15,9 @@ const FormList = React.createClass({
 	cancel() {
 		this.props.closePayModalVisible();
 	},
+	submit() {
+		this.props.setPayModalVisible();
+	},
 	render(){
 		const payList = this.props.payList;
 		console.log(payList)
@@ -36,7 +39,7 @@ const FormList = React.createClass({
 					<input onChange={this.inputChange} value={payList.sign_type} name="sign_type" />
         </div>
         <button onClick={this.cancel} type="button" id="cancel">取消支付</button>
-        <button type="submit" id="submit">确认支付</button>
+        <button onClick={this.submit} type="submit" id="submit">确认支付</button>
       </form>
 		);
 	}
