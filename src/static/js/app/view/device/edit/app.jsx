@@ -237,7 +237,8 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: false });
 	}
 	checkChinese(rule, value, callback) {
-		var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
+    var pattern=new RegExp(/^[0-9a-zA-Z]*$/);
+    // var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
 		if(value && !pattern.test(value)){
 			callback('请输入正确的设备编号');
 		} else {
