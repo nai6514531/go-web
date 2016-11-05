@@ -149,6 +149,7 @@ class AgentTable extends React.Component {
     return {
       total: total,
       showSizeChanger: true,
+      size:'small',
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
