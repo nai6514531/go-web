@@ -1,6 +1,6 @@
 import React from "react";
-import {Menu, Button, Icon} from "antd";
-
+import {Menu, Button, Icon,Modal} from "antd";
+const confirm = Modal.confirm;
 const Header = React.createClass({
   propTypes: {
     onHamburgClick: React.PropTypes.func
