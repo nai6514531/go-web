@@ -240,6 +240,14 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	return int(r.RowsAffected), nil
 }
 
+func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
+	r := common.DB.Model(&model.DailyBill{}).Where("status = ? and user_id in (?)", oldStatus, userIds).Update("status", newStatus)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
+}
+
 func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 	list := []*muniu.Recharge{}
 	sql := "select DATE_FORMAT(UPDATETIME,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
