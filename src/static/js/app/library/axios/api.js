@@ -51,7 +51,11 @@ function handleResponse(promise, resolve, reject) {
 
 api.interceptors.request.use(function (config) {
   var timestamp =new Date().getTime();
-  config.url = config.url + `?_t=${timestamp}`;
+  if(config.url.indexOf('?')>0){
+    config.url = config.url + `&_t=${timestamp}`;
+  } else {
+    config.url = config.url + `?_t=${timestamp}`;
+  }
   return config;
 });
 
