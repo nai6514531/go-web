@@ -43,6 +43,8 @@ api.interceptors.response.use(
     if (!response.data) {
       return Promise.reject('服务器返回数据异常!');
     }
+    var timestamp =new Date().getTime();
+    response.url = response.url + `?_t${timestamp}`;
     return response.data;
   },
   (error) => {
