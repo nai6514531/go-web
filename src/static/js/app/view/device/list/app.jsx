@@ -69,6 +69,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
+  width: 100,
+  fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={"/device/edit/" + record.key}>修改</Link>
@@ -118,8 +120,7 @@ class DeviceList extends React.Component {
     const pager = { page : this.state.page, perPage: this.state.perPage};
     if(this.theStatus !== -1) {
       const status = nextProps.status;
-      // console.log('status',nextProps.status);
-      if(status){
+      if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true){
           this.props.getDeviceList(pager);
           message.success('操作成功!',3);
@@ -260,7 +261,9 @@ class DeviceList extends React.Component {
           </Link>
         </div>
         <article>
-          <Table columns={columns}
+          <Table
+            scroll={{ x: 980 }}
+            columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
             loading={this.loading}
