@@ -248,7 +248,9 @@ class AgentTable extends React.Component {
           ''
         }
         <article>
-          <Table columns={columns}
+          <Table
+            className="table"
+                 columns={columns}
                rowKey={record => record.key}
                dataSource={dataSource}
               {...pagination}
