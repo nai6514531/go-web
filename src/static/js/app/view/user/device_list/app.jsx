@@ -87,6 +87,7 @@ class SchoolTable extends React.Component {
       total: total,
       showSizeChanger: true,
       defaultCurrent: 1,
+      size:'small',
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
