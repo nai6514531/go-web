@@ -175,14 +175,15 @@ const App = React.createClass({
 			status: "",
 			hasApplied: 0,
 			billAt: '',
-			selectedList: [],   //勾选的账单
-			clickLock: false,   //重复点击的锁
+			selectedList: [],   						//勾选的账单
+			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
-			nowAjaxStatus: {},   //保存ajax请求字段状态
-			currentPage: 1,
-			payModalVisible: false,  //支付modal的状态 false:hide true:show
-			payList: {},  //支付宝数据
-			selectedRowKeys: [],
+			nowAjaxStatus: {},  						//保存ajax请求字段状态
+			currentPage: 1,									//当前页码
+			payModalVisible: false,  				//支付modal的状态 false:hide true:show
+			payList: {},  									//支付宝数据
+			nowSettlement: {}, 							//只在结账的数据
+			selectedRowKeys: [], 						//已勾选的列表[key1, key2...]
 		};
 	},
 	list(data) {
@@ -218,6 +219,20 @@ const App = React.createClass({
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });
   },
+  closePayModalVisible() {
+  	const data = this.state.payList;
+  	DailyBillService.billCancel(data).then((res)=>{
+  		if(res.status == "00"){
+  			this.refuseSettlementStatus(this.state.nowSettlement);
+  			this.setState({ payModalVisible: false });
+  		}else{
+  			message.info(res.msg)
+  		}
+  	}).catch((e)=>{
+  		message.info(e)
+  	})
+  	
+  },
 	changeApplyStatus(orderId, willApplyStatus) {
 		const self = this;
 		let newList = this.state.list;
@@ -248,6 +263,21 @@ const App = React.createClass({
 			this.setState({clickLock: false});
 			message.info(err)
 		})
+	},
+	refuseSettlementStatus(data) { //反转支付状态
+		let list = this.state.list;
+		for(var i=0; i<data.length; i++){
+			for(var j=0; j<list.length; j++){
+				if(data[i].idArr.indexOf(list[j].id) >= 0){
+					if(list[j].accountType == 1){
+						list[j].status = 1;
+					}
+				}
+			}
+		}
+		this.setState({list: list});
+		this.clearSelectRows();
+		//this.list(this.state.nowAjaxStatus)
 	},
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let list = this.state.list;
@@ -313,16 +343,29 @@ const App = React.createClass({
 	},
 	settleAjax(data) {
 		let self = this;
-		/*var res = {"status":"2","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};*/
-
+		/*var res = {"status":"00","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955pp^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};
+		if(res.status == "00"){
+			if(res.data.batch_no){
+				self.setState({ payList: res.data });
+				self.setPayModalVisible(true);
+			}
+			self.changeSettlementStatus(data, res.status);
+		}else if(res.status == "01"){
+			message.info("结账操作失败，请稍后重试！")
+		}else if(res.status == "02"){
+			self.changeSettlementStatus(data, res.status);
+			message.info("银行结账成功，支付宝结账失败")
+		}else(
+      message.info(res.msg)
+    )
+    return;*/
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
 			this.setState({clickLock: false});
-			console.log(res)
 			if(res.status == "00"){
 				if(res.data.batch_no){
-					self.setState({ payList: res.data });
+					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
 				}
 				self.changeSettlementStatus(data, res.status);
@@ -524,11 +567,12 @@ const App = React.createClass({
 			<Modal
         title="支付二次确认"
         wrapClassName="playModal"
+        closable={false}
         visible={this.state.payModalVisible}
         onOk={() => this.setPayModalVisible(false)}
-        onCancel={() => this.setPayModalVisible(false)}
+        onCancel={() => this.closePayModalVisible()}
       >
-        <FormDiv payList={payList} />
+        <FormDiv closePayModalVisible={this.closePayModalVisible} payList={payList} />
       </Modal>
 		</section>);
 	}

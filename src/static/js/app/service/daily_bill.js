@@ -12,6 +12,9 @@ const Service = {
       }
     })
   },
+  billCancel: (data) => {
+    return api.post('/api/daily-bill/cancel', data)
+  },
   apply: (data) => {
     return api.get('/api/daily-bill/apply', {
       params: {
