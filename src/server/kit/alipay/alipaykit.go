@@ -14,9 +14,9 @@ type AlipayKit struct {
 }
 
 /**
-	微信支付计算签名的函数
+	支付宝批量付款接口md5计算签名的函数
  */
-func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
+func CreateSign(mReq interface{}) (sign string) {
 	//apiKey := viper.GetString("pay.wechat.api-key")
 	apiKey := os.Getenv("ALIPAYKEY")
 
@@ -25,15 +25,17 @@ func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
 	if mReq == nil {
 		return ""
 	}
-	if interfaceToType == 1 {
-		for k, _ := range mReq.(map[string]interface{}) {
+
+	switch mValue := mReq.(type) {
+	case map[string]interface{}:
+		for k, _ := range mValue {
 			sorted_keys = append(sorted_keys, k)
 		}
-	}else if interfaceToType == 2 {
-		for k, _ := range mReq.(map[string]string) {
+	case map[string]string:
+		for k, _ := range mValue {
 			sorted_keys = append(sorted_keys, k)
 		}
-	}else {
+	default:
 		return ""
 	}
 
@@ -42,13 +44,15 @@ func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
 	var signStrings string
 	for _, k := range sorted_keys {
 		value := ""
-		if interfaceToType == 1 {
-			fmt.Printf("k=%v, v=%v\n", k, mReq.(map[string]interface{})[k])
-			value = fmt.Sprintf("%v", mReq.(map[string]interface{})[k])
-		}else if interfaceToType == 2 {
-			fmt.Printf("k=%v, v=%v\n", k, mReq.(map[string]string)[k])
-			value = fmt.Sprintf("%v", mReq.(map[string]string)[k])
+		switch mValue := mReq.(type) {
+		case map[string]interface{}:
+			fmt.Printf("k=%v, v=%v\n", k, mValue[k])
+			value = fmt.Sprintf("%v", mValue[k])
+		case map[string]string:
+			fmt.Printf("k=%v, v=%v\n", k, mValue[k])
+			value = fmt.Sprintf("%v", mValue[k])
 		}
+
 
 		if value != "" {
 			signStrings = signStrings + k + "=" + value + "&"
@@ -78,7 +82,7 @@ func CreateSign(mReq interface{}, interfaceToType int) (sign string) {
 	签名校验方法
  */
 func VerifySign(data map[string]interface{}, sign string) bool {
-	_sign := CreateSign(data, 1)
+	_sign := CreateSign(data)
 	common.Logger.Debugln("计算出来的sign: %v", _sign)
 	common.Logger.Debugln("支付宝通知sign: %v", sign)
 	if sign == _sign {

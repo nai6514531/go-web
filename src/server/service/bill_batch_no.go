@@ -4,9 +4,19 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"time"
 )
 
 type BillBatchNoService struct {
+}
+
+func (self *BillBatchNoService) Baisc(billIds ...interface{}) (*[]*model.BillBatchNo, error) {
+	list := &[]*model.BillBatchNo{}
+	r := common.DB.Where("bill_id in (?)", billIds...).Find(&list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
 }
 
 func (self *BillBatchNoService) BatchCreate(list *[]*model.BillBatchNo) (int, error) {
@@ -50,6 +60,10 @@ func (self *BillBatchNoService) Create(billBatchNo *model.BillBatchNo) (int, err
 	return int(r.RowsAffected), nil
 }
 
-func (self *BillBatchNoService) Delete() {
-
+func (self *BillBatchNoService) Delete(billIds ...interface{}) (int, error){
+	r := common.DB.Model(&model.BillBatchNo{}).Where("bill_id in (?)", billIds...).Update("deleted_at", time.Now().Format("2006-01-02 15:04:05"))
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return int(r.RowsAffected), nil
 }
