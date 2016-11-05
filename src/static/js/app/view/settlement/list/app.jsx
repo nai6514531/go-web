@@ -175,14 +175,15 @@ const App = React.createClass({
 			status: "",
 			hasApplied: 0,
 			billAt: '',
-			selectedList: [],   //勾选的账单
-			clickLock: false,   //重复点击的锁
+			selectedList: [],   						//勾选的账单
+			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
-			nowAjaxStatus: {},   //保存ajax请求字段状态
-			currentPage: 1,
-			payModalVisible: false,  //支付modal的状态 false:hide true:show
-			payList: {},  //支付宝数据
-			selectedRowKeys: [],
+			nowAjaxStatus: {},  						//保存ajax请求字段状态
+			currentPage: 1,									//当前页码
+			payModalVisible: false,  				//支付modal的状态 false:hide true:show
+			payList: {},  									//支付宝数据
+			nowSettlement: {}, 							//只在结账的数据
+			selectedRowKeys: [], 						//已勾选的列表[key1, key2...]
 		};
 	},
 	list(data) {
@@ -221,8 +222,8 @@ const App = React.createClass({
   closePayModalVisible() {
   	const data = this.state.payList;
   	DailyBillService.billCancel(data).then((res)=>{
-  		console.log(res);
   		if(res.status == "00"){
+  			this.refuseSettlementStatus(this.state.nowSettlement);
   			this.setState({ payModalVisible: false });
   		}else{
   			message.info(res.msg)
@@ -262,6 +263,21 @@ const App = React.createClass({
 			this.setState({clickLock: false});
 			message.info(err)
 		})
+	},
+	refuseSettlementStatus(data) { //反转支付状态
+		let list = this.state.list;
+		for(var i=0; i<data.length; i++){
+			for(var j=0; j<list.length; j++){
+				if(data[i].idArr.indexOf(list[j].id) >= 0){
+					if(list[j].accountType == 1){
+						list[j].status = 1;
+					}
+				}
+			}
+		}
+		this.setState({list: list});
+		this.clearSelectRows();
+		//this.list(this.state.nowAjaxStatus)
 	},
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let list = this.state.list;
@@ -349,7 +365,7 @@ const App = React.createClass({
 			this.setState({clickLock: false});
 			if(res.status == "00"){
 				if(res.data.batch_no){
-					self.setState({ payList: res.data });
+					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
 				}
 				self.changeSettlementStatus(data, res.status);
