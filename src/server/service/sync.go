@@ -175,29 +175,39 @@ func (self *SyncService) SyncDailyBill() (bool, error) {
 }
 
 func (self *SyncService) SyncDailyBillDetail() (bool, error) {
-	list := &[]*muniu.BoxWash{}
-	//最近15个月
-	billAt := time.Now().AddDate(0, -15, 0).Format("2006-01-02")
-	r := common.MNDB.Where("date(inserttime)> ?", billAt).Order("localid desc").Find(list)
+	list := &[]*muniu.BoxStatBill{}
+	r := common.MNDB.Where("status = 0 or status =1").Find(list)
 	syncService := &SyncService{}
 	dailyBillDetailService := &DailyBillDetailService{}
 	if r.Error != nil {
-		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxWash:List:", r.Error.Error())
-		return false, r.Error
-	}
-	hasDeleted, err := dailyBillDetailService.DeleteByBillAt(billAt)
-	if !hasDeleted || err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
 	}
 	boo := true
-	for _, boxWash := range *list {
-		boo, _ = syncService.AddDailyBillDetail(boxWash)
-		if !boo {
-			common.Logger.Warningln("Soda_Sync_Error:AddDailyBillDetail:UserId:DeviceId:", (boxWash.UserId + 1), boxWash.DeviceId)
-			break
+	for _, boxStatBill := range *list {
+		companyId := boxStatBill.CompanyId
+		periodStart := boxStatBill.PeriodStart
+		boxWashList := &[]*muniu.BoxWash{}
+		userId := (companyId + 1)
+		hasDeleted, err := dailyBillDetailService.DeleteByUserAndBillAt(userId, periodStart)
+		if !hasDeleted || err != nil {
+			common.Logger.Warningln("Soda_Sync_Error:DeleteByUserAndBillAt:UserId:periodStart:", userId, periodStart, err.Error())
+			return false, err
+		}
+		_r := common.MNDB.Where("COMPANYID =? and date(INSERTTIME) = ?", companyId, periodStart).Find(boxWashList)
+		if _r.Error != nil {
+			common.Logger.Warningln("Soda_Sync_Error:Find(boxWashList):CompanyId:PeriodStart:", companyId, periodStart, _r.Error.Error())
+			return false, _r.Error
+		}
+		for _, boxWash := range *boxWashList {
+			boo, err = syncService.AddDailyBillDetail(boxWash)
+			if !boo {
+				common.Logger.Warningln("Soda_Sync_Error:AddDailyBillDetail:UserId:DeviceId:", (boxWash.UserId + 1), boxWash.DeviceId, err.Error())
+				return false, err
+			}
 		}
 	}
-	return boo, nil
+	return true, nil
 }
 
 func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) (bool, error) {
