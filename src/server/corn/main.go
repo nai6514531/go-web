@@ -15,16 +15,18 @@ func SetUpCron() {
 
 	c := cron.New()
 
-	syncDailyBillDetailSpec := "0 15 5 * * ?"
-	syncDailyBillSpec := "0 45 5 * * ?"
-	syncDeviceSpec := "0 0 6 * * ?"
-	syncUserSpec := "0 30 6 * * ?"
-	updateSpec := "0 45 6 * * ?"
-	applySpec := "0 0 7 * * ?"
+	syncDailyBillDetailSpec := "0 0 4 * * ?"
+	syncDailyBillSpec := "0 30 4 * * ?"
+	syncDeviceSpec := "0 40 4 * * ?"
+	syncUserSpec := "0 10 5 * * ?"
+	syncUserCashSpec := "0 20 5 * * ?"
+	syncUserRoleSpec := "0 30 5 * * ?"
+	updateSpec := "0 40 6 * * ?"
+	applySpec := "0 50 6 * * ?"
 
 	c.AddFunc(applySpec, dailyBill.TimedApplyAliPayBill)
 	c.AddFunc(updateSpec, dailyBill.TimedUpdateAlipayStatus)
-	
+
 	c.AddFunc(syncDailyBillDetailSpec, func() {
 		syncService.SyncDailyBillDetail()
 	})
@@ -36,6 +38,12 @@ func SetUpCron() {
 	})
 	c.AddFunc(syncUserSpec, func() {
 		syncService.SyncUser()
+	})
+	c.AddFunc(syncUserCashSpec, func() {
+		syncService.SyncUserCashAccount()
+	})
+	c.AddFunc(syncUserRoleSpec, func() {
+		syncService.SyncUserRole()
 	})
 
 	c.Start()
