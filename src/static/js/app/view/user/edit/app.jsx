@@ -243,7 +243,7 @@ class UserForm extends React.Component {
     if((pattern.test(value) && value.length == 11 )|| !value ){
       callback();
     } else {
-      callback('新增账号名只能是11位手机号');
+      callback('新增账号名只能为11位手机号');
     }
   }
   checkAreaCode(rule, value, callback) {
@@ -393,7 +393,7 @@ class UserForm extends React.Component {
         </FormItem>
         <FormItem
           {...formItemLayout}
-          label="账号">
+          label="银行账号">
           {getFieldDecorator('account', {
             rules: [
               {required: true, message: '必填'},
@@ -403,7 +403,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.account,
 
           })(
-            <Input placeholder="请输入账号"/>
+            <Input placeholder="请输入银行账号"/>
           )}
         </FormItem>
         <FormItem
