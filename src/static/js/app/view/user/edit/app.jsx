@@ -161,7 +161,7 @@ class UserForm extends React.Component {
           "contact": values.contact,
           "mobile": values.mobile,
           "telephone": values.telephone,
-                    "address": values.address,
+          "address": values.address,
           "email": ""
       }
       if(values.type == 3) {
@@ -187,11 +187,11 @@ class UserForm extends React.Component {
       }
             user.cashAccount = cashAccount;
       if(this.props.params.id == 'new') {
-                user.account = values.mobile;
-                this.props.postUserDetail(user);
+          user.account = values.mobile;
+          this.props.postUserDetail(user);
       } else {
-                user.account = self.account;
-                this.props.putUserDetail(this.props.params.id, user);
+          // user.account = self.account;
+          this.props.putUserDetail(this.props.params.id, user);
       }
       self.saveDetail = 1;
     });
@@ -273,7 +273,7 @@ class UserForm extends React.Component {
           mobile : data.mobile,
           telephone: data.telephone,
         }
-                self.account = data.account;
+        self.account = data.account;
         let cashValues = {};
         if(data.cashAccount) {
           const type = Math.abs(data.cashAccount.type);
@@ -436,6 +436,7 @@ class UserForm extends React.Component {
         </FormItem>
       </div>
     }
+    const test = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
         <header>
@@ -518,8 +519,7 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
               })(
-                id !== 'new'?
-                <RadioGroup disabled>
+                <RadioGroup {...test}>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
                     无
                   </Radio>
@@ -532,20 +532,7 @@ class UserForm extends React.Component {
                       <p className="tips">请确保输入正确的银行卡相关信息</p>
                   </Radio>
                 </RadioGroup>
-                  :
-                  <RadioGroup >
-                    <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
-                      无
-                    </Radio>
-                    <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                      <span>自动分账-无须手动申请结账</span>
-                      <p className="tips">必须有支付宝账号,按每笔账单的0.5%收服务费,保底1元,封顶25元</p>
-                    </Radio>
-                    <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                      <span>财务定期结账-需手动申请结账</span>
-                      <p className="tips">请确保输入正确的银行卡相关信息</p>
-                    </Radio>
-                  </RadioGroup>
+
               )}
             </FormItem>
             {payNode}
