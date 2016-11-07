@@ -297,7 +297,7 @@ class UserForm extends React.Component {
         }
         initialValue = Object.assign({}, baseValues, cashValues);
       } else {
-        console.log('获取代理商信息失败,请重试.');
+        message.error('获取代理商信息失败,请重试.');
       }
     }
     const { getFieldDecorator } = this.props.form;
