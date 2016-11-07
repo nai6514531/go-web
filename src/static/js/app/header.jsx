@@ -16,6 +16,9 @@ const Header = React.createClass({
       onOk() {
         var timestamp =new Date().getTime();
         fetch(`/api/signout?_t=${timestamp}`, {
+          headers: {
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+          },
           method: 'get',
           credentials: 'same-origin'
         }).then(response=>response.json())

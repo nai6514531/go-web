@@ -6,7 +6,6 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const confirm = Modal.confirm;
-import SchoolSelect from '../../common/school_select/app.jsx';
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -143,7 +142,6 @@ class DeviceForm extends React.Component {
           switch (nextProps.resultPostDetail.result.status){
             case 3:
               message.error('格式有误',3);
-              // self.setState({serialNumberHelp:'格式有误'});
               break;
             case 1:
             case 12:
