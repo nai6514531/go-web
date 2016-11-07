@@ -27,6 +27,14 @@ func (self *DailyBillDetailService) DeleteByBillAt(billAt string) (bool, error) 
 	return true, nil
 }
 
+func (self *DailyBillDetailService) DeleteByUserAndBillAt(userId int, billAt string) (bool, error) {
+	r := common.DB.Exec("delete from daily_bill_detail WHERE user_id = ? and bill_at = ?", userId, billAt)
+	if r.Error != nil {
+		return false, r.Error
+	}
+	return true, nil
+}
+
 func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt string) (int, error) {
 	dailyBillDetail := &model.DailyBillDetail{}
 	var total int64
