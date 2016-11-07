@@ -9,6 +9,7 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
+	"regexp"
 )
 
 /**
@@ -116,6 +117,7 @@ var (
 		"01010413": "手机号已被使用",
 		"01010414": "请输入11位的手机号!",
 		"01010415": "添加用户记录失败!",
+		"01010416": "账号必须为11位手机号码",
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登陆账号不能为空!",
@@ -129,6 +131,7 @@ var (
 		"01010512": "修改用户结算账号失败",
 		"01010513": "请输入11位的手机号!",
 		"01010514": "修改用户记录错误!",
+		"01010515": "不能对账号进行更新!",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -293,7 +296,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 **/
 func (self *UserController) Signout(ctx *iris.Context) {
 	ctx.SessionDestroy()
-	sess:=viper.GetString("server.session.cookie")
+	sess := viper.GetString("server.session.cookie")
 	ctx.RemoveCookie(sess)
 	result := &enity.Result{"00100200", nil, user_msg["00100200"]}
 	ctx.JSON(iris.StatusOK, &result)
@@ -341,6 +344,13 @@ func (self *UserController) Create(ctx *iris.Context) {
 	//user信息校验
 	if user.Account == "" {
 		result = &enity.Result{"01010401", nil, user_msg["01010401"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//账号信息必须为11位数字(手机)
+	match, _ := regexp.MatchString(`^\d{11}$`, user.Account)
+	if !match {
+		result = &enity.Result{"01010416", nil, user_msg["01010416"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -482,15 +492,18 @@ func (self *UserController) Update(ctx *iris.Context) {
 	ctx.ReadJSON(&user)
 	user.Id = userId
 	//user信息校验
-	//判断登陆名是否已经存在
+	//判断登陆名是否已经存在,不能对account进行更新
 	if user.Account != "" { //如果有登陆账号传入
-		currentUser, _ := userService.FindByAccount(user.Account)
-		if (currentUser != nil) && (currentUser.Id != userId) {
-			//可以找到,并且不为将要修改的那一条记录
-			result = &enity.Result{"01010507", nil, user_msg["01010507"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
+		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+		// currentUser, _ := userService.FindByAccount(user.Account)
+		// if (currentUser != nil) && (currentUser.Id != userId) {
+		// 	//可以找到,并且不为将要修改的那一条记录
+		// 	result = &enity.Result{"01010507", nil, user_msg["01010507"]}
+		// 	ctx.JSON(iris.StatusOK, result)
+		// 	return
+		// }
 	}
 	//判断手机号码是否已经存在
 	if user.Mobile != "" {
