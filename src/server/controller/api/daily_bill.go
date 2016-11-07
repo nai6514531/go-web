@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/alipay"
-	"os"
 	"maizuo.com/soda-manager/src/server/model"
 )
 
@@ -59,7 +58,7 @@ var (
 		"01060600": "取消支付宝批量支付成功",
 		"01060601": "取消支付宝批量支付失败,请联系技术人员解锁提交账单",
 		"01060602": "无取消订单号",
-		"01060603":"参数异常",
+		"01060603": "参数异常",
 	}
 )
 
@@ -238,7 +237,7 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 /*
 	支付宝批量支付接口
 */
-func BatchAliPay(batchNum int, aliPayDetailDataStr string) map[string]string {
+func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[string]string {
 	param := make(map[string]string, 0)
 	if batchNum <=0 || batchNum>1000 || aliPayDetailDataStr == ""{
 		return param
@@ -248,19 +247,20 @@ func BatchAliPay(batchNum int, aliPayDetailDataStr string) map[string]string {
 	}
 	common.Logger.Debugln("aliPayDetailDataStr====================", aliPayDetailDataStr)
 	param["service"] = "batch_trans_notify"
-	param["partner"] = os.Getenv("ALIPAYID")
+	param["partner"] = viper.GetString("pay.aliPay.id")//os.Getenv("ALIPAYID")
 	param["_input_charset"] = "utf-8"
-	param["notify_url"] = "http://1d410969.ngrok.io/api/daily-bill/alipay/notification"
-	param["account_name"] = "深圳市华策网络科技有限公司"
+	param["notify_url"] = viper.GetString("pay.aliPay.notifyUrl")
+	param["account_name"] = viper.GetString("pay.aliPay.accountName")
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
 	param["batch_num"] = strconv.Itoa(batchNum)
-	param["batch_fee"] = "0.02"
-	param["email"] = "laura@maizuo.com"
+	param["batch_fee"] = "0.01"//strconv.Itoa(batchFee)
+	param["email"] = viper.GetString("pay.aliPay.email")
 	param["pay_date"] = time.Now().Local().Format("20060102")
 	param["sign"] = alipay.CreateSign(param)
-	param["sign_type"] = "MD5"
-	param["request_url"] = "https://mapi.alipay.com/gateway.do"
+	param["sign_type"] = viper.GetString("pay.aliPay.signType")
+	param["request_url"] = viper.GetString("pay.aliPay.requestUrl")
+	common.Logger.Debugln("batchNum======================", batchNum)
 	common.Logger.Debugln("param======================", param)
 
 	return param
@@ -274,6 +274,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	aliPayBillIds := make([]int, 0)
 	billBatchNoList := make([]*model.BillBatchNo, 0)
 	batchNum := 0
+	batchFee := 0
 	var result *enity.Result
 	var aliPayReqParam map[string]string
 	aliPayDetailDataStr := ""
@@ -362,8 +363,9 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 				if _userCashAccount != nil && _userCashAccount.Type == 1 && _dailyBill != nil {         //判断结算方式是否为支付宝且存在该用户账单
 					//" + strconv.Itoa(_dailyBill.TotalAmount) + "
 					aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^" + _userCashAccount.Account + "^" + _userCashAccount.RealName +
-						"^" +  "0.02" + "^" + "无" + "|"          //组装支付宝支付data_detail
+						"^" +  "0.01" + "^" + "无" + "|"          //组装支付宝支付data_detail
 					aliPayBillIds = append(aliPayBillIds, _dailyBill.Id)//组装需要修改为"结账中"状态的支付宝订单
+					batchFee += _dailyBill.TotalAmount
 					batchNum++      //计算批量结算请求中支付宝结算的日订单数,不可超过1000
 				}
 			}
@@ -400,7 +402,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 
 	//生成支付宝请求参数并存储账单对应的批次号
 	if batchNum > 0 && batchNum <= 1000 && aliPayDetailDataStr != "" {
-		aliPayReqParam = BatchAliPay(batchNum, aliPayDetailDataStr)
+		aliPayReqParam = BatchAliPay(batchNum, batchFee, aliPayDetailDataStr)
 		if aliPayReqParam["batch_no"] == "" {
 			common.Logger.Debugln("生成批次号失败:", err.Error())
 			result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
@@ -699,7 +701,6 @@ func (self *DailyBillController) TimedUpdateAlipayStatus() {
 	for _, _dailyBill := range *list {
 		billIds = append(billIds, _dailyBill.Id)
 	}
-
 	if len(billIds) <= 0{
 		common.Logger.Debugln("无'结账中'的支付宝账单")
 		return
@@ -717,7 +718,6 @@ func (self *DailyBillController) TimedUpdateAlipayStatus() {
 		return
 	}
 	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单结束=============")
-
 }
 
 func (self *DailyBillController) Recharge(ctx *iris.Context) {

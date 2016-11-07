@@ -6,8 +6,8 @@ import (
 	"sort"
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
-	"os"
 	"strings"
+	"github.com/spf13/viper"
 )
 
 type AlipayKit struct {
@@ -16,9 +16,8 @@ type AlipayKit struct {
 /**
 	支付宝批量付款接口md5计算签名的函数
  */
-func CreateSign(mReq interface{}) (sign string) {
-	//apiKey := viper.GetString("pay.wechat.api-key")
-	apiKey := os.Getenv("ALIPAYKEY")
+func CreateSign(mReq interface{}) string {
+	apiKey := viper.GetString("pay.aliPay.key")//os.Getenv("ALIPAYKEY")
 
 	//STEP 1, 对key进行升序排序.
 	sorted_keys := make([]string, 0)
@@ -72,10 +71,10 @@ func CreateSign(mReq interface{}) (sign string) {
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(signStrings))
 	cipherStr := md5Ctx.Sum(nil)
-	upperSign := hex.EncodeToString(cipherStr)
+	sign := hex.EncodeToString(cipherStr)
 	//upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
-	common.Logger.Debugln("upperSign====================================", upperSign)
-	return upperSign
+	common.Logger.Debugln("sign====================================", sign)
+	return sign
 }
 
 /**

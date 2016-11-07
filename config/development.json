@@ -19,11 +19,25 @@
   "faviconPath": "./src/build/static/img/favicon.ico",
   "logFilePath": "./log/log.log",
   "pay": {
-    "alipay": {
-      "appId": "",
-      "mchId": "",
-      "apiKey": ""
+    "aliPay": {
+      "id": "",
+      "key": "",
+      "notifyUrl": "http://1d410969.ngrok.io/api/daily-bill/alipay/notification",
+      "accountName": "深圳市华策网络科技有限公司",
+      "email": "laura@maizuo.com",
+      "signType": "MD5",
+      "requestUrl": "https://mapi.alipay.com/gateway.do"
     }
+  },
+  "cron": {
+    "syncDailyBillDetailSpec": "0 0 4 * * ?",
+    "syncDailyBillSpec": "0 30 4 * * ?",
+    "syncDeviceSpec": "0 40 4 * * ?",
+    "syncUserSpec": "0 10 5 * * ?",
+    "syncUserCashSpec": "0 20 5 * * ?",
+    "syncUserRoleSpec": "0 30 5 * * ?",
+    "updateSpec": "0 40 6 * * ?",
+    "applySpec": "0 50 6 * * ?"
   },
   "server": {
     "host": "0.0.0.0",
