@@ -34,7 +34,7 @@ const App = React.createClass({
           } else if (data == 603) {
             return <div>标准</div>
           } else if (data == 604) {
-            return <div>大件</div>
+            return <div>大物洗</div>
           }
         }
       }, {
