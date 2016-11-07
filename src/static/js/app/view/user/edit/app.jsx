@@ -436,7 +436,7 @@ class UserForm extends React.Component {
         </FormItem>
       </div>
     }
-    const test = id !== 'new'?{disabled:true}:{};
+    const disable = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
         <header>
@@ -519,7 +519,7 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
               })(
-                <RadioGroup {...test}>
+                <RadioGroup {...disable}>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
                     无
                   </Radio>
