@@ -250,7 +250,7 @@ func BatchAliPay(batchNum int, aliPayDetailDataStr string) map[string]string {
 	param["service"] = "batch_trans_notify"
 	param["partner"] = os.Getenv("ALIPAYID")
 	param["_input_charset"] = "utf-8"
-	param["notify_url"] = "http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification"
+	param["notify_url"] = "http://1d410969.ngrok.io/api/daily-bill/alipay/notification"
 	param["account_name"] = "深圳市华策网络科技有限公司"
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
