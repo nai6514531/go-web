@@ -30,7 +30,7 @@ func main() {
 
 	//common.SetUpSecure()
 
-	timed.SetUpCron()
+	cron.SetUpCron()
 
 	server.SetUpServer()
 }

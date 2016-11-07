@@ -1,4 +1,4 @@
-package timed
+package cron
 
 import (
 	"github.com/robfig/cron"
