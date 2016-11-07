@@ -54,6 +54,7 @@ class UserForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
+    this.checkUserAccount = this.checkUserAccount.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
@@ -100,15 +101,16 @@ class UserForm extends React.Component {
         self.saveDetail = -1;
       } else if(resultPostDetail !== nextProps.resultPostDetail
         && nextProps.resultPostDetail.fetch == false){
-        const code = nextProps.resultPostDetail.result.status;
-        switch (code) {
-          case 7:
-          case 13:
-            message.error('该手机号已存在',3);
-            break;
-          default:
-            message.error('添加代理商失败',3);
-        }
+        // const code = nextProps.resultPostDetail.result.status;
+        message.error(nextProps.resultPostDetail.result.msg,3);
+        // switch (code) {
+        //   case 7:
+        //   case 13:
+        //     message.error('该手机号已存在',3);
+        //     break;
+        //   default:
+        //     message.error('添加代理商失败',3);
+        // }
         self.saveDetail = -1;
       }
       const resultPutDetail = this.props.resultPutDetail;
@@ -119,15 +121,16 @@ class UserForm extends React.Component {
         self.saveDetail = -1;
       } else if(resultPutDetail !== nextProps.resultPutDetail
         && nextProps.resultPutDetail.fetch == false){
-        const code = nextProps.resultPutDetail.result.status;
-        switch (code) {
-          case 7:
-          case 8:
-            message.error('该手机号已存在',3);
-            break;
-          default:
-            message.error('修改代理商失败',3);
-        }
+        message.error(nextProps.resultPostDetail.result.msg,3);
+        // const code = nextProps.resultPutDetail.result.status;
+        // switch (code) {
+        //   case 7:
+        //   case 8:
+        //     message.error('该手机号已存在',3);
+        //     break;
+        //   default:
+        //     message.error('修改代理商失败',3);
+        // }
         self.saveDetail = -1;
       }
     }
@@ -187,8 +190,13 @@ class UserForm extends React.Component {
       }
             user.cashAccount = cashAccount;
       if(this.props.params.id == 'new') {
-          user.account = values.mobile;
-          this.props.postUserDetail(user);
+        if(values.userAccount.length == 11) {
+            user.account = values.userAccount;
+            this.props.postUserDetail(user);
+        } else {
+          message.error('新增账号只能为11位手机号',3);
+          return;
+        }
       } else {
           // user.account = self.account;
           this.props.putUserDetail(this.props.params.id, user);
@@ -230,6 +238,14 @@ class UserForm extends React.Component {
       callback('只能为数字');
     }
   }
+  checkUserAccount(rule, value, callback) {
+    var pattern=new RegExp(/^\d+$/);
+    if((pattern.test(value) && value.length == 11 )|| !value ){
+      callback();
+    } else {
+      callback('新增账号名只能是11位手机号');
+    }
+  }
   checkAreaCode(rule, value, callback) {
     var pattern = new RegExp(/^[0-9\-]+$/);
     if(pattern.test(value) || !value){
@@ -267,6 +283,7 @@ class UserForm extends React.Component {
       if(detail.fetch == true){
         const data = detail.result.data;
         const baseValues = {
+          userAccount: data.account,
           name: data.name,
           contact: data.contact,
           address: data.address,
@@ -456,6 +473,32 @@ class UserForm extends React.Component {
         </header>
         <article>
           <Form horizontal>
+            {id !== 'new'? <FormItem
+              {...formItemLayout}
+              label="账号名称" >
+              {getFieldDecorator('userAccount', {
+                rules: [
+                  {required: true, message: '必填'},
+                  {max:30, message: '不超过三十个字' },
+                ],
+                initialValue: initialValue.userAccount,
+              })(
+                <Input disabled placeholder="请输入账号名称" />
+              )}
+            </FormItem>:
+              <FormItem
+                {...formItemLayout}
+                label="账号名称" >
+                {getFieldDecorator('userAccount', {
+                  rules: [
+                    {required: true, message: '必填'},
+                    {validator: this.checkUserAccount },
+                  ],
+                  initialValue: initialValue.userAccount,
+                })(
+                  <Input placeholder="请输入账号名称" />
+                )}
+              </FormItem>}
             <FormItem
               {...formItemLayout}
               label="代理商名称" >
