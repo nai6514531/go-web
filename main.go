@@ -3,7 +3,7 @@ package main
 import (
 	"maizuo.com/soda-manager/src/server"
 	"maizuo.com/soda-manager/src/server/common"
-	"maizuo.com/soda-manager/src/server/timed"
+	"maizuo.com/soda-manager/src/server/corn"
 )
 
 func main() {
