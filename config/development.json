@@ -19,7 +19,7 @@
   "faviconPath": "./src/build/static/img/favicon.ico",
   "logFilePath": "./log/log.log",
   "pay": {
-    "wechat": {
+    "alipay": {
       "appId": "",
       "mchId": "",
       "apiKey": ""

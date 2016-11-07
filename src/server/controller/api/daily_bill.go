@@ -658,21 +658,66 @@ func (self *DailyBillController) CancelBatchAliPay(ctx *iris.Context) {
 /**
 	定时修改"未结算"的支付宝账单状态为"已申请"
  */
-func (self *DailyBillController) TimedApplyAliPayBill(ctx *iris.Context) {
+func (self *DailyBillController) TimedApplyAliPayBill() {
+	common.Logger.Debugln("=============定时更新'未结账'支付宝账单状态'已申请'开始=============")
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userIds := make([]int, 0)
 	var err error
 	accountList, err := userCashAccountService.List(1)  //支付宝账户
 	if err != nil {
-
+		common.Logger.Debugln("获取支付宝结账用户失败:", err.Error())
 	}
 	for _, _account := range *accountList {
 		userIds = append(userIds, _account.UserId)
 	}
 	_, err = dailyBillService.UpdateStausByUserIdAndStatus(0, 1, userIds...)
 	if err != nil {
+		common.Logger.Debugln("更新支付宝账单状态失败:", err.Error())
 	}
+	common.Logger.Debugln("=============定时更新'未结账'支付宝账单状态'已申请'结束=============")
+}
+
+func (self *DailyBillController) TimedUpdateAlipayStatus() {
+	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单开始=============")
+	dailyBillService := &service.DailyBillService{}
+	billBatchNoService := &service.BillBatchNoService{}
+	var err error
+	billIds := make([]int, 0)
+
+	submitTime := time.Now().Local().AddDate(0, 0, -1).Format("2006-01-02 15:04:05")
+	common.Logger.Debugln("submitTime===========", submitTime)
+	list, err := dailyBillService.BasicBySubmitAtAndStatus(submitTime, 3)
+	if err != nil {
+		common.Logger.Debugln("BasicBySubmitAtAndStatus=====", err.Error())
+		return
+	}
+	if len(*list) <= 0 {
+		common.Logger.Debugln("无'结账中'的支付宝账单")
+		return
+	}
+	for _, _dailyBill := range *list {
+		billIds = append(billIds, _dailyBill.Id)
+	}
+
+	if len(billIds) <= 0{
+		common.Logger.Debugln("无'结账中'的支付宝账单")
+		return
+	}
+
+	//两个更新暂时没有保持事务
+	_, err = dailyBillService.BatchUpdateStatusById(1, billIds)      //将"结算中"的状态改成"已申请"
+	if err != nil {
+		common.Logger.Debugln("更新账单状态'结算中'为'已申请'失败:", billIds)
+		return
+	}
+	_, err = billBatchNoService.Delete(billIds)
+	if err != nil {
+		common.Logger.Debugln("取消批次号绑定失败:", billIds)
+		return
+	}
+	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单结束=============")
+
 }
 
 func (self *DailyBillController) Recharge(ctx *iris.Context) {
@@ -697,7 +742,6 @@ func (self *DailyBillController) Consume(ctx *iris.Context) {
 		result = &enity.Result{"0", list, "拉取消费数据成功"}
 	}
 	ctx.JSON(iris.StatusOK, result)
-
 }
 
 

@@ -1,9 +1,7 @@
-FROM reg.miz.so/table/busybox:latest
+FROM reg.miz.so/soda/centos:latest
 MAINTAINER "Maizuo Table <table@maizuo.com>"
 
 WORKDIR /<%-config.get('name')%>/
-
-RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 ADD src/build /<%-config.get('name')%>/src/build
 

@@ -113,6 +113,15 @@ func (self *DailyBillService) Basic(id int) (*model.DailyBill, error) {
 	return dailyBill, nil
 }
 
+func (self *DailyBillService) BasicBySubmitAtAndStatus(submitAt string, status ...int) (*[]*model.DailyBill, error) {
+	list := &[]*model.DailyBill{}
+	r := common.DB.Where("submit_at <= ? and status in (?)", submitAt, status).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
 func (self *DailyBillService) BasicByUserIdAndBillAt(userId int, billAt string) (*model.DailyBill, error) {
 	dailyBill := &model.DailyBill{}
 	r := common.DB.Where("user_id = ? and bill_at = ?", userId, billAt).First(dailyBill)
@@ -177,6 +186,9 @@ func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface
 	timeNow := time.Now().Local().Format("2006-01-02 15:04:05")
 	if status == 2 {
 		param["settled_at"] = timeNow
+	}
+	if status == 3 {        //修改状态为"结账中",需更新"结账中时间"
+		param["submit_at"] = timeNow
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where(" id in (?) ", ids...).Update(param)
 	if r.Error != nil {
@@ -245,6 +257,7 @@ func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStat
 	if r.Error != nil {
 		return 0, r.Error
 	}
+	common.Logger.Debugln("update rows=========================", strconv.Itoa(int(r.RowsAffected)))
 	return int(r.RowsAffected), nil
 }
 
