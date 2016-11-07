@@ -504,8 +504,7 @@ class UserForm extends React.Component {
                   { validator: this.checkNumber },
                 ],
                 initialValue: initialValue.mobile,
-              })(id !== 'new'? 
-                <Input disabled placeholder="请输入手机号" />:
+              })(
                 <Input placeholder="请输入手机号" />
               )}
             </FormItem>
