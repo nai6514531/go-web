@@ -42,38 +42,40 @@ func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (map[i
 }
 
 func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
-	r := common.DB.Create(userCashAccount)
+	transAction := common.DB.Begin()
+	r := transAction.Create(userCashAccount)
 	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
-	//只有更新的为银行账号才更新木牛里面的账号其他支付宝和微信不同步进去
-	if userCashAccount.Type == 3 {
-		boxAdmin := &muniu.BoxAdmin{}
-		boxAdmin.FillByUserCashAccount(userCashAccount)
-		r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-		if r.RowsAffected <= 0 || r.Error != nil {
-			return false
-		}
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUserCashAccount(userCashAccount)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.RowsAffected <= 0 || r.Error != nil {
+		transAction.Rollback()
+		return false
 	}
+	transAction.Commit()
 	return true
 }
 
 func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) bool {
-	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
+	transAction := common.DB.Begin()
+	r := transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
 	if r.Error != nil || r.RowsAffected <= 0 {
+		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
-	//只有更新的为银行账号才更新木牛里面的账号其他支付宝和微信不同步进去
-	if userCashAccount.Type == 3 {
-		boxAdmin := &muniu.BoxAdmin{}
-		boxAdmin.FillByUserCashAccount(userCashAccount)
-		r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
-		if r.Error != nil {
-			return false
-		}
+	boxAdmin := &muniu.BoxAdmin{}
+	boxAdmin.FillByUserCashAccount(userCashAccount)
+	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	if r.Error != nil {
+		transAction.Rollback()
+		return false
 	}
+	transAction.Commit()
 	return true
 }
 
@@ -94,4 +96,3 @@ func (self *UserCashAccountService) List(payType ...int) (*[]*model.UserCashAcco
 	}
 	return list, nil
 }
-
