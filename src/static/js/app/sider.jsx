@@ -23,7 +23,9 @@ const Navbar = React.createClass({
       icons:[
         {'title':'代理商管理','icon':'user'},
         {'title':'结算管理','icon':'pay-circle-o'},
-        {'title':'设备管理','icon':'calculator'}]
+        {'title':'设备管理','icon':'calculator'},
+        {'title':'数据统计','icon':'area-chart'}
+      ]
     };
   },
   onClickNav(item) {

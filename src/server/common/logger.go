@@ -59,10 +59,13 @@ var (
 			alarmID = "1"
 		}
 
+		userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+
 		Logger := logrus.WithFields(logrus.Fields{
 			"@source":ctx.LocalAddr().String(),
 			"@timestamp":time.Now().Format("2006-01-02 15:04:05"),
 			"@fields":map[string]interface{}{
+				"userId":userId,
 				"fromtype":"soda-manager",
 				"host":ctx.HostString(),
 				"interface":_interface,

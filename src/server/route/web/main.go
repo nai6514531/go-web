@@ -15,7 +15,6 @@ func Web() {
 
 	iris.Get("/", web.Index)
 	iris.Get("/signin", web.Signin)
-	iris.Get("/stat", web.Stat)
 	iris.Get("/captcha.png", web.Captcha)
 
 	iris.Get("/500", func(ctx *iris.Context) {

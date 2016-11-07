@@ -63,10 +63,6 @@ func (self *WebController) Signin(ctx *iris.Context) {
 	ctx.Render("signin.html", map[string]interface{}{"title": "登录"})
 }
 
-func (self *WebController) Stat(ctx *iris.Context) {
-	ctx.Render("stat.html", map[string]interface{}{"title": "统计"})
-}
-
 func (self *WebController) Captcha(ctx *iris.Context) {
 	_cap := captcha.New()
 	fontPath := viper.GetString("server.captcha.fontPath")

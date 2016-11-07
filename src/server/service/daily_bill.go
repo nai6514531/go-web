@@ -169,7 +169,7 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
 			common.Logger.Debugln(r.Error.Error())
 			tx.Rollback()
 			return 0, r.Error
-		}else {
+		} else {
 			rows += int(r.RowsAffected)
 		}
 
@@ -187,7 +187,8 @@ func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface
 	if status == 2 {
 		param["settled_at"] = timeNow
 	}
-	if status == 3 {        //修改状态为"结账中",需更新"结账中时间"
+	if status == 3 {
+		//修改状态为"结账中",需更新"结账中时间"
 		param["submit_at"] = timeNow
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where(" id in (?) ", ids...).Update(param)
@@ -214,10 +215,10 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 		boxStatBill.BillDate = timeNow
 	}
 	//mnzn用户id减1
-	for _, _userId :=range userIds {
+	for _, _userId := range userIds {
 		_mnUserId := functions.StringToInt(_userId) - 1
 		if (_mnUserId >= 0) {
-			mnUserIds  = append(mnUserIds, strconv.Itoa(_mnUserId))
+			mnUserIds = append(mnUserIds, strconv.Itoa(_mnUserId))
 		}
 	}
 	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
@@ -292,6 +293,76 @@ func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 		consume := &muniu.Consume{}
 		common.MNDB.ScanRows(rows, consume)
 		list = append(list, consume)
+	}
+	return &list, nil
+}
+
+/**
+每日账单总额，按天统计
+ */
+func (self *DailyBillService) SumByDate() (*[]*muniu.BillSumByDate, error) {
+	list := []*muniu.BillSumByDate{}
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := " select PERIOD_START as 'date', sum(MONEY) as 'count' " +
+		" from box_stat_bill " +
+		" where PERIOD_START>='" + start + "' and PERIOD_START<'" + end +
+		"' group by PERIOD_START"
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		sumByDate := &muniu.BillSumByDate{}
+		common.MNDB.ScanRows(rows, sumByDate)
+		list = append(list, sumByDate)
+	}
+	return &list, nil
+}
+/**
+最近7天，微信充值金额，不含当天
+ */
+func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error) {
+	list := []*muniu.BillSumByDate{}
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
+		" from trade_info " +
+		" where date(UPDATETIME) >='" + start + "' and date(UPDATETIME)<'" + end + "' and tradestatus='success' " +
+		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		sumByDate := &muniu.BillSumByDate{}
+		common.MNDB.ScanRows(rows, sumByDate)
+		list = append(list, sumByDate)
+	}
+	return &list, nil
+}
+/**
+最近7天，支付宝充值金额，不含当天
+ */
+func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error) {
+	list := []*muniu.BillSumByDate{}
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
+		" from trade_info " +
+		" where date(UPDATETIME) >='" + start + "' and date(UPDATETIME)<'" + end + "' and tradestatus='TRADE_SUCCESS' " +
+		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
+	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		sumByDate := &muniu.BillSumByDate{}
+		common.MNDB.ScanRows(rows, sumByDate)
+		list = append(list, sumByDate)
 	}
 	return &list, nil
 }

@@ -27,8 +27,13 @@ func Api() {
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
 
+	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
+
+	api.UseFunc(common.RequireSignin)
+
 	api.Get("/stat/recharge", dailyBill.Recharge)
 	api.Get("/stat/consume", dailyBill.Consume)
+	api.Get("/stat/daily-bill", dailyBill.SumByDate)
 	api.Get("/stat/signin-user", user.SignInUser)
 
 	api.Get("/sync/user", sync.SyncUser)
@@ -37,10 +42,6 @@ func Api() {
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
-
-	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
-
-	api.UseFunc(common.RequireSignin)
 
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
