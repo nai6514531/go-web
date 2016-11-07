@@ -265,8 +265,12 @@ func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStat
 func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 	list := []*muniu.Recharge{}
 	sql := "select DATE_FORMAT(UPDATETIME,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
-		"from trade_info where date(UPDATETIME) >'2015-12' and (tradestatus='success' " +
-		"or tradestatus='TRADE_SUCCESS') group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
+		"from trade_info " +
+		"where date(UPDATETIME) >'2015-12' " +
+		"and tradetype in ('7','8') " +
+		"and tradeno!=''  " +
+		"and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
+		"group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
 	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -283,7 +287,7 @@ func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 	list := []*muniu.Consume{}
 	sql := "select DATE_FORMAT(inserttime,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
-		"from box_wash group by DATE_FORMAT(inserttime,'%Y-%m')"
+		"from box_wash where companyid!=0 group by DATE_FORMAT(inserttime,'%Y-%m')"
 	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -306,8 +310,10 @@ func (self *DailyBillService) SumByDate() (*[]*muniu.BillSumByDate, error) {
 	end := time.Now().Format("2006-01-02")
 	sql := " select PERIOD_START as 'date', sum(MONEY) as 'count' " +
 		" from box_stat_bill " +
-		" where PERIOD_START>='" + start + "' and PERIOD_START<'" + end +
-		"' group by PERIOD_START"
+		" where PERIOD_START>='" + start + "' " +
+		" and PERIOD_START<'" + end + "'" +
+		" and COMPANYID!=0 " +
+		" group by PERIOD_START"
 	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -329,7 +335,9 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 	end := time.Now().Format("2006-01-02")
 	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
 		" from trade_info " +
-		" where date(UPDATETIME) >='" + start + "' and date(UPDATETIME)<'" + end + "' and tradestatus='success' " +
+		" where date(UPDATETIME) >='" + start + "' " +
+		" and date(UPDATETIME)<'" + end + "'" +
+		" and tradestatus='success'" +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
 	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()
@@ -352,7 +360,9 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 	end := time.Now().Format("2006-01-02")
 	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
 		" from trade_info " +
-		" where date(UPDATETIME) >='" + start + "' and date(UPDATETIME)<'" + end + "' and tradestatus='TRADE_SUCCESS' " +
+		" where date(UPDATETIME) >='" + start + "'" +
+		" and date(UPDATETIME)<'" + end + "'" +
+		" and tradestatus='TRADE_SUCCESS' " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
 	rows, err := common.MNDBPROD.Raw(sql).Rows()
 	defer rows.Close()

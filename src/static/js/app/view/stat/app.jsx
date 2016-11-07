@@ -5,6 +5,7 @@ import "./app.less";
 const _ = require('lodash');
 var Highcharts = require('highcharts');
 var Highstock = require('highcharts/highstock');
+var moment = require('moment');
 import StatService from "../../service/stat";
 const App = React.createClass({
   chartKey: [],
@@ -108,8 +109,9 @@ const App = React.createClass({
         if (data && data.status == 0) {
           const _data = [];
           _.each(data.data || [], function (v) {
-            _data.push([new Date(v.date).getTime(), v.count])
+            _data.push([moment(v.date).toDate().getTime(), v.count])
           });
+          console.info(_data)
           Highstock.stockChart('user', {
             chart: {
               height: 400
@@ -117,11 +119,9 @@ const App = React.createClass({
             title: {
               text: ''
             },
-
             subtitle: {
               text: ''
             },
-
             rangeSelector: {
               selected: 1
             },
@@ -131,7 +131,7 @@ const App = React.createClass({
               type: 'area',
               threshold: null,
               tooltip: {
-                valueDecimals: 2
+                valueDecimals: 0
               }
             }],
             responsive: {
