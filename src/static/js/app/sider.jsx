@@ -23,7 +23,9 @@ const Navbar = React.createClass({
       icons:[
         {'title':'代理商管理','icon':'user'},
         {'title':'结算管理','icon':'pay-circle-o'},
-        {'title':'设备管理','icon':'calculator'}]
+        {'title':'设备管理','icon':'calculator'},
+        {'title':'数据统计','icon':'line-chart'},
+      ]
     };
   },
   onClickNav(item) {
@@ -40,6 +42,7 @@ const Navbar = React.createClass({
     const { location, forceShow } = this.props;
     const menus = USER.menu || [];
     const self = this;
+    const icons = this.state.icons;
     return (<div className={classnames('application-sider', { show: forceShow })}>
       <div className="close"><Button type="ghost" icon="close" shape="circle" onClick={this.props.onClickClose} /></div>
       <h2 onClick={() => this.redirect('')}><a href="#/"><img src={require('./logo.png')}/></a></h2>
@@ -50,9 +53,11 @@ const Navbar = React.createClass({
           onClick={this.onClickNav}>
           {menus.map(function (item) {
             return <Menu.Item key={item.url}>
-              <Icon type={self.state.icons.filter(function (icon) {
+              <Icon type={icons.filter(function (icon) {
                 return icon.title == item.name
-              })[0].icon}
+              }).length > 0 ? icons.filter(function (icon) {
+                return icon.title == item.name
+              })[0].icon:'smile-o'}
               />
               {item.name}
             </Menu.Item>
