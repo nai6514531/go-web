@@ -1,14 +1,14 @@
 package model
 
-type billRel struct {
+type BillRel struct {
 	Model
-	BillId      string      `json:"billId"`
+	BillId      int         `json:"billId"`
 	Type        int         `json:"type"`
 	IsSuccessed bool        `json:"isSuccessed"`
 	Reason      string      `json:"reason"`
 	OuterNo     string      `json:"outerNo"`
 }
 
-func (billRel) TableName() string {
+func (BillRel) TableName() string {
 	return "bill_rel"
 }
