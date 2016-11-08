@@ -174,6 +174,8 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
 		}
 
 	}
+
+	tx.Commit()
 	return rows, nil
 }
 

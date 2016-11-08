@@ -80,8 +80,14 @@ func CreateSign(mReq interface{}) string {
 /**
 	签名校验方法
  */
-func VerifySign(data map[string]interface{}, sign string) bool {
-	_sign := CreateSign(data)
+func VerifySign(data interface{}, sign string) bool {
+	_sign := ""
+	switch value := data.(type) {
+	case map[string]interface{}:
+		_sign = CreateSign(value)
+	case map[string]string:
+		_sign = CreateSign(value)
+	}
 	common.Logger.Debugln("计算出来的sign: %v", _sign)
 	common.Logger.Debugln("支付宝通知sign: %v", sign)
 	if sign == _sign {
