@@ -680,7 +680,7 @@ func (self *DailyBillController) TimedApplyAliPayBill() {
 	common.Logger.Debugln("=============定时更新'未结账'支付宝账单状态'已申请'结束=============")
 }
 
-func (self *DailyBillController) TimedUpdateAlipayStatus() {
+func (self *DailyBillController) TimedUpdateAliPayStatus() {
 	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单开始=============")
 	dailyBillService := &service.DailyBillService{}
 	billBatchNoService := &service.BillBatchNoService{}

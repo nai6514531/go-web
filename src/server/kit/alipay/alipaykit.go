@@ -91,8 +91,3 @@ func VerifySign(data map[string]interface{}, sign string) bool {
 	common.Logger.Debugln("签名校验失败!")
 	return false
 }
-
-func (self *AlipayKit) BatchPay() {
-
-
-}

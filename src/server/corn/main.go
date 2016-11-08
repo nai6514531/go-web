@@ -26,7 +26,7 @@ func SetUpCron() {
 	applySpec := viper.GetString("cron.applySpec")
 
 	c.AddFunc(applySpec, dailyBill.TimedApplyAliPayBill)
-	c.AddFunc(updateSpec, dailyBill.TimedUpdateAlipayStatus)
+	c.AddFunc(updateSpec, dailyBill.TimedUpdateAliPayStatus)
 
 	c.AddFunc(syncDailyBillDetailSpec, func() {
 		syncService.SyncDailyBillDetail()
