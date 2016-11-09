@@ -39,7 +39,7 @@ var (
 		"01060306": "该用户账单不是通过银行结账,故不可申请结账",
 		"01060307": "参数用户id不能为空",
 
-		"01060400": "日账单结账成功",
+		"01060400": "日账单提交成功",
 		"01060401": "银行结算更新状态失败",
 		"01060402": "支付宝结算更新状态失败",
 		"01060403": "所选中的银行结算用户未申请提现或已结账",
@@ -250,7 +250,7 @@ func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[str
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
 	param["batch_num"] = strconv.Itoa(batchNum)
-	param["batch_fee"] = "0.01"//strconv.Itoa(batchFee)
+	param["batch_fee"] =  strconv.FormatFloat(float64(batchNum)*0.01, 'f', -1, 64)//strconv.Itoa(batchFee)
 	param["email"] = viper.GetString("pay.aliPay.email")
 	param["pay_date"] = time.Now().Local().Format("20060102")
 	param["sign"] = alipay.CreateSign(param)
@@ -500,7 +500,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 					insertTime, _ := time.Parse("20060102150405", _time)
 					_settledAt := insertTime.Format("2006-01-02 15:04:05")
 					_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 2}  //已结账
-					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), Type: 1, IsSuccessed: true, Reason: _reason, OuterNo: _alipayno}
+					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: true, Reason: _reason, OuterNo: _alipayno}
 					if _flag == "S" {
 						billList = append(billList, _bill)
 						billRelList = append(billRelList, _billRel)
@@ -528,7 +528,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 					insertTime, _ := time.Parse("20060102150405", _time)
 					_settledAt := insertTime.Format("2006-01-02 15:04:05")
 					_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 4}  //结账失败
-					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), Type: 1, IsSuccessed: false, Reason: _reason, OuterNo: _alipayno}
+					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: false, Reason: _reason, OuterNo: _alipayno}
 					if _flag == "F" {
 						failureList = append(failureList, _bill)
 						billRelList = append(billRelList, _billRel)
