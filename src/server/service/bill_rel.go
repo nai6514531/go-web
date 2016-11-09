@@ -22,6 +22,7 @@ func (self *BillRelService) Create(billRelList ...*model.BillRel) (int, error) {
 			e := &functions.DefinedError{}
 			e.Msg = "can not create a new record!"
 			err = e
+			tx.Rollback()
 			return 0, err
 		}
 		r = tx.Create(&billRel)
