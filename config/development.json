@@ -22,7 +22,7 @@
     "aliPay": {
       "id": "",
       "key": "",
-      "notifyUrl": "http://1d410969.ngrok.io/api/daily-bill/alipay/notification",
+      "notifyUrl": "http://74002de1.ngrok.io/api/daily-bill/alipay/notification",
       "accountName": "深圳市华策网络科技有限公司",
       "email": "laura@maizuo.com",
       "signType": "MD5",

@@ -191,7 +191,7 @@ func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface
 	}
 	if status == 3 {
 		//修改状态为"结账中",需更新"结账中时间"
-		param["submit_at"] = timeNow
+		param["submit_at"] = time.Now()
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where(" id in (?) ", ids...).Update(param)
 	if r.Error != nil {
