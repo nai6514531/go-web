@@ -16,7 +16,7 @@ func SetUpCron() {
 
 	isDevelopment := viper.GetBool("isDevelopment")
 
-	if isDevelopment {
+	if isDevelopment == false {
 
 		c := cron.New()
 

@@ -10,6 +10,8 @@ func main() {
 
 	common.SetUpConfig()
 
+	common.SetUpCommon()
+
 	common.SetUpLogger()
 
 	common.SetUpSession()
@@ -19,8 +21,6 @@ func main() {
 	common.SetUpMNDB()
 
 	common.SetUpRedis()
-
-	common.SetUpCommon()
 
 	//common.SetUpRateLimiter()
 

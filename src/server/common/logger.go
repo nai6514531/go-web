@@ -40,9 +40,15 @@ var (
 	Logger  *logrus.Entry
 	logFile *os.File
 	Log = func(ctx *iris.Context, result *enity.Result) {
-		startAt := ctx.Get("startAt").(int64)
-		endAt := time.Now().UnixNano() / 1000000
-		processTime := endAt - startAt
+		var processTime int64
+		startAt := ctx.Get("startAt")
+		if startAt != nil {
+			startAt := startAt.(int64)
+			endAt := time.Now().UnixNano() / 1000000
+			processTime = endAt - startAt
+		} else {
+			processTime = -1
+		}
 
 		body := string(ctx.PostBody()[:])
 
@@ -55,7 +61,7 @@ var (
 		_interface := handle[1] + ":" + handle[len(handle) - 2] + ":" + handle[len(handle) - 1]
 		_status, _ := strconv.Atoi(result.Status[len(result.Status) - 2 : len(result.Status)])
 		if _status != 0 {
-			_interface += ":error"
+			_interface = "error:" + _interface
 			alarmID = "1"
 		}
 
