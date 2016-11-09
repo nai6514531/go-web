@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/alipay"
-	"os"
 	"maizuo.com/soda-manager/src/server/model"
 )
 
@@ -53,13 +52,15 @@ var (
 		"01060410": "所选支付宝账单超出批次结算最大值1000",
 		"01060411": "所选支付宝账单中存在已有批次号账单",
 
-		"01060500": "更新账单成功",
-		"01060501": "更新账单失败",
+		"01060500": "更新支付宝账单成功",
+		"01060501": "更新支付宝账单结账状态失败",
+		"01060502": "软删除支付宝失败订单批次号失败",
+		"01060503": "插入支付宝账单信息失败",
 
 		"01060600": "取消支付宝批量支付成功",
 		"01060601": "取消支付宝批量支付失败,请联系技术人员解锁提交账单",
 		"01060602": "无取消订单号",
-		"01060603":"参数异常",
+		"01060603": "参数异常",
 	}
 )
 
@@ -77,7 +78,6 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	if params["status"] != "" {
 		_status = strings.Split(params["status"], ",")  //结算状态和提现状态
 	}
-
 	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
 	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
 	if err != nil {
@@ -121,12 +121,10 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		status = append(status, []string{"1", "2", "3", "4"}...)
 	}
 	billAt := params["billAt"]
-
 	if page <= 0 || perPage <= 0 {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
 		return
 	}
-
 	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId)
 	if err != nil {
 		result = &enity.Result{"01060102", nil, daily_bill_msg["01060102"]}
@@ -197,7 +195,6 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060304", nil, daily_bill_msg["01060304"]})
 		return
 	}
-
 	//判断该用户的是否银行结算,其他方式不需或不给申请提现
 	account, err := userCashAccountService.BasicByUserId(functions.StringToInt(userIds[0]))
 	if err != nil {
@@ -213,7 +210,6 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	rows, err := dailyBillService.BatchUpdateStatus(status, billAt, userIds...)
 	if err != nil {
 		result = &enity.Result{"01060302", nil, daily_bill_msg["01060302"]}
@@ -221,7 +217,6 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	common.Logger.Debugln("rows, userIds============", rows, ", =======", userIds)
 	if rows != len(userIds) {
 		common.Logger.Debugln(daily_bill_msg["01060302"])
@@ -230,7 +225,6 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	result = &enity.Result{"01060300", nil, daily_bill_msg["01060300"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
@@ -239,7 +233,7 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 /*
 	支付宝批量支付接口
 */
-func BatchAliPay(batchNum int, aliPayDetailDataStr string) map[string]string {
+func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[string]string {
 	param := make(map[string]string, 0)
 	if batchNum <= 0 || batchNum > 1000 || aliPayDetailDataStr == "" {
 		return param
@@ -249,21 +243,21 @@ func BatchAliPay(batchNum int, aliPayDetailDataStr string) map[string]string {
 	}
 	common.Logger.Debugln("aliPayDetailDataStr====================", aliPayDetailDataStr)
 	param["service"] = "batch_trans_notify"
-	param["partner"] = os.Getenv("ALIPAYID")
+	param["partner"] = viper.GetString("pay.aliPay.id")//os.Getenv("ALIPAYID")
 	param["_input_charset"] = "utf-8"
-	param["notify_url"] = "http://1d410969.ngrok.io/api/daily-bill/alipay/notification"
-	param["account_name"] = "深圳市华策网络科技有限公司"
+	param["notify_url"] = viper.GetString("pay.aliPay.notifyUrl")
+	param["account_name"] = viper.GetString("pay.aliPay.accountName")
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
 	param["batch_num"] = strconv.Itoa(batchNum)
-	param["batch_fee"] = "0.02"
-	param["email"] = "laura@maizuo.com"
+	param["batch_fee"] = "0.01"//strconv.Itoa(batchFee)
+	param["email"] = viper.GetString("pay.aliPay.email")
 	param["pay_date"] = time.Now().Local().Format("20060102")
 	param["sign"] = alipay.CreateSign(param)
-	param["sign_type"] = "MD5"
-	param["request_url"] = "https://mapi.alipay.com/gateway.do"
+	param["sign_type"] = viper.GetString("pay.aliPay.signType")
+	param["request_url"] = viper.GetString("pay.aliPay.requestUrl")
+	common.Logger.Debugln("batchNum======================", batchNum)
 	common.Logger.Debugln("param======================", param)
-
 	return param
 }
 
@@ -275,11 +269,11 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	aliPayBillIds := make([]int, 0)
 	billBatchNoList := make([]*model.BillBatchNo, 0)
 	batchNum := 0
+	batchFee := 0
 	var result *enity.Result
 	var aliPayReqParam map[string]string
 	aliPayDetailDataStr := ""
 	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-
 	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
 	if err != nil {
 		result = &enity.Result{"01060405", nil, daily_bill_msg["01060405"]}
@@ -292,7 +286,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
 		return
 	}
-
 	var params map[string]interface{}
 	if json.Unmarshal(ctx.PostBody(), &params) != nil {
 		common.Logger.Debugln("解析json异常")
@@ -328,7 +321,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			common.Log(ctx, result)
 			continue        //查询不到用户的账户信息就没有必要往下执行
 		}
-
 		//过滤掉未申请提现的用户
 		billMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)
 		if err == nil  && len(billMap) > 0 {
@@ -344,7 +336,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			}
 			common.Logger.Debugln(billAt, "==>bankPayUserIds:", bankPayUserIds)
 		}
-
 		aliPayFailureBillMap, err := dailyBillService.BasicMap(billAt, 4, userIds...)   //查询出支付宝结算方式中失败的账单
 		if err == nil && len(aliPayFailureBillMap) > 0 {
 			for _userId, _dailyBill := range aliPayFailureBillMap {
@@ -356,7 +347,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			}
 			common.Logger.Debugln(billAt, "==>aliPayUserIds:", aliPayUserIds)
 		}
-
 		//aliPay bill
 		if len(aliPayUserIds) > 0 {
 			for _, _userId := range aliPayUserIds {
@@ -366,12 +356,12 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 					//判断结算方式是否为支付宝且存在该用户账单
 					//" + strconv.Itoa(_dailyBill.TotalAmount) + "
 					aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^" + _userCashAccount.Account + "^" + _userCashAccount.RealName +
-						"^" + "0.02" + "^" + "无" + "|"          //组装支付宝支付data_detail
+						"^" +  "0.01" + "^" + "无" + "|"          //组装支付宝支付data_detail
 					aliPayBillIds = append(aliPayBillIds, _dailyBill.Id)//组装需要修改为"结账中"状态的支付宝订单
+					batchFee += _dailyBill.TotalAmount
 					batchNum++      //计算批量结算请求中支付宝结算的日订单数,不可超过1000
 				}
 			}
-
 		}
 		//update bankPay
 		if len(bankPayUserIds) > 0 {
@@ -392,7 +382,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			}
 		}
 	}
-
 	//查询支付宝订单中是否已有批次号的订单(再次确认,这里的支付宝订单号只是"已申请"和"结账失败"的)
 	batchNoList, _ := billBatchNoService.Baisc(aliPayBillIds)
 	if len(*batchNoList) > 0 {
@@ -401,10 +390,9 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	//生成支付宝请求参数并存储账单对应的批次号
 	if batchNum > 0 && batchNum <= 1000 && aliPayDetailDataStr != "" {
-		aliPayReqParam = BatchAliPay(batchNum, aliPayDetailDataStr)
+		aliPayReqParam = BatchAliPay(batchNum, batchFee, aliPayDetailDataStr)
 		if aliPayReqParam["batch_no"] == "" {
 			common.Logger.Debugln("生成批次号失败:", err.Error())
 			result = &enity.Result{"01060402", nil, daily_bill_msg["01060402"]}
@@ -439,7 +427,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	//更新支付宝账单为"结账中"
 	rows, err := dailyBillService.BatchUpdateStatusById(3, aliPayBillIds)
 	if err != nil {
@@ -456,122 +443,149 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	result = &enity.Result{"01060400", aliPayReqParam, daily_bill_msg["01060400"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }
 
 func (self *DailyBillController) Notification(ctx *iris.Context) {
+	var err error
 	dailyBillService := &service.DailyBillService{}
 	billBatchNoService := &service.BillBatchNoService{}
+	billRelService := &service.BillRelService{}
 	common.Logger.Debugln("支付宝回调开始!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-	notifyRequest := alipay.NotifyRequest{}
-	reqMap := make(map[string]interface{}, 0)
+	reqMap := make(map[string]string, 0)
 	billList := make([]*model.DailyBill, 0)
 	failureList := make([]*model.DailyBill, 0)
+	billRelList := make([]*model.BillRel, 0)
 	failureBillIds := make([]int, 0)
-	body := ctx.Request.Body()
+	successNotifyDetail := make([]string, 0)
+	failNotifyDetail := make([]string, 0)
 	succeedNum := 0
 	failureNum := 0
-	common.Logger.Debugln("支付宝通知 Body:", string(body))
-	err := json.Unmarshal(body, &notifyRequest)
-	if err != nil {
-		common.Logger.Debugln("解析支付宝回调信息失败!")
-		//ctx.Response.SetBodyString("fail")
-		ctx.JSON(iris.StatusOK, &enity.Result{})
-		return
-	}
-
-	reqMap["notify_time"] = notifyRequest.NotifyTime
-	reqMap["notify_type"] = notifyRequest.NotifyType
-	reqMap["notify_dd"] = notifyRequest.NotifyId
-	reqMap["batch_no"] = notifyRequest.BatchNo
-	reqMap["pay_user_id"] = notifyRequest.PayUserId
-	reqMap["pay_user_name"] = notifyRequest.PayUserName
-	reqMap["pay_account_no"] = notifyRequest.PayAccountNo
-	reqMap["success_details"] = notifyRequest.SuccessDetails
-	reqMap["fail_details"] = notifyRequest.FailDetails
-	common.Logger.Debugln("signType=============", notifyRequest.SignType)
+	reqMap["notify_time"] = ctx.FormValueString("notify_time")
+	reqMap["notify_type"] = ctx.FormValueString("notify_type")
+	reqMap["notify_id"] = ctx.FormValueString("notify_id")
+	reqMap["batch_no"] = ctx.FormValueString("batch_no")
+	reqMap["pay_user_id"] = ctx.FormValueString("pay_user_id")
+	reqMap["pay_user_name"] = ctx.FormValueString("pay_user_name")
+	reqMap["pay_account_no"] = ctx.FormValueString("pay_account_no")
+	reqMap["success_details"] = ctx.FormValueString("success_details")
+	reqMap["fail_details"] = ctx.FormValueString("fail_details")
+	common.Logger.Debugln("signType=============", ctx.FormValueString("sign_type"))
 	common.Logger.Debugln("reqMap===========================", reqMap)
-	if !alipay.VerifySign(reqMap, notifyRequest.Sign) {
-		ctx.JSON(iris.StatusOK, &enity.Result{})
+	if !alipay.VerifySign(reqMap, ctx.FormValueString("sign")) {
+		ctx.Response.SetBodyString("fail")
 		return
 	}
 	common.Logger.Debugln("success")
 	//successed status of alipaybill
-	successNotifyDetail := strings.Split(notifyRequest.SuccessDetails, "|")
-	if len(successNotifyDetail) > 0 {
-		for _, _detail := range successNotifyDetail {
-			_info := strings.Split(_detail, "^")
-			if len(_info) > 0 {
-				_id := _info[0]         //商家流水号
-				//_account := _info[1]    //收款方账号
-				//_name := _info[2]       //收款账号姓名
-				//_amount := _info[3]     //付款金额
-				_flag := _info[4]       //成功或失败标识
-				//_reason := _info[5]     //成功或失败原因
-				//_alipayno := _info[6]   //支付宝内部流水号
-				_time := _info[7]       //完成时间
-				_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _time, Status: 2}  //已结账
-				if _flag == "S" {
-					billList = append(billList, _bill)
-					succeedNum++
+	if reqMap["success_details"] != "" {
+		successNotifyDetail = strings.Split(reqMap["success_details"], "|")
+		if len(successNotifyDetail) > 0 {
+			for _, _detail := range successNotifyDetail {
+				if _detail == "" {
+					continue
+				}
+				_info := strings.Split(_detail, "^")
+				if len(_info) > 0 {
+					_id := _info[0]           //商家流水号
+					//_account := _info[1]    //收款方账号
+					//_name := _info[2]       //收款账号姓名
+					//_amount := _info[3]     //付款金额
+					_flag := _info[4]         //成功或失败标识
+					_reason := _info[5]       //成功或失败原因
+					_alipayno := _info[6]     //支付宝内部流水号
+					_time := _info[7]         //完成时间
+					insertTime, _ := time.Parse("20060102150405", _time)
+					_settledAt := insertTime.Format("2006-01-02 15:04:05")
+					_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 2}  //已结账
+					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), Type: 1, IsSuccessed: true, Reason: _reason, OuterNo: _alipayno}
+					if _flag == "S" {
+						billList = append(billList, _bill)
+						billRelList = append(billRelList, _billRel)
+						succeedNum++
+					}
 				}
 			}
 		}
 	}
-
 	//failure status of alipaybill
-	failNotifyDetail := strings.Split(notifyRequest.FailDetails, "|")
-	if len(failNotifyDetail) > 0 {
-		for _, _detail := range failNotifyDetail {
-			_info := strings.Split(_detail, "^")
-			if len(_info) > 0 {
-				_id := _info[0]
-				_flag := _info[4]
-				_time := _info[7]
-				_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _time, Status: 4}  //结账失败
-				if _flag == "F" {
-					failureList = append(failureList, _bill)
-					failureBillIds = append(failureBillIds, functions.StringToInt(_id))
-					failureNum++
+	if reqMap["fail_details"] != "" {
+		failNotifyDetail = strings.Split(reqMap["fail_details"], "|")
+		if len(failNotifyDetail) > 0 {
+			for _, _detail := range failNotifyDetail {
+				if _detail == "" {
+					continue
+				}
+				_info := strings.Split(_detail, "^")
+				if len(_info) > 0 {
+					_id := _info[0]
+					_flag := _info[4]
+					_reason := _info[5]
+					_alipayno := _info[6]
+					_time := _info[7]
+					insertTime, _ := time.Parse("20060102150405", _time)
+					_settledAt := insertTime.Format("2006-01-02 15:04:05")
+					_bill := &model.DailyBill{Model:model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 4}  //结账失败
+					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), Type: 1, IsSuccessed: false, Reason: _reason, OuterNo: _alipayno}
+					if _flag == "F" {
+						failureList = append(failureList, _bill)
+						billRelList = append(billRelList, _billRel)
+						failureBillIds = append(failureBillIds, functions.StringToInt(_id))
+						failureNum++
+					}
 				}
 			}
 		}
+		billList = append(billList, failureList...)
 	}
-
-	billList = append(billList, failureList...)
 	common.Logger.Debugln("list==============", billList)
 	billLength := len(successNotifyDetail) + len(failNotifyDetail)
-	if billLength != (succeedNum + failureNum) {
-		ctx.Render("batch_alipay_notify.html", map[string]interface{}{"msg": "fail"})
+	common.Logger.Debugln("billLength======", billLength)
+	common.Logger.Debugln("succeedNum + failureNum=======", (succeedNum + failureNum))
+	/*if billLength != (succeedNum + failureNum) {
+		ctx.Response.SetBodyString("fail")
+		return
+	}*/
+	if len(billList) <= 0 {
+		ctx.Response.SetBodyString("fail")
 		return
 	}
 	_, err = dailyBillService.Updates(&billList)
 	if err != nil {
-		//更新支付宝成功订单失败
+		//更新支付宝账单结账状态失败
+		common.Logger.Debugln(daily_bill_msg["01060501"], ":", err.Error())
 		result := &enity.Result{"01060501", nil, daily_bill_msg["01060501"]}
 		common.Log(ctx, result)
-		ctx.Render("batch_alipay_notify.html", map[string]interface{}{"msg": "fail"})
+		ctx.Response.SetBodyString("fail")
 		return
 	}
-
 	//软删除失败订单的批次号
 	if len(failureBillIds) > 0 {
 		_, err = billBatchNoService.Delete(failureBillIds)
 		if err != nil {
-			common.Logger.Debugln("软删除支付宝失败订单批次号出错, failureBillIds==", failureBillIds)
-			result := &enity.Result{"01060501", nil, daily_bill_msg["01060501"]}
+			common.Logger.Debugln(daily_bill_msg["01060502"], "failureBillIds==", failureBillIds, ":", err.Error())
+			result := &enity.Result{"01060502", nil, daily_bill_msg["01060502"]}
 			common.Log(ctx, result)
-			ctx.Render("batch_alipay_notify.html", map[string]interface{}{"msg": "fail"})
+			ctx.Response.SetBodyString("fail")
 			return
 		}
 	}
-	//ctx.Response.SetBodyString("success")
+	//插入支付宝返回的账单信息
+	if len(billRelList) > 0 {
+		_, err := billRelService.Create(billRelList...)
+		if err != nil {
+			common.Logger.Debugln(daily_bill_msg["01060503"], ":", err.Error())
+			result := &enity.Result{"01060503", nil, daily_bill_msg["01060503"]}
+			common.Log(ctx, result)
+			ctx.Response.SetBodyString("fail")
+			return
+		}
+	}
 	common.Logger.Debugln("支付宝回调结束!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	common.Log(ctx, nil)
-	ctx.Render("batch_alipay_notify.html", map[string]interface{}{"msg": "success"})
+	ctx.Response.SetBodyString("success")
 }
 
 /**
@@ -653,11 +667,9 @@ func (self *DailyBillController) CancelBatchAliPay(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
 	result = &enity.Result{"01060600", nil, daily_bill_msg["01060600"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
-
 }
 
 /**
@@ -683,7 +695,7 @@ func (self *DailyBillController) TimedApplyAliPayBill() {
 	common.Logger.Debugln("=============定时更新'未结账'支付宝账单状态'已申请'结束=============")
 }
 
-func (self *DailyBillController) TimedUpdateAlipayStatus() {
+func (self *DailyBillController) TimedUpdateAliPayStatus() {
 	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单开始=============")
 	dailyBillService := &service.DailyBillService{}
 	billBatchNoService := &service.BillBatchNoService{}
@@ -704,7 +716,6 @@ func (self *DailyBillController) TimedUpdateAlipayStatus() {
 	for _, _dailyBill := range *list {
 		billIds = append(billIds, _dailyBill.Id)
 	}
-
 	if len(billIds) <= 0 {
 		common.Logger.Debugln("无'结账中'的支付宝账单")
 		return
@@ -722,7 +733,6 @@ func (self *DailyBillController) TimedUpdateAlipayStatus() {
 		return
 	}
 	common.Logger.Debugln("=============定时解绑支付宝'结账中'状态超24小时账单结束=============")
-
 }
 
 func (self *DailyBillController) Recharge(ctx *iris.Context) {

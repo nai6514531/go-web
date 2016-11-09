@@ -4,6 +4,7 @@ import (
 	"github.com/robfig/cron"
 	"maizuo.com/soda-manager/src/server/controller/api"
 	"maizuo.com/soda-manager/src/server/service"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -15,17 +16,17 @@ func SetUpCron() {
 
 	c := cron.New()
 
-	syncDailyBillDetailSpec := "0 0 4 * * ?"
-	syncDailyBillSpec := "0 30 4 * * ?"
-	syncDeviceSpec := "0 40 4 * * ?"
-	syncUserSpec := "0 10 5 * * ?"
-	syncUserCashSpec := "0 20 5 * * ?"
-	syncUserRoleSpec := "0 30 5 * * ?"
-	updateSpec := "0 40 6 * * ?"
-	applySpec := "0 50 6 * * ?"
+	syncDailyBillDetailSpec := viper.GetString("cron.syncDailyBillDetailSpec")
+	syncDailyBillSpec := viper.GetString("cron.syncDailyBillSpec")
+	syncDeviceSpec := viper.GetString("cron.syncDeviceSpec")
+	syncUserSpec := viper.GetString("cron.syncUserSpec")
+	syncUserCashSpec := viper.GetString("cron.syncUserCashSpec")
+	syncUserRoleSpec := viper.GetString("cron.syncUserRoleSpec")
+	updateSpec := viper.GetString("cron.updateSpec")
+	applySpec := viper.GetString("cron.applySpec")
 
 	c.AddFunc(applySpec, dailyBill.TimedApplyAliPayBill)
-	c.AddFunc(updateSpec, dailyBill.TimedUpdateAlipayStatus)
+	c.AddFunc(updateSpec, dailyBill.TimedUpdateAliPayStatus)
 
 	c.AddFunc(syncDailyBillDetailSpec, func() {
 		syncService.SyncDailyBillDetail()

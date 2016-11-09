@@ -1,7 +1,5 @@
 package alipay
 
-import "time"
-
 /**
 	商户后台请求支付宝后台批量支付
  */
@@ -26,7 +24,7 @@ type BatchPayRequest struct {
 /**
 	支付宝异步通知商户后台
  */
-type NotifyRequest struct {
+/*type NotifyRequest struct {
 	NotifyTime     time.Time        `json:"notify_time"`
 	NotifyType     string           `json:"notify_type"`
 	NotifyId       string           `json:"notify_id"`
@@ -38,4 +36,6 @@ type NotifyRequest struct {
 	PayAccountNo   string           `json:"pay_account_no"`
 	SuccessDetails string           `json:"success_details"` //可空
 	FailDetails    string           `json:"fail_details"`    //可空
-}
+}*/
+
+
