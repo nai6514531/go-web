@@ -7,6 +7,14 @@ gulp.task('copy:template', function () {
 	})
 		.pipe(gulp.dest('./src/build/'));
 });
+gulp.task('copy:vendor', function () {
+  return gulp.src([
+    './src/static/vendor/**/*'
+  ], {
+    base: './src'
+  })
+    .pipe(gulp.dest('./src/build/'));
+});
 gulp.task('copy:img', function () {
 	return gulp
 		.src([
