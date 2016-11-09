@@ -273,7 +273,7 @@ func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 		"and tradeno!=''  " +
 		"and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
 		"group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
-	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -290,7 +290,7 @@ func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 	list := []*muniu.Consume{}
 	sql := "select DATE_FORMAT(inserttime,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
 		"from box_wash where companyid!=0 group by DATE_FORMAT(inserttime,'%Y-%m')"
-	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -316,7 +316,7 @@ func (self *DailyBillService) SumByDate() (*[]*muniu.BillSumByDate, error) {
 		" and PERIOD_START<'" + end + "'" +
 		" and COMPANYID!=0 " +
 		" group by PERIOD_START"
-	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -341,7 +341,7 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 		" and date(UPDATETIME)<'" + end + "'" +
 		" and tradestatus='success'" +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
-	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -366,7 +366,7 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 		" and date(UPDATETIME)<'" + end + "'" +
 		" and tradestatus='TRADE_SUCCESS' " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
-	rows, err := common.MNDBPROD.Raw(sql).Rows()
+	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err

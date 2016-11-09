@@ -3,7 +3,7 @@ package main
 import (
 	"maizuo.com/soda-manager/src/server"
 	"maizuo.com/soda-manager/src/server/common"
-	"maizuo.com/soda-manager/src/server/corn"
+	"maizuo.com/soda-manager/src/server/cron"
 )
 
 func main() {
@@ -17,8 +17,6 @@ func main() {
 	common.SetUpDB()
 
 	common.SetUpMNDB()
-
-	common.SetUpMNDBPROD()
 
 	common.SetUpRedis()
 
