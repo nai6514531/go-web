@@ -250,7 +250,7 @@ func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[str
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
 	param["batch_num"] = strconv.Itoa(batchNum)
-	param["batch_fee"] =  strconv.FormatFloat(float64(batchNum)*0.01, 'f', -1, 64)//strconv.Itoa(batchFee)
+	param["batch_fee"] =  strconv.FormatFloat(float64(batchNum)*2.00, 'f', 2, 64)//(float(batchFee)/100.00)
 	param["email"] = viper.GetString("pay.aliPay.email")
 	param["pay_date"] = time.Now().Local().Format("20060102")
 	param["sign"] = alipay.CreateSign(param)
@@ -356,7 +356,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 					//判断结算方式是否为支付宝且存在该用户账单
 					//" + strconv.Itoa(_dailyBill.TotalAmount) + "
 					aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^" + _userCashAccount.Account + "^" + _userCashAccount.RealName +
-						"^" +  "0.01" + "^" + "无" + "|"          //组装支付宝支付data_detail
+						"^" +  "2.00" + "^" + "无" + "|"          //组装支付宝支付data_detail
 					aliPayBillIds = append(aliPayBillIds, _dailyBill.Id)//组装需要修改为"结账中"状态的支付宝订单
 					batchFee += _dailyBill.TotalAmount
 					batchNum++      //计算批量结算请求中支付宝结算的日订单数,不可超过1000
