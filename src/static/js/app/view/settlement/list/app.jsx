@@ -258,7 +258,7 @@ const App = React.createClass({
   	}).catch((e)=>{
   		message.info(e)
   	})
-  	
+
   },
 	changeApplyStatus(orderId, willApplyStatus) {
 		const self = this;
@@ -397,7 +397,7 @@ const App = React.createClass({
 					self.changeSettlementStatus(data, res.status);
 				}else{
 					message.success(res.msg)
-					self.changeSettlementStatus("结账成功");
+          self.changeSettlementStatus(data, res.status);
 				}
 				self.changeSettlementStatus(data, res.status);
 			}else if(res.status == "01"){
