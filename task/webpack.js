@@ -26,7 +26,7 @@ gulp.task('compile', shell.task([
 ]));
 
 gulp.task('build', () => {
-	return sequence('clean', 'copy:template', 'copy:img', 'webpack:prod', 'rev', 'rev:replace', 'minify');
+	return sequence('clean', 'copy:template', 'copy:img', 'copy:vendor', 'webpack:prod', 'rev', 'rev:replace', 'minify');
 });
 
 

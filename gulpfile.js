@@ -12,7 +12,7 @@ require('./task/git');
 require('./task/deploy');
 
 gulp.task('default', () => {
-	return sequence('clean', 'copy:img', 'webpack:dev');
+	return sequence('clean', 'copy:img', 'copy:vendor', 'webpack:dev');
 });
 
 gulp.task('local', shell.task([

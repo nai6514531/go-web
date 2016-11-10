@@ -24,13 +24,13 @@ func (self *SyncService) SyncUser() (bool, error) {
 		userId := boxAdmin.LocalId + 1
 		user, err := userService.Basic(userId)
 		if user == nil && err != nil {
-			boo, _ = syncService.AddBoxAdmin(boxAdmin)
+			boo, _ = syncService.AddUser(boxAdmin)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", userId)
 				break
 			}
 		} else {
-			boo, _ = syncService.UpdateBoxAdmin(boxAdmin)
+			boo, _ = syncService.UpdateUser(boxAdmin)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", userId)
 				break
@@ -250,16 +250,18 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) (bool, err
 
 func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) (bool, error) {
 	status, _ := strconv.Atoi(boxStatBill.Status)
-	dailyBill := &model.DailyBill{
-		UserId:      (boxStatBill.CompanyId + 1),
-		UserName:    boxStatBill.MerchName,
-		TotalAmount: int(boxStatBill.Money * 100),
-		SettledAt:   boxStatBill.BillDate,
-		BillAt:      boxStatBill.PeriodStart,
-		OrderCount:  boxStatBill.Times,
-		Status:      status,
+	userId := (boxStatBill.CompanyId + 1)
+	billAt := boxStatBill.PeriodStart
+	data := map[string]interface{}{
+		"user_id":      userId,
+		"user_name":    boxStatBill.MerchName,
+		"total_amount": int(boxStatBill.Money * 100),
+		"settled_at":   boxStatBill.BillDate,
+		"bill_at":      billAt,
+		"order_count":  boxStatBill.Times,
+		"status":       status,
 	}
-	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", dailyBill.UserId, dailyBill.BillAt).Updates(dailyBill)
+	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", userId, billAt).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
@@ -298,31 +300,31 @@ func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) (bool, error) {
 	status, _ := strconv.Atoi(boxInfo.Status)
 	deviceType, _ := strconv.Atoi(boxInfo.DeviceType)
 	deviceType += 1
-	device := &model.Device{
-		UserId:            (boxInfo.CompanyId + 1),
-		Password:          boxInfo.Password,
-		Step:              boxInfo.Location,
-		SerialNumber:      boxInfo.DeviceNo,
-		ReferenceDeviceId: deviceType,
-		Address:           boxInfo.Address,
-		FirstPulsePrice:   int(boxInfo.Price_601 * 100),
-		SecondPulsePrice:  int(boxInfo.Price_602 * 100),
-		ThirdPulsePrice:   int(boxInfo.Price_603 * 100),
-		FourthPulsePrice:  int(boxInfo.Price_604 * 100),
-		FirstPulseName:    "单洗",
-		SecondPulseName:   "快洗",
-		ThirdPulseName:    "标准洗",
-		FourthPulseName:   "大物洗",
-		Status:            status,
+	data := map[string]interface{}{
+		"user_id":             (boxInfo.CompanyId + 1),
+		"password":            boxInfo.Password,
+		"step":                boxInfo.Location,
+		"serial_number":       boxInfo.DeviceNo,
+		"reference_device_id": deviceType,
+		"address":             boxInfo.Address,
+		"first_pulse_price":   int(boxInfo.Price_601 * 100),
+		"second_pulse_price":  int(boxInfo.Price_602 * 100),
+		"third_pulse_price":   int(boxInfo.Price_603 * 100),
+		"fourth_pulse_price":  int(boxInfo.Price_604 * 100),
+		"first_pulse_name":    "单洗",
+		"second_pulse_name":   "快洗",
+		"third_pulse_name":    "标准洗",
+		"fourth_pulse_name":   "大物洗",
+		"status":              status,
 	}
-	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", boxInfo.DeviceNo).Updates(device)
+	r := common.DB.Model(&model.Device{}).Where("serial_number = ?", boxInfo.DeviceNo).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
 	return true, nil
 }
 
-func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
+func (self *SyncService) AddUser(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	_parentId, _ := strconv.Atoi(boxAdmin.AgencyId)
 	_parentId += 1
 	user := &model.User{
@@ -332,6 +334,7 @@ func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
 		Account:   boxAdmin.Mobile,
 		Password:  boxAdmin.Password,
 		Telephone: boxAdmin.ServicePhone,
+		Mobile:    boxAdmin.ServicePhone,
 		ParentId:  _parentId,
 	}
 	user.Id = (boxAdmin.LocalId + 1)
@@ -342,20 +345,21 @@ func (self *SyncService) AddBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	return true, nil
 }
 
-func (self *SyncService) UpdateBoxAdmin(boxAdmin *muniu.BoxAdmin) (bool, error) {
+func (self *SyncService) UpdateUser(boxAdmin *muniu.BoxAdmin) (bool, error) {
 	_parentId, _ := strconv.Atoi(boxAdmin.AgencyId)
 	_parentId += 1
-	user := &model.User{
-		Name:      boxAdmin.Name,
-		Contact:   boxAdmin.Contact,
-		Address:   boxAdmin.Address,
-		Account:   boxAdmin.Mobile,
-		Password:  boxAdmin.Password,
-		Telephone: boxAdmin.ServicePhone,
-		ParentId:  _parentId,
+	data := map[string]interface{}{
+		"name":      boxAdmin.Name,
+		"contact":   boxAdmin.Contact,
+		"address":   boxAdmin.Address,
+		"account":   boxAdmin.Mobile,
+		"password":  boxAdmin.Password,
+		"telephone": boxAdmin.ServicePhone,
+		"mobile":    boxAdmin.ServicePhone,
+		"parent_id": _parentId,
 	}
-	user.Id = (boxAdmin.LocalId + 1)
-	r := common.DB.Save(user)
+	userId := (boxAdmin.LocalId + 1)
+	r := common.DB.Model(&model.User{}).Where("id = ?", userId).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
@@ -372,7 +376,7 @@ func (self *SyncService) AddUserCashAccount(boxAdmin *muniu.BoxAdmin) (bool, err
 		BankName: boxAdmin.BankName,
 		Account:  boxAdmin.PayAccount,
 		RealName: boxAdmin.PayName,
-		Mobile:   boxAdmin.ContactNum,
+		Mobile:   boxAdmin.ServicePhone,
 	}
 	r := common.DB.Create(userCashAccount)
 	if r.Error != nil {
@@ -385,21 +389,19 @@ func (self *SyncService) UpdateUserCashAccount(boxAdmin *muniu.BoxAdmin) (bool, 
 	payType, _ := strconv.Atoi(boxAdmin.PayType)
 	payType += 1
 	userId := (boxAdmin.LocalId + 1)
-	userCashAccount := &model.UserCashAccount{
-		UserId:   userId,
-		Type:     payType,
-		BankName: boxAdmin.BankName,
-		Account:  boxAdmin.PayAccount,
-		RealName: boxAdmin.PayName,
-		Mobile:   boxAdmin.ContactNum,
+	data := map[string]interface{}{
+		"type":      payType,
+		"bank_name": boxAdmin.BankName,
+		"account":   boxAdmin.PayAccount,
+		"real_name": boxAdmin.PayName,
+		"mobile":    boxAdmin.ServicePhone,
 	}
-	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
+	r := common.DB.Model(&model.UserCashAccount{}).Where("user_id = ?", userId).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
 	return true, nil
 }
-
 func (self *SyncService) AddUserRoleRel(userId int, roleId int) (bool, error) {
 	userRoleRel := &model.UserRoleRel{
 		UserId: userId,
@@ -413,11 +415,11 @@ func (self *SyncService) AddUserRoleRel(userId int, roleId int) (bool, error) {
 }
 
 func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) (bool, error) {
-	userRoleRel := &model.UserRoleRel{
-		UserId: userId,
-		RoleId: roleId,
+	data := map[string]interface{}{
+		"user_id": userId,
+		"role_id": roleId,
 	}
-	r := common.DB.Model(&model.UserRoleRel{}).Where("user_id = ?", userId).Updates(userRoleRel)
+	r := common.DB.Model(&model.UserRoleRel{}).Where("user_id = ?", userId).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
