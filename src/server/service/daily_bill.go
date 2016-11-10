@@ -314,7 +314,7 @@ func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStat
 		_mnUserId := _userId - 1
 		mnUserIds = append(mnUserIds, _mnUserId)
 	}
-	r = txmn.Model(&muniu.BoxStatBill{}).Where("status = ? and COMPANYID in (?)", oldStatus, userIds).Update("status", newStatus)
+	r = txmn.Model(&muniu.BoxStatBill{}).Where("status = ? and COMPANYID in (?)", strconv.Itoa(oldStatus), userIds).Update("Status", strconv.Itoa(newStatus))
 	if r.Error != nil {
 		txmn.Rollback()
 		return 0, r.Error
