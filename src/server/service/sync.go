@@ -52,6 +52,7 @@ func (self *SyncService) SyncUserRole() (bool, error) {
 	boo := true
 	for _, boxAdmin := range *list {
 		roleId := 0
+		userId := (boxAdmin.LocalId + 1)
 		userType, _ := strconv.Atoi(boxAdmin.UserType)
 		if userType == 0 {
 			roleId = 1 // 管理员
@@ -66,7 +67,9 @@ func (self *SyncService) SyncUserRole() (bool, error) {
 		} else {
 			roleId = userType
 		}
-		userId := (boxAdmin.LocalId + 1)
+		if userId == 1 {
+			roleId = 5
+		}
 		userRoleRel, err := userRoleRelService.BasicByUserId(userId)
 		if userRoleRel == nil && err != nil {
 			boo, _ = syncService.AddUserRoleRel(userId, roleId)
@@ -283,7 +286,7 @@ func (self *SyncService) AddDevice(boxInfo *muniu.BoxInfo) (bool, error) {
 		SecondPulsePrice:  int(boxInfo.Price_602 * 100),
 		ThirdPulsePrice:   int(boxInfo.Price_603 * 100),
 		FourthPulsePrice:  int(boxInfo.Price_604 * 100),
-		FirstPulseName:    "单洗",
+		FirstPulseName:    "单脱",
 		SecondPulseName:   "快洗",
 		ThirdPulseName:    "标准洗",
 		FourthPulseName:   "大物洗",
@@ -311,7 +314,7 @@ func (self *SyncService) UpdateDevice(boxInfo *muniu.BoxInfo) (bool, error) {
 		"second_pulse_price":  int(boxInfo.Price_602 * 100),
 		"third_pulse_price":   int(boxInfo.Price_603 * 100),
 		"fourth_pulse_price":  int(boxInfo.Price_604 * 100),
-		"first_pulse_name":    "单洗",
+		"first_pulse_name":    "单脱",
 		"second_pulse_name":   "快洗",
 		"third_pulse_name":    "标准洗",
 		"fourth_pulse_name":   "大物洗",
