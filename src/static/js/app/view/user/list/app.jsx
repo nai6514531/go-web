@@ -58,21 +58,17 @@ const columns = [{
   width: 100,
   fixed: 'right',
   render: (text, record) => (
-    <span>
-      <Link to={'/user/edit/' + record.key}>修改</Link>
+    <div>
+      <p><Link to={'/user/edit/' + record.key}>修改</Link></p>
       {record.showAction?
-        <span>
-          <span className="ant-divider" />
-          <Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link>
+        <div>
+          <p><Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link></p>
           {USER.role.id == 1 ? "" :
-            <span>
-              <span className="ant-divider" />
-              <Link to='/user/device/list'>设备管理</Link>
-            </span>
+              <p><Link to='/user/device/list'>设备管理</Link></p>
           }
-        </span>
+        </div>
       :''}
-    </span>
+    </div>
   ),
 }];
 

@@ -47,8 +47,6 @@ class UserForm extends React.Component {
     this.state = {
       type: "3",
       payType: 0,
-      provinceChange: false,
-      cityChange: false,
       unsaved: true,
     }
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -61,8 +59,8 @@ class UserForm extends React.Component {
   }
   componentWillMount() {
         // 默认北京市东城区
-        this.props.getProvinceList();
-        this.props.getProvinceCityList(110000);
+    this.props.getProvinceList();
+    this.props.getProvinceCityList(110000);
     const id = this.props.params.id;
     if(id && id !== 'new') {
       this.props.getUserDetail(id);
@@ -76,6 +74,7 @@ class UserForm extends React.Component {
             if(nextProps.detail.result.data.cashAccount){
         // const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
         const type = nextProps.detail.result.data.cashAccount.type;
+              // type 1 for alipay,3 for bank,0 for none
         if(type) {
           switch (type) {
             case 1:
@@ -101,16 +100,7 @@ class UserForm extends React.Component {
         self.saveDetail = -1;
       } else if(resultPostDetail !== nextProps.resultPostDetail
         && nextProps.resultPostDetail.fetch == false){
-        // const code = nextProps.resultPostDetail.result.status;
         message.error(nextProps.resultPostDetail.result.msg,3);
-        // switch (code) {
-        //   case 7:
-        //   case 13:
-        //     message.error('该手机号已存在',3);
-        //     break;
-        //   default:
-        //     message.error('添加代理商失败',3);
-        // }
         self.saveDetail = -1;
       }
       const resultPutDetail = this.props.resultPutDetail;
@@ -122,15 +112,6 @@ class UserForm extends React.Component {
       } else if(resultPutDetail !== nextProps.resultPutDetail
         && nextProps.resultPutDetail.fetch == false){
         message.error(nextProps.resultPostDetail.result.msg,3);
-        // const code = nextProps.resultPutDetail.result.status;
-        // switch (code) {
-        //   case 7:
-        //   case 8:
-        //     message.error('该手机号已存在',3);
-        //     break;
-        //   default:
-        //     message.error('修改代理商失败',3);
-        // }
         self.saveDetail = -1;
       }
     }
@@ -140,16 +121,13 @@ class UserForm extends React.Component {
     const { setFieldsValue } = this.props.form;
     setFieldsValue({'cityId':'-1'});
     this.default = -1;
-        this.setState({provinceChange:true});
-        this.setState({cityChange: true});
     }
-    cityChange(event) {
-        this.setState({cityChange:true});
+  cityChange(event) {
     this.cityIdHelp = {};
     }
   handleSubmit(e) {
-    e.preventDefault();
-        const self = this;
+      e.preventDefault();
+      const self = this;
     this.props.form.validateFields((errors, values) => {
       if(values.cityId == -1) {
         self.cityIdHelp = {'help':'必选','className':'has-error'};
@@ -168,21 +146,21 @@ class UserForm extends React.Component {
           "email": ""
       }
       if(values.type == 3) {
-                cashAccount = {
-                    "type": parseInt(values.type),
-                    "realName": values.realName,
-                    "bankName": values.bankName,
-                    "account": values.account,
-                    "mobile": values.bankMobile,
-                    "cityId": parseInt(values.cityId),
-                    "provinceId": parseInt(values.provinceId),
-        }
+          cashAccount = {
+              "type": parseInt(values.type),
+              "realName": values.realName,
+              "bankName": values.bankName,
+              "account": values.account,
+              "mobile": values.bankMobile,
+              "cityId": parseInt(values.cityId),
+              "provinceId": parseInt(values.provinceId),
+          }
       } else if(values.type == 1){
-                cashAccount = {
-                    "type": parseInt(values.type),
-                    "realName": values.alipayName,
-                    "account": values.alipayAccount,
-        }
+          cashAccount = {
+              "type": parseInt(values.type),
+              "realName": values.alipayName,
+              "account": values.alipayAccount,
+          }
       } else {
         cashAccount = {
           "type": parseInt(values.type),
@@ -206,12 +184,15 @@ class UserForm extends React.Component {
   }
 
   handleRadio(select) {
-    if (select === '3') {
-      this.setState({ payType: 3 });
-    } else if (select === '1') {
-      this.setState({ payType: 1 });
-    } else {
-      this.setState({ payType: 0 });
+    switch (select) {
+      case "3":
+        this.setState({ payType: 3 });
+        break;
+      case "1":
+        this.setState({ payType: 1 });
+        break;
+      default:
+        this.setState({ payType: 0 });
     }
   }
   handleEnter(event) {

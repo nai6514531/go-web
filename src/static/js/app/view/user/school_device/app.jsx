@@ -80,24 +80,21 @@ const columns = [{
   width: 100,
   fixed: 'right',
   render: (text, record) => (
-    <span>
-      <Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link>
-      <span className="ant-divider" />
+    <div>
+      <p><Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link></p>
       <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
-        <a href="#">删除</a>
+        <p><a href="#">删除</a></p>
       </Popconfirm>
-      <span className="ant-divider" />
       {record.statusCode == 9 ?
         <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
-          <a href="#">启用</a>
+          <p><a href="#">启用</a></p>
         </Popconfirm>
         :
         <Popconfirm title="确认停止吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
-          <a href="#">停止</a>
+          <p><a href="#">停止</a></p>
         </Popconfirm>
       }
-
-    </span>
+    </div>
   ),
 }];
 
