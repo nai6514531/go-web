@@ -113,6 +113,20 @@ func (self *DailyBillService) Basic(id int) (*model.DailyBill, error) {
 	return dailyBill, nil
 }
 
+func (self *DailyBillService) BasicMapByIds(id ...int) (map[int]*model.DailyBill, error) {
+	list := &[]*model.DailyBill{}
+	billMap := make(map[int]*model.DailyBill)
+	r := common.DB.Where("id in (?)", id).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, _bill := range *list {
+		billMap[_bill.Id] = _bill
+	}
+	return billMap, nil
+}
+
 func (self *DailyBillService) BasicBySubmitAtAndStatus(submitAt string, status ...int) (*[]*model.DailyBill, error) {
 	list := &[]*model.DailyBill{}
 	r := common.DB.Where("submit_at <= ? and status in (?)", submitAt, status).Find(list)
@@ -158,11 +172,47 @@ func (self *DailyBillService) Update(id int, dailyBill *model.DailyBill) (int, e
 
 }
 
-func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
-	tx := common.DB.Begin()
+func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interface{}) (int, error) {
 	var r *gorm.DB
 	var rows int
+	var status int
+	var userId int
+	var billAt string
+	var settledAt string
 	rows = 0
+
+	txmn := common.MNDB.Begin()
+	if mnznList != nil {
+		for _, _mnznMap := range mnznList.([]map[string]interface{}) {
+			_billMap := _mnznMap
+			if _billMap["status"] != nil {
+				status = _billMap["status"].(int)
+			}
+			if _billMap["userId"] != nil {
+				userId = _billMap["userId"].(int)
+			}
+			if _billMap["billAt"] != nil {
+				billAt = _billMap["billAt"].(string)
+			}
+			if _billMap["settledAt"] != nil {
+				settledAt = _billMap["settledAt"].(string)
+			}
+			common.Logger.Debugln(_billMap)
+			param := map[string]interface{}{
+				"Status": strconv.Itoa(status),
+				"BillDate": settledAt,
+			}
+			common.Logger.Debugln("param---------------------------", param)
+			r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID = ? and PERIOD_START = ? ", userId, billAt).Updates(param)
+			if r.Error != nil {
+				common.Logger.Debugln(r.Error.Error())
+				txmn.Rollback()
+				return 0, r.Error
+			}
+		}
+	}
+
+	tx := common.DB.Begin()
 	for _, _bill := range *list {
 		r = tx.Model(&model.DailyBill{}).Update(&_bill)
 		if r.Error != nil {
@@ -176,6 +226,7 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill) (int, error) {
 	}
 
 	tx.Commit()
+	txmn.Commit()
 	return rows, nil
 }
 
@@ -219,9 +270,9 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	//mnzn用户id减1
 	for _, _userId := range userIds {
 		_mnUserId := functions.StringToInt(_userId) - 1
-		if (_mnUserId >= 0) {
-			mnUserIds = append(mnUserIds, strconv.Itoa(_mnUserId))
-		}
+		//if (_mnUserId >= 0) {
+		mnUserIds = append(mnUserIds, strconv.Itoa(_mnUserId))
+		//}
 	}
 	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
@@ -251,16 +302,34 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 
 	tx.Commit()
 	txmn.Commit()
-	common.Logger.Debugln("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	return int(r.RowsAffected), nil
 }
 
 func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
-	r := common.DB.Model(&model.DailyBill{}).Where("status = ? and user_id in (?)", oldStatus, userIds).Update("status", newStatus)
+	var r *gorm.DB
+	mnUserIds := []int{}
+	txmn := common.MNDB.Begin()
+	//mnzn用户id减1
+	for _, _userId := range userIds {
+		_mnUserId := _userId - 1
+		mnUserIds = append(mnUserIds, _mnUserId)
+	}
+	r = txmn.Model(&muniu.BoxStatBill{}).Where("status = ? and COMPANYID in (?)", oldStatus, userIds).Update("status", newStatus)
 	if r.Error != nil {
+		txmn.Rollback()
+		return 0, r.Error
+	}
+
+	tx := common.DB.Begin()
+	r = common.DB.Model(&model.DailyBill{}).Where("status = ? and user_id in (?)", oldStatus, userIds).Update("status", newStatus)
+	if r.Error != nil {
+		tx.Rollback()
 		return 0, r.Error
 	}
 	common.Logger.Debugln("update rows=========================", strconv.Itoa(int(r.RowsAffected)))
+
+	tx.Commit()
+	txmn.Commit()
 	return int(r.RowsAffected), nil
 }
 
