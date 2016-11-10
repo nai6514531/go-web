@@ -38,3 +38,7 @@ func StringToInt(value string) int {
 	}
 	return v
 }
+
+func Float64ToString(num float64, prec int) string {
+	return strconv.FormatFloat(num, 'f', prec, 64)
+}

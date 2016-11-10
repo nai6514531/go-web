@@ -39,7 +39,7 @@ var (
 		"01060306": "该用户账单不是通过银行结账,故不可申请结账",
 		"01060307": "参数用户id不能为空",
 
-		"01060400": "日账单提交成功",
+		"01060400": "日账单结账成功",
 		"01060401": "银行结算更新状态失败",
 		"01060402": "支付宝结算更新状态失败",
 		"01060403": "所选中的银行结算用户未申请提现或已结账",
@@ -250,7 +250,7 @@ func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[str
 	param["detail_data"] = aliPayDetailDataStr
 	param["batch_no"] = time.Now().Local().Format("20060102150405")
 	param["batch_num"] = strconv.Itoa(batchNum)
-	param["batch_fee"] =  strconv.FormatFloat(float64(batchNum)*2.00, 'f', 2, 64)//(float(batchFee)/100.00)
+	param["batch_fee"] =  functions.Float64ToString(float64(batchFee)/100.00, 2)//(float(batchFee)/100.00)
 	param["email"] = viper.GetString("pay.aliPay.email")
 	param["pay_date"] = time.Now().Local().Format("20060102")
 	param["sign"] = alipay.CreateSign(param)
@@ -352,11 +352,11 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			for _, _userId := range aliPayUserIds {
 				_userCashAccount := accountMap[functions.StringToInt(_userId)]
 				_dailyBill := AliPayBillMap[functions.StringToInt(_userId)]
-				if _userCashAccount != nil && _userCashAccount.Type == 1 && _dailyBill != nil {
+				if _userCashAccount != nil && _userCashAccount.Type == 1 && _dailyBill != nil && _dailyBill.TotalAmount > 0{
 					//判断结算方式是否为支付宝且存在该用户账单
 					//" + strconv.Itoa(_dailyBill.TotalAmount) + "
 					aliPayDetailDataStr += strconv.Itoa(_dailyBill.Id) + "^" + _userCashAccount.Account + "^" + _userCashAccount.RealName +
-						"^" +  "2.00" + "^" + "无" + "|"          //组装支付宝支付data_detail
+						"^" +  functions.Float64ToString(float64(_dailyBill.TotalAmount)/100.00, 2) + "^" + "无" + "|"          //组装支付宝支付data_detail
 					aliPayBillIds = append(aliPayBillIds, _dailyBill.Id)//组装需要修改为"结账中"状态的支付宝订单
 					batchFee += _dailyBill.TotalAmount
 					batchNum++      //计算批量结算请求中支付宝结算的日订单数,不可超过1000
@@ -541,9 +541,9 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 		billList = append(billList, failureList...)
 	}
 	common.Logger.Debugln("list==============", billList)
-	billLength := len(successNotifyDetail) + len(failNotifyDetail)
-	common.Logger.Debugln("billLength======", billLength)
-	common.Logger.Debugln("succeedNum + failureNum=======", (succeedNum + failureNum))
+	//billLength := len(successNotifyDetail) + len(failNotifyDetail)
+	//common.Logger.Debugln("billLength======", billLength)
+	//common.Logger.Debugln("succeedNum + failureNum=======", (succeedNum + failureNum))
 	/*if billLength != (succeedNum + failureNum) {
 		ctx.Response.SetBodyString("fail")
 		return
