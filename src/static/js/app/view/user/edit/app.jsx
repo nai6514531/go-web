@@ -7,6 +7,8 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const confirm = Modal.confirm;
 import { Link } from 'react-router';
+import md5 from 'md5';
+
 
 
 import { connect } from 'react-redux';
@@ -48,11 +50,15 @@ class UserForm extends React.Component {
       type: "3",
       payType: 0,
       unsaved: true,
+      passwordDirty: false,
     }
     this.handleSubmit = this.handleSubmit.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
     this.checkUserAccount = this.checkUserAccount.bind(this);
+    this.checkConfirm = this.checkConfirm.bind(this);
+    this.handlePasswordBlur = this.handlePasswordBlur.bind(this);
+    this.checkPassowrd = this.checkPassowrd.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
@@ -143,7 +149,9 @@ class UserForm extends React.Component {
           "mobile": values.mobile,
           "telephone": values.telephone,
           "address": values.address,
-          "email": ""
+          "password": md5(values.password),
+
+        "email": ""
       }
       if(values.type == 3) {
           cashAccount = {
@@ -233,6 +241,32 @@ class UserForm extends React.Component {
       callback();
     } else {
       callback('请填写正确号码');
+    }
+  }
+  checkConfirm(rule, value, callback) {
+    const form = this.props.form;
+    var pattern = new RegExp(/^(?=.*[0-9]{1,})(?=.*[a-zA-Z]{1,})([a-zA-Z0-9]{8,})$/);
+    console.log(pattern.test(value));
+    if(pattern.test(value) || !value){
+      callback();
+    } else {
+      callback('至少是8位数字和字母组成');
+    }
+    if (value && this.state.passwordDirty) {
+      form.validateFields(['confirm'], { force: true });
+    }
+    callback();
+  }
+  handlePasswordBlur(e) {
+    const value = e.target.value;
+    this.setState({ passwordDirty: this.state.passwordDirty || !!value });
+  }
+  checkPassowrd(rule, value, callback) {
+    const form = this.props.form;
+    if (value && value !== form.getFieldValue('password')) {
+      callback('两次输入的密码不一致');
+    } else {
+      callback();
     }
   }
   render() {
@@ -467,19 +501,48 @@ class UserForm extends React.Component {
                 <Input disabled placeholder="请输入账号名称" />
               )}
             </FormItem>:
-              <FormItem
-                {...formItemLayout}
-                label="账号名称" >
-                {getFieldDecorator('userAccount', {
-                  rules: [
-                    {required: true, message: '必填'},
-                    {validator: this.checkUserAccount },
-                  ],
-                  initialValue: initialValue.userAccount,
-                })(
-                  <Input placeholder="请输入账号名称" />
-                )}
-              </FormItem>}
+              <div>
+                <FormItem
+                  {...formItemLayout}
+                  label="账号名称" >
+                  {getFieldDecorator('userAccount', {
+                    rules: [
+                      {required: true, message: '必填'},
+                      {validator: this.checkUserAccount },
+                    ],
+                    initialValue: initialValue.userAccount,
+                  })(
+                    <Input placeholder="请输入账号名称" />
+                  )}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="密码"
+                >
+                  {getFieldDecorator('password', {
+                    rules: [
+                      {required: true, message: '必填'},
+                      {validator: this.checkConfirm}],
+                  })(
+                    <Input type="password" placeholder="请输入密码" onBlur={this.handlePasswordBlur} />
+                  )}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="确认密码"
+                >
+                  {getFieldDecorator('confirm', {
+                    rules: [{
+                      required: true, message: '请确认密码',
+                    }, {
+                      validator: this.checkPassowrd,
+                    }],
+                  })(
+                    <Input type="password" placeholder="请确认密码"/>
+                  )}
+                </FormItem>
+              </div>
+              }
             <FormItem
               {...formItemLayout}
               label="代理商名称" >
