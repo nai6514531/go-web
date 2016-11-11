@@ -149,9 +149,7 @@ class UserForm extends React.Component {
           "mobile": values.mobile,
           "telephone": values.telephone,
           "address": values.address,
-          "password": md5(values.password),
-
-        "email": ""
+          "email": ""
       }
       if(values.type == 3) {
           cashAccount = {
@@ -176,6 +174,7 @@ class UserForm extends React.Component {
       }
             user.cashAccount = cashAccount;
       if(this.props.params.id == 'new') {
+        user.password = md5(values.password);
         if(values.userAccount.length == 11) {
             user.account = values.userAccount;
             this.props.postUserDetail(user);
@@ -246,7 +245,6 @@ class UserForm extends React.Component {
   checkConfirm(rule, value, callback) {
     const form = this.props.form;
     var pattern = new RegExp(/^(?=.*[0-9]{1,})(?=.*[a-zA-Z]{1,})([a-zA-Z0-9]{8,})$/);
-    console.log(pattern.test(value));
     if(pattern.test(value) || !value){
       callback();
     } else {
