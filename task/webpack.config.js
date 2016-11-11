@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 var path = require('path');
+var config = require('config');
 var APP_PATH = path.resolve(__dirname, '../src/static/js');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CSSSplitWebpackPlugin = require('css-split-webpack-plugin').default;
@@ -41,13 +42,16 @@ module.exports = {
     new ExtractTextPlugin("css/[name].css"),
     new CSSSplitWebpackPlugin({size: 4000,imports: true,filename:"css-chunk/[name]-[part].[ext]"}),
 		new webpack.DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      __ENV__: {
+        GA: JSON.stringify(config.get('analytics.google-analytics.id'))
+      },
 		}),
 		new webpack.ProgressPlugin(function (percentage, message) {
 			const percent = Math.round(percentage * 100);
 			process.stderr.clearLine();
 			process.stderr.cursorTo(0);
 			process.stderr.write(percent + '% ' + message);
-		})
-	]
+		}),
+	],
 };
