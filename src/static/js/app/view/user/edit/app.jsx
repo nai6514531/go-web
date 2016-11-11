@@ -488,7 +488,7 @@ class UserForm extends React.Component {
           <Form horizontal>
             {id !== 'new'? <FormItem
               {...formItemLayout}
-              label="账号名称" >
+              label="登录账号" >
               {getFieldDecorator('userAccount', {
                 rules: [
                   {required: true, message: '必填'},
@@ -496,13 +496,13 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.userAccount,
               })(
-                <Input disabled placeholder="请输入账号名称" />
+                <Input disabled placeholder="请输入登录账号" />
               )}
             </FormItem>:
               <div>
                 <FormItem
                   {...formItemLayout}
-                  label="账号名称" >
+                  label="登录账号" >
                   {getFieldDecorator('userAccount', {
                     rules: [
                       {required: true, message: '必填'},
@@ -510,7 +510,7 @@ class UserForm extends React.Component {
                     ],
                     initialValue: initialValue.userAccount,
                   })(
-                    <Input placeholder="请输入账号名称" />
+                    <Input placeholder="请输入登录账号" />
                   )}
                 </FormItem>
                 <FormItem
