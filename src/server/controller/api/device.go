@@ -46,14 +46,14 @@ var (
 		"01030401": "拉取设备列表失败!",
 
 		"01030500": "更新设备成功!",
-		"01030501": "更新设备失败!",
+		"01030501": "批量更新设备失败!",
 		"01030502": "请填写设备编号!",
 		"01030503": "设备编号格式不对,长度为10位!",
 		"01030504": "请选择省份!",
 		"01030505": "请选择学校!",
 		"01030506": "请填写楼层信息!",
 		"01030507": "请选择关联设备!",
-		"01030508": "该序列号不存在!",
+		"01030508": "序列号列表中有不能添加的序列号!",
 		"01030509": "请操作属于你或未被注册的设备!",
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
@@ -76,7 +76,7 @@ var (
 		"01030709": "请填写快洗价格!",
 		"01030710": "请填写标准洗价格!",
 		"01030711": "请填写大件洗价格!",
-		"01030712": "该设备序列号已经存在!",
+		"01030712": "序列号列表中有数据已经存在",
 
 		"01030800": "更新设备脉冲名成功!",
 		"01030801": "更新设备脉冲名失败!",
@@ -414,11 +414,15 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if len(device.SerialNumber) != 10 {
-		result = &enity.Result{"01030503", nil, device_msg["01030503"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	serialList := strings.Split(device.SerialNumber, ",")
+	for _, v := range serialList {
+		if len(v) != 10 { //必须为10位的
+			result = &enity.Result{"01030503", nil, device_msg["01030503"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
+
 	if device.ProvinceId <= 0 {
 		result = &enity.Result{"01030504", nil, device_msg["01030504"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -429,57 +433,23 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// if device.Label == "" {
-	// 	result = &enity.Result{"01030506", nil, device_msg["01030506"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030507", nil, device_msg["01030507"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// if device.FirstPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030508", nil, device_msg["01030508"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.SecondPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030509", nil, device_msg["01030509"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.ThirdPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030510", nil, device_msg["01030510"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.FourthPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030511", nil, device_msg["01030511"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 	//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	//判断一下这个设备的用户id是否为1或者自己
-	current, err := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if err != nil { //设备不存在
+	//判断一下这批设备的用户id是否为1或者自己
+	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(userId, serialList)
+	if !isOwntoMeOrTest {
 		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if current.UserId == userId { //如果用户id为自己说明已经添加过了
-		result = &enity.Result{"01030512", nil, device_msg["01030512"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if current.UserId != userId && current.UserId != 1 {
-		result = &enity.Result{"01030509", nil, device_msg["01030509"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+
 	device.UserId = userId
-	success := deviceService.UpdateBySerialNumber(&device)
+	success := deviceService.BatchUpdateBySerialNumber(&device, serialList)
 	if !success {
 		result = &enity.Result{"01030501", nil, device_msg["01030501"]}
 		common.Log(ctx, result)
@@ -616,11 +586,15 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if len(device.SerialNumber) != 10 {
-		result = &enity.Result{"01030703", nil, device_msg["01030703"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
+	serialList := strings.Split(device.SerialNumber, ",")
+	for _, v := range serialList {
+		if len(v) != 10 { //必须为10位的
+			result = &enity.Result{"01030703", nil, device_msg["01030703"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
+
 	if device.ProvinceId <= 0 {
 		result = &enity.Result{"01030704", nil, device_msg["01030704"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -631,47 +605,24 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// if device.Label == "" {
-	// 	result = &enity.Result{"01030706", nil, device_msg["01030706"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
+
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030707", nil, device_msg["01030707"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// if device.FirstPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030708", nil, device_msg["01030708"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.SecondPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030709", nil, device_msg["01030709"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.ThirdPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030710", nil, device_msg["01030710"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.FourthPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030711", nil, device_msg["01030711"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	//查找该序列号是否已经存在
-	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if currentDevice != nil {
+
+	//判断该序列号列表是否全部要不还不存在要不属于test用户的
+	isNoExist := deviceService.IsNoExist(serialList)
+	if !isNoExist {
 		result = &enity.Result{"01030712", nil, device_msg["01030712"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	device.UserId = userId
-	success := deviceService.Create(&device)
-	if !success {
+	//userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	device.UserId = 1
+	err := deviceService.BatchCreateBySerialNum(&device, serialList)
+	if err != nil {
 		result = &enity.Result{"01030701", nil, device_msg["01030701"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)

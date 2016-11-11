@@ -347,6 +347,11 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if user.Password == "" {
+		result = &enity.Result{"01010404", nil, user_msg["01010404"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	//账号信息必须为11位数字(手机)
 	match, _ := regexp.MatchString(`^\d{11}$`, user.Account)
 	if !match {

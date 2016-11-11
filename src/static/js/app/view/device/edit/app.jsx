@@ -139,18 +139,19 @@ class DeviceForm extends React.Component {
           message.success('添加设备成功',3);
           self.context.router.goBack();
         } else {
-          switch (nextProps.resultPostDetail.result.status){
-            case 3:
-              message.error('格式有误',3);
-              break;
-            case 1:
-            case 12:
-              message.error(nextProps.resultPostDetail.result.msg,3);
-              break;
-            default:
-              message.error('添加设备失败',3);
-              break;
-          }
+          message.error(nextProps.resultPostDetail.result.msg,3);
+          // switch (nextProps.resultPostDetail.result.status){
+          //   case 3:
+          //     message.error('格式有误',3);
+          //     break;
+          //   case 1:
+          //   case 12:
+          //     message.error(nextProps.resultPostDetail.result.msg,3);
+          //     break;
+          //   default:
+          //     message.error('添加设备失败',3);
+          //     break;
+          // }
         }
         self.saveDetail = -1;
       }
@@ -163,6 +164,28 @@ class DeviceForm extends React.Component {
 			self.fourthPulseName = device.fourthPulseName;
 		}
 	}
+  remove_duplicates(arr) {
+    var obj = {};
+    var ret_arr = [];
+    for (var i = 0; i < arr.length; i++) {
+      obj[arr[i]] = true;
+    }
+    for (var key in obj) {
+      ret_arr.push(key);
+    }
+    return ret_arr;
+  }
+  remove_null(arr){
+    var pattern=new RegExp(/^\s*$/);
+    for(var i = 0 ;i<arr.length;i++) {
+      if(arr[i] == "" || typeof(arr[i]) == "undefined"
+        || pattern.test(arr[i]) || arr[i].length !== 10) {
+        arr.splice(i,1);
+        i= i-1;
+      }
+    }
+    return arr;
+  }
 	handleSubmit(e) {
 		e.preventDefault();
 		const self = this;
@@ -174,8 +197,15 @@ class DeviceForm extends React.Component {
 			if (errors) {
 				return;
 			}
+      // 根据换行切割字符串
+      const splitted = values.serialNumber.split("\n");
+      // 移除重复,空白,长度不为10,并且内部全为空格的字符串
+      const numbers = self.remove_null(self.remove_duplicates(splitted));
+      // 拼接成字符串
+      const serialNumber = numbers.join(",");
+
 			const deviceValue = {
-				"serialNumber": values.serialNumber,
+				"serialNumber": serialNumber,
         "provinceId": parseInt(values.provinceId),
         "schoolId": parseInt(values.schoolId),
 				// 'label': values.label,
@@ -277,11 +307,7 @@ class DeviceForm extends React.Component {
 	checkFourPluse(rule,value,callback) {
 		this.checkPrice(rule,value,callback);
 	}
-	handleEnter(event) {
-		if (event.keyCode==13) {
-			this.handleSubmit(event);
-		}
-	}
+
 	goBack() {
 		const self = this;
 		if(this.state.unsaved) {
@@ -377,7 +403,7 @@ class DeviceForm extends React.Component {
     }
 		const serialNumberHelp = this.state.serialNumberHelp?{'help':this.state.serialNumberHelp,'className':'has-error'}:{};
 		return (
-			<section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
+			<section className="view-user-list" >
 				<header>
 					<Breadcrumb>
 						<Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
@@ -393,15 +419,15 @@ class DeviceForm extends React.Component {
 						>
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									{ len:10, message: '长度为十位' },
+									// { len:10, message: '长度为十位' },
 									{ required: true, message: '必填' },
-									{ validator: this.checkChinese.bind(this) },
+									// { validator: this.checkChinese.bind(this) },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
 								<Input disabled placeholder="请输入设备编号" />
 								:
-								<Input placeholder="请输入设备编号" />
+              <Input type="textarea" placeholder="请输入设备编号" autosize={{ minRows: 2, maxRows: 6 }} />
 							)}
 						</FormItem>
             <FormItem

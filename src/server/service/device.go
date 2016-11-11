@@ -1,9 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
+	"time"
 )
 
 type DeviceService struct {
@@ -242,6 +244,60 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	return true
 }
 
+func (self *DeviceService) BatchUpdateBySerialNumber(device *model.Device, serialList []string) bool {
+	transAction := common.DB.Begin()
+	mnTransAction := common.MNDB.Begin()
+	device.SerialNumber = "" //不更新这个字段
+	r := transAction.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Updates(device)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	//再单独更新一次可能为0的值，学校id，4个单洗价格
+	var zeroValue = make(map[string]interface{})
+	zeroValue["school_id"] = device.SchoolId
+	zeroValue["first_pulse_price"] = device.FirstPulsePrice
+	zeroValue["second_pulse_price"] = device.SecondPulsePrice
+	zeroValue["third_pulse_price"] = device.ThirdPulsePrice
+	zeroValue["fourth_pulse_price"] = device.FourthPulsePrice
+	r = transAction.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Updates(zeroValue).First(device)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	device.SerialNumber = "" //不更新这个字段
+	//更新到木牛数据库
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO IN (?)", serialList).Update(boxInfo)
+	if r.Error != nil {
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
+		return false
+	}
+	//再次单独更新几个价格避免价格为0的时候不能更新成功
+	var boxInfoPrice = make(map[string]interface{})
+	boxInfoPrice["PRICE_601"] = boxInfo.Price_601
+	boxInfoPrice["PRICE_602"] = boxInfo.Price_602
+	boxInfoPrice["PRICE_603"] = boxInfo.Price_603
+	boxInfoPrice["PRICE_604"] = boxInfo.Price_604
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO IN (?)", serialList).Updates(boxInfoPrice)
+	if r.Error != nil {
+		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false
+	}
+	transAction.Commit()
+	mnTransAction.Commit()
+	return true
+}
+
 func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
@@ -314,4 +370,77 @@ func (self *DeviceService) TotalByUserIds(userIds []int) (int, error) {
 		return 0, r.Error
 	}
 	return int(total), nil
+}
+
+//判断这批设备序列号是否都是属于test用户或者自身用户的
+func (self *DeviceService) IsOwntoMeOrTest(userId int, serialList []string) bool {
+	var total int64
+	r := common.DB.Model(&model.Device{}).Where("user_id IN (1,?) AND serial_number IN (?)", userId, serialList).Count(&total)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error)
+		return false
+	}
+	if int(total) == len(serialList) {
+		return true
+	} else {
+		return false
+	}
+}
+
+//判断这一批序列号要不还没注册要不还没录入
+func (self *DeviceService) IsNoExist(serialList []string) bool {
+	var total int64
+	r := common.DB.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Count(&total)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error)
+		return false
+	}
+	if total == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialList []string) error {
+	transAction := common.DB.Begin()
+	mnTransAction := common.MNDB.Begin()
+	device.UserId = 1 //添加的设备userid为1
+	device.CreatedAt = time.Now()
+	sql := "INSERT INTO device (user_id,label,serial_number,reference_device_id,province_id,city_id,district_id,school_id,address,first_pulse_price,second_pulse_price,third_pulse_price,fourth_pulse_price,first_pulse_name,second_pulse_name,third_pulse_name,fourth_pulse_name,status,created_at,updated_at) VALUES "
+	for k, serial := range serialList {
+		val := fmt.Sprintf("(%d,'%s','%s',%d,%d,%d,%d,%d,'%s',%d,%d,%d,%d,'%s','%s','%s','%s',%d,'%s','%s')", device.UserId, device.Label, serial, device.ReferenceDeviceId, device.ProvinceId, device.CityId, device.DistrictId, device.SchoolId, device.Address, device.FirstPulsePrice, device.SecondPulsePrice, device.ThirdPulsePrice, device.FourthPulsePrice, device.FirstPulseName, device.SecondPulseName, device.ThirdPulseName, device.FourthPulseName, device.Status, device.CreatedAt, device.UpdatedAt)
+		sql = sql + val
+		if k != len(serialList)-1 {
+			sql = sql + ","
+		}
+	}
+	r := transAction.Exec(sql)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error)
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return r.Error
+	}
+	//更新到木牛
+	boxInfo := &muniu.BoxInfo{}
+	boxInfo.FillByDevice(device)
+	mnsql := "INSERT INTO box_info (DEVICENO,COMPANYID,STATUS,PASSWORD,LOCATION,INSERTTIME,UPDATETIME,ADDRESS,PRICE_601,PRICE_602,PRICE_603,PRICE_604,DEVICETYPE) VALUES "
+	for k, serial := range serialList {
+		val := fmt.Sprintf("('%s',%d,'%s','%s',%d,'%s','%s','%s',%f,%f,%f,%f,'%s')", serial, boxInfo.CompanyId, boxInfo.Status, boxInfo.Password, boxInfo.Location, boxInfo.InsertTime, boxInfo.UpdateTime, boxInfo.Address, boxInfo.Price_601, boxInfo.Price_602, boxInfo.Price_603, boxInfo.Price_604, boxInfo.DeviceType)
+		mnsql = mnsql + val
+		if k != len(serialList)-1 {
+			mnsql = mnsql + ","
+		}
+	}
+	r = mnTransAction.Exec(mnsql)
+	if r.Error != nil {
+		common.Logger.Warningln(r.Error)
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return r.Error
+	}
+	transAction.Commit()
+	mnTransAction.Commit()
+	return nil
 }
