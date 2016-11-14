@@ -92,7 +92,9 @@ class DeviceForm extends React.Component {
     }
     this.props.getRefDevice();
     const { schoolId } = this.props.params;
-    this.props.getSchoolDetail(schoolId);
+    if(schoolId >= 0) {
+      this.props.getSchoolDetail(schoolId);
+    }
     // 默认北京市所有学校
     this.props.getProvinceList();
     this.props.getProvinceSchoolList(110000);
@@ -148,18 +150,7 @@ class DeviceForm extends React.Component {
           message.success('添加设备成功',3);
           self.saveDetail = -1;
         } else if(nextProps.resultSerialNumber.fetch == false) {
-              message.error(nextProps.resultSerialNumber.result.msg,3);
-          // switch (nextProps.resultSerialNumber.result.status){
-          //   case 1:
-          //   case 3:
-          //   case 8:
-          //   case 12:
-          //     message.error(nextProps.resultSerialNumber.result.msg,3);
-          //     break;
-          //   default:
-          //     message.error('添加设备失败',3);
-          //     break;
-          // }
+          message.error(nextProps.resultSerialNumber.result.msg,3);
         }
         self.saveDetail = -1;
       }
@@ -176,7 +167,7 @@ class DeviceForm extends React.Component {
       }
     }
 	}
-  remove_duplicates(arr) {
+  removeDuplicates(arr) {
       var obj = {};
       var ret_arr = [];
       for (var i = 0; i < arr.length; i++) {
@@ -187,7 +178,7 @@ class DeviceForm extends React.Component {
       }
       return ret_arr;
   }
-  remove_null(arr){
+  removeNull(arr){
     var pattern=new RegExp(/^\s*$/);
     for(var i = 0 ;i<arr.length;i++) {
       if(arr[i] == "" || typeof(arr[i]) == "undefined" 
@@ -212,7 +203,7 @@ class DeviceForm extends React.Component {
       // 根据换行切割字符串
       const splitted = values.serialNumber.split("\n");
       // 移除重复,空白,长度不为10,并且内部全为空格的字符串
-      const numbers = self.remove_null(self.remove_duplicates(splitted));
+      const numbers = self.removeNull(self.removeDuplicates(splitted));
       // 拼接成字符串
       const serialNumber = numbers.join(",");
       
