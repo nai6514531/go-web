@@ -336,12 +336,10 @@ func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStat
 func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 	list := []*muniu.Recharge{}
 	sql := "select DATE_FORMAT(UPDATETIME,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
-		"from trade_info " +
-		"where date(UPDATETIME) >'2015-12' " +
-		"and tradetype in ('7','8') " +
-		"and tradeno!=''  " +
-		"and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
-		"group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
+		" from trade_info " +
+		" where date(UPDATETIME) >'2015-12' " +
+		" and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
+		" group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
 	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -358,7 +356,9 @@ func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 	list := []*muniu.Consume{}
 	sql := "select DATE_FORMAT(inserttime,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
-		"from box_wash where companyid!=0 group by DATE_FORMAT(inserttime,'%Y-%m')"
+		" from box_wash " +
+		" where companyid!=0 " +
+		" group by DATE_FORMAT(inserttime,'%Y-%m')"
 	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {

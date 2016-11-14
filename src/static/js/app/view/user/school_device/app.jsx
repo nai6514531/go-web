@@ -120,7 +120,9 @@ class DeviceTable extends React.Component {
     const pager = { page: this.state.page, perPage: this.state.perPage };
     this.props.getSchoolDevice(USER.id, schoolId, pager);
     this.loading = true;
-    this.props.getSchoolDetail(schoolId);
+    if(schoolId >= 0) {
+      this.props.getSchoolDetail(schoolId);
+    }
   }
   componentWillReceiveProps(nextProps) {
     const self = this;
