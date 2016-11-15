@@ -286,17 +286,23 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	}
 	if userRoleRel.RoleId != 3 {
 		//不是财务角色
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060406", nil, daily_bill_msg["01060406"]})
+		result = &enity.Result{"01060406", nil, daily_bill_msg["01060406"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	var params map[string]interface{}
 	if json.Unmarshal(ctx.PostBody(), &params) != nil {
 		common.Logger.Debugln("解析json异常")
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060408", nil, daily_bill_msg["01060408"]})
+		result = &enity.Result{"01060408", nil, daily_bill_msg["01060408"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	if params["params"] == nil {
-		ctx.JSON(iris.StatusOK, &enity.Result{"01060409", nil, daily_bill_msg["01060409"]})
+		result = &enity.Result{"01060409", nil, daily_bill_msg["01060409"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	paramList := params["params"].([]interface{})
@@ -313,7 +319,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		userIdStr := _map["userId"].(string)
 		billAt := _map["billAt"].(string)
 		if userIdStr == "" || billAt == "" {
-			common.Logger.Debugln("billAt=", billAt, "==>userIdStr=", userIdStr)
+			common.Logger.Warningln("缺少参数:billAt=", billAt, "==>userIdStr=", userIdStr)
 			continue
 		}
 		userIds := strings.Split(userIdStr, ",")
@@ -341,7 +347,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 					bankPayUserIds = append(bankPayUserIds, strconv.Itoa(_userId))
 				}
 			}
-			common.Logger.Debugln(billAt, "==>bankPayUserIds:", bankPayUserIds)
+			common.Logger.Warningln(billAt, "==>bankPayUserIds:", bankPayUserIds)
 		}
 		aliPayFailureBillMap, err := dailyBillService.BasicMap(billAt, 4, userIds...)   //查询出支付宝结算方式中失败的账单
 		if err == nil && len(aliPayFailureBillMap) > 0 {
@@ -352,7 +358,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 					aliPayUserIds = append(aliPayUserIds, strconv.Itoa(_userId))
 				}
 			}
-			common.Logger.Debugln(billAt, "==>aliPayUserIds:", aliPayUserIds)
+			common.Logger.Warningln(billAt, "==>aliPayUserIds:", aliPayUserIds)
 		}
 		//aliPay bill
 		if len(aliPayUserIds) > 0 {
@@ -476,9 +482,9 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 	failureBillIds := make([]int, 0)
 	successedNotifyDetail := make([]string, 0)
 	failNotifyDetail := make([]string, 0)
-	mnznbillList := make([]map[string]interface{}, 0)
+	mnznBillList := make([]map[string]interface{}, 0)
 	billIdSettledAtMap := make(map[string]string)
-	successeddNum := 0
+	successedNum := 0
 	failureNum := 0
 	reqMap["notify_time"] = ctx.FormValueString("notify_time")
 	reqMap["notify_type"] = ctx.FormValueString("notify_type")
@@ -525,7 +531,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 						billRelList = append(billRelList, _billRel)
 						successedBillIds = append(successedBillIds, functions.StringToInt(_id))
 						billIdSettledAtMap[_id] = _settledAt
-						successeddNum++
+						successedNum++
 					}
 				}
 			}
@@ -579,7 +585,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 			ctx.Response.SetBodyString("fail")
 			return
 		}
-		mnznbillList = append(mnznbillList, mnznSuccessedBillList...)
+		mnznBillList = append(mnznBillList, mnznSuccessedBillList...)
 	}
 	if len(failureBillIds) > 0 {
 		mnznFailureBillList, err := BasicMnznBillLists(&billIdSettledAtMap, failureBillIds...)
@@ -590,11 +596,11 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 			ctx.Response.SetBodyString("fail")
 			return
 		}
-		mnznbillList = append(mnznbillList, mnznFailureBillList...)
+		mnznBillList = append(mnznBillList, mnznFailureBillList...)
 	}
 
-	if len(mnznbillList) > 0 {
-		_, err = dailyBillService.Updates(&billList, mnznbillList)
+	if len(mnznBillList) > 0 {
+		_, err = dailyBillService.Updates(&billList, mnznBillList)
 		if err != nil {
 			//更新支付宝账单结账状态失败
 			common.Logger.Debugln(daily_bill_msg["01060501"], ":", err.Error())
