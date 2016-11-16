@@ -214,6 +214,7 @@ class DeviceForm extends React.Component {
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
+        // 乘 1000 在除以 10 是为了解决19.99出现的精度问题
 				"firstPulsePrice": parseInt((+values.firstPulsePrice)*1000/10),
 				"secondPulsePrice": parseInt((+values.secondPulsePrice)*1000/10),
 				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*1000/10),
