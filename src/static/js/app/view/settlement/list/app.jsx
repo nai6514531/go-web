@@ -404,10 +404,6 @@ const App = React.createClass({
 				if(res.data != undefined){
 					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
-					self.changeSettlementStatus(data, res.status);
-				}else{
-					message.success(res.msg)
-          self.changeSettlementStatus(data, res.status);
 				}
 				self.changeSettlementStatus(data, res.status);
 			}else if(res.status == "01"){
@@ -416,8 +412,8 @@ const App = React.createClass({
 				self.changeSettlementStatus(data, res.status);
 				message.info("银行结账成功，支付宝结账失败")
 			}else(
-        message.info(res.msg)
-      )
+	      message.info(res.msg)
+	    )
 
 		}).catch((err)=>{
 			message.info(err)
