@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message } from 'antd';
+import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message, Tooltip, Icon } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -254,15 +254,6 @@ class DeviceForm extends React.Component {
 	hideModal() {
 		this.setState({ visible: false });
 	}
-	checkChinese(rule, value, callback) {
-    var pattern=new RegExp(/^[0-9a-zA-Z]*$/);
-    // var pattern=new RegExp(/^[u4E00-u9FA5]*$/);
-		if(value && !pattern.test(value)){
-			callback('请输入正确的设备编号');
-		} else {
-			callback();
-		}
-	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
 		if(value && !pattern.test(value)){
@@ -276,8 +267,8 @@ class DeviceForm extends React.Component {
 		var pattern=new RegExp(/^(0|[1-9][0-9]*)(\.[0-9]*)?$/g);
 		if(value && !pattern.test(value)){
 			callback('请输入正确价格');
-		} else if(value >= 10000000){
-			callback('不超过七位数');
+		} else if(value > 20){
+			callback('不超过20元');
 		} else {
 			callback();
 		}
@@ -403,20 +394,25 @@ class DeviceForm extends React.Component {
 						<FormItem
 							{...formItemLayout}
 							{...serialNumberHelp}
-							label="设备编号"
+              label={(
+                <span>
+                  设备编号&nbsp;
+                  <Tooltip placement="topLeft" title="可直接复制excel表设备编号列数据批量添加设备">
+                     <Icon style={{color:'#f50'}} type="question-circle-o" />
+                  </Tooltip>
+                </span>
+              )}
 						>
 							{getFieldDecorator('serialNumber', {
 								rules: [
-									// { len:10, message: '长度为十位' },
 									{ required: true, message: '必填' },
-									// { validator: this.checkChinese.bind(this) },
 								],
 								initialValue: initialValue.serialNumber,
 							})( id ?
-								<Input disabled placeholder="请输入设备编号" />
+								<Input disabled placeholder="请输入10位设备编号" />
 								:
-              <Input type="textarea" placeholder="请输入设备编号" autosize={{ minRows: 2, maxRows: 6 }} />
-							)}
+                <Input type="textarea" placeholder="请输入一个或者多个10位设备编号,以回车分隔,每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
+              )}
 						</FormItem>
             <FormItem
               {...formItemLayout}

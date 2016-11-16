@@ -28,7 +28,9 @@ func SetUpLogger() {
 		logrus.SetOutput(logFile)
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
-	Logger = logrus.WithFields(logrus.Fields{})
+	Logger = logrus.WithFields(logrus.Fields{
+		"system":"soda-manager",
+	})
 }
 
 func TeardownLogger() {
