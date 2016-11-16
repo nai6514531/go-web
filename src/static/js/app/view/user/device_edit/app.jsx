@@ -448,7 +448,7 @@ class DeviceForm extends React.Component {
 							})( id ?
 								<Input disabled placeholder="请输入设备编号" />
 								:
-                <Input type="textarea" placeholder="请输入1个或者多个10位设备编号,以回车分隔" autosize={{ minRows: 2, maxRows: 6 }} />
+                <Input type="textarea" placeholder="请输入1个或者多个10位设备编号,以回车分隔,每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
               )}
 						</FormItem>
             <FormItem
