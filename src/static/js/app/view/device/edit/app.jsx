@@ -397,10 +397,7 @@ class DeviceForm extends React.Component {
 							{...serialNumberHelp}
               label={(
                 <span>
-                  设备编号&nbsp;
-                  <Tooltip placement="topLeft" title="可直接复制 excel 表中设备编号列的数据来批量添加设备">
-                     <Icon style={{color:'#f50'}} type="question-circle-o" />
-                  </Tooltip>
+                  设备编号
                 </span>
               )}
 						>
@@ -412,7 +409,10 @@ class DeviceForm extends React.Component {
 							})( id ?
 								<Input disabled placeholder="请输入10位设备编号" />
 								:
-                <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
+                <div>
+                  <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
+                  <span>可直接复制 excel 表中设备编号列的数据来批量添加设备</span>
+                </div>
               )}
 						</FormItem>
             <FormItem
