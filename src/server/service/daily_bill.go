@@ -180,11 +180,9 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 	var billAt string
 	var settledAt string
 	rows = 0
-
 	txmn := common.MNDB.Begin()
 	if mnznList != nil {
-		for _, _mnznMap := range mnznList.([]map[string]interface{}) {
-			_billMap := _mnznMap
+		for _, _billMap := range mnznList.([]map[string]interface{}) {
 			if _billMap["status"] != nil {
 				status = _billMap["status"].(int)
 			}
