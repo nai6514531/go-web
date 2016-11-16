@@ -282,9 +282,6 @@ class UserForm extends React.Component {
         const item = <Option key={i} value={list[i].id.toString()}>{list[i].name}</Option>
         cityNode.push(item);
       }
-      // cityNode = this.props.provinceCity.result.data.map(function (item, key) {
-      //   return <Option key={key} value={item.id.toString()}>{item.name}</Option>
-      // })
     }
     const self = this;
     const { id } = this.props.params;
@@ -423,7 +420,6 @@ class UserForm extends React.Component {
           label="短信通知手机号">
           {getFieldDecorator('bankMobile', {
             rules: [
-              {required: true, message: '必填'},
               {len: 11, message: '请输入11位短信通知手机号'},
             ],
             initialValue: initialValue.bankMobile,
@@ -609,7 +605,7 @@ class UserForm extends React.Component {
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
                     <span>自动分账-无须手动申请结账</span>
-                    <p className="tips">必须有支付宝账号,按每笔账单的0.5%收服务费,保底1元,封顶25元</p>
+                    <p className="tips">必须有支付宝账号</p>
                   </Radio>
                   <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
                       <span>财务定期结账-需手动申请结账</span>
