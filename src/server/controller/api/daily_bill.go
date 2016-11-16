@@ -578,6 +578,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 	//用于更新旧系统数据
 	if len(successedBillIds) > 0 {
 		mnznSuccessedBillList, err := BasicMnznBillLists(&billIdSettledAtMap, successedBillIds...)
+		common.Logger.Debugln("11111111111111111111111111", mnznSuccessedBillList)
 		if err != nil {
 			common.Logger.Debugln(daily_bill_msg["01060504"], ":", err.Error())
 			result := &enity.Result{"01060504", err.Error(), daily_bill_msg["01060504"]}
@@ -639,28 +640,29 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 
 func BasicMnznBillLists(billIdSettledAtMap *map[string]string, billIds ...int) ([]map[string]interface{}, error){
 	dailyBillService := &service.DailyBillService{}
-	mnznBillMap := make(map[string]interface{}, 0)
+
 	list := make([]map[string]interface{}, 0)
 	successedBillMap, err := dailyBillService.BasicMapByIds(billIds...)
 	if err != nil {
 		return nil, err
 	}
-	for _, _bill := range successedBillMap {
+	for i, _bill := range successedBillMap {
+		mnznBillMap := make(map[string]interface{}, 0)
 		mnznBillMap["settledAt"] = (*billIdSettledAtMap)[strconv.Itoa(_bill.Id)]
 		mnznBillMap["userId"] = _bill.UserId - 1
-
 		_time, err := time.Parse(time.RFC3339, _bill.BillAt)
 		if err != nil {
 			common.Logger.Warningln("时间格式转换错误:", err.Error())
 			continue
 		}
 		_billAt := _time.Format("2006-01-02")
-		mnznBillMap["billAt"] = _billAt//(strings.Split(_bill.BillAt, "T"))[0]
+		mnznBillMap["billAt"] = _billAt
 		common.Logger.Warningln("_bill.BillAt=======================", _bill.BillAt)
 		common.Logger.Warningln("mnznBillMap[billAt]===========", mnznBillMap["billAt"])
 		mnznBillMap["status"] = 2
 		list  = append(list, mnznBillMap)
 	}
+	common.Logger.Debugln("list============", list)
 	return list, nil
 }
 
