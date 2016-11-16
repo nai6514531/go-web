@@ -199,10 +199,11 @@ class DeviceForm extends React.Component {
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
-				"firstPulsePrice": parseInt((+values.firstPulsePrice)*100),
-				"secondPulsePrice": parseInt((+values.secondPulsePrice)*100),
-				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*100),
-				"fourthPulsePrice": parseInt((+values.fourthPulsePrice)*100),
+        // 乘 1000 在除以 10 是为了解决19.99出现的精度问题
+        "firstPulsePrice": parseInt((+values.firstPulsePrice)*1000/10),
+				"secondPulsePrice": parseInt((+values.secondPulsePrice)*1000/10),
+				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*1000/10),
+				"fourthPulsePrice": parseInt((+values.fourthPulsePrice)*1000/10),
 				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
 				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
 				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
@@ -397,7 +398,7 @@ class DeviceForm extends React.Component {
               label={(
                 <span>
                   设备编号&nbsp;
-                  <Tooltip placement="topLeft" title="可直接复制excel表设备编号列数据批量添加设备">
+                  <Tooltip placement="topLeft" title="可直接复制 excel 表中设备编号列的数据来批量添加设备">
                      <Icon style={{color:'#f50'}} type="question-circle-o" />
                   </Tooltip>
                 </span>
@@ -411,7 +412,7 @@ class DeviceForm extends React.Component {
 							})( id ?
 								<Input disabled placeholder="请输入10位设备编号" />
 								:
-                <Input type="textarea" placeholder="请输入一个或者多个10位设备编号,以回车分隔,每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
+                <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
               )}
 						</FormItem>
             <FormItem
