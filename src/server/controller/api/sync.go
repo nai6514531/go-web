@@ -12,10 +12,10 @@ type SyncController struct {
 
 func (self *SyncController) SyncUser(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncUser()
+	boo, err := syncService.SyncUser()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步后台用户数据失败!"}
+		result = &enity.Result{"1", err.Error(), "同步后台用户数据失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步后台用户数据成功!"}
@@ -26,10 +26,10 @@ func (self *SyncController) SyncUser(ctx *iris.Context) {
 
 func (self *SyncController) SyncUserRole(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncUserRole()
+	boo, err := syncService.SyncUserRole()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步后台用户角色数据失败!"}
+		result = &enity.Result{"1", err.Error(), "同步后台用户角色数据失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步后台用户角色数据成功!"}
@@ -40,10 +40,10 @@ func (self *SyncController) SyncUserRole(ctx *iris.Context) {
 
 func (self *SyncController) SyncUserCashAccount(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncUserCashAccount()
+	boo, err := syncService.SyncUserCashAccount()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步后台用户分账账户数据失败!"}
+		result = &enity.Result{"1", err.Error(), "同步后台用户分账账户数据失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步后台用户分账账户数据成功!"}
@@ -54,10 +54,10 @@ func (self *SyncController) SyncUserCashAccount(ctx *iris.Context) {
 
 func (self *SyncController) SyncDevice(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncDevice()
+	boo, err := syncService.SyncDevice()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步设备数据失败!"}
+		result = &enity.Result{"1", err.Error(), "同步设备数据失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步设备数据成功!"}
@@ -68,10 +68,10 @@ func (self *SyncController) SyncDevice(ctx *iris.Context) {
 
 func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncDailyBill()
+	boo, err := syncService.SyncDailyBill()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步账单数据失败!"}
+		result = &enity.Result{"1", err.Error(), "同步账单数据失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步账单数据成功!"}
@@ -82,10 +82,10 @@ func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
 
 func (self *SyncController) SyncDailyBillDetail(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, _ := syncService.SyncDailyBillDetail()
+	boo, err := syncService.SyncDailyBillDetail()
 	result := &enity.Result{}
 	if !boo {
-		result = &enity.Result{"1", nil, "同步账单数据详情失败!"}
+		result = &enity.Result{"1", err.Error(), "同步账单数据详情失败!"}
 		common.Log(ctx, result)
 	} else {
 		result = &enity.Result{"0", nil, "同步账单数据详情成功!"}
