@@ -122,7 +122,7 @@ export class LoginForm extends React.Component {
             >
             {getFieldDecorator('account', {
               rules: [
-                { required: true, message: '请输入登录账号' },
+                { required: true, message: '请输入注册时填写的登录账号' },
               ],
             })(
               <Input placeholder="请输入登录账号" />
