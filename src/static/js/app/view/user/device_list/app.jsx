@@ -147,7 +147,7 @@ class SchoolTable extends React.Component {
             pagination={pagination}
             changeSchoolId={this.changeSchoolId.bind(this)}
             />
-          <Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary item add-btn">
+          <Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary add-btn">
             添加新设备
           </Link>
         </div>
@@ -195,10 +195,6 @@ class SchoolFilter extends React.Component {
         const item = <Option style={{textOverflow: 'ellipsis'}} key={id} value={id}>{name}</Option>;
         schoolNode.push(item);
       }
-      // schoolNode = schoolList.map(function (item, key) {
-      //   const id = item.id.toString();
-      //   return <Option key={key} value={id}>{item.name}</Option>;
-      // })
     }
     const { getFieldDecorator } = this.props.form;
     const schoolFilter = {
