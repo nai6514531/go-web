@@ -48,9 +48,6 @@ const Header = React.createClass({
         <Button type="ghost" icon="bars" onClick={this.props.onHamburgClick} />
       </span>
       <div className="right">
-        <span className="avatar">
-          <img src="static/img/app/a5.jpg" alt="" />
-        </span>
         <span className="name">
           {USER.name}, 您好!
         </span>

@@ -117,15 +117,15 @@ export class LoginForm extends React.Component {
     return (
         <Form horizontal onKeyDown={this.handleEnter.bind(this)}>
           <FormItem {...formItemLayout}
-            label="用户名"
+            label="登录账号"
             {...accountHelp}
             >
             {getFieldDecorator('account', {
               rules: [
-                { required: true, message: '请输入用户名' },
+                { required: true, message: '请输入注册时填写的登录账号' },
               ],
             })(
-              <Input placeholder="请输入用户名" />
+              <Input placeholder="请输入登录账号" />
             )}
           </FormItem>
           <FormItem

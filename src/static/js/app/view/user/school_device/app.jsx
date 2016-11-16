@@ -90,8 +90,8 @@ const columns = [{
           <p><a href="#">启用</a></p>
         </Popconfirm>
         :
-        <Popconfirm title="确认停止吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
-          <p><a href="#">停止</a></p>
+        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+          <p><a href="#">锁定</a></p>
         </Popconfirm>
       }
     </div>
@@ -245,7 +245,7 @@ class DeviceTable extends React.Component {
               status = '启用';
               break;
             case 9:
-              status = '停止';
+              status = '锁定';
               break;
             default:
               status = '启用';

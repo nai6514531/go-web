@@ -74,23 +74,34 @@ func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccoun
 	return true
 }
 
-func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) bool {
+func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) (bool, error) {
 	transAction := common.DB.Begin()
+	mnTransAction := common.MNDB.Begin()
 	r := transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(userCashAccount)
-	if r.Error != nil || r.RowsAffected <= 0 {
+	if r.Error != nil {
 		transAction.Rollback()
-		return false
+		mnTransAction.Rollback()
+		return false, r.Error
+	}
+	//再单独更新一次type避免为0时更新不了
+	r = transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Update("type", userCashAccount.Type)
+	if r.Error != nil {
+		transAction.Rollback()
+		mnTransAction.Rollback()
+		return false, r.Error
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUserCashAccount(userCashAccount)
-	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	r = mnTransAction.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
 	if r.Error != nil {
 		transAction.Rollback()
-		return false
+		mnTransAction.Rollback()
+		return false, r.Error
 	}
 	transAction.Commit()
-	return true
+	mnTransAction.Commit()
+	return true, r.Error
 }
 
 func (self *UserCashAccountService) ListByUserIds(userIds string) (*[]*model.UserCashAccount, error) {

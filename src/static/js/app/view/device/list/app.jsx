@@ -69,7 +69,7 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 100,
+  width: 150,
   fixed: 'right',
   render: (text, record) => (
     <span>
@@ -84,8 +84,8 @@ const columns = [{
           <a href="#">启用</a>
         </Popconfirm>
         :
-        <Popconfirm title="确认停止吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
-          <a href="#">停止</a>
+        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+          <a href="#">锁定</a>
         </Popconfirm>
       }
     </span>
@@ -225,7 +225,7 @@ class DeviceList extends React.Component {
               status = '启用';
               break;
             case 9:
-              status = '停止';
+              status = '锁定';
               break;
             default:
               status = '启用';
