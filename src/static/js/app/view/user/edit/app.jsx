@@ -78,7 +78,6 @@ class UserForm extends React.Component {
         const self = this;
     if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
             if(nextProps.detail.result.data.cashAccount){
-        // const type = Math.abs(nextProps.detail.result.data.cashAccount.type);
         const type = nextProps.detail.result.data.cashAccount.type;
               // type 1 for alipay,3 for bank,0 for none
         if(type) {
@@ -602,9 +601,9 @@ class UserForm extends React.Component {
                 rules: [
                   {  message: '请选择收款方式' },
                 ],
-                initialValue: initialValue.type? (+initialValue.type<=0?"0":initialValue.type): this.state.payType.toString(),
+                initialValue: initialValue.type? initialValue.type: this.state.payType.toString(),
               })(
-                <RadioGroup {...disable}>
+                <RadioGroup>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
                     无
                   </Radio>
