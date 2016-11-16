@@ -282,7 +282,7 @@ const App = React.createClass({
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
-				let msg = data.willApplyStatus==1?"已成功申请结账":"已成功取消结账"
+				let msg = data.willApplyStatus==1?"已成功申请结账":"已取消结账"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			}else{
