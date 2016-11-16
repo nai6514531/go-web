@@ -1,8 +1,8 @@
 package service
 
 import (
-	"crypto/md5"
-	"fmt"
+	// "crypto/md5"
+	// "fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
@@ -70,7 +70,7 @@ func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
 
 func (self *UserService) Create(user *model.User) bool {
 	//对明文密码md5
-	user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
+	//user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
 	transAction := common.DB.Begin()
 	r := transAction.Create(user)
 	if r.RowsAffected <= 0 || r.Error != nil {

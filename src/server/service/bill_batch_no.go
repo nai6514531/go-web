@@ -60,7 +60,6 @@ func (self *BillBatchNoService) Create(billBatchNo *model.BillBatchNo) (int, err
 }
 
 func (self *BillBatchNoService) Delete(billIds ...interface{}) (int, error){
-	//r := common.DB.Model(&model.BillBatchNo{}).Where("bill_id in (?)", billIds...).Update("deleted_at", time.Now().Local().Format("2006-01-02 15:04:05"))
 	r := common.DB.Where("bill_id in (?)", billIds...).Delete(&model.BillBatchNo{})
 	if r.Error != nil {
 		return 0, r.Error

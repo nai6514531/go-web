@@ -41,6 +41,20 @@ func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (map[i
 	return accountMap, nil
 }
 
+func (self *UserCashAccountService) BasicMapByType(payType ...int) (map[string]*model.UserCashAccount, error) {
+	list := &[]*model.UserCashAccount{}
+	accountMap := make(map[string]*model.UserCashAccount, 0)
+	r := common.DB.Where("type in (?)", payType).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, account := range *list {
+		accountMap[account.RealName] = account
+	}
+	return accountMap, nil
+}
+
 func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
 	transAction := common.DB.Begin()
 	r := transAction.Create(userCashAccount)

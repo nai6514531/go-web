@@ -6,5 +6,7 @@ import ReactDOM from 'react-dom';
 import App from './app.jsx';
 import 'nprogress/nprogress.css';
 import 'antd/dist/antd.min.css';
+import './ga'
+
 ReactDOM.render(<App />, document.getElementById('main'));
 

@@ -18,6 +18,11 @@
   "templateSuffix": ".html",
   "faviconPath": "./src/build/static/img/favicon.ico",
   "logFilePath": "./log/log.log",
+  "analytics": {
+    "google-analytics": {
+      "id": "UA-87262312-1"
+    }
+  },
   "pay": {
     "aliPay": {
       "id": "",

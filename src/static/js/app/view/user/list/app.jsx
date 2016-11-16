@@ -55,7 +55,7 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 120,
+  width: 100,
   fixed: 'right',
   render: (text, record) => (
     <div>
@@ -71,7 +71,6 @@ const columns = [{
     </div>
   ),
 }];
-// <span className="ant-divider" />
 
 class AgentTable extends React.Component {
   constructor(props) {

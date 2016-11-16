@@ -73,7 +73,7 @@ func CreateSign(mReq interface{}) string {
 	cipherStr := md5Ctx.Sum(nil)
 	sign := hex.EncodeToString(cipherStr)
 	//upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
-	common.Logger.Debugln("sign====================================", sign)
+	common.Logger.Warningln("sign====================================", sign)
 	return sign
 }
 
@@ -88,12 +88,12 @@ func VerifySign(data interface{}, sign string) bool {
 	case map[string]string:
 		_sign = CreateSign(value)
 	}
-	common.Logger.Debugln("计算出来的sign: %v", _sign)
-	common.Logger.Debugln("支付宝通知sign: %v", sign)
+	common.Logger.Warningln("计算出来的sign: %v", _sign)
+	common.Logger.Warningln("支付宝通知sign: %v", sign)
 	if sign == _sign {
-		common.Logger.Debugln("签名校验通过!")
+		common.Logger.Warningln("签名校验通过!")
 		return true
 	}
-	common.Logger.Debugln("签名校验失败!")
+	common.Logger.Warningln("签名校验失败!")
 	return false
 }
