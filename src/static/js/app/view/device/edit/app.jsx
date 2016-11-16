@@ -398,7 +398,7 @@ class DeviceForm extends React.Component {
               label={(
                 <span>
                   设备编号&nbsp;
-                  <Tooltip placement="topLeft" title="可直接复制excel表设备编号列数据批量添加设备">
+                  <Tooltip placement="topLeft" title="可直接复制 excel 表中设备编号列的数据来批量添加设备">
                      <Icon style={{color:'#f50'}} type="question-circle-o" />
                   </Tooltip>
                 </span>
