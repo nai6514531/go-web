@@ -45,7 +45,6 @@ const App = React.createClass({
 				dataIndex: 'settledAt',
 				key: 'settledAt',
 				render: (settled_at, record) => {
-					console.log(record)
 					return record.status == 2?settled_at:'/';
 				}
 			}, {
@@ -249,11 +248,13 @@ const App = React.createClass({
     this.setState({ payModalVisible: status });
   },
   closePayModalVisible() {	//二次支付框取消按钮触发函数
+  	const self = this;
   	const data = this.state.payList;
   	DailyBillService.billCancel(data).then((res)=>{
   		if(res.status == "00"){
   			this.refuseSettlementStatus(this.state.nowSettlement);
   			this.setState({ payModalVisible: false });
+  			self.clearSelectRows();
   		}else{
   			message.info(res.msg)
   		}
@@ -479,7 +480,10 @@ const App = React.createClass({
 		};
 	},
 	clearSelectRows() { //清空勾选
-		this.setState({selectedRowKeys: []})
+		this.setState({
+			selectedRowKeys: [],
+			selectedList: []
+		})
 	},
 	getAliPayOrderNum() {//获取支付宝的订单
 		return 123
