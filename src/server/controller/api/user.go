@@ -554,30 +554,40 @@ func (self *UserController) Update(ctx *iris.Context) {
 		return
 	}
 	//更新结算账号信息,如果传的不是0就直接更新
-	if cashAccount.Type != 0 {
-		ok = userCashAccountService.UpdateByUserId(cashAccount)
-		if !ok {
-			result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-	} else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,原来是-1的话还是-1，方便还原上一条历史记录
-		current, err := userCashAccountService.BasicByUserId(userId)
-		if err == nil { //可以找到
-			if current.Type > 0 {
-				//把该记录的type值取反
-				current.Type = -current.Type
-			}
-			ok = userCashAccountService.UpdateByUserId(current)
-			if !ok {
-				result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-				common.Log(ctx, result)
-				ctx.JSON(iris.StatusOK, result)
-				return
-			}
-		} //没有记录的不做处理
+	// if cashAccount.Type != 0 {
+	// 	ok = userCashAccountService.UpdateByUserId(cashAccount)
+	// 	if !ok {
+	// 		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+	// 		common.Log(ctx, result)
+	// 		ctx.JSON(iris.StatusOK, result)
+	// 		return
+	// 	}
+	// } else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,原来是-1的话还是-1，方便还原上一条历史记录
+	// 	current, err := userCashAccountService.BasicByUserId(userId)
+	// 	if err == nil { //可以找到
+	// 		if current.Type > 0 {
+	// 			//把该记录的type值取反
+	// 			current.Type = -current.Type
+	// 		}
+	// 		ok = userCashAccountService.UpdateByUserId(current)
+	// 		if !ok {
+	// 			result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+	// 			common.Log(ctx, result)
+	// 			ctx.JSON(iris.StatusOK, result)
+	// 			return
+	// 		}
+	// 	} //没有记录的不做处理
+	// }
+
+	//20161116修改直接前端传什么type就保存什么
+	ok = userCashAccountService.UpdateByUserId(cashAccount)
+	if !ok {
+		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
+
 	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
 	ctx.JSON(iris.StatusOK, &result)
 	common.Log(ctx, nil)
