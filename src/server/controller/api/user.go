@@ -579,10 +579,10 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// 	} //没有记录的不做处理
 	// }
 
-	//20161116修改直接前端传什么type就保存什么
-	ok = userCashAccountService.UpdateByUserId(cashAccount)
+	//修改直接前端传什么type就保存什么
+	ok, err := userCashAccountService.UpdateByUserId(cashAccount)
 	if !ok {
-		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
+		result = &enity.Result{"01010512", err, user_msg["01010512"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
