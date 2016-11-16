@@ -116,7 +116,7 @@ class UserForm extends React.Component {
         self.saveDetail = -1;
       } else if(resultPutDetail !== nextProps.resultPutDetail
         && nextProps.resultPutDetail.fetch == false){
-        message.error(nextProps.resultPostDetail.result.msg,3);
+        message.error(nextProps.resultPutDetail.result.msg,3);
         self.saveDetail = -1;
       }
     }
