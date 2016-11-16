@@ -22,7 +22,7 @@ gulp.task('webpack:prod', function () {
 });
 
 gulp.task('compile', shell.task([
-	'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build',
+	'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 godep go build',
 ]));
 
 gulp.task('build', () => {
