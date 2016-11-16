@@ -646,7 +646,7 @@ func BasicMnznBillLists(billIdSettledAtMap *map[string]string, billIds ...int) (
 	if err != nil {
 		return nil, err
 	}
-	for i, _bill := range successedBillMap {
+	for _, _bill := range successedBillMap {
 		mnznBillMap := make(map[string]interface{}, 0)
 		mnznBillMap["settledAt"] = (*billIdSettledAtMap)[strconv.Itoa(_bill.Id)]
 		mnznBillMap["userId"] = _bill.UserId - 1
