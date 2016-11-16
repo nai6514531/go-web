@@ -197,15 +197,15 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 			if _billMap["settledAt"] != nil {
 				settledAt = _billMap["settledAt"].(string)
 			}
-			common.Logger.Debugln(_billMap)
+			common.Logger.Warningln("_billMap===================", _billMap)
 			param := map[string]interface{}{
 				"Status": strconv.Itoa(status),
 				"BillDate": settledAt,
 			}
-			common.Logger.Debugln("param---------------------------", param)
+			common.Logger.Warningln("param---------------------------", param)
 			r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID = ? and PERIOD_START = ? ", userId, billAt).Updates(param)
 			if r.Error != nil {
-				common.Logger.Debugln(r.Error.Error())
+				common.Logger.Warningln(r.Error.Error())
 				txmn.Rollback()
 				return 0, r.Error
 			}
@@ -216,7 +216,7 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 	for _, _bill := range *list {
 		r = tx.Model(&model.DailyBill{}).Update(&_bill)
 		if r.Error != nil {
-			common.Logger.Debugln(r.Error.Error())
+			common.Logger.Warningln(r.Error.Error())
 			tx.Rollback()
 			return 0, r.Error
 		} else {
@@ -246,7 +246,7 @@ func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where(" id in (?) ", ids...).Update(param)
 	if r.Error != nil {
-		common.Logger.Debugln(r.Error.Error())
+		common.Logger.Warningln(r.Error.Error())
 		return 0, r.Error
 	}
 	return int(r.RowsAffected), nil
@@ -276,7 +276,7 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	}
 	r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID in (?) and PERIOD_START = ? ", mnUserIds, billAt).Update(boxStatBill)
 	if r.Error != nil {
-		common.Logger.Debugln(r.Error.Error())
+		common.Logger.Warningln(r.Error.Error())
 		txmn.Rollback()
 		return 0, r.Error
 	}
@@ -294,7 +294,7 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	}
 	r = tx.Model(&model.DailyBill{}).Where(" user_id in (?) and bill_at = ? ", userIds, billAt).Update(param)
 	if r.Error != nil {
-		common.Logger.Debugln(r.Error.Error())
+		common.Logger.Warningln(r.Error.Error())
 		tx.Rollback()
 		txmn.Rollback()
 		return 0, r.Error

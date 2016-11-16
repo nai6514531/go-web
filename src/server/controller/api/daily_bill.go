@@ -50,7 +50,7 @@ var (
 		"01060408": "解析json异常",
 		"01060409": "传参json异常",
 		"01060410": "所选支付宝账单超出批次结算最大值1000",
-		"01060411": "所选支付宝账单中存在已有批次号账单",
+		"01060411": "所选账单中包含已结账账单，请重新选择",
 
 		"01060500": "更新支付宝账单成功",
 		"01060501": "更新支付宝账单结账状态失败",
@@ -648,7 +648,16 @@ func BasicMnznBillLists(billIdSettledAtMap *map[string]string, billIds ...int) (
 	for _, _bill := range successedBillMap {
 		mnznBillMap["settledAt"] = (*billIdSettledAtMap)[strconv.Itoa(_bill.Id)]
 		mnznBillMap["userId"] = _bill.UserId - 1
-		mnznBillMap["billAt"] = (strings.Split(_bill.BillAt, "T"))[0]
+
+		_time, err := time.Parse(time.RFC3339, _bill.BillAt)
+		if err != nil {
+			common.Logger.Warningln("时间格式转换错误:", err.Error())
+			continue
+		}
+		_billAt := _time.Format("2006-01-02")
+		mnznBillMap["billAt"] = _billAt//(strings.Split(_bill.BillAt, "T"))[0]
+		common.Logger.Warningln("_bill.BillAt=======================", _bill.BillAt)
+		common.Logger.Warningln("mnznBillMap[billAt]===========", mnznBillMap["billAt"])
 		mnznBillMap["status"] = 2
 		list  = append(list, mnznBillMap)
 	}
