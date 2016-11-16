@@ -44,8 +44,9 @@ const App = React.createClass({
 				title: '结账日期',
 				dataIndex: 'settledAt',
 				key: 'settledAt',
-				render: (settled_at) => {
-					return settled_at == '' ? '/' : settled_at;
+				render: (settled_at, record) => {
+					console.log(record)
+					return record.status == 2?settled_at:'/';
 				}
 			}, {
 				title: '状态',
@@ -203,6 +204,7 @@ const App = React.createClass({
 			hasApplied: 0,
 			billAt: '',
 			selectedList: [],   						//勾选的账单
+			nowAliPayingOrderNum: 0,        //有多少笔支付宝的账单正在支付
 			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
 			nowAjaxStatus: {},  						//保存ajax请求字段状态
@@ -307,19 +309,27 @@ const App = React.createClass({
 		//this.list(this.state.nowAjaxStatus)
 	},
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
+		let aliPayNum = 0;
 		let list = this.state.list;
+		console.log(data)
+		console.log(list)
 		for(var i=0; i<data.length; i++){
 			for(var j=0; j<list.length; j++){
 				if(data[i].idArr.indexOf(list[j].id) >= 0){
-					if(list[j].accountType == 1 && resStatus == 0){
+					if(list[j].accountType == 1 && resStatus == 0 && list[j].status != 3){
 						list[j].status = 3;
+						aliPayNum++
 					}else if(list[j].accountType == 3){
 						list[j].status = 2;
 					}
 				}
 			}
 		}
-		this.setState({list: list});
+		console.log(aliPayNum)
+		this.setState({
+			list: list,
+			getAliPayOrderNum: aliPayNum
+		});
 		this.clearSelectRows();
 		//this.list(this.state.nowAjaxStatus)
 	},
@@ -475,6 +485,9 @@ const App = React.createClass({
 	clearSelectRows() { //清空勾选
 		this.setState({selectedRowKeys: []})
 	},
+	getAliPayOrderNum() {//获取支付宝的订单
+		return 123
+	},
 	render(){
 		const self = this;
 		const {list, columns} = this.state;
@@ -597,7 +610,7 @@ const App = React.createClass({
 			</div>
 			{tableDiv}
 			<Modal
-        title="支付二次确认"
+        title={'你有'+ self.state.getAliPayOrderNum +'笔支付宝账单需要二次确认'}
         wrapClassName="playModal"
         closable={false}
         visible={this.state.payModalVisible}
