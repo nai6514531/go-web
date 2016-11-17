@@ -38,7 +38,7 @@ func SetUpCommon() {
 
 	iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
 		result := &enity.Result{"-3", nil, common_msg["-3"]}
-		Log(ctx, result)
+		//Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 	})
 
