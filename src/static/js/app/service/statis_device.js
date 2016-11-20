@@ -8,7 +8,7 @@ const Service = {
     return api.get('/api/statis/device', {
       params: {
         date: date,
-        "serial-number": serialNumber,
+        serialNumber: serialNumber,
         page: pager.page || 1,
         perPage: pager.perPage || 10
       }

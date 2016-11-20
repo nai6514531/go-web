@@ -4,7 +4,7 @@ const Service = {
   list: (serialNumber, pager) => {
     return api.get('/api/trade', {
       params: {
-        "serial-number": serialNumber,
+        serialNumber: serialNumber,
         page: pager.page || 1,
         perPage: pager.perPage || 10
       }
