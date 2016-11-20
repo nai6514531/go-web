@@ -51,7 +51,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return amount.toFixed(2) + "元";
         }
       },{
         title: '洗衣类型',
@@ -89,7 +89,7 @@ const App = React.createClass({
               :
               <span>已退款</span>
             }
-            
+
           </div>
         ),
       }],

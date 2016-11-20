@@ -62,35 +62,35 @@ const App = React.createClass({
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
         render: (firstPulseAmount) => {
-          return firstPulseAmount + "元";
+          return firstPulseAmount.toFixed(2) + "元";
         }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
         render: (secondPulseAmount) => {
-          return secondPulseAmount + "元";
+          return secondPulseAmount.toFixed(2) + "元";
         }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
         render: (thirdPulseAmount) => {
-          return thirdPulseAmount + "元";
+          return thirdPulseAmount.toFixed(2) + "元";
         }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
         render: (fourthPulseAmount) => {
-          return fourthPulseAmount + "元";
+          return fourthPulseAmount.toFixed(2) + "元";
         }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return amount.toFixed(2) + "元";
         }
       }],
       loading: false
@@ -119,12 +119,12 @@ const App = React.createClass({
           const fourthPulseAmount = list.reduce((total,item)=>{return total+item.fourthPulseAmount},0);
           const amount = list.reduce((total,item)=>{return total+item.amount},0);
           const total = {
-            "firstPulseAmount": firstPulseAmount,
-            "secondPulseAmount": secondPulseAmount,
-            "thirdPulseAmount": thirdPulseAmount,
-            "fourthPulseAmount": fourthPulseAmount,
-            "amount": amount,
-          }
+            "firstPulseAmount": firstPulseAmount.toFixed(2),
+            "secondPulseAmount": secondPulseAmount.toFixed(2),
+            "thirdPulseAmount": thirdPulseAmount.toFixed(2),
+            "fourthPulseAmount": fourthPulseAmount.toFixed(2),
+            "amount": amount.toFixed(2),
+          };
           let theList = list.map((item, key) => {
             item.key = key;
             // item.key = item.id;

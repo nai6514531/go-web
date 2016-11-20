@@ -48,7 +48,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return amount.toFixed(2) + "元";
         }
       }],
       loading: false

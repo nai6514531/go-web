@@ -60,14 +60,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (rechargeAmount) => {
-          return rechargeAmount + "元";
+          return rechargeAmount.toFixed(2) + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consumeAmount) => {
-          return consumeAmount + "元";
+          return consumeAmount.toFixed(2) + "元";
         }
       }],
       loading: false
@@ -95,11 +95,11 @@ const App = React.createClass({
           const rechargeAmount = list.reduce((total,item)=>{return total+item.rechargeAmount},0);
           const consumeAmount = list.reduce((total,item)=>{return total+item.consumeAmount},0);
           const total = {
-            "increaseUserCount": increaseUserCount,
-            "enabledDeviceCount": enabledDeviceCount,
-            "increaseDeviceCount": increaseDeviceCount,
-            "rechargeAmount": rechargeAmount,
-            "consumeAmount": consumeAmount,
+            "increaseUserCount": increaseUserCount.toFixed(2),
+            "enabledDeviceCount": enabledDeviceCount.toFixed(2),
+            "increaseDeviceCount": increaseDeviceCount.toFixed(2),
+            "rechargeAmount": rechargeAmount.toFixed(2),
+            "consumeAmount": consumeAmount.toFixed(2),
           }
           let theList = list.map((item, key) => {
             item.key = key;
