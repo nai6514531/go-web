@@ -19,7 +19,7 @@ const App = React.createClass({
         dataIndex: 'key',
         key: 'key',
         render(text, row, index) {
-          if (index < self.state.total) {
+          if (index < self.state.total-1) {
             return <span>{text}</span>;
           }
           return {
@@ -34,7 +34,7 @@ const App = React.createClass({
         dataIndex: 'date',
         key: 'date',
         render(text, record, index) {
-          if (index < self.state.total) {
+          if (index < self.state.total-1) {
             return <Link to={"/data/consume/month/" + record.date}>{text}</Link>;
           }
           return {
@@ -48,7 +48,7 @@ const App = React.createClass({
         dataIndex: 'deviceCount',
         key: 'deviceCount',
         render(text, record, index) {
-          if (index < self.state.total) {
+          if (index < self.state.total-1) {
             return <span>{text}</span>;
           }
           return {
@@ -62,35 +62,35 @@ const App = React.createClass({
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
         render: (firstPulseAmount) => {
-          return firstPulseAmount / 100 + "元";
+          return firstPulseAmount + "元";
         }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
         render: (secondPulseAmount) => {
-          return secondPulseAmount / 100 + "元";
+          return secondPulseAmount + "元";
         }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
         render: (thirdPulseAmount) => {
-          return thirdPulseAmount / 100 + "元";
+          return thirdPulseAmount + "元";
         }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
         render: (fourthPulseAmount) => {
-          return fourthPulseAmount / 100 + "元";
+          return fourthPulseAmount + "元";
         }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount / 100 + "元";
+          return amount + "元";
         }
       }],
       loading: false
@@ -111,7 +111,8 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          const list = data.data.list;
+          const list = data.data;
+          console.log(list);
           const firstPulseAmount = list.reduce((total,item)=>{return total+item.firstPulseAmount},0);
           const secondPulseAmount = list.reduce((total,item)=>{return total+item.secondPulseAmount},0);
           const thirdPulseAmount = list.reduce((total,item)=>{return total+item.thirdPulseAmount},0);
@@ -124,14 +125,14 @@ const App = React.createClass({
             "fourthPulseAmount": fourthPulseAmount,
             "amount": amount,
           }
-          let theList = data.data.list.map((item, key) => {
+          let theList = list.map((item, key) => {
             item.key = key;
             // item.key = item.id;
             return item;
           });
           theList.push(total);
           this.setState({
-            total: theList.length ,
+            total: theList.length,
             list: theList,
           });
         } else {

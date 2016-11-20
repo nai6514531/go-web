@@ -1,6 +1,5 @@
 import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
-// import "./app.less";
 import StatisOperateService from "../../../service/statis_operate";
 import { Link } from 'react-router';
 const _ = require('lodash');
@@ -20,7 +19,7 @@ const App = React.createClass({
         dataIndex: 'key',
         key: 'key',
         render(text, row, index) {
-          if (index < self.state.total) {
+          if (index < self.state.total - 1) {
             return <span>{text}</span>;
           }
           return {
@@ -35,7 +34,7 @@ const App = React.createClass({
         dataIndex: 'date',
         key: 'date',
         render(text, record, index) {
-          if (index <= self.state.total) {
+          if (index < self.state.total - 1) {
             return <Link to={"/data/manage/month/" + record.date}>{text}</Link>;
           }
           return {
@@ -61,14 +60,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (rechargeAmount) => {
-          return rechargeAmount / 100 + "元";
+          return rechargeAmount + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consumeAmount) => {
-          return consumeAmount / 100 + "元";
+          return consumeAmount + "元";
         }
       }],
       loading: false
@@ -89,7 +88,7 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          const list = data.data.list;
+          const list = data.data;
           const increaseUserCount = list.reduce((total,item)=>{return total+item.increaseUserCount},0);
           const enabledDeviceCount = list.reduce((total,item)=>{return total+item.enabledDeviceCount},0);
           const increaseDeviceCount = list.reduce((total,item)=>{return total+item.increaseDeviceCount},0);
@@ -102,7 +101,7 @@ const App = React.createClass({
             "rechargeAmount": rechargeAmount,
             "consumeAmount": consumeAmount,
           }
-          let theList = data.data.list.map((item, key) => {
+          let theList = list.map((item, key) => {
             item.key = key;
             return item;
           });
@@ -116,8 +115,6 @@ const App = React.createClass({
         }
       })
   },
-
-
   render() {
     const {list, total, columns} = this.state;
     return (<section className="view-statis-manage-month">

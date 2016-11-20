@@ -1,8 +1,7 @@
 import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
-import StatisDeviceService from "../../../service/statis_consume";
+import StatisDeviceService from "../../../service/statis_device";
 import { Link } from 'react-router';
-const _ = require('lodash');
 
 const App = React.createClass({
   propTypes: {
@@ -49,7 +48,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount / 100 + "元";
+          return amount + "元";
         }
       }],
       loading: false
@@ -73,11 +72,11 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          const total = data.data.list.length;
+          const total = data.data.length;
           this.setState({
             total: total,
-            list: data.data.list.map((item) => {
-              item.key = item.id;
+            list: data.data.map((item, key) => {
+              item.key = key;
               console.log(item);
               return item;
             })

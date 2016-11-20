@@ -1,7 +1,7 @@
 import React from "react";
 import {Input,Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 // import "./app.less";
-import StatisWashService from "../../../service/wash-search";
+import StatisWashService from "../../../service/wash_search";
 import { Link } from 'react-router';
 const _ = require('lodash');
 import moment from 'moment';
@@ -49,12 +49,23 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount / 100 + "元";
+          return amount + "元";
         }
       },{
         title: '洗衣类型',
         dataIndex: 'pulseType',
         key: 'pulseType',
+        render: (pulseType) => {
+          if(pulseType == 601){
+            return "单脱";
+          } else if (pulseType == 602) {
+            return "快洗";
+          } else if (pulseType == 603) {
+            return "标准洗";
+          } else if (pulseType == 604) {
+            return "大物洗";
+          }
+        },
       },{
         title: '下单时间',
         dataIndex: 'time',
@@ -64,11 +75,11 @@ const App = React.createClass({
         },
       },{
         title: '操作',
-        dataIndex: 'action',
-        key: 'action',
+        dataIndex: 'userId',
+        key: 'userId',
         render: (text, record) => (
           <div>
-            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.key)}>
+            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.userId)}>
               <p><a href="#">退款</a></p>
             </Popconfirm>
           </div>
@@ -92,10 +103,10 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          const total = data.data.list.length;
+          const total = data.data.length;
           this.setState({
             total: total,
-            list: data.data.list.map((item, key) => {
+            list: data.data.map((item, key) => {
               item.key = key;
               item.action = 'action';
               console.log(item);
@@ -107,9 +118,9 @@ const App = React.createClass({
         }
       })
   },
-  refund(id) {
+  refund(userId) {
     // 退款操作
-    console.log(id);
+    console.log(userId);
   },
   handleSearch() {
     const account = this.state.searchValue;
@@ -155,7 +166,7 @@ const App = React.createClass({
         </header>
         <div className="toolbar">
           <span> 手机号：</span>
-          <Input style={{width:100}} placeholder="请输入手机号" onChange={this.handleInputChange}/>
+          <Input style={{width:120}} placeholder="请输入手机号" onChange={this.handleInputChange}/>
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
         </div>
         <article>

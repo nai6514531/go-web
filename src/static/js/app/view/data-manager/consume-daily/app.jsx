@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import StatisConsumeService from "../../../service/statis_consume";
 import { Link } from 'react-router';
-const _ = require('lodash');
+// const _ = require('lodash');
 import moment from 'moment';
 
 const App = React.createClass({
@@ -25,65 +25,44 @@ const App = React.createClass({
         title: '日期',
         dataIndex: 'date',
         key: 'date',
-        render(text, record, index) {
-          if (index < self.state.total) {
-            return <span>{text}</span>
-            // return moment(text).format('YYYY-MM-DD')
-          }
-          return {
-            props: {
-              colSpan: 0,
-            },
-          };
-        },
       }, {
         title: '模块数',
         dataIndex: 'deviceCount',
         key: 'deviceCount',
-        render(text, record, index) {
-          if (index < self.state.total) {
-            return <span>{text}</span>;
-          }
-          return {
-            props: {
-              colSpan: 0,
-            },
-          };
-        },
       }, {
         title: '单脱',
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
         render: (firstPulseAmount) => {
-          return firstPulseAmount / 100 + "元";
+          return firstPulseAmount + "元";
         }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
         render: (secondPulseAmount) => {
-          return secondPulseAmount / 100 + "元";
+          return secondPulseAmount + "元";
         }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
         render: (thirdPulseAmount) => {
-          return thirdPulseAmount / 100 + "元";
+          return thirdPulseAmount + "元";
         }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
         render: (fourthPulseAmount) => {
-          return fourthPulseAmount / 100 + "元";
+          return fourthPulseAmount + "元";
         }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount / 100 + "元";
+          return amount + "元";
         }
       }],
       loading: false
@@ -106,10 +85,10 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          const total = data.data.list.length;
+          const total = data.data.length;
           this.setState({
             total: total,
-            list: data.data.list.map((item, key) => {
+            list: data.data.map((item, key) => {
               item.key = key;
               console.log(item);
               return item;
