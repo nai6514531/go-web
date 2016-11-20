@@ -46,7 +46,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 		var status int
 		var localid int
 		err := rows.Scan(&name, &servicephone, &agencyid, &deviceno, &passwd, &usermobile, &price, &washtype, &inserttime, &address, &status, &localid)
-		m["admin"] = name
+		m["user"] = name
 		m["telephone"] = servicephone
 		m["address"] = address
 		m["account"] = usermobile
