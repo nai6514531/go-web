@@ -2,6 +2,8 @@ import React from "react";
 import {Input,Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 // import "./app.less";
 import StatisWashService from "../../../service/wash_search";
+import RefundService from "../../../service/refund";
+
 import { Link } from 'react-router';
 const _ = require('lodash');
 import moment from 'moment';
@@ -75,12 +77,12 @@ const App = React.createClass({
         },
       },{
         title: '操作',
-        dataIndex: 'userId',
-        key: 'userId',
+        dataIndex: 'washId',
+        key: 'washId',
         width: 100,
         render: (text, record) => (
           <div>
-            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.userId)}>
+            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, text)}>
               <p><a href="#">退款</a></p>
             </Popconfirm>
           </div>
@@ -109,7 +111,6 @@ const App = React.createClass({
             total: total,
             list: data.data.map((item, key) => {
               item.key = key;
-              item.action = 'action';
               console.log(item);
               return item;
             })
@@ -119,9 +120,34 @@ const App = React.createClass({
         }
       })
   },
-  refund(userId) {
+  refund(washId) {
     // 退款操作
-    console.log(userId);
+    console.log(washId);
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    RefundService.refund(account, washId)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        console.log(data);
+        if (data && data.status == '00') {
+          message.info(data.msg,3);
+          // const total = data.data.length;
+          // this.setState({
+          //   total: total,
+          //   list: data.data.map((item, key) => {
+          //     item.key = key;
+          //     console.log(item);
+          //     return item;
+          //   })
+          // });
+        } else {
+          message.info(data.msg);
+        }
+      })
   },
   handleSearch() {
     const account = this.state.searchValue;
@@ -158,6 +184,8 @@ const App = React.createClass({
   render() {
     var self = this;
     const {list, total, columns} = this.state;
+    // const pagination = this.initializePagination();
+    // pagination.current = this.state.page;
     return (
       <section className="view-statis-wash-search">
         <header>
