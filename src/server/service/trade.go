@@ -54,6 +54,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 		m["amount"] = price
 		m["pulseType"] = washtype
 		m["time"] = inserttime
+		m["serialNumber"] = deviceno
 		if err != nil {
 			return nil, err
 		}

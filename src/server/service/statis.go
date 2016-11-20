@@ -215,6 +215,15 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		param = append(param, date)
 	}
 
+	if serialNumber != "" || date != "" {
+		if len(param) < 3 {
+			e := &functions.DefinedError{}
+			e.Msg = "less param!"
+			err = e
+			return nil, err
+		}
+	}
+
 	common.Logger.Debugln("=========================", admin.UserType)
 	common.Logger.Debugln("------------------------------", companyId)
 

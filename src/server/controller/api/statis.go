@@ -18,6 +18,7 @@ var (
 
 		"01070300": "拉取模块统计数据成功",
 		"01070301": "拉取模块统计数据失败",
+		"01070302": "参数错误",
 	}
 )
 
@@ -77,6 +78,12 @@ func (self *StatisController) Device(ctx *iris.Context) {
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
 	serialNumber := ctx.URLParam("serial-number")
+	if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {
+		result = &enity.Result{"01070302", nil, statis_msg["01070302"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	list, err := statisService.Device(userId, serialNumber, date)
 	if err != nil {
 		result = &enity.Result{"01070301", err.Error(), statis_msg["01070301"]}
