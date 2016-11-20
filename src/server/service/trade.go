@@ -59,6 +59,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 		m["time"] = inserttime
 		m["serialNumber"] = deviceno
 		m["washId"] = localid + 1
+		m["status"] = status
 		if err != nil {
 			return nil, err
 		}
