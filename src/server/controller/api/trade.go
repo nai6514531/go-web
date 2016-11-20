@@ -28,7 +28,7 @@ type TradeController struct {
 func (self *TradeController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	tradeService := service.TradeService{}
-	serialNumber := ctx.URLParam("serial-number")
+	serialNumber := ctx.URLParam("serialNumber")
 	account := ctx.URLParam("account")
 	if serialNumber == "" && account == "" {
 		result = &enity.Result{"01080102", nil, trade_msg["01080102"]}
