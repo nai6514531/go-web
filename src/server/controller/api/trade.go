@@ -10,7 +10,8 @@ import (
 var (
 	trade_msg = map[string]string{
 		"01080100": "拉取模块数据成功",
-		"01080200": "拉取模块数据失败",
+		"01080101": "拉取模块数据失败",
+		"01080102": "缺少参数",
 
 	}
 )
@@ -26,6 +27,12 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 	tradeService := service.TradeService{}
 	serialNumber := ctx.URLParam("serial-number")
 	account := ctx.URLParam("account")
+	if serialNumber == "" && account == "" {
+		result = &enity.Result{"01080102", nil, trade_msg["01080102"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	list, err := tradeService.BasicOfDevice(serialNumber, account)
 	if err != nil {
 		result = &enity.Result{"01080101", err.Error(), trade_msg["01080101"]}
