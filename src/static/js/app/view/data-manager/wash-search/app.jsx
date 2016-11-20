@@ -128,6 +128,7 @@ const App = React.createClass({
   refund(account, washId) {
     // 退款操作
     var self = this;
+    const pager = {page: this.state.page, perPage: this.state.perPage}
     this.setState({
       loading: true,
     });
@@ -139,6 +140,7 @@ const App = React.createClass({
         console.log(data);
         if (data && data.status == '00') {
           message.success('退款成功',3);
+          self.list(account,pager);
         } else {
           message.info(data.msg);
         }
