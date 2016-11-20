@@ -93,13 +93,7 @@ const Navbar = React.createClass({
                     {item.name}
                   </Menu.Item>
           })}
-          <SubMenu key="#/data" title={<span><Icon type="line-chart" /><span>数据管理</span></span>}>
-            <Menu.Item key="#/data/consume">消费统计</Menu.Item>
-            <Menu.Item key="#/data/manage">经营统计</Menu.Item>
-            <Menu.Item key="#/data/device_search">模块查询</Menu.Item>
-            <Menu.Item key="#/data/wash_search">洗衣查询</Menu.Item>
-            <Menu.Item key="#/data/device">模块统计</Menu.Item>
-          </SubMenu>
+          
         </Menu>
         <footer>
           <p> - &#10084; - </p>
