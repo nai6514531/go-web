@@ -58,7 +58,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 		m["pulseType"] = washtype
 		m["time"] = inserttime
 		m["serialNumber"] = deviceno
-		m["washId"] = localid + 1
+		m["washId"] = localid
 		m["status"] = status
 		if err != nil {
 			return nil, err
@@ -89,7 +89,7 @@ func (self *TradeService) Refund(washId int, account string) (int, error) {
 		txmn.Rollback()
 		return 0, r.Error
 	}
-	r = txmn.Model(&muniu.BoxWash{}).Where(" localid = ? ", washId).Update("status", 1)
+	r = txmn.Model(&muniu.BoxWash{}).Where(" localid = ? ", washId).Update("STATUS", 1)
 	if r.Error != nil {
 		txmn.Rollback()
 		return 0, r.Error
