@@ -77,6 +77,7 @@ const App = React.createClass({
         title: '操作',
         dataIndex: 'userId',
         key: 'userId',
+        width: 100,
         render: (text, record) => (
           <div>
             <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.userId)}>
