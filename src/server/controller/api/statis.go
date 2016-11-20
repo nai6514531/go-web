@@ -77,7 +77,7 @@ func (self *StatisController) Device(ctx *iris.Context) {
 	statisService := &service.StatisService{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
-	serialNumber := ctx.URLParam("serial-number")
+	serialNumber := ctx.URLParam("serialNumber")
 	if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {
 		result = &enity.Result{"01070302", nil, statis_msg["01070302"]}
 		common.Log(ctx, result)
