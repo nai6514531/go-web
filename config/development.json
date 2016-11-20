@@ -1,37 +1,7 @@
 {
-  "name": "soda-manager",
-  "version": "0.0.17",
-  "image": {
-    "url": "reg.miz.so"
-  },
-  "domain": {
-    "url": "mng.huace.cn"
-  },
-  "author": "soda",
-  "log": {
-    "path": "/data/logs"
-  },
-  "isDevelopment": true,
-  "staticSystemPath": "./src/build/static",
-  "staticRequestPath": "/static",
-  "templateServe": "./src/template",
-  "templateSuffix": ".html",
-  "faviconPath": "./src/build/static/img/favicon.ico",
-  "logFilePath": "./log/log.log",
-  "analytics": {
-    "google-analytics": {
-      "id": "UA-87262312-1"
-    }
-  },
   "pay": {
     "aliPay": {
-      "id": "",
-      "key": "",
-      "notifyUrl": "http://74002de1.ngrok.io/api/daily-bill/alipay/notification",
-      "accountName": "深圳市华策网络科技有限公司",
-      "email": "laura@maizuo.com",
-      "signType": "MD5",
-      "requestUrl": "https://mapi.alipay.com/gateway.do"
+      "notifyUrl": "http://74002de1.ngrok.io/api/daily-bill/alipay/notification"
     }
   },
   "cron": {
@@ -45,14 +15,7 @@
     "applySpec": "0 50 6 * * ?"
   },
   "server": {
-    "host": "0.0.0.0",
-    "port": 8080,
-    "captcha": {
-      "key": "CAPTCHA",
-      "fontPath": "./resource/font/comic.ttf"
-    },
     "rateLimiter": {
-      "rate": "10-M",
       "redis": {
         "addr": "192.168.1.204:6379",
         "password": "123456",
@@ -62,12 +25,6 @@
       }
     },
     "session": {
-      "user": {
-        "id": "USER_ID",
-        "key": "USER"
-      },
-      "cookie": "sess",
-      "expires": 3600,
       "redis": {
         "addr": "192.168.1.204:6379",
         "password": "123456",
