@@ -42,3 +42,12 @@ func StringToInt(value string) int {
 func Float64ToString(num float64, prec int) string {
 	return strconv.FormatFloat(num, 'f', prec, 64)
 }
+
+func FormatFloat(num float64, prec int) float64 {
+	s := strconv.FormatFloat(num, 'f', prec, 64)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return float64(-1)
+	}
+	return f
+}
