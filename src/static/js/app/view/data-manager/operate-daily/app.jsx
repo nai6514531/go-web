@@ -52,14 +52,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (recharge_amount) => {
-          return recharge_amount.toFixed(2) + "元";
+          return recharge_amount + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consume_amount) => {
-          return consume_amount.toFixed(2) + "元";
+          return consume_amount + "元";
         }
       }],
       loading: false
