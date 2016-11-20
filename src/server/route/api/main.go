@@ -16,6 +16,8 @@ func Api() {
 		referenceDevice = &controller.ReferenceDeviceController{}
 		dailyBill       = &controller.DailyBillController{}
 		sync            = &controller.SyncController{}
+		statis          = &controller.StatisController{}
+		trade           = &controller.TradeController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -84,4 +86,9 @@ func Api() {
 	api.Get("/daily-bill/apply", dailyBill.Apply)
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
 	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
+
+	api.Get("/statis/consume", statis.Consume)
+	api.Get("/statis/operate", statis.Operate)
+	api.Get("/statis/device", statis.Device)
+	api.Get("/trade", trade.Basic)
 }

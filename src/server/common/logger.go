@@ -87,6 +87,7 @@ var (
 				"processTime":processTime,
 				"result":result,
 				"msg":result.Msg,
+				"data":result.Data,
 				"status":result.Status,
 				"system":"soda-manager",
 				"totype":"soda-manager",
