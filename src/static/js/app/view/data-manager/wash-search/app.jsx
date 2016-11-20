@@ -82,7 +82,7 @@ const App = React.createClass({
         width: 100,
         render: (text, record) => (
           <div>
-            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, text)}>
+            <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
               <p><a href="#">退款</a></p>
             </Popconfirm>
           </div>
@@ -120,9 +120,8 @@ const App = React.createClass({
         }
       })
   },
-  refund(washId) {
+  refund(account, washId) {
     // 退款操作
-    console.log(washId);
     var self = this;
     this.setState({
       loading: true,
@@ -134,16 +133,7 @@ const App = React.createClass({
         });
         console.log(data);
         if (data && data.status == '00') {
-          message.info(data.msg,3);
-          // const total = data.data.length;
-          // this.setState({
-          //   total: total,
-          //   list: data.data.map((item, key) => {
-          //     item.key = key;
-          //     console.log(item);
-          //     return item;
-          //   })
-          // });
+          message.success('退款成功',3);
         } else {
           message.info(data.msg);
         }
