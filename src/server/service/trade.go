@@ -71,7 +71,7 @@ func BasicOfBoxWash(localId int) (*muniu.BoxWash, error) {
 	boxWash := &muniu.BoxWash{}
 	r := common.MNDB.Where(" localid = ?", localId).First(boxWash)
 	if r.Error != nil {
-		return 0, r.Error
+		return nil, r.Error
 	}
 	return boxWash, nil
 }

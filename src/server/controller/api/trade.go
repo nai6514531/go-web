@@ -48,9 +48,9 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
-func (self *TradeController) refund(ctx *iris.Context) {
+func (self *TradeController) Refund(ctx *iris.Context) {
 	result := &enity.Result{}
-	tradeService := *service.TradeService{}
+	tradeService := &service.TradeService{}
 	washId, err := ctx.URLParamInt("washId")
 	if err != nil {
 		result = &enity.Result{"01080202", nil, trade_msg["01080202"]}
