@@ -77,14 +77,27 @@ func BasicOfBoxWash(localId int) (*muniu.BoxWash, error) {
 	return boxWash, nil
 }
 
+func BasicOfBoxUser(account string) (*muniu.BoxUser, error) {
+	boxUser := &muniu.BoxUser{}
+	r := common.MNDB.Where(" mobile = ? ", account).First(boxUser)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return boxUser, nil
+}
+
 func (self *TradeService) Refund(washId int, account string) (int, error) {
 	var r *gorm.DB
 	boxWash, err := BasicOfBoxWash(washId)
 	if err != nil {
 		return 0, err
 	}
+	boxUser, err := BasicOfBoxUser(account)
+	if err != nil {
+		return 0, err
+	}
 	txmn := common.MNDB.Begin()
-	r = txmn.Model(&muniu.BoxUser{}).Where(" mobile = ? ", account).Update("CONSUMPTION", boxWash.Price)
+	r = txmn.Model(&muniu.BoxUser{}).Where(" mobile = ? ", account).Update("CONSUMPTION", boxUser.Consumption - boxWash.Price)
 	if r.Error != nil {
 		txmn.Rollback()
 		return 0, r.Error
