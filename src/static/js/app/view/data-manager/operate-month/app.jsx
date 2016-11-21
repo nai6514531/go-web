@@ -20,7 +20,7 @@ const App = React.createClass({
         key: 'key',
         render(text, row, index) {
           if (index < self.state.total - 1) {
-            return <span>{text}</span>;
+            return <span>{text + 1}</span>;
           }
           return {
             children: <span>合计</span>,
@@ -86,7 +86,6 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const list = data.data;
           const increaseUserCount = list.reduce((total,item)=>{return total+item.increaseUserCount},0);
@@ -102,7 +101,7 @@ const App = React.createClass({
             "consumeAmount": consumeAmount,
           }
           let theList = list.map((item, key) => {
-            item.key = key;
+            item.key = key ;
             return item;
           });
           theList.push(total);

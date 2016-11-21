@@ -89,8 +89,7 @@ const App = React.createClass({
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });

@@ -70,14 +70,12 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const total = data.data.length;
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });

@@ -20,7 +20,7 @@ const App = React.createClass({
         key: 'key',
         render(text, row, index) {
           if (index < self.state.total-1) {
-            return <span>{text}</span>;
+            return <span>{text + 1}</span>;
           }
           return {
             children: <span>合计</span>,
@@ -109,7 +109,6 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const list = data.data;
           console.log(list);
@@ -127,7 +126,6 @@ const App = React.createClass({
           }
           let theList = list.map((item, key) => {
             item.key = key;
-            // item.key = item.id;
             return item;
           });
           theList.push(total);
