@@ -92,8 +92,8 @@ const App = React.createClass({
           const increaseUserCount = list.reduce((total,item)=>{return total+item.increaseUserCount},0);
           const enabledDeviceCount = list.reduce((total,item)=>{return total+item.enabledDeviceCount},0);
           const increaseDeviceCount = list.reduce((total,item)=>{return total+item.increaseDeviceCount},0);
-          const rechargeAmount = list.reduce((total,item)=>{return total+item.rechargeAmount},0);
-          const consumeAmount = list.reduce((total,item)=>{return total+item.consumeAmount},0);
+          const rechargeAmount = Math.round(list.reduce((total,item)=>{return total+item.rechargeAmount},0)*100)/100;
+          const consumeAmount = Math.round(list.reduce((total,item)=>{return total+item.consumeAmount},0)*100)/100;
           const total = {
             "increaseUserCount": increaseUserCount,
             "enabledDeviceCount": enabledDeviceCount,

@@ -113,11 +113,11 @@ const App = React.createClass({
         if (data && data.status == '00') {
           const list = data.data;
           console.log(list);
-          const firstPulseAmount = list.reduce((total,item)=>{return total+item.firstPulseAmount},0);
-          const secondPulseAmount = list.reduce((total,item)=>{return total+item.secondPulseAmount},0);
-          const thirdPulseAmount = list.reduce((total,item)=>{return total+item.thirdPulseAmount},0);
-          const fourthPulseAmount = list.reduce((total,item)=>{return total+item.fourthPulseAmount},0);
-          const amount = list.reduce((total,item)=>{return total+item.amount},0);
+          const firstPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.firstPulseAmount},0)*100)/100;
+          const secondPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.secondPulseAmount},0)*100)/100;
+          const thirdPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.thirdPulseAmount},0)*100)/100;
+          const fourthPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.fourthPulseAmount},0)*100)/100;
+          const amount = Math.round(list.reduce((total,item)=>{return total+item.amount},0)*100)/100;
           const total = {
             "firstPulseAmount": firstPulseAmount,
             "secondPulseAmount": secondPulseAmount,
