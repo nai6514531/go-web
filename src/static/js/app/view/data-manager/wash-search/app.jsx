@@ -89,7 +89,7 @@ const App = React.createClass({
               :
               <span>已退款</span>
             }
-            
+
           </div>
         ),
       }],
@@ -185,7 +185,7 @@ const App = React.createClass({
       <section className="view-statis-wash-search">
         <header>
           <Breadcrumb>
-            <Breadcrumb.Item>模块查询</Breadcrumb.Item>
+            <Breadcrumb.Item>洗衣查询</Breadcrumb.Item>
           </Breadcrumb>
         </header>
         <div className="toolbar">
