@@ -73,7 +73,7 @@ const App = React.createClass({
         dataIndex: 'time',
         key: 'time',
         render: (time) => {
-          return moment(time).format('YYYY-MM-DD hh:mm:ss')
+          return moment(time).format('YYYY-MM-DD HH:mm:ss')
         },
       },{
         title: '操作',
