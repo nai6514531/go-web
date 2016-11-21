@@ -34,24 +34,36 @@ const App = React.createClass({
         title: '单脱',
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
+        render: (firstPulseAmount) => {
+          return Math.round(firstPulseAmount*100)/100 + "元";
+        }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
+        render: (secondPulseAmount) => {
+          return Math.round(secondPulseAmount*100)/100 + "元";
+        }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
+        render: (thirdPulseAmount) => {
+          return Math.round(thirdPulseAmount*100)/100 + "元";
+        }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
+        render: (fourthPulseAmount) => {
+          return Math.round(fourthPulseAmount*100)/100 + "元";
+        }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       }],
       loading: false

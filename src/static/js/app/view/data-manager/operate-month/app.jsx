@@ -60,14 +60,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (rechargeAmount) => {
-          return rechargeAmount + "元";
+          return Math.round(rechargeAmount*100)/100 + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consumeAmount) => {
-          return consumeAmount + "元";
+          return Math.round(consumeAmount*100)/100 + "元";
         }
       }],
       loading: false

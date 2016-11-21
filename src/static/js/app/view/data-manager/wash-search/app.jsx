@@ -51,7 +51,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       },{
         title: '洗衣类型',
