@@ -49,7 +49,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       },{
         title: '洗衣类型',
@@ -71,7 +71,7 @@ const App = React.createClass({
         dataIndex: 'time',
         key: 'time',
         render: (time) => {
-          return moment(time).format('YYYY-MM-DD hh:mm:ss')
+          return moment(time).format('YYYY-MM-DD HH:mm:ss')
         }
       }],
       loading: false
@@ -91,14 +91,12 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const total = data.data.length;
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });
