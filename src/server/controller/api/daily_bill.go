@@ -578,7 +578,6 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 	//用于更新旧系统数据
 	if len(successedBillIds) > 0 {
 		mnznSuccessedBillList, err := BasicMnznBillLists(&billIdSettledAtMap, successedBillIds...)
-		common.Logger.Debugln("11111111111111111111111111", mnznSuccessedBillList)
 		if err != nil {
 			common.Logger.Debugln(daily_bill_msg["01060504"], ":", err.Error())
 			result := &enity.Result{"01060504", err.Error(), daily_bill_msg["01060504"]}
