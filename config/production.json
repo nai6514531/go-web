@@ -1,0 +1,8 @@
+{
+  "isDevelopment": false,
+  "templateServe": "./src/build/template",
+  "logFilePath": "/data/logs/maizuo.log",
+  "server": {
+    "port": 9999
+  }
+}
