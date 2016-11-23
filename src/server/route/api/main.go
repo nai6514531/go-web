@@ -90,7 +90,7 @@ func Api() {
 	api.Get("/statis/consume", statis.Consume)
 	api.Get("/statis/operate", statis.Operate)
 	api.Get("/statis/device", statis.Device)
-	api.Get("/statis/daily-pay", statis.DailyPay)
+	api.Get("/stat/daily-pay", statis.DailyPay)
 	api.Get("/trade", trade.Basic)
 	api.Get("/trade/refund", trade.Refund)
 }
