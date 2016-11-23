@@ -28,9 +28,9 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-  title: 'ID',
-  dataIndex: 'index',
-  key: 'index',
+  title: '序号',
+  dataIndex: 'id',
+  key: 'id',
 }, {
   title: '学校',
   dataIndex: 'school',
@@ -121,8 +121,7 @@ class SchoolTable extends React.Component {
         list = school.result.data;
         dataSource = list.map(function (item,key) {
           return {
-            key: item.id,
-            index: item.id,
+            id: item.id,
             school: item.name,
             number: item.deviceTotal,
           }

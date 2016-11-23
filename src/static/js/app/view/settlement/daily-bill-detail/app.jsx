@@ -10,18 +10,14 @@ const App = React.createClass({
   getInitialState() {
     return {
       columns: [{
-        title: 'ID',
-        dataIndex: 'key',
-        key: 'key',
+        title: '账单号',
+        dataIndex: 'id',
+        key: 'id',
         sorter: (a, b) => +a.id - +b.id
       }, {
         title: '设备编号',
         dataIndex: 'serialNumber',
         key: 'serialNumber'
-      }, {
-        title: '订单号',
-        dataIndex: 'id',
-        key: 'id'
       }, {
         title: '服务类型',
         dataIndex: 'pulseType',
@@ -81,7 +77,6 @@ const App = React.createClass({
           this.setState({
             total: data.data.total,
             list: data.data.list.map((item) => {
-              item.key = item.id;
               return item;
             })
           });

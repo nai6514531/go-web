@@ -38,9 +38,9 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-  title: 'ID',
-  dataIndex: 'key',
-  key: 'index',
+  title: '序号',
+  dataIndex: 'id',
+  key: 'id',
 }, {
   title: '编号',
   dataIndex: 'serialNumber',
@@ -251,8 +251,7 @@ class DeviceTable extends React.Component {
               status = '启用';
           }
           return {
-            key: item.id,
-            index: key,
+            id: item.id,
             schoolId: schoolId,
             serialNumber: item.serialNumber,
             referenceDevice: referenceDevice,

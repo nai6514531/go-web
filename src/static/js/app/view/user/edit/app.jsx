@@ -585,6 +585,22 @@ class UserForm extends React.Component {
             </FormItem>
             <FormItem
               {...formItemLayout}
+              label="服务电话" >
+              {getFieldDecorator('telephone', {
+                rules: [
+                  { required: true, message: '必填' },
+                  { max:30, message: '长度不超过三十位' },
+                  { validator: this.checkAreaCode },
+                ],
+                initialValue: initialValue.telephone,
+
+              })(
+                <Input placeholder="请输入服务电话" />
+              )}
+            </FormItem>
+
+            <FormItem
+              {...formItemLayout}
               label="收款方式"
             >
               {getFieldDecorator('type', {
@@ -595,7 +611,7 @@ class UserForm extends React.Component {
               })(
                 <RadioGroup>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
-                    无
+                    无设备
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
                     <span>自动分账-无须手动申请结账</span>
@@ -610,21 +626,6 @@ class UserForm extends React.Component {
               )}
             </FormItem>
             {payNode}
-            <FormItem
-              {...formItemLayout}
-              label="服务电话" >
-              {getFieldDecorator('telephone', {
-                rules: [
-                  { required: true, message: '必填' },
-                  { max:30, message: '长度不超过三十位' },
-                  { validator: this.checkAreaCode },
-                ],
-                initialValue: initialValue.telephone,
-
-              })(
-                <Input placeholder="请输入服务电话" />
-              )}
-            </FormItem>
             <FormItem wrapperCol={{ span: 12, offset: 7 }}>
               <Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
               <Button type="primary" onClick={this.handleSubmit}>保存</Button>

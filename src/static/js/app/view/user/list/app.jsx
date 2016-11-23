@@ -25,9 +25,9 @@ function mapDispatchToProps(dispatch) {
 }
 
 const columns = [{
-  title: 'ID',
-  dataIndex: 'index',
-  key: 'index',
+  title: '用户编号',
+  dataIndex: 'id',
+  key: 'id',
 }, {
   title: '运营商名称',
   dataIndex: 'user',
@@ -186,8 +186,7 @@ class AgentTable extends React.Component {
           dataSource = data.map(function (item, key) {
             return (
             {
-              key: item.id,
-              index: item.id,
+              id: item.id,
               user: item.name,
               contact: item.contact,
               account: item.account,

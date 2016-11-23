@@ -10,7 +10,7 @@ const App = React.createClass({
 	getInitialState() {
 		return {
 			columns: [{
-				title: 'ID',
+				title: '账单号',
 				dataIndex: 'id',
 				key: 'id',
 				sorter: (a, b) => +a.id - +b.id

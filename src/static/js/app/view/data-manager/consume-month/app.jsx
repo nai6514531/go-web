@@ -13,7 +13,7 @@ const App = React.createClass({
       list:[],
       total: 0,
       columns: [{
-        title: 'ID',
+        title: '序号',
         dataIndex: 'key',
         key: 'key',
         render(text, row, index) {
