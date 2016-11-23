@@ -77,9 +77,9 @@ class UserForm extends React.Component {
   componentWillReceiveProps(nextProps) {
         const self = this;
     if(this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true){
-            if(nextProps.detail.result.data.cashAccount){
+      if(nextProps.detail.result.data.cashAccount){
         const type = nextProps.detail.result.data.cashAccount.type;
-              // type 1 for alipay,3 for bank,0 for none
+        // type 1 for alipay,3 for bank,0 for none
         if(type) {
           switch (type) {
             case 1:
@@ -124,7 +124,7 @@ class UserForm extends React.Component {
   provinceChange(event) {
     this.props.getProvinceCityList(event);
     const { setFieldsValue } = this.props.form;
-    setFieldsValue({'cityId':'0'});
+    setFieldsValue({'cityId':'-1'});
     this.default = -1;
     }
   cityChange(event) {
@@ -134,10 +134,12 @@ class UserForm extends React.Component {
       e.preventDefault();
       const self = this;
     this.props.form.validateFields((errors, values) => {
-      // if(values.cityId == -1) {
+      let cityId = values.cityId;
+      if(values.cityId == -1) {
+        cityId = 0;
         // self.cityIdHelp = {'help':'必选','className':'has-error'};
         // return false;
-      // }
+      }
       if (errors) {
         return;
       }
@@ -157,7 +159,7 @@ class UserForm extends React.Component {
               "bankName": values.bankName,
               "account": values.account,
               "mobile": values.bankMobile,
-              "cityId": parseInt(values.cityId),
+              "cityId": parseInt(cityId),
               "provinceId": parseInt(values.provinceId),
           }
       } else if(values.type == 1){
@@ -280,7 +282,7 @@ class UserForm extends React.Component {
     const self = this;
     const { id } = this.props.params;
     const userId = USER.id;
-        const { detail, provinceCity, provinceList } = this.props;
+    const { detail, provinceCity, provinceList } = this.props;
     let initialValue = {};
     if(id && id !== 'new' && detail) {
       if(detail.fetch == true){
@@ -317,7 +319,7 @@ class UserForm extends React.Component {
         }
         initialValue = Object.assign({}, baseValues, cashValues);
       } else {
-        message.error('获取运营商信息失败,请重试.');
+        message.error('获取运营商信息失败,请重试.',3);
       }
     }
     const { getFieldDecorator } = this.props.form;
@@ -449,7 +451,7 @@ class UserForm extends React.Component {
         </FormItem>
       </div>
     }
-    const disable = id !== 'new'?{disabled:true}:{};
+    // const disable = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
         <header>
