@@ -31,24 +31,36 @@ const App = React.createClass({
         title: '单脱',
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
+        render: (firstPulseAmount) => {
+          return Math.round(firstPulseAmount*100)/100 + "元";
+        }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
+        render: (secondPulseAmount) => {
+          return Math.round(secondPulseAmount*100)/100 + "元";
+        }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
+        render: (thirdPulseAmount) => {
+          return Math.round(thirdPulseAmount*100)/100 + "元";
+        }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
+        render: (firstPulseAmount) => {
+          return Math.round(firstPulseAmount*100)/100 + "元";
+        }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       }],
       loading: false
@@ -70,14 +82,12 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const total = data.data.length;
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });

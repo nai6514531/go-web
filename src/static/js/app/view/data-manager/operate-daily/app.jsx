@@ -52,14 +52,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (recharge_amount) => {
-          return recharge_amount + "元";
+          return Math.round(recharge_amount*100)/100 + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consume_amount) => {
-          return consume_amount + "元";
+          return Math.round(consume_amount*100)/100 + "元";
         }
       }],
       loading: false
@@ -80,14 +80,12 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const total = data.data.length;
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });

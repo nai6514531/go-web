@@ -1,0 +1,8 @@
+{
+  "templateServe": "./src/build/template",
+  "templateSuffix": ".html",
+  "logFilePath": "/data/logs/maizuo.log",
+  "server": {
+    "port": 9999
+  }
+}

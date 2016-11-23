@@ -20,7 +20,7 @@ const App = React.createClass({
         key: 'key',
         render(text, row, index) {
           if (index < self.state.total - 1) {
-            return <span>{text}</span>;
+            return <span>{text + 1}</span>;
           }
           return {
             children: <span>合计</span>,
@@ -60,14 +60,14 @@ const App = React.createClass({
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
         render: (rechargeAmount) => {
-          return rechargeAmount + "元";
+          return Math.round(rechargeAmount*100)/100 + "元";
         }
       },{
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
         render: (consumeAmount) => {
-          return consumeAmount + "元";
+          return Math.round(consumeAmount*100)/100 + "元";
         }
       }],
       loading: false
@@ -86,23 +86,22 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
         if (data && data.status == '00') {
           const list = data.data;
           const increaseUserCount = list.reduce((total,item)=>{return total+item.increaseUserCount},0);
           const enabledDeviceCount = list.reduce((total,item)=>{return total+item.enabledDeviceCount},0);
           const increaseDeviceCount = list.reduce((total,item)=>{return total+item.increaseDeviceCount},0);
-          const rechargeAmount = list.reduce((total,item)=>{return total+item.rechargeAmount},0);
-          const consumeAmount = list.reduce((total,item)=>{return total+item.consumeAmount},0);
+          const rechargeAmount = Math.round(list.reduce((total,item)=>{return total+item.rechargeAmount},0)*100)/100;
+          const consumeAmount = Math.round(list.reduce((total,item)=>{return total+item.consumeAmount},0)*100)/100;
           const total = {
-            "increaseUserCount": increaseUserCount,
-            "enabledDeviceCount": enabledDeviceCount,
-            "increaseDeviceCount": increaseDeviceCount,
-            "rechargeAmount": rechargeAmount,
-            "consumeAmount": consumeAmount,
+            "increaseUserCount": increaseUserCount.toFixed(2),
+            "enabledDeviceCount": enabledDeviceCount.toFixed(2),
+            "increaseDeviceCount": increaseDeviceCount.toFixed(2),
+            "rechargeAmount": rechargeAmount.toFixed(2),
+            "consumeAmount": consumeAmount.toFixed(2),
           }
           let theList = list.map((item, key) => {
-            item.key = key;
+            item.key = key ;
             return item;
           });
           theList.push(total);

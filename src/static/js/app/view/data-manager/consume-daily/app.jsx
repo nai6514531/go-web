@@ -2,8 +2,6 @@ import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import StatisConsumeService from "../../../service/statis_consume";
 import { Link } from 'react-router';
-// const _ = require('lodash');
-import moment from 'moment';
 
 const App = React.createClass({
   propTypes: {
@@ -34,35 +32,35 @@ const App = React.createClass({
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
         render: (firstPulseAmount) => {
-          return firstPulseAmount + "元";
+          return Math.round(firstPulseAmount*100)/100 + "元";
         }
       },{
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
         render: (secondPulseAmount) => {
-          return secondPulseAmount + "元";
+          return Math.round(secondPulseAmount*100)/100 + "元";
         }
       },{
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
         render: (thirdPulseAmount) => {
-          return thirdPulseAmount + "元";
+          return Math.round(thirdPulseAmount*100)/100 + "元"
         }
       },{
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
         render: (fourthPulseAmount) => {
-          return fourthPulseAmount + "元";
+          return Math.round(fourthPulseAmount*100)/100 + "元"
         }
       }, {
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return amount + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       }],
       loading: false
@@ -89,8 +87,7 @@ const App = React.createClass({
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
-              item.key = key;
-              console.log(item);
+              item.key = key + 1;
               return item;
             })
           });

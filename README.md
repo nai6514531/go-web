@@ -2,17 +2,17 @@
 
 ### 目录结构
 
-* src/static 
+- src/static 
 
 前端业务逻辑处理 & 页面静态资源
 
-* src/server
+- src/server
 
 后端业务逻辑处理
 
 ### 编译和运行
 
-* 安装golang环境
+#### 安装golang环境
 
 推荐下载地址
 
@@ -20,88 +20,60 @@
 
 [Mac](http://golangtc.com/static/go/1.5.2/go1.5.2.darwin-amd64.tar.gz)
 
-### 配置
 
-
+#### 安装依赖包
 ```
-获取 go依赖
-go get 
-
-获取 js依赖
 npm i 
-
 ```
-### 开发环境
 
+
+#### 开始开发
+
+- 前端即时编译
 ```
 gulp 
-
-gulp deve || gulp local
 ```
 
-### 预生产环境(preview)210测试
+- 启动服务端
+```
+make dev
+```
 
-`待补充`
 
-### 生产环境
+### 发布
+- 打标签并上传
+	```
+	git tag 20161120.1
+	git push origin master:master --tags 
+	```
 
+- 登录发布环境
+	```
+	ssh ${deployment}
+	```
 
 - 手动设置环境
-	`
-	export NODE_ENV=production
-	`
+	```
+	export NODE_ENV=${production, intranet}
+	kubectl config set-context ${prod, dev}
+	docker login ${reg.maizuo.com, reg.miz.so}
+	```
 
-- 更新版本号
-	`
-	gulp bump:patch || gulp bump:minor
-	`
+- 更新发布环境的仓库
+	```
+	cd /data/deploy/project/golang/src/maizuo.com/soda-manager
+	git fetch -p --tags
+	git checkout -B master origin/master
+	```
 
-- 编译前端资源
-	`
-	gulp build
-	`
+- 第一次发布
+	```
+	cd /data/deploy/chamber/soda-manager
+	make HOSTING=${intranet,production}
+	```
 
-- 编译后端资源
-	`
-	gulp compile
-	`
-
-- 生成Dockerfile
-	`
-	 gulp docker:config
-	`
-	
-- 构建docker镜像
-	`
-	 gulp docker:build
-	`
-
-- 登录docker远端仓库
-	`
-	docker login reg.miz.so || docker login reg.maizuo.com
-	`
-
-- 推送docker镜像
-	`
-	gulp docker:push
-	`
-
-- 生成kubernetes配置
-	`
-	gulp k8s:config
-	`
-
-- 设置kubernetes环境
-	`
-	kubectl config set current-context dev || prod
-	`
-
-- 删除服务器上的服务
-	`
-	gulp k8s:delete
-	`
-
-- 用kubernetes发布
-	`
-	gulp k8s:create
-	`
+- 滚动更新
+	```
+	cd /data/deploy/chamber/soda-manager
+	make update HOSTING=${intranet,production}
+	```

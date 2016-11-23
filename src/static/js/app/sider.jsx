@@ -25,6 +25,8 @@ const Navbar = React.createClass({
         {'title':'结算管理','icon':'pay-circle-o'},
         {'title':'设备管理','icon':'calculator'},
         {'title':'数据统计','icon':'line-chart'},
+        {'title': '洗衣查询','icon':'search'},
+        {'title': '模块查询','icon':'search'},
       ],
       openKeys: [],
     };
@@ -93,7 +95,7 @@ const Navbar = React.createClass({
                     {item.name}
                   </Menu.Item>
           })}
-          
+
         </Menu>
         <footer>
           <p> - &#10084; - </p>

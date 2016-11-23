@@ -7,26 +7,15 @@ require('./task/webpack');
 require('./task/rev');
 require('./task/minify');
 require('./task/copy');
-require('./task/bump');
 require('./task/git');
-require('./task/deploy');
+require('./task/doc');
 
 gulp.task('default', () => {
-	return sequence('clean', 'copy:img', 'copy:vendor', 'webpack:dev');
+  return sequence('clean', 'copy:img', 'copy:vendor', 'webpack:dev');
 });
 
-gulp.task('local', shell.task([
-	"godep go run main.go -conf ./config/default"
-]));
+gulp.task('build', () => {
+  return sequence('clean', 'copy:template', 'copy:img', 'copy:vendor', 'webpack:prod', 'rev', 'rev:replace', 'minify');
+});
 
-gulp.task('deve', shell.task([
-	'godep go run main.go -conf ./config/development',
-]));
-
-gulp.task('prod', shell.task([
-	'godep go run main.go -conf ./config/production',
-]));
-
-gulp.task('doc', shell.task([
-	'apidoc -i ./src/server/ -o doc/',
-]));
+gulp.task('release', ['git:release']);
