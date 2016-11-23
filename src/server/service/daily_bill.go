@@ -409,7 +409,7 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
+	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
 		" from trade_info " +
 		" where date(UPDATETIME) >='" + start + "' " +
 		" and date(UPDATETIME)<'" + end + "'" +
@@ -434,7 +434,7 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'count' " +
+	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
 		" from trade_info " +
 		" where date(UPDATETIME) >='" + start + "'" +
 		" and date(UPDATETIME)<'" + end + "'" +

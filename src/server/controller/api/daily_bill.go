@@ -839,9 +839,9 @@ func (self *DailyBillController) SumByDate(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	type List struct {
-		Bill       interface{} `json:"bill"`
-		WeChatBill interface{} `json:"weChatBill"`
-		AliPayBill interface{} `json:"aliPayBill"`
+		Bill       interface{} `json:"all"`
+		WeChatBill interface{} `json:"wechat"`
+		AliPayBill interface{} `json:"alipay"`
 	}
 	bill, err := dailyBillService.SumByDate()
 	weChatBill, err := dailyBillService.WechatBillByDate()

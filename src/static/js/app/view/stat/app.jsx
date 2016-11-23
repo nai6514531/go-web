@@ -141,9 +141,9 @@ const App = React.createClass({
       .then((body) => {
         if (body && body.status == 0) {
           const data = body.data || {};
-          const dates = _.chain([_.map(data.bill, 'date'), _.map(data.alipay, 'date'), _.map(data.wechat, 'date')]).flatten().uniq().value();
-          const bill = _.map(dates, (date) => {
-            const item = _.find(data.bill || [], { date }) || {};
+          const dates = _.chain([_.map(data.all, 'date'), _.map(data.alipay, 'date'), _.map(data.wechat, 'date')]).flatten().uniq().value();
+          const all = _.map(dates, (date) => {
+            const item = _.find(data.all || [], { date }) || {};
             return item.amount || 0;
           });
           const alipay = _.map(dates, (date) => {
@@ -186,7 +186,7 @@ const App = React.createClass({
             },
             series: [{
               name: '每日消费账单总金额',
-              data: bill
+              data: all
             }, {
               name: '微信充值总金额',
               visible: false,
