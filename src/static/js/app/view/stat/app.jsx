@@ -83,9 +83,16 @@ const App = React.createClass({
     StatService.dailyPay()
       .then((body) => {
         if (body && body.status == 0) {
-          const dates = _.map(body.data.alipay || [], (obj) => obj.date)
-          const alipay = _.map(body.data.alipay || [], (obj) => obj.amount)
-          const bank = _.map(body.data.bank || [], (obj) => obj.amount)
+          const data = body.data || {};
+          const dates = _.chain([_.map(data.alipay, 'date'), _.map(data.bank, 'date')]).flatten().uniq().value();
+          const alipay = _.map(dates, (date) => {
+            const item = _.find(data.alipay || [], { date }) || {};
+            return item.amount || 0;
+          });
+          const bank = _.map(dates, (date) => {
+            const item = _.find(data.bank || [], { date }) || {};
+            return item.amount || 0;
+          });
           Highcharts.chart('daily-pay', {
             chart: {
               type: 'bar'
@@ -135,10 +142,20 @@ const App = React.createClass({
     StatService.dailyBill()
       .then((body) => {
         if (body && body.status == 0) {
-          const dates = _.map(body.data.bill || [], (obj) => obj.date)
-          const bill = _.map(body.data.bill || [], (obj) => obj.count)
-          const alipay = _.map(body.data.alipay || [], (obj) => obj.count)
-          const wechat = _.map(body.data.wechat || [], (obj) => obj.count)
+          const data = body.data || {};
+          const dates = _.chain([_.map(data.bill, 'date'), _.map(data.alipay, 'date'), _.map(data.wechat, 'date')]).flatten().uniq().value();
+          const bill = _.map(dates, (date) => {
+            const item = _.find(data.bill || [], { date }) || {};
+            return item.amount || 0;
+          });
+          const alipay = _.map(dates, (date) => {
+            const item = _.find(data.alipay || [], { date }) || {};
+            return item.amount || 0;
+          });
+          const wechat = _.map(dates, (date) => {
+            const item = _.find(data.wechat || [], { date }) || {};
+            return item.amount || 0;
+          });
           Highcharts.chart('daily-bill', {
             chart: {
               type: 'bar'
