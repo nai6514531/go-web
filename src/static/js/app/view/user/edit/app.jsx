@@ -226,11 +226,11 @@ class UserForm extends React.Component {
     }
   }
   checkUserAccount(rule, value, callback) {
-    var pattern=new RegExp(/^\d+$/);
-    if((pattern.test(value) && value.length == 11 )|| !value ){
+    var pattern=new RegExp(/^[a-zA-Z0-9]+$/);
+    if((pattern.test(value) && value.length <= 15 && value.length >= 5 )|| !value ){
       callback();
     } else {
-      callback('新增账号名只能为11位手机号');
+      callback('新增账号名只能包含字母或数字，长度为5到15位');
     }
   }
   checkAreaCode(rule, value, callback) {
