@@ -327,7 +327,7 @@ const App = React.createClass({
           <Breadcrumb.Item>数据统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Collapse accordion defaultActiveKey={ PANEL_KEY.DAILY_BILL } onChange={this.onChange}>
+      <Collapse accordion defaultActiveKey={ PANEL_KEY.DAILY_PAY } onChange={this.onChange}>
         <Panel header="每日结账" key={PANEL_KEY.DAILY_PAY}>
           <div id="daily-pay" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
