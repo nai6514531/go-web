@@ -48,10 +48,10 @@
     },
     "mndb": {
       "dialect": "mysql",
-      "host": "192.168.1.204",
+      "host": "120.24.248.223",
       "port": 3306,
-      "user": "web",
-      "password": "123456",
+      "user": "boxadmin",
+      "password": "db@ba1306",
       "database": "mnzn",
       "maxIdle": 20,
       "maxOpen": 20

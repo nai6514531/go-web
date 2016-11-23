@@ -125,11 +125,9 @@ const App = React.createClass({
             },
             series: [{
               name: '银行卡结账总金额',
-              visible: false,
               data: bank
             }, {
               name: '支付宝结账总金额',
-              visible: false,
               data: alipay
             }]
           });
@@ -296,7 +294,7 @@ const App = React.createClass({
 
   },
   componentDidMount(){
-    this.renderDailyBillChart()
+    this.renderDailyPayChart()
   },
   onChange(key){
     if (~_.indexOf(this.chartKey, key)) {

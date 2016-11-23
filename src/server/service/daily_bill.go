@@ -379,7 +379,7 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	IdStr := ""
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := " select PERIOD_START as 'date', sum(MONEY) as 'count' " +
+	sql := " select PERIOD_START as 'date', sum(MONEY) as 'amount' " +
 		" from box_stat_bill " +
 		" where PERIOD_START>='" + start + "' " +
 		" and PERIOD_START<'" + end + "'"
