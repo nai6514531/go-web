@@ -77,7 +77,7 @@ var (
 				_controller = _c[2 : len(_c)-1]
 			}
 			_system = strings.Replace(handle[1], "-", "_", -1)
-			if len(_f) >= 1 {
+				if len(_f) >= 1 {
 				_func = _f[0]
 			}
 		}
