@@ -83,8 +83,14 @@ func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCa
 		mnTransAction.Rollback()
 		return false, r.Error
 	}
+	//对有可能为0的值进行单独更新
+	var value_zero = make(map[string]interface{})
+	value_zero["type"] = userCashAccount.Type
+	value_zero["province_id"] = userCashAccount.ProvinceId
+	value_zero["city_id"] = userCashAccount.CityId
+
 	//再单独更新一次type避免为0时更新不了
-	r = transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Update("type", userCashAccount.Type)
+	r = transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(value_zero)
 	if r.Error != nil {
 		transAction.Rollback()
 		mnTransAction.Rollback()

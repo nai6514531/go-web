@@ -115,11 +115,11 @@ const App = React.createClass({
           const fourthPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.fourthPulseAmount},0)*100)/100;
           const amount = Math.round(list.reduce((total,item)=>{return total+item.amount},0)*100)/100;
           const total = {
-            "firstPulseAmount": firstPulseAmount.toFixed(2),
-            "secondPulseAmount": secondPulseAmount.toFixed(2),
-            "thirdPulseAmount": thirdPulseAmount.toFixed(2),
-            "fourthPulseAmount": fourthPulseAmount.toFixed(2),
-            "amount": amount.toFixed(2),
+            "firstPulseAmount": firstPulseAmount,
+            "secondPulseAmount": secondPulseAmount,
+            "thirdPulseAmount": thirdPulseAmount,
+            "fourthPulseAmount": fourthPulseAmount,
+            "amount": amount,
           };
           let theList = list.map((item, key) => {
             item.key = key;

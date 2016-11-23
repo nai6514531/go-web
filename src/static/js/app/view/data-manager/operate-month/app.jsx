@@ -94,11 +94,11 @@ const App = React.createClass({
           const rechargeAmount = Math.round(list.reduce((total,item)=>{return total+item.rechargeAmount},0)*100)/100;
           const consumeAmount = Math.round(list.reduce((total,item)=>{return total+item.consumeAmount},0)*100)/100;
           const total = {
-            "increaseUserCount": increaseUserCount.toFixed(2),
-            "enabledDeviceCount": enabledDeviceCount.toFixed(2),
-            "increaseDeviceCount": increaseDeviceCount.toFixed(2),
-            "rechargeAmount": rechargeAmount.toFixed(2),
-            "consumeAmount": consumeAmount.toFixed(2),
+            "increaseUserCount": increaseUserCount,
+            "enabledDeviceCount": enabledDeviceCount,
+            "increaseDeviceCount": increaseDeviceCount,
+            "rechargeAmount": rechargeAmount,
+            "consumeAmount": consumeAmount,
           }
           let theList = list.map((item, key) => {
             item.key = key ;
