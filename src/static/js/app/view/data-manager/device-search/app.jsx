@@ -106,7 +106,7 @@ const App = React.createClass({
       })
   },
   handleSearch() {
-    const serialNumber = this.state.searchValue;
+    const serialNumber = this.state.searchValue.replace(/[\r\n\s]/g,"");
     const pager = {page: this.state.page, perPage: this.state.perPage}
     if (serialNumber) {
       // 发请求啦

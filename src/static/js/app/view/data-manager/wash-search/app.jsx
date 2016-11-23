@@ -145,7 +145,7 @@ const App = React.createClass({
       })
   },
   handleSearch() {
-    const account = this.state.searchValue;
+    const account = this.state.searchValue.replace(/[\r\n\s]/g,"");
     const pager = {page: this.state.page, perPage: this.state.perPage}
     if (account) {
       // 发请求啦
