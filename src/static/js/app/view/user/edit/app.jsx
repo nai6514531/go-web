@@ -174,15 +174,9 @@ class UserForm extends React.Component {
             user.cashAccount = cashAccount;
       if(this.props.params.id == 'new') {
         user.password = md5(values.password);
-        if(values.userAccount.length == 11) {
-            user.account = values.userAccount;
-            this.props.postUserDetail(user);
-        } else {
-          message.error('新增账号只能为11位手机号',3);
-          return;
-        }
+        user.account = values.userAccount;
+        this.props.postUserDetail(user);
       } else {
-          // user.account = self.account;
           this.props.putUserDetail(this.props.params.id, user);
       }
       self.saveDetail = 1;

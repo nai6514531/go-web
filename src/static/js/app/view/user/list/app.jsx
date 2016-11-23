@@ -187,6 +187,7 @@ class AgentTable extends React.Component {
             return (
             {
               id: item.id,
+              key: item.id,
               user: item.name,
               contact: item.contact,
               account: item.account,
@@ -206,8 +207,8 @@ class AgentTable extends React.Component {
         if(detailTotal.fetch == true) {
           data = detailTotal.result.data;
           dataSource = [{
+            id: data.id,
             key: data.id,
-            index: data.id,
             user: data.name,
             contact: data.contact,
             account: data.account,
