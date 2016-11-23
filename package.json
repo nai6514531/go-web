@@ -24,6 +24,7 @@
     "g2": "^2.0.5",
     "graceful-fs": "^4.1.9",
     "highcharts": "^5.0.2",
+    "keymirror": "^0.1.1",
     "lib-flexible": "^0.3.2",
     "lodash": "^4.13.1",
     "mailgen": "^1.0.25",

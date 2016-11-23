@@ -1,12 +1,23 @@
 import React from "react";
 import {Collapse, Breadcrumb, Spin} from 'antd';
-const Panel = Collapse.Panel;
-import "./app.less";
-const _ = require('lodash');
-var Highcharts = require('highcharts');
-var Highstock = require('highcharts/highstock');
-var moment = require('moment');
+import keymirror from 'keymirror';
 import StatService from "../../service/stat";
+import "./app.less";
+
+const _ = require('lodash');
+const Highcharts = require('highcharts');
+const Highstock = require('highcharts/highstock');
+const moment = require('moment');
+const Panel = Collapse.Panel;
+
+const PANEL_KEY = keymirror({
+  DAILY_BILL: null,
+  DAILY_PAY: null,
+  RECHARGE: null,
+  CONSUME: null,
+  USER: null,
+})
+
 const App = React.createClass({
   chartKey: [],
   getInitialState() {
@@ -68,47 +79,155 @@ const App = React.createClass({
       }]
     });
   },
+  renderDailyPayChart(){
+    StatService.dailyPay()
+      .then((body) => {
+        if (body && body.status == 0) {
+          const dates = _.map(body.data.alipay || [], (obj) => obj.date)
+          const alipay = _.map(body.data.alipay || [], (obj) => obj.amount)
+          const bank = _.map(body.data.bank || [], (obj) => obj.amount)
+          Highcharts.chart('daily-pay', {
+            chart: {
+              type: 'bar'
+            },
+            title: {
+              text: ''
+            },
+            xAxis: {
+              categories: dates
+            },
+            yAxis: {
+              min: 0,
+              title: {
+                text: ''
+              }
+            },
+            legend: {
+              reversed: false
+            },
+            plotOptions: {
+              bar: {
+                dataLabels: {
+                  enabled: true
+                },
+                enableMouseTracking: false
+              },
+              series: {
+                stacking: 'normal'
+              }
+            },
+            series: [{
+              name: '银行卡结账总金额',
+              visible: false,
+              data: bank
+            }, {
+              name: '支付宝结账总金额',
+              visible: false,
+              data: alipay
+            }]
+          });
+        } else {
+          alert(body.msg);
+        }
+      });
+  },
+  renderDailyBillChart(){
+    StatService.dailyBill()
+      .then((body) => {
+        if (body && body.status == 0) {
+          const dates = _.map(body.data.bill || [], (obj) => obj.date)
+          const bill = _.map(body.data.bill || [], (obj) => obj.count)
+          const alipay = _.map(body.data.alipay || [], (obj) => obj.count)
+          const wechat = _.map(body.data.wechat || [], (obj) => obj.count)
+          Highcharts.chart('daily-bill', {
+            chart: {
+              type: 'bar'
+            },
+            title: {
+              text: ''
+            },
+            xAxis: {
+              categories: dates
+            },
+            yAxis: {
+              min: 0,
+              title: {
+                text: ''
+              }
+            },
+            legend: {
+              reversed: false
+            },
+            plotOptions: {
+              bar: {
+                dataLabels: {
+                  enabled: true
+                },
+                enableMouseTracking: false
+              },
+              series: {
+                stacking: 'normal'
+              }
+            },
+            series: [{
+              name: '每日消费账单总金额',
+              data: bill
+            }, {
+              name: '微信充值总金额',
+              visible: false,
+              data: wechat
+            }, {
+              name: '支付宝充值总金额',
+              visible: false,
+              data: alipay
+            }]
+          });
+        } else {
+          alert(data.msg);
+        }
+      });
+  },
   renderRechargeChart(){
     var self = this;
     StatService.recharge()
-      .then((data) => {
-        if (data && data.status == 0) {
+      .then((body) => {
+        if (body && body.status == 0) {
           const categories = [];
           const _data = [];
-          _.each(data.data || [], function (v) {
+          _.each(body.data || [], function (v) {
             categories.push(v.month);
             _data.push(v.count);
           });
           self.renderBarChart('recharge', categories, _data);
         } else {
-          alert(data.msg);
+          alert(body.msg);
         }
       });
   },
   renderConsumeChart(){
     var self = this;
     StatService.consume()
-      .then((data) => {
-        if (data && data.status == 0) {
+      .then((body) => {
+        if (body && body.status == 0) {
           const categories = [];
           const _data = [];
-          _.each(data.data || [], function (v) {
+          _.each(body.data || [], function (v) {
             categories.push(v.month);
             _data.push(v.count);
           });
           self.renderBarChart('consume', categories, _data);
         } else {
-          alert(data.msg);
+          alert(body.msg);
         }
       });
   },
   renderUserChart(){
     var self = this;
     StatService.signInUser()
-      .then((data) => {
-        if (data && data.status == 0) {
+      .then((body) => {
+        if (body && body.status == 0) {
           const _data = [];
-          _.each(data.data || [], function (v) {
+          _.each(body.data || [], function (v) {
             _data.push([moment(v.date).toDate().getTime(), v.count])
           });
           console.info(_data)
@@ -154,94 +273,33 @@ const App = React.createClass({
             }
           });
         } else {
-          alert(data.msg);
+          alert(body.msg);
         }
       });
 
   },
-  renderDailBillChart(){
-    StatService.dailyBill()
-      .then((data) => {
-        if (data && data.status == 0) {
-          const categories = [];
-          const bill = data.data.bill || [];
-          const weChatBill = data.data.weChatBill || [];
-          const aliPayBill = data.data.aliPayBill || [];
-          const billData = [];
-          const weChatData = [];
-          const aliPayData = [];
-          _.each(bill || [], function (v) {
-            categories.push(v.date);
-            billData.push(v.count);
-          });
-          _.each(weChatBill || [], function (v) {
-            weChatData.push(v.count);
-          });
-          _.each(aliPayBill || [], function (v) {
-            aliPayData.push(v.count);
-          });
-          Highcharts.chart('daily-bill', {
-            chart: {
-              type: 'bar'
-            },
-            title: {
-              text: ''
-            },
-            xAxis: {
-              categories: categories
-            },
-            yAxis: {
-              min: 0,
-              title: {
-                text: ''
-              }
-            },
-            legend: {
-              reversed: false
-            },
-            plotOptions: {
-              bar: {
-                dataLabels: {
-                  enabled: true
-                },
-                enableMouseTracking: false
-              },
-              series: {
-                stacking: 'normal'
-              }
-            },
-            series: [{
-              name: '每日消费账单总金额',
-              data: billData
-            }, {
-              name: '微信充值总金额',
-              visible: false,
-              data: weChatData
-            }, {
-              name: '支付宝充值总金额',
-              visible: false,
-              data: aliPayData
-            }]
-          });
-        } else {
-          alert(data.msg);
-        }
-      });
-  },
   componentDidMount(){
-    this.renderDailBillChart()
+    this.renderDailyBillChart()
   },
   onChange(key){
-    if (_.indexOf(this.chartKey, key) >= 0) {
+    if (~_.indexOf(this.chartKey, key)) {
       return false;
     }
     this.chartKey.push(key);
-    if (key == 2) {
-      this.renderRechargeChart()
-    } else if (key == 3) {
-      this.renderConsumeChart()
-    } else if (key == 4) {
-      this.renderUserChart()
+    if (key == PANEL_KEY.DAILY_PAY) {
+      return this.renderDailyPayChart();
+    }
+    if (key == PANEL_KEY.DAILY_BILL) {
+      return this.renderDailyBillChart();
+    }
+    if (key == PANEL_KEY.RECHARGE) {
+      return this.renderRechargeChart();
+    }
+    if (key == PANEL_KEY.CONSUME) {
+      return this.renderConsumeChart();
+    }
+    if (key == PANEL_KEY.USER) {
+      return this.renderUserChart();
     }
   },
   render(){
@@ -252,26 +310,32 @@ const App = React.createClass({
           <Breadcrumb.Item>数据统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Collapse accordion defaultActiveKey="1" onChange={this.onChange}>
-        <Panel header={'每日账单'} key="1">
+      <Collapse accordion defaultActiveKey={ PANEL_KEY.DAILY_BILL } onChange={this.onChange}>
+        <Panel header="每日结账" key={PANEL_KEY.DAILY_PAY}>
+          <div id="daily-pay" className="spin-loading">
+            <Spin tip="正在计算中，请稍后...">
+            </Spin>
+          </div>
+        </Panel>
+        <Panel header="每日经营" key={PANEL_KEY.DAILY_BILL}>
           <div id="daily-bill" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
           </div>
         </Panel>
-        <Panel header={'独立充值'} key="2">
+        <Panel header="独立充值" key={PANEL_KEY.RECHARGE}>
           <div id="recharge" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
           </div>
         </Panel>
-        <Panel header={'独立消费'} key="3">
+        <Panel header="独立消费" key={PANEL_KEY.CONSUME}>
           <div id="consume" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
           </div>
         </Panel>
-        <Panel header={'注册用户'} key="4">
+        <Panel header="注册用户" key={PANEL_KEY.USER}>
           <div id="user" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
