@@ -88,7 +88,9 @@ class UserForm extends React.Component {
             case 3:
               this.setState({ payType: 3 });
               const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-              this.props.getProvinceCityList(provinceId);
+              if(provinceId !== 0){
+                this.props.getProvinceCityList(provinceId);
+              }
               break;
             default:
               this.setState({ payType: 0 });

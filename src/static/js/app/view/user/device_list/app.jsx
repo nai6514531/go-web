@@ -45,7 +45,7 @@ const columns = [{
   key: 'action',
   width: 100,
   fixed: 'right',
-  render: (text, record) => <Link to={"/user/device/school/" + record.key}>查看模块</Link>,
+  render: (text, record) => <Link to={"/user/device/school/" + record.id}>查看模块</Link>,
 }];
 
 
@@ -122,6 +122,7 @@ class SchoolTable extends React.Component {
         dataSource = list.map(function (item,key) {
           return {
             id: item.id,
+            key: item.id,
             school: item.name,
             number: item.deviceTotal,
           }
