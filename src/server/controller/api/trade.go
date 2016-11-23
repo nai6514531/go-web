@@ -28,6 +28,7 @@ type TradeController struct {
 func (self *TradeController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	tradeService := service.TradeService{}
+
 	serialNumber := ctx.URLParam("serialNumber")
 	account := ctx.URLParam("account")
 	if serialNumber == "" && account == "" {
@@ -36,6 +37,22 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
+	/*rel, err := userRoleRelService.BasicByUserId(userId)
+	if err != nil {
+
+	}
+	if rel.RoleId == 2 { //代理商
+		ids, err = userService.SubChildIdsByUserId(userId)
+		if err != nil {
+
+		}
+		ids = append(ids, userId)
+		if len(ids) <= 0 {
+
+		}
+	}*/
+
 	list, err := tradeService.BasicOfDevice(serialNumber, account)
 	if err != nil {
 		result = &enity.Result{"01080101", err.Error(), trade_msg["01080101"]}

@@ -444,3 +444,12 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	mnTransAction.Commit()
 	return nil
 }
+
+func (self *DeviceService) ListByUserId(userId ...int) (*[]*model.Device, error) {
+	list := []*model.Device{}
+	r := common.DB.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return &list, nil
+}

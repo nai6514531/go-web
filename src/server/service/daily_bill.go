@@ -8,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"strings"
 )
 
 type DailyBillService struct {
@@ -373,19 +374,25 @@ func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 /**
 每日账单总额，按天统计
  */
-func (self *DailyBillService) SumByDate() (*[]*muniu.BillSumByDate, error) {
+func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSumByDate, error) {
 	list := []*muniu.BillSumByDate{}
+	IdStr := ""
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
 	sql := " select PERIOD_START as 'date', sum(MONEY) as 'count' " +
 		" from box_stat_bill " +
 		" where PERIOD_START>='" + start + "' " +
-		" and PERIOD_START<'" + end + "'" +
-		" and COMPANYID!=0 " +
+		" and PERIOD_START<'" + end + "'"
+	if len(companyIds) > 0 {
+		IdStr = strings.Join(companyIds, ",")
+		sql += " and COMPANYID in (" + IdStr + ") "
+	}
+	sql += " and COMPANYID!=0 " +
 		" group by PERIOD_START"
 	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
+		common.Logger.Debugln("err:", err.Error())
 		return nil, err
 	}
 	for rows.Next() {

@@ -119,5 +119,4 @@ func (self *TradeService) Refund(washId int, account string) (int, error) {
 	tx.Commit()
 	txmn.Commit()
 	return int(r.RowsAffected), nil
-
 }

@@ -854,6 +854,3 @@ func (self *DailyBillController) SumByDate(ctx *iris.Context) {
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
-
-
-

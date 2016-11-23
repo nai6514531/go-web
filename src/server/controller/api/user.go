@@ -353,7 +353,8 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//账号信息必须为11位数字(手机)
-	match, _ := regexp.MatchString(`^\d{11}$`, user.Account)
+	//match, _ := regexp.MatchString(`^\d{11}$`, user.Account)
+	match, _ := regexp.MatchString(`^\w{5,15}$`, user.Account)
 	if !match {
 		result = &enity.Result{"01010416", nil, user_msg["01010416"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -389,12 +390,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//判断手机号是否存在
-	currentUser, _ = userService.FindByMobile(user.Mobile)
+	/*currentUser, _ = userService.FindByMobile(user.Mobile)
 	if currentUser != nil {
 		result = &enity.Result{"01010413", nil, user_msg["01010413"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 	//获取cashAccount
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
@@ -518,13 +519,13 @@ func (self *UserController) Update(ctx *iris.Context) {
 			return
 		}
 		//判断手机号是否已被别人使用
-		currentUser, _ := userService.FindByMobile(user.Mobile)
+		/*currentUser, _ := userService.FindByMobile(user.Mobile)
 		if (currentUser != nil) && (currentUser.Id != userId) {
 			//可以找到,并且不为将要修改的那一条记录
 			result = &enity.Result{"01010508", nil, user_msg["01010508"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
-		}
+		}*/
 	}
 
 	//cashAccount
