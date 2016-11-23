@@ -59,10 +59,10 @@ const columns = [{
   fixed: 'right',
   render: (text, record) => (
     <div>
-      <p><Link to={'/user/edit/' + record.key}>修改</Link></p>
+      <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
       {record.showAction?
         <div>
-          <p><Link to={'/user/' + record.key} onClick={record.action}>下级运营商</Link></p>
+          <p><Link to={'/user/' + record.id} onClick={record.action}>下级运营商</Link></p>
           {USER.role.id == 1 ? "" :
               <p><Link to='/user/device/list'>设备管理</Link></p>
           }

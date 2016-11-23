@@ -81,16 +81,16 @@ const columns = [{
   fixed: 'right',
   render: (text, record) => (
     <div>
-      <p><Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.key}>修改</Link></p>
-      <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
+      <p><Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.id}>修改</Link></p>
+      <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
         <p><a href="#">删除</a></p>
       </Popconfirm>
       {record.statusCode == 9 ?
-        <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
+        <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
           <p><a href="#">启用</a></p>
         </Popconfirm>
         :
-        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
           <p><a href="#">锁定</a></p>
         </Popconfirm>
       }
@@ -252,6 +252,7 @@ class DeviceTable extends React.Component {
           }
           return {
             id: item.id,
+            key: item.id,
             schoolId: schoolId,
             serialNumber: item.serialNumber,
             referenceDevice: referenceDevice,
