@@ -124,20 +124,20 @@ class UserForm extends React.Component {
   provinceChange(event) {
     this.props.getProvinceCityList(event);
     const { setFieldsValue } = this.props.form;
-    setFieldsValue({'cityId':'-1'});
+    setFieldsValue({'cityId':'0'});
     this.default = -1;
     }
   cityChange(event) {
-    this.cityIdHelp = {};
+    // this.cityIdHelp = {};
     }
   handleSubmit(e) {
       e.preventDefault();
       const self = this;
     this.props.form.validateFields((errors, values) => {
-      if(values.cityId == -1) {
-        self.cityIdHelp = {'help':'必选','className':'has-error'};
-        return false;
-      }
+      // if(values.cityId == -1) {
+        // self.cityIdHelp = {'help':'必选','className':'has-error'};
+        // return false;
+      // }
       if (errors) {
         return;
       }
@@ -336,9 +336,9 @@ class UserForm extends React.Component {
       breadcrumb = '修改运营商';
     }
     let payNode = '';
-    if(!this.cityIdHelp){
-      this.cityIdHelp = {};
-    }
+    // if(!this.cityIdHelp){
+    //   this.cityIdHelp = {};
+    // }
     if(this.state.payType == 1){
       payNode = <div>
         <FormItem
@@ -374,7 +374,7 @@ class UserForm extends React.Component {
       payNode = <div>
         <FormItem
           {...formItemLayout}
-          label="转账户名">
+          label="收款户名">
           {getFieldDecorator('realName', {
             rules: [
               {required: true, message: '必填'},
@@ -383,7 +383,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.realName,
 
           })(
-            <Input placeholder="请输入转账户名"/>
+            <Input placeholder="请输入收款户名"/>
           )}
         </FormItem>
         <FormItem
@@ -433,10 +433,7 @@ class UserForm extends React.Component {
           label="省份"
         >
           {getFieldDecorator('provinceId', {
-            rules: [
-              { required: true, message: '必选' },
-            ],
-            initialValue: initialValue.provinceId,
+            initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
           })(
             <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
               {ProvinceNode}
@@ -446,13 +443,10 @@ class UserForm extends React.Component {
         <FormItem
           {...formItemLayout}
           label="城市"
-          {...this.cityIdHelp}
+          // {...this.cityIdHelp}
         >
           {getFieldDecorator('cityId', {
-            rules: [
-              { required: true, message: '必选' },
-            ],
-            initialValue: initialValue.cityId,
+            initialValue: +initialValue.cityId !==0?initialValue.cityId:'请选择城市',
           })(
             <Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
               {cityNode}
