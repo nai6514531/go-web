@@ -100,7 +100,7 @@ class UserForm extends React.Component {
       const resultPostDetail = this.props.resultPostDetail;
       if(resultPostDetail !== nextProps.resultPostDetail
         && nextProps.resultPostDetail.fetch == true){
-        message.success('添加代理商成功',3);
+        message.success('添加运营商成功',3);
         self.context.router.goBack();
         self.saveDetail = -1;
       } else if(resultPostDetail !== nextProps.resultPostDetail
@@ -111,7 +111,7 @@ class UserForm extends React.Component {
       const resultPutDetail = this.props.resultPutDetail;
       if(resultPutDetail !== nextProps.resultPutDetail
         && nextProps.resultPutDetail.fetch == true){
-        message.success('修改代理商成功',3);
+        message.success('修改运营商成功',3);
         self.context.router.goBack();
         self.saveDetail = -1;
       } else if(resultPutDetail !== nextProps.resultPutDetail
@@ -323,7 +323,7 @@ class UserForm extends React.Component {
         }
         initialValue = Object.assign({}, baseValues, cashValues);
       } else {
-        message.error('获取代理商信息失败,请重试.');
+        message.error('获取运营商信息失败,请重试.');
       }
     }
     const { getFieldDecorator } = this.props.form;
@@ -331,9 +331,9 @@ class UserForm extends React.Component {
       labelCol: { span: 7 },
       wrapperCol: { span: 12 },
     };
-    let breadcrumb = '添加代理商';
+    let breadcrumb = '添加运营商';
     if(id !== 'new') {
-      breadcrumb = '修改代理商';
+      breadcrumb = '修改运营商';
     }
     let payNode = '';
     if(!this.cityIdHelp){
@@ -467,13 +467,13 @@ class UserForm extends React.Component {
         <header>
           {userId == id?
             <Breadcrumb >
-              <Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
             </Breadcrumb>
             :
             <Breadcrumb >
-              <Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
-              <Breadcrumb.Item><Link to={"/user/" + userId}>下级代理商</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/" + userId}>下级运营商</Link></Breadcrumb.Item>
               <Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
             </Breadcrumb>
           }
@@ -538,7 +538,7 @@ class UserForm extends React.Component {
               }
             <FormItem
               {...formItemLayout}
-              label="代理商名称" >
+              label="运营商名称" >
               {getFieldDecorator('name', {
                 rules: [
                   {required: true, message: '必填'},
@@ -546,7 +546,7 @@ class UserForm extends React.Component {
                 ],
                 initialValue: initialValue.name,
               })(
-                <Input placeholder="请输入代理商名称" />
+                <Input placeholder="请输入运营商名称" />
               )}
             </FormItem>
             <FormItem

@@ -27,7 +27,7 @@ const App = React.createClass({
         dataIndex: 'key',
         key: 'key',
       }, {
-        title: '代理商',
+        title: '运营商',
         dataIndex: 'user',
         key: 'user',
       }, {

@@ -134,7 +134,7 @@ class SchoolTable extends React.Component {
       <section className="view-user-list">
         <header>
           <Breadcrumb >
-            <Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item>设备管理</Breadcrumb.Item>
           </Breadcrumb>
         </header>

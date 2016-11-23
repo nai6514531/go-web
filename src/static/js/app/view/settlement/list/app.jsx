@@ -15,7 +15,7 @@ const App = React.createClass({
 				key: 'id',
 				sorter: (a, b) => +a.id - +b.id
 			}, {
-				title: '代理商',
+				title: '运营商',
 				dataIndex: 'userName',
 				key: 'userName'
 			}, {

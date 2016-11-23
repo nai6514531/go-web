@@ -437,7 +437,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 
-	//插入一条用户角色记录（暂时所有调用此的api都是代理商角色）
+	//插入一条用户角色记录（暂时所有调用此的api都是运营商角色）
 	userRoleRel := &model.UserRoleRel{}
 	userRoleRel.UserId = user.Id
 	userRoleRel.RoleId = 2 //统一为用户角色
@@ -1048,7 +1048,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		      	"createdAt": "0001-01-01T00:00:00Z",
 		      	"updatedAt": "0001-01-01T00:00:00Z",
 		      	"deletedAt": null,
-		      	"name": "代理商管理",
+		      	"name": "运营商管理",
 		      	"url": "/#!/agent/",
 		      	"parentId": 0,
 		      	"level": 1,
@@ -1059,7 +1059,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		      	"createdAt": "0001-01-01T00:00:00Z",
 		      	"updatedAt": "0001-01-01T00:00:00Z",
 		      	"deletedAt": null,
-		      	"name": "添加代理商",
+		      	"name": "添加运营商",
 		      	"url": "/#!/agent/add",
 		      	"parentId": 1,
 		      	"level": 2,
@@ -1118,7 +1118,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 		      	"createdAt": "0001-01-01T00:00:00Z",
 		      	"updatedAt": "0001-01-01T00:00:00Z",
 		      	"deletedAt": null,
-		      	"name": "代理商管理",
+		      	"name": "运营商管理",
 		      	"type": 0,
 		      	"status": 0
 		    },
@@ -1127,7 +1127,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 		      	"createdAt": "0001-01-01T00:00:00Z",
 		      	"updatedAt": "0001-01-01T00:00:00Z",
 		      	"deletedAt": null,
-		      	"name": "添加代理商",
+		      	"name": "添加运营商",
 		      	"type": 0,
 		      	"status": 0
 		    },...

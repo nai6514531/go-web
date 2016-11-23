@@ -48,7 +48,7 @@ class LeftMenu extends React.Component {
     const data = [
       {
         url: '/agent',
-        name: '代理商管理',
+        name: '运营商管理',
       },
       {
         url: '/cash',

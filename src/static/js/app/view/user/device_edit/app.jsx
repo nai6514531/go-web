@@ -414,14 +414,14 @@ class DeviceForm extends React.Component {
 					{
 						schoolId !== "-1" ?
 						<Breadcrumb >
-							<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item><Link className="breadcrumb" to={"/user/device/school/"+ schoolId}>{schoolName?schoolName:'未分类学校'}</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 						</Breadcrumb>
 							:
 						<Breadcrumb >
-							<Breadcrumb.Item><Link to="/user">代理商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 						</Breadcrumb>

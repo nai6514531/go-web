@@ -29,7 +29,7 @@ const columns = [{
   dataIndex: 'index',
   key: 'index',
 }, {
-  title: '代理商名称',
+  title: '运营商名称',
   dataIndex: 'user',
   key: 'user',
   className: 'table-col',
@@ -62,7 +62,7 @@ const columns = [{
       <p><Link to={'/user/edit/' + record.key}>修改</Link></p>
       {record.showAction?
         <div>
-          <p><Link to={'/user/' + record.key} onClick={record.action}>下级代理商</Link></p>
+          <p><Link to={'/user/' + record.key} onClick={record.action}>下级运营商</Link></p>
           {USER.role.id == 1 ? "" :
               <p><Link to='/user/device/list'>设备管理</Link></p>
           }
@@ -115,11 +115,11 @@ class AgentTable extends React.Component {
       self.loading = true;
       this.props.getUserList(pager);
     }
-    // 首次加载子代理商列表,首次从子用户列表跳转到父用户列表
+    // 首次加载子运营商列表,首次从子用户列表跳转到父用户列表
     if(this.props.list == undefined && nextProps.list) {
       this.first = 1;
     }
-    // 首次加载父代理商列表
+    // 首次加载父运营商列表
     if(nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
       if(this.first) {
         this.setState({child:false});
@@ -229,19 +229,19 @@ class AgentTable extends React.Component {
         <header>
           {id?
             <Breadcrumb>
-              <Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>代理商管理</Link></Breadcrumb.Item>
-              <Breadcrumb.Item>下级代理商</Breadcrumb.Item>
+              <Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>下级运营商</Breadcrumb.Item>
             </Breadcrumb>
             :
             <Breadcrumb>
-              <Breadcrumb.Item>代理商管理</Breadcrumb.Item>
+              <Breadcrumb.Item>运营商管理</Breadcrumb.Item>
             </Breadcrumb>
           }
         </header>
         {id?
           <div className="toolbar">
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
-              添加新代理商
+              添加新运营商
             </Link>
           </div>:
           ''

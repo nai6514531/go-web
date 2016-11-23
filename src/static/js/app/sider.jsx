@@ -21,7 +21,7 @@ const Navbar = React.createClass({
     return {
       current: '1',
       icons:[
-        {'title':'代理商管理','icon':'user'},
+        {'title':'运营商管理','icon':'user'},
         {'title':'结算管理','icon':'pay-circle-o'},
         {'title':'设备管理','icon':'calculator'},
         {'title':'数据统计','icon':'line-chart'},
