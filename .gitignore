@@ -81,6 +81,7 @@ fabric.properties
 /soda-manager
 /Dockerfile
 /config/local.json
+/config/default.json
 
 # runtime
 /runtime.config.json
