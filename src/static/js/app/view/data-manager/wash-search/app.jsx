@@ -82,12 +82,14 @@ const App = React.createClass({
         width: 100,
         render: (text, record) => (
           <div>
-            {record.status == 0 ?
+            { USER.role.id == 4 ?
+              record.status == 0 ?
               <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
                 <p><a href="#">退款</a></p>
               </Popconfirm>
               :
               <span>已退款</span>
+              :'/'
             }
 
           </div>
