@@ -5,6 +5,7 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/common"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -16,6 +17,8 @@ var (
 		"01080200": "退款成功",
 		"01080201": "退款失败",
 		"01080202": "参数错误",
+		"01080203": "无当前用户登陆信息",
+		"01080204": "无操作权限",
 	}
 )
 
@@ -68,9 +71,25 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 func (self *TradeController) Refund(ctx *iris.Context) {
 	result := &enity.Result{}
 	tradeService := &service.TradeService{}
+	userRoleRelService := service.UserRoleRelService{}
+
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	role, err := userRoleRelService.BasicByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01080203", err.Error(), trade_msg["01080203"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if role.RoleId == 2 {
+		result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	washId, err := ctx.URLParamInt("washId")
 	if err != nil {
-		result = &enity.Result{"01080202", nil, trade_msg["01080202"]}
+		result = &enity.Result{"01080202", err.Error(), trade_msg["01080202"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
