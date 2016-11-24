@@ -122,10 +122,10 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 		common.Log(ctx, result)
 	}
 	for _, _account := range alipayAccount {
-		alipayUserIds = append(alipayUserIds, strconv.Itoa(_account.UserId))
+		alipayUserIds = append(alipayUserIds, strconv.Itoa(_account.UserId-1))
 	}
 	for _, _account := range bankAccount {
-		bankUserIds = append(bankUserIds, strconv.Itoa(_account.UserId))
+		bankUserIds = append(bankUserIds, strconv.Itoa(_account.UserId-1))
 	}
 	if len(alipayUserIds) > 0 {
 		alipay, err := dailyBillServie.SumByDate(alipayUserIds...)
