@@ -320,7 +320,7 @@ func (self *DailyBillService)UpdateStatusByUserIdAndStatus(oldStatus int, newSta
 	}
 
 	tx := common.DB.Begin()
-	r = common.DB.Model(&model.DailyBill{}).Where("status = ? and user_id in (?)", oldStatus, userIds).Update("status", newStatus)
+	r = tx.Model(&model.DailyBill{}).Where("status = ? and user_id in (?)", oldStatus, userIds).Update("status", newStatus)
 	if r.Error != nil {
 		tx.Rollback()
 		return 0, r.Error
