@@ -106,7 +106,7 @@ func (self *StatisController) Device(ctx *iris.Context) {
 
 func (self *StatisController) DailyPay(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
-	dailyBillServie := &service.DailyBillService{}
+	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	data := make(map[string]interface{}, 0)
 	alipayUserIds := make([]string, 0)
@@ -127,8 +127,25 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	for _, _account := range bankAccount {
 		bankUserIds = append(bankUserIds, strconv.Itoa(_account.UserId-1))
 	}
+	/*alipayAccount, err := dailyBillService.MnznBasicMapByType("0")        //支付宝
+	if err != nil {
+		result = &enity.Result{"01070402", err.Error(), daily_bill_msg["01070402"]}
+		common.Log(ctx, result)
+	}
+	bankAccount, err := dailyBillService.MnznBasicMapByType("2")           //银行
+	if err != nil {
+		result = &enity.Result{"01070403", err.Error(), daily_bill_msg["01070403"]}
+		common.Log(ctx, result)
+	}
+	for _, _account := range alipayAccount {
+		alipayUserIds = append(alipayUserIds, strconv.Itoa(_account.LocalId))
+	}
+	for _, _account := range bankAccount {
+		bankUserIds = append(bankUserIds, strconv.Itoa(_account.LocalId))
+	}*/
+
 	if len(alipayUserIds) > 0 {
-		alipay, err := dailyBillServie.SumByDate(alipayUserIds...)
+		alipay, err := dailyBillService.SumByDate(alipayUserIds...)
 		if err != nil {
 			result = &enity.Result{"01070404", nil, daily_bill_msg["01070404"]}
 			common.Log(ctx, result)
@@ -136,7 +153,7 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 		data["alipay"] = alipay
 	}
 	if len(bankUserIds) > 0 {
-		bank, err := dailyBillServie.SumByDate(bankUserIds...)
+		bank, err := dailyBillService.SumByDate(bankUserIds...)
 		if err != nil {
 			result = &enity.Result{"01070405", nil, daily_bill_msg["01070405"]}
 			common.Log(ctx, result)

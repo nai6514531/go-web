@@ -84,15 +84,60 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 	return true, nil
 }
 
+func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
+	list := &[]*muniu.BoxAdmin{}
+	_time := time.Now().Add(-5 * time.Minute).Format("2006-01-02 15:04:05")
+	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *SyncService) AllListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
+	list := &[]*muniu.BoxAdmin{}
+	r := common.MNDB.Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
 func (self *SyncService) SyncUserAndRel() (bool, error) {
 	syncService := SyncService{}
-	boo := true
 	var err error
 	list, err := syncService.ListBySyncBoxAdmin()
 	if err != nil {
 		common.Logger.Warningln("Soda_Sync_Error:ListBySyncBoxAdmin: ", err.Error())
 		return false, err
 	}
+	_, err = syncService.UserSync(list)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (self *SyncService) SyncAllUserAndRel() (bool, error) {
+	syncService := SyncService{}
+	var err error
+	list, err := syncService.AllListBySyncBoxAdmin()
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:ListBySyncBoxAdmin: ", err.Error())
+		return false, err
+	}
+	_, err = syncService.UserSync(list)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+
+func (self *SyncService) UserSync(list *[]*muniu.BoxAdmin) (bool, error) {
+	syncService := &SyncService{}
+	boo := true
+	var err error
 	boo, err = syncService.SyncUser(list)
 	if !boo || err != nil {
 		common.Logger.Warningln("Soda_Sync_Error:SyncUser: ", err.Error())
@@ -109,16 +154,6 @@ func (self *SyncService) SyncUserAndRel() (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
-	list := &[]*muniu.BoxAdmin{}
-	_time := time.Now().Add(-5 * time.Minute).Format("2006-01-02 15:04:05")
-	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
-	if r.Error != nil {
-		return nil, r.Error
-	}
-	return list, nil
 }
 
 func (self *SyncService) SyncUser(list *[]*muniu.BoxAdmin) (bool, error) {

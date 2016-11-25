@@ -765,7 +765,7 @@ func (self *DailyBillController) TimedApplyAliPayBill() {
 	for _, _account := range *accountList {
 		userIds = append(userIds, _account.UserId)
 	}
-	_, err = dailyBillService.UpdateStausByUserIdAndStatus(0, 1, userIds...)
+	_, err = dailyBillService.UpdateStatusByUserIdAndStatus(0, 1, userIds...)
 	if err != nil {
 		common.Logger.Warningln("更新支付宝账单状态失败:", err.Error())
 	}

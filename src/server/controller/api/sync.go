@@ -10,10 +10,10 @@ import (
 type SyncController struct {
 }
 
-func (self *SyncController) SyncUserAndRel(ctx *iris.Context) {
+func (self *SyncController) SyncAllUserAndRel(ctx *iris.Context) {
 	syncService := &service.SyncService{}
 	result := &enity.Result{}
-	boo, err := syncService.SyncUserAndRel()
+	boo, err := syncService.SyncAllUserAndRel()
 	if err != nil || !boo {
 		result = &enity.Result{"1", err.Error(), "同步后台用户及相关数据失败!"}
 		common.Log(ctx, result)

@@ -304,7 +304,7 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	return int(r.RowsAffected), nil
 }
 
-func (self *DailyBillService)UpdateStausByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
+func (self *DailyBillService)UpdateStatusByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []int{}
 	txmn := common.MNDB.Begin()
@@ -451,4 +451,18 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 		list = append(list, sumByDate)
 	}
 	return &list, nil
+}
+
+func (self *DailyBillService) MnznBasicMapByType(payType ...string) (map[string]*muniu.BoxAdmin, error) {
+	list := &[]*muniu.BoxAdmin{}
+	accountMap := make(map[string]*muniu.BoxAdmin, 0)
+	r := common.MNDB.Where("paytype in (?)", payType).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, account := range *list {
+		accountMap[strconv.Itoa(account.LocalId)] = account
+	}
+	return accountMap, nil
 }

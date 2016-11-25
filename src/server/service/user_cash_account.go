@@ -41,16 +41,16 @@ func (self *UserCashAccountService) BasicMapByUserId(userIds interface{}) (map[i
 	return accountMap, nil
 }
 
-func (self *UserCashAccountService) BasicMapByType(payType ...int) (map[string]*model.UserCashAccount, error) {
+func (self *UserCashAccountService) BasicMapByType(payType ...int) (map[int]*model.UserCashAccount, error) {
 	list := &[]*model.UserCashAccount{}
-	accountMap := make(map[string]*model.UserCashAccount, 0)
+	accountMap := make(map[int]*model.UserCashAccount, 0)
 	r := common.DB.Where("type in (?)", payType).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 
 	for _, account := range *list {
-		accountMap[account.RealName] = account
+		accountMap[account.UserId] = account
 	}
 	return accountMap, nil
 }
