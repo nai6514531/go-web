@@ -84,7 +84,11 @@ const App = React.createClass({
       .then((body) => {
         if (body && body.status == 0) {
           const data = body.data || {};
-          const dates = _.chain([_.map(data.alipay, 'date'), _.map(data.bank, 'date')]).flatten().uniq().value();
+          const dates = _.chain([_.map(data.alipay, 'date'), _.map(data.bank, 'date')])
+            .flatten()
+            .uniq()
+            .value()
+            .sort();
           const alipay = _.map(dates, (date) => {
             const item = _.find(data.alipay || [], { date }) || {};
             return item.amount || 0;
@@ -141,7 +145,11 @@ const App = React.createClass({
       .then((body) => {
         if (body && body.status == 0) {
           const data = body.data || {};
-          const dates = _.chain([_.map(data.all, 'date'), _.map(data.alipay, 'date'), _.map(data.wechat, 'date')]).flatten().uniq().value();
+          const dates = _.chain([_.map(data.all, 'date'), _.map(data.alipay, 'date'), _.map(data.wechat, 'date')])
+            .flatten()
+            .uniq()
+            .value()
+            .sort();
           const all = _.map(dates, (date) => {
             const item = _.find(data.all || [], { date }) || {};
             return item.amount || 0;
