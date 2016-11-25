@@ -11,14 +11,124 @@ import (
 type SyncService struct {
 }
 
-func (self *SyncService) SyncUser() (bool, error) {
+func ListByTimed(isCreated bool) (*[]*muniu.BoxAdmin, error) {
 	list := &[]*muniu.BoxAdmin{}
+	_time := time.Now().Add(-5 * time.Minute).Format("2006-01-02 15:04:05")
+	_column := ""
+	if isCreated {
+		_column = "INSERTTIME"
+	}else{
+		_column = "UPDATETIME"
+	}
+	r := common.MNDB.Where(_column+" > ?", _time).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+//new but no use, no test
+func (self *SyncService) SyncUserNew() (bool, error) {
+	userService := &UserService{}
+	syncService := &SyncService{}
+	newUserIds := make([]int, 0)
+	exitsUserMap := make(map[int]*model.User, 0)
+	newAdminList, err := ListByTimed(true)       //查询旧数据库新增用户
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:", err.Error())
+		return false, err
+	}
+	for _, _admin := range *newAdminList {
+		newUserIds = append(newUserIds, _admin.LocalId+1)       //新库用户id
+	}
+	exitsUserList, err := userService.ListById(newUserIds...)       //判断新数据库中是否存在
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:", err.Error())
+		return false, err
+	}
+	for _, _user := range *exitsUserList {
+		exitsUserMap[_user.Id] = _user
+	}
+
+	for _, _admin := range *newAdminList {
+		boo := true
+		if exitsUserMap[_admin.LocalId+1] != nil {
+			boo, _ = syncService.UpdateUser(_admin)
+			if !boo {
+				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+				return false, err
+			}
+			continue
+		}
+		boo, _ = syncService.AddUser(_admin)
+		if !boo {
+			common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			return false, err
+		}
+	}
+
+	updateAdminList, err := ListByTimed(false)
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:", err.Error())
+		return false, err
+	}
+	for _, _admin := range *updateAdminList {
+		boo := true
+		boo, _ = syncService.UpdateUser(_admin)
+		if !boo {
+			common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			return false, err
+		}
+	}
+
+	return true, nil
+}
+
+func (self *SyncService) SyncUserAndRel() (bool, error) {
+	syncService := SyncService{}
+	boo := true
+	var err error
+	list, err := syncService.ListBySyncBoxAdmin()
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:ListBySyncBoxAdmin: ", err.Error())
+		return false, err
+	}
+	boo, err = syncService.SyncUser(list)
+	if !boo || err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:SyncUser: ", err.Error())
+		return false, err
+	}
+	boo, err = syncService.SyncUserRole(list)
+	if !boo || err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:SyncUserRole: ", err.Error())
+		return false, err
+	}
+	boo, err = syncService.SyncUserCashAccount(list)
+	if !boo || err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:SyncUserCashAccount: ", err.Error())
+		return false, err
+	}
+	return true, nil
+}
+
+func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
+	list := &[]*muniu.BoxAdmin{}
+	_time := time.Now().Add(-5 * time.Minute).Format("2006-01-02 15:04:05")
+	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *SyncService) SyncUser(list *[]*muniu.BoxAdmin) (bool, error) {
+	//list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userService := &UserService{}
-	r := common.MNDB.Find(list)
+	/*r := common.MNDB.Find(list)
 	if r.Error != nil {
 		return false, r.Error
-	}
+	}*/
 	boo := true
 	for _, boxAdmin := range *list {
 		userId := boxAdmin.LocalId + 1
@@ -40,15 +150,15 @@ func (self *SyncService) SyncUser() (bool, error) {
 	return boo, nil
 }
 
-func (self *SyncService) SyncUserRole() (bool, error) {
-	list := &[]*muniu.BoxAdmin{}
+func (self *SyncService) SyncUserRole(list *[]*muniu.BoxAdmin) (bool, error) {
+	//list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userRoleRelService := &UserRoleRelService{}
-	r := common.MNDB.Find(list)
+	/*r := common.MNDB.Find(list)
 	if r.Error != nil {
 		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxAdmin:List:", r.Error.Error())
 		return false, r.Error
-	}
+	}*/
 	boo := true
 	for _, boxAdmin := range *list {
 		roleId := 0
@@ -88,15 +198,15 @@ func (self *SyncService) SyncUserRole() (bool, error) {
 	return boo, nil
 }
 
-func (self *SyncService) SyncUserCashAccount() (bool, error) {
-	list := &[]*muniu.BoxAdmin{}
+func (self *SyncService) SyncUserCashAccount(list *[]*muniu.BoxAdmin) (bool, error) {
+	//list := &[]*muniu.BoxAdmin{}
 	syncService := &SyncService{}
 	userCashAccountService := &UserCashAccountService{}
-	r := common.MNDB.Find(list)
+	/*r := common.MNDB.Find(list)
 	if r.Error != nil {
 		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxAdmin:List:", r.Error.Error())
 		return false, r.Error
-	}
+	}*/
 	boo := true
 	for _, boxAdmin := range *list {
 		userId := (boxAdmin.LocalId + 1)
@@ -118,14 +228,29 @@ func (self *SyncService) SyncUserCashAccount() (bool, error) {
 	return boo, nil
 }
 
-func (self *SyncService) SyncDevice() (bool, error) {
+func (self *SyncService) ListBySyncBoxInfo() (*[]*muniu.BoxInfo, error) {
 	list := &[]*muniu.BoxInfo{}
-	r := common.MNDB.Find(list)
+	_time := time.Now().Add(-10 * time.Minute).Format("2006-01-02 15:04:05")
+	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *SyncService) SyncDevice() (bool, error) {
+	//list := &[]*muniu.BoxInfo{}
+	//r := common.MNDB.Find(list)
 	syncService := &SyncService{}
 	deviceService := &DeviceService{}
-	if r.Error != nil {
+	/*if r.Error != nil {
 		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxInfo:List:", r.Error.Error())
 		return false, r.Error
+	}*/
+	list, err := syncService.ListBySyncBoxInfo()
+	if err != nil {
+		common.Logger.Warningln("Soda_Sync_Error:ListBySyncBoxInfo:", err.Error())
+		return false, err
 	}
 	boo := true
 	for _, boxInfo := range *list {

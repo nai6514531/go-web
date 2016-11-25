@@ -206,3 +206,12 @@ func (self *UserService) SubChildIdsByUserId(parentId int) ([]int, error) {
 	}
 	return subChildsByUse(parentId), nil
 }
+
+func (self *UserService) ListById(ids ...int) (*[]*model.User, error) {
+	list := &[]*model.User{}
+	r := common.DB.Where("id in (?)", ids).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}

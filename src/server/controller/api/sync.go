@@ -10,10 +10,31 @@ import (
 type SyncController struct {
 }
 
+func (self *SyncController) SyncUserAndRel(ctx *iris.Context) {
+	syncService := &service.SyncService{}
+	result := &enity.Result{}
+	boo, err := syncService.SyncUserAndRel()
+	if err != nil || !boo {
+		result = &enity.Result{"1", err.Error(), "同步后台用户及相关数据失败!"}
+		common.Log(ctx, result)
+	}else {
+		result = &enity.Result{"0", nil, "同步后台用户及相关数据成功!"}
+	}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
 func (self *SyncController) SyncUser(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, err := syncService.SyncUser()
 	result := &enity.Result{}
+	list, err := syncService.ListBySyncBoxAdmin()
+	if err != nil {
+		result = &enity.Result{"2", err.Error(), "拉取旧系统用户信息失败"}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	boo, err := syncService.SyncUser(list)
 	if !boo {
 		result = &enity.Result{"1", err.Error(), "同步后台用户数据失败!"}
 		common.Log(ctx, result)
@@ -26,8 +47,15 @@ func (self *SyncController) SyncUser(ctx *iris.Context) {
 
 func (self *SyncController) SyncUserRole(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, err := syncService.SyncUserRole()
 	result := &enity.Result{}
+	list, err := syncService.ListBySyncBoxAdmin()
+	if err != nil {
+		result = &enity.Result{"2", err.Error(), "拉取旧系统用户信息失败"}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	boo, err := syncService.SyncUserRole(list)
 	if !boo {
 		result = &enity.Result{"1", err.Error(), "同步后台用户角色数据失败!"}
 		common.Log(ctx, result)
@@ -40,8 +68,15 @@ func (self *SyncController) SyncUserRole(ctx *iris.Context) {
 
 func (self *SyncController) SyncUserCashAccount(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, err := syncService.SyncUserCashAccount()
 	result := &enity.Result{}
+	list, err := syncService.ListBySyncBoxAdmin()
+	if err != nil {
+		result = &enity.Result{"2", err.Error(), "拉取旧系统用户信息失败"}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	boo, err := syncService.SyncUserCashAccount(list)
 	if !boo {
 		result = &enity.Result{"1", err.Error(), "同步后台用户分账账户数据失败!"}
 		common.Log(ctx, result)
