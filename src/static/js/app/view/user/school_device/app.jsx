@@ -1,6 +1,6 @@
 import React from 'react';
 import '../device_list/app.less';
-import { Table, Button, Breadcrumb, Popconfirm, message } from 'antd';
+import { Table,Input, Button, Breadcrumb, Popconfirm, message } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -110,6 +110,7 @@ class DeviceTable extends React.Component {
       page: 1,
       perPage: 10,
       changeState: 0,
+      searchValue: '',
     };
     this.remove = this.remove.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
@@ -209,8 +210,49 @@ class DeviceTable extends React.Component {
       self.theStatus = 9;
     }
   }
+  handleInputChange(e) {
+    this.setState({
+      searchValue: e.target.value,
+    });
+  }
+  handleSearch() {
+    let device = this.state.searchValue;
+    const pager = {page: 1, perPage: this.state.perPage};
+    this.setState({page:1});
+    if(device) {
+      const splitted = device.split("\n");
+      const numbers = this.removeNull(this.removeDuplicates(splitted));
+      device = numbers.join(",");
+    }
+    const schoolId = this.props.params.id;
+    this.props.getSchoolDevice(USER.id, schoolId, pager, device);
+    // this.list(account, pager);
+  }
+  removeDuplicates(arr) {
+    var obj = {};
+    var ret_arr = [];
+    for (var i = 0; i < arr.length; i++) {
+      obj[arr[i]] = true;
+    }
+    for (var key in obj) {
+      ret_arr.push(key);
+    }
+    return ret_arr;
+  }
+  removeNull(arr){
+    var pattern=new RegExp(/^\s*$/);
+    for(var i = 0 ;i<arr.length;i++) {
+      if(arr[i] == "" || typeof(arr[i]) == "undefined"
+        || pattern.test(arr[i]) || arr[i].length !== 10) {
+        arr.splice(i,1);
+        i= i-1;
+      }
+    }
+    return arr;
+  }
   render() {
     this.pagination = this.initializePagination();
+    this.pagination.current = this.state.page;
     const schoolDevice = this.props.schoolDevice;
     const schoolDetail = this.props.schoolDetail;
     let schoolName = '';
@@ -278,6 +320,10 @@ class DeviceTable extends React.Component {
             <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
           </Breadcrumb>
         </header>
+        <div className="toolbar">
+          <Input style={{width:120}}  type="textarea" placeholder="请输入设备编号" onChange={this.handleInputChange.bind(this)}/>
+          <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
+        </div>
         <article>
           <Table
             scroll={{ x: 980 }}

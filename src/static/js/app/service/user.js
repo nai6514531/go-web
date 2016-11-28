@@ -27,9 +27,9 @@ const UserService = {
     const { page, perPage } = pager;
     return apiGet(`/api/user/${id}/school?hasDeviceTotal=1&schoolId=${schoolId}&deviceStr=${serialNumber || ''}`);
   },
-  schoolDevice:(id, school_id, pager) => {
+  schoolDevice:(id, school_id, pager, serialNumber) => {
     const { page, perPage } = pager;
-    return apiGet(`/api/user/${id}/school/${school_id}/device?page=${page}&perPage=${perPage}`);
+    return apiGet(`/api/user/${id}/school/${school_id}/device?page=${page}&perPage=${perPage}&deviceStr=${serialNumber || ''}`);
   },
   permission: (id) => {
     return apiGet(`/api/user/${id}/permission`);
