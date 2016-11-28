@@ -76,19 +76,34 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 	return list, nil
 }
 
-func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int, deviceStr ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ? and school_id = ?", userId, schoolId).Order("id desc").Find(list)
+	params := make([]interface{}, 0)
+	sql := "user_id = ? and school_id = ?"
+	params = append(params, userId, schoolId)
+	if len(deviceStr) > 0 && deviceStr[0] != ""{
+		sql += " and serial_number in (?)"
+		params = append(params, deviceStr)
+	}
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	return list, nil
 }
 
-func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int) (int, error) {
+func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, deviceStr ...string) (int, error) {
 	device := &model.Device{}
 	var total int
-	r := common.DB.Model(device).Where("user_id = ? and school_id = ?", userId, schoolId).Count(&total)
+	params := make([]interface{}, 0)
+	sql := "user_id = ? and school_id = ?"
+	params = append(params, userId, schoolId)
+
+	if len(deviceStr) > 0 && deviceStr[0] != ""{
+		sql += " and serial_number in (?)"
+		params = append(params, deviceStr)
+	}
+	r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}

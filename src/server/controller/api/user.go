@@ -933,16 +933,17 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	schoolId, _ := ctx.ParamInt("schoolId")
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
+	deviceStr := ctx.URLParam("deviceStr")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage)
+	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage, deviceStr)
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := deviceService.TotalByByUserAndSchool(userId, schoolId) //计算总数
+	total, err := deviceService.TotalByByUserAndSchool(userId, schoolId, deviceStr) //计算总数
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		common.Log(ctx, result)
@@ -1010,7 +1011,6 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 			schoolIds = append(schoolIds, _device.SchoolId)
 		}
 	}
-
 
 	//返回全部学校列表
 	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds)<=0 { //?schoolId=-1或者没有筛选条件
