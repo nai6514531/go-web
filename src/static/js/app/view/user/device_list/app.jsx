@@ -189,7 +189,7 @@ class SchoolFilter extends React.Component {
     var pattern=new RegExp(/^\s*$/);
     for(var i = 0 ;i<arr.length;i++) {
       if(arr[i] == "" || typeof(arr[i]) == "undefined"
-        || pattern.test(arr[i]) || arr[i].length !== 10) {
+        || pattern.test(arr[i])) {
         arr.splice(i,1);
         i= i-1;
       }

@@ -51,7 +51,7 @@ function handleResponse(promise, resolve, reject) {
       }
     } else {
       reject(data);
-      return message.error('服务器返回数据异常',3);
+      // return message.error('服务器返回数据异常',3);
     }
   });
 }
