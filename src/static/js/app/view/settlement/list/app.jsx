@@ -25,13 +25,9 @@ const App = React.createClass({
 				dataIndex: 'totalAmount',
 				key: 'totalAmount',
 				render: (total_amount) => {
-					return total_amount / 100;
+					return <p className="bigger">{total_amount / 100}</p>;
 				}
-			}, {
-				title: '订单量',
-				dataIndex: 'orderCount',
-				key: 'orderCount'
-			}, {
+			},  {
 				title: '收款方式',
 				dataIndex: 'accountName',
 				key: 'accountName'
@@ -68,7 +64,11 @@ const App = React.createClass({
             </div>
           }
         }
-			}, {
+			},{
+        title: '订单量',
+        dataIndex: 'orderCount',
+        key: 'orderCount'
+      }, {
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
