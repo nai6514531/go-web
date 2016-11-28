@@ -10,6 +10,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"regexp"
+	"strings"
 )
 
 /**
@@ -936,7 +937,8 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	deviceStr := ctx.URLParam("deviceStr")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage, deviceStr)
+	serialNums := strings.Split(deviceStr, ",")
+	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage, serialNums...)
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		common.Log(ctx, result)
@@ -991,11 +993,17 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
-
-	if len(deviceStr) > 0 {
-		list, err := deviceService.ListBySerialNumber(deviceStr)
+	serialNums := strings.Split(deviceStr, ",")
+	common.Logger.Debugln("serialNums===========", serialNums)
+	common.Logger.Debugln("schoolId===========", schoolId)
+	if schoolId != -1 && ctx.URLParam("schoolId") != ""{
+		schoolIds = append(schoolIds, schoolId)
+	}
+	if len(serialNums) > 0 && serialNums[0] != "" {
+		common.Logger.Debugln("=======================")
+		list, err := deviceService.ListBySerialNumber(schoolId, serialNums...)
 		if len(*list) <= 0 {
-			result = &enity.Result{"01011103", nil, user_msg["01011103"]}
+			result = &enity.Result{"01011100", nil, user_msg["01011100"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, nil)
 			return
@@ -1011,6 +1019,8 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 			schoolIds = append(schoolIds, _device.SchoolId)
 		}
 	}
+	common.Logger.Debugln("schoolIds=============", schoolIds)
+	common.Logger.Debugln("schoolId===========", schoolId)
 
 	//返回全部学校列表
 	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds)<=0 { //?schoolId=-1或者没有筛选条件
@@ -1031,7 +1041,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		}
 		//如果带上schoolId=1101的参数只列出该学校
 	} else {
-
+		common.Logger.Debugln("schoolIds=====", schoolIds)
 		schoolList, err := schoolService.List(schoolIds...)
 		if err != nil {
 			result = &enity.Result{"01011102", err, user_msg["01011102"]}

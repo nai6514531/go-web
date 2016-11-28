@@ -75,7 +75,6 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	perPage := functions.StringToInt(params["perPage"])
 	cashAccountType := functions.StringToInt(params["cashAccountType"])      //提现方式
 	searchStr := params["searchStr"]
-	common.Logger.Debugln("searchStr=========", searchStr)
 	var status []string
 	var _status []string
 	userId := -1

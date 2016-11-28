@@ -386,6 +386,7 @@ func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) (bool, error
 		BillAt:       billAt,
 		Status:       boxWash.Status,
 		WashId:       boxWash.LocalId,
+		Mobile:       boxWash.UserMobile,
 	}
 	r := common.DB.Create(dailyBillDetail)
 	if r.Error != nil {

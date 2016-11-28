@@ -29,9 +29,17 @@ func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Devi
 	return device, nil
 }
 
-func (self *DeviceService) ListBySerialNumber(serialNumber ...string) (*[]*model.Device, error) {
+func (self *DeviceService) ListBySerialNumber(schoolId int, serialNumber ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Where("serial_number in (?) ", serialNumber).Find(list)
+	params := make([]interface{}, 0)
+	sql := ""
+	if schoolId != -1 {
+		sql += "school_id = ? and "
+		params = append(params, schoolId)
+	}
+	sql += " serial_number in (?)"
+	params = append(params, serialNumber)
+	r := common.DB.Where(sql, params...).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -76,14 +84,14 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 	return list, nil
 }
 
-func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int, deviceStr ...string) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page int, perPage int, serialNums ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	params := make([]interface{}, 0)
 	sql := "user_id = ? and school_id = ?"
 	params = append(params, userId, schoolId)
-	if len(deviceStr) > 0 && deviceStr[0] != ""{
+	if len(serialNums) > 0 && serialNums[0] != ""{
 		sql += " and serial_number in (?)"
-		params = append(params, deviceStr)
+		params = append(params, serialNums)
 	}
 	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {

@@ -9,6 +9,7 @@ type DailyBillDetail struct {
 	Status       int    `json:"status"`
 	BillAt       string `json:"billAt"`
 	WashId       int    `json:"washId"`
+	Mobile       string `json:"mobile"`
 }
 
 func (DailyBillDetail) TableName() string {
