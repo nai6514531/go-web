@@ -255,6 +255,7 @@ const App = React.createClass({
 			payList: {},  									//支付宝数据
 			nowSettlement: {}, 							//只在结账的数据
 			selectedRowKeys: [], 						//已勾选的列表[key1, key2...]
+      perPage: 10,
 		};
 	},
 	list(data) {
@@ -494,6 +495,8 @@ const App = React.createClass({
     const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1});
     this.list({
+      page:1,
+      perPage: this.perPage,
       searchStr: textValue,
     });
   },
@@ -540,6 +543,8 @@ const App = React.createClass({
       },
 			onShowSizeChange(page, perPage) {
 				let listObj = self.state.nowAjaxStatus;
+        self.perPage = perPage;
+        // self.setState({perPage:perPage});
 				listObj.page = page;
 				listObj.perPage = perPage;
 				self.list(listObj);

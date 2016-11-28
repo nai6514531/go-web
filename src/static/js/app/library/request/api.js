@@ -59,7 +59,7 @@ api.interceptors.request.use(function (config) {
 api.interceptors.response.use(
   (response)=> {
     if (!response.data) {
-      return Promise.reject('服务器返回数据异常!');
+      // return Promise.reject('服务器返回数据异常!');
     }
     return response.data;
   },
