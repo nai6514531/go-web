@@ -103,6 +103,9 @@ const App = React.createClass({
     const pagination = {
       total: total,
       showSizeChanger: true,
+      showTotal (total) {
+        return <span>总计 {total} 条</span>
+      },
       onShowSizeChange(current, pageSize) {
         self.list(user_id, bill_at, current, pageSize);
       },

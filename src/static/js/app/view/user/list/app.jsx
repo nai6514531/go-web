@@ -116,6 +116,9 @@ class AgentTable extends React.Component {
       total: total,
       showSizeChanger: true,
       size:'small',
+      showTotal (total) {
+        return <span>总计 {total} 条</span>
+      },
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);

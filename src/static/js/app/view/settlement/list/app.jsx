@@ -535,6 +535,9 @@ const App = React.createClass({
 			total: total,
 			showSizeChanger: true,
       pageSizeOptions: ['10','20','30','40','300'],
+      showTotal (total) {
+        return <span>总计 {total} 条</span>
+      },
 			onShowSizeChange(page, perPage) {
 				let listObj = self.state.nowAjaxStatus;
 				listObj.page = page;
