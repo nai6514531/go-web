@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
-import {Button, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
+import {Button,Input, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
@@ -10,6 +10,7 @@ const App = React.createClass({
 	getInitialState() {
 		return {
       rowColor:[],
+      textValue: '',
 			columns: [{
 				title: '账单号',
 				dataIndex: 'id',
@@ -489,6 +490,20 @@ const App = React.createClass({
 			billAt: billAt
 		});
 	},
+  texthandleFilter() {
+    const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
+    this.setState({currentPage: 1});
+    if (textValue) {
+      this.list({
+        searchStr: textValue,
+      });
+    }
+  },
+  textChange(e) {
+    this.setState({
+      textValue: e.target.value,
+    });
+  },
 	componentWillMount() {
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
 		this.list({
@@ -668,7 +683,9 @@ const App = React.createClass({
 				{orderSelectOption}
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
 				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
-			</div>
+        <Input style={{width: 160}} className="" placeholder="输入运营商名称或者银行名称" onChange={this.textChange}/>
+        <Button className="item" type="primary" icon="search" onClick={this.texthandleFilter}>筛选</Button>
+      </div>
 			{tableDiv}
 			<Modal
         title={'你有'+ self.state.getAliPayOrderNum +'笔支付宝账单需要二次确认'}
