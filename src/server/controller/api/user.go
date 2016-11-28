@@ -10,7 +10,6 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"regexp"
-	"strings"
 )
 
 /**
@@ -992,24 +991,26 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
 
-	serialNums := strings.Split(deviceStr, ",")
-	list, err := deviceService.ListBySerialNumber(serialNums...)
-	if len(*list) <= 0 {
-		result = &enity.Result{"01011103", nil, user_msg["01011103"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, nil)
-		return
-	}
-	if err != nil {
-		result = &enity.Result{"01011104", err, user_msg["01011104"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if len(deviceStr) > 0 {
+		list, err := deviceService.ListBySerialNumber(deviceStr)
+		if len(*list) <= 0 {
+			result = &enity.Result{"01011103", nil, user_msg["01011103"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, nil)
+			return
+		}
+		if err != nil {
+			result = &enity.Result{"01011104", err, user_msg["01011104"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+
+		for _, _device := range *list {
+			schoolIds = append(schoolIds, _device.SchoolId)
+		}
 	}
 
-	for _, _device := range *list {
-		schoolIds = append(schoolIds, _device.SchoolId)
-	}
 
 	//返回全部学校列表
 	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds)<=0 { //?schoolId=-1或者没有筛选条件
