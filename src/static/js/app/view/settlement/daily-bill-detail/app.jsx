@@ -40,6 +40,10 @@ const App = React.createClass({
         render: (total_amount) => {
           return total_amount / 100 + "元";
         }
+      },{
+        title: '洗衣手机号',
+        dataIndex: 'mobile',
+        key: 'mobile',
       }, {
         title: '下单时间',
         dataIndex: 'billAt',
