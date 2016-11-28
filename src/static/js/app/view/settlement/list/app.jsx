@@ -493,11 +493,9 @@ const App = React.createClass({
   texthandleFilter() {
     const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1});
-    if (textValue) {
-      this.list({
-        searchStr: textValue,
-      });
-    }
+    this.list({
+      searchStr: textValue,
+    });
   },
   textChange(e) {
     this.setState({
