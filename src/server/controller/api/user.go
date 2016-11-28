@@ -10,6 +10,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"regexp"
+	"strings"
 )
 
 /**
@@ -153,6 +154,8 @@ var (
 		"01011100": "拉取用户学校列表成功!",
 		"01011101": "拉取用户学校列表失败!",
 		"01011102": "该学校id不存在!",
+		"01011103": "无设备信息!",
+		"01011104": "拉取设备信息失败!",
 
 		"01011200": "拉取用户菜单列表成功!",
 		"01011201": "拉取用户菜单列表失败!",
@@ -719,7 +722,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := userService.TotalByParentId(userId)
+	total, err := userService.TotalByParentId(userId, searchStr)
 	if err != nil {
 		result = &enity.Result{"01010702", err, user_msg["01010702"]}
 		common.Log(ctx, result)
@@ -981,13 +984,35 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	userId, _ := ctx.ParamInt("id")
 	schoolId, _ := ctx.URLParamInt("schoolId")
 	hasDeviceTotal, _ := ctx.URLParamInt("hasDeviceTotal")
+	deviceStr := ctx.URLParam("deviceStr")
+	schoolIds := make([]int, 0)
 	schools := &[]*model.School{}
 
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	schoolService := &service.SchoolService{}
+
+	serialNums := strings.Split(deviceStr, ",")
+	list, err := deviceService.ListBySerialNumber(serialNums...)
+	if len(*list) <= 0 {
+		result = &enity.Result{"01011103", nil, user_msg["01011103"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, nil)
+		return
+	}
+	if err != nil {
+		result = &enity.Result{"01011104", err, user_msg["01011104"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	for _, _device := range *list {
+		schoolIds = append(schoolIds, _device.SchoolId)
+	}
+
 	//返回全部学校列表
-	if schoolId == -1 || ctx.URLParam("schoolId") == "" { //?schoolId=-1或者没有筛选条件
+	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds)<=0 { //?schoolId=-1或者没有筛选条件
 		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
 			result = &enity.Result{"01011101", err, user_msg["01011101"]}
@@ -1005,14 +1030,15 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		}
 		//如果带上schoolId=1101的参数只列出该学校
 	} else {
-		school, err := schoolService.Basic(schoolId)
+
+		schoolList, err := schoolService.List(schoolIds...)
 		if err != nil {
 			result = &enity.Result{"01011102", err, user_msg["01011102"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		*schools = append(*schools, school)
+		*schools = append(*schools, *schoolList...)
 	}
 	//判断是否需要带上设备总数
 	if hasDeviceTotal == 1 {

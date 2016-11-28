@@ -31,10 +31,17 @@ func (self *UserService) FindByMobile(mobile string) (*model.User, error) {
 	return user, nil
 }
 
-func (self *UserService) TotalByParentId(parentId int) (int, error) {
+func (self *UserService) TotalByParentId(parentId int, searchStr string) (int, error) {
 	user := &model.User{}
 	var total int64
-	r := common.DB.Model(user).Where("parent_id = ? AND id != ?", parentId, parentId).Count(&total)
+	sql := "parent_id = ? AND id != ?"
+	params := make([]interface{}, 0)
+	params = append(params, parentId, parentId)
+	if searchStr != "" {
+		sql += " and (name like ? or contact like ?) "
+		params = append(params, "%"+searchStr+"%", "%"+searchStr+"%")
+	}
+	r := common.DB.Model(user).Where(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -126,7 +133,7 @@ func (self *UserService) SubList(parentId int, searchStr string, page int, perPa
 	params := make([]interface{}, 0)
 	params = append(params, parentId, parentId)
 	if searchStr != "" {
-		sql += " and (name like ? or account like ?) "
+		sql += " and (name like ? or contact like ?) "
 		params = append(params, "%"+searchStr+"%", "%"+searchStr+"%")
 	}
 	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
