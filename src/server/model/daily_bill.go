@@ -14,6 +14,10 @@ type DailyBill struct {
 	OrderCount  int    `json:"orderCount"`
 	AccountType int    `json:"accountType,omitempty" gorm:"-"`
 	AccountName string `json:"accountName,omitempty" gorm:"-"`
+	Account     string `json:"account,omitempty" gorm:"-"`
+	RealName    string `json:"realName,omitempty" gorm:"-"`
+	BankName    string `json:"bankName,omitempty" gorm:"-"`
+	Mobile      string `json:"mobile,omitempty" gorm:"-"`
 }
 
 func (DailyBill) TableName() string {

@@ -71,7 +71,7 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
 	_perPage := strconv.Itoa(perPage)
-	sql := "select bill.*, cat.id as account_type,cat.name as account_name from daily_bill bill,cash_account_type " +
+	sql := "select bill.*, cat.id as account_type,cat.name as account_name, uca.real_name, uca.bank_name, uca.account, uca.mobile from daily_bill bill,cash_account_type " +
 		"cat,user_cash_account uca where bill.user_id=uca.user_id and uca.type=cat.id and bill.deleted_at IS NULL "
 	if userId != -1 {
 		sql += " and bill.user_id = ? "
