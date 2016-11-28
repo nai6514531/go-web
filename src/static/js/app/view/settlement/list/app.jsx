@@ -39,7 +39,7 @@ const App = React.createClass({
 					return moment(bill_at).format('YYYY-MM-DD')
 				}
 			}, {
-				title: '结账信息',
+				title: '账户信息',
 				dataIndex: 'settledAt',
 				key: 'settledAt',
         width: 250,

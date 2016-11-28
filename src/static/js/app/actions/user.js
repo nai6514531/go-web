@@ -120,9 +120,9 @@ export function deleteUser(id) {
   };
 }
 
-export function getUserSchool(id, schoolId, pager) {
+export function getUserSchool(id, schoolId, pager, serialNumber) {
   return dispatch => {
-    UserService.schoolTotal(id, schoolId, pager).then((result) => {
+    UserService.schoolTotal(id, schoolId, pager, serialNumber).then((result) => {
       dispatch({
         type: GET_USER_SCHOOL,
         result: { fetch: true, result },

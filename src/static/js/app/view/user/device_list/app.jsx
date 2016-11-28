@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Table, Breadcrumb, Form, Select, Button } from 'antd';
+import { Table,Input, Breadcrumb, Form, Select, Button } from 'antd';
 const FormItem = Form.Item;
 const Option = Select.Option;
 import { Link } from 'react-router';
@@ -171,16 +171,48 @@ class SchoolFilter extends React.Component {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  removeDuplicates(arr) {
+    var obj = {};
+    var ret_arr = [];
+    for (var i = 0; i < arr.length; i++) {
+      obj[arr[i]] = true;
+    }
+    for (var key in obj) {
+      ret_arr.push(key);
+    }
+    return ret_arr;
+  }
+  removeNull(arr){
+    var pattern=new RegExp(/^\s*$/);
+    for(var i = 0 ;i<arr.length;i++) {
+      if(arr[i] == "" || typeof(arr[i]) == "undefined"
+        || pattern.test(arr[i]) || arr[i].length !== 10) {
+        arr.splice(i,1);
+        i= i-1;
+      }
+    }
+    return arr;
+  }
   handleSubmit(e) {
     e.preventDefault();
     const schoolId = parseInt(this.props.form.getFieldsValue().school);
+    let serialNumber = this.props.form.getFieldsValue().serialNumber;
+    
+    // 根据换行切割字符串
+    if(serialNumber) {
+      const splitted = serialNumber.split("\n");
+      // 移除重复,空白,长度不为10,并且内部全为空格的字符串
+      const numbers = this.removeNull(this.removeDuplicates(splitted));
+      // 拼接成字符串
+      serialNumber = numbers.join(",");
+    }
     this.props.changeSchoolId(schoolId);
     const pager = {page: this.props.page, perPage: this.props.perPage};
-    this.props.getUserSchool(USER.id, schoolId, pager);
-    if(schoolId == -1) {
-      // 调所有学校的接口
-      this.props.pagination.onChange(1);
-    }
+    this.props.getUserSchool(USER.id, schoolId, pager, serialNumber);
+    // if(schoolId == -1) {
+    //   // 调所有学校的接口
+    //   this.props.pagination.onChange(1);
+    // }
   }
   render() {
     const allSchool = this.props.allSchool;
@@ -207,8 +239,6 @@ class SchoolFilter extends React.Component {
           >
           <FormItem
             id="select"
-            labelCol={{ span: 6 }}
-            wrapperCol={{ span: 14 }}
             >
             {getFieldDecorator('school', {
               rules: [
@@ -219,6 +249,15 @@ class SchoolFilter extends React.Component {
               <Select id="school" style={{width:200}} dropdownClassName="test">
                 {schoolNode}
               </Select>
+            )}
+          </FormItem>
+          <FormItem>
+            {getFieldDecorator('serialNumber', {
+              rules: [
+                // { required: true, message: '必填' },
+              ],
+            })(
+              <Input type="textarea" placeholder="请输入设备编号" autosize={{ minRows: 2, maxRows: 6 }} />
             )}
           </FormItem>
           <Button style={{verticalAlign:"top",height:32}} type="primary" htmlType="submit">筛选</Button>

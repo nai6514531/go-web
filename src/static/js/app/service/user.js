@@ -23,9 +23,9 @@ const UserService = {
   school: (id, schoolId) => {
     return apiGet(`/api/user/${id}/school?hasDeviceTotal=0&schoolId=${schoolId}`);
   },
-  schoolTotal: (id, schoolId, pager) => {
+  schoolTotal: (id, schoolId, pager, serialNumber) => {
     const { page, perPage } = pager;
-    return apiGet(`/api/user/${id}/school?hasDeviceTotal=1&schoolId=${schoolId}&page=${page}&perPage=${perPage}`);
+    return apiGet(`/api/user/${id}/school?hasDeviceTotal=1&schoolId=${schoolId}&deviceStr=${serialNumber || ''}`);
   },
   schoolDevice:(id, school_id, pager) => {
     const { page, perPage } = pager;
