@@ -30,8 +30,8 @@ const columns = [{
   key: 'id',
 }, {
   title: '运营商名称',
-  dataIndex: 'user',
-  key: 'user',
+  dataIndex: 'name',
+  key: 'name',
   className: 'table-col',
 }, {
   title: '联系人',
@@ -49,8 +49,11 @@ const columns = [{
   className: 'table-col',
 }, {
   title: '模块数量',
-  dataIndex: 'number',
-  key: 'number',
+  dataIndex: 'deviceTotal',
+  key: 'deviceTotal',
+  render: (deviceTotal) => {
+    return deviceTotal || '0';
+  }
 }, {
   title: '操作',
   dataIndex: 'action',
@@ -62,7 +65,7 @@ const columns = [{
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
       {record.showAction?
         <div>
-          <p><Link to={'/user/' + record.id} onClick={record.action}>下级运营商</Link></p>
+          <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
           {USER.role.id == 1 ? "" :
               <p><Link to='/user/device/list'>设备管理</Link></p>
           }
@@ -76,72 +79,36 @@ class AgentTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dataSource: [],
       page: 1,
       perPage: 10,
-      pagination: {},
-      child: false,
-      list: [],
       pager: {},
       total: 1,
       searchValue: '',
     };
-    this.showChild = this.showChild.bind(this);
   }
   componentWillMount() {
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.loading = true;
     if(this.props.params.id) {
-      this.showChild();
+      // this.showChild();
       this.props.getUserList(pager);
     } else {
       this.props.getDetailTotal(USER.id);
     }
   }
-  showChild() {
-    this.setState({
-      child: true,
-    })
-  }
-  hideChild() {
-    this.setState({
-      child: false,
-    })
-  }
   componentWillUpdate(nextProps, nextState) {
-    const self = this;
     const pager = { page : this.state.page, perPage: this.state.perPage};
-    // 加载子用户列表
-    if(nextState.child == true && this.state.child == false) {
-      self.loading = true;
+    const id = nextProps.params.id;
+    // 首次加载子代理商
+    if(this.props.list == undefined && nextProps.list == undefined && id) {
+      this.loading = true;
       this.props.getUserList(pager);
     }
-    // 首次加载子运营商列表,首次从子用户列表跳转到父用户列表
-    if(this.props.list == undefined && nextProps.list) {
-      this.first = 1;
+    // 首次加载父代理商
+    if(this.props.detailTotal == undefined && nextProps.detailTotal == undefined && !id) {
+      this.loading = true;
+      this.props.getDetailTotal(USER.id);
     }
-    // 首次加载父运营商列表
-    if(nextProps.routeParams.id == undefined && this.props.detailTotal == undefined){
-      if(this.first) {
-        this.setState({child:false});
-        this.first = 0;
-      }
-      if(this.state.child == true && nextState.child == false) {
-        self.hideChild();
-        self.loading = true;
-        this.props.getDetailTotal(USER.id);
-      }
-    }
-  }
-  shouldComponentUpdate(nextProps, nextState) {
-    if(nextProps.list !== this.props.list
-      || nextProps.detailTotal !== this.props.detailTotal
-      || nextState.child == true || nextState.child == false) {
-      return true;
-    } else {
-      return false;
-    }
-
   }
   initializePagination(total) {
     const self = this;
@@ -165,15 +132,13 @@ class AgentTable extends React.Component {
   }
   childPagination() {
     let total = 1;
-    if(this.state.child){
+    const { id } = this.props.params;
+    if(id){
       if (this.props.list && this.props.list.fetch == true) {
         total = this.props.list.result.data.total;
       }
     }
     return this.initializePagination(total);
-  }
-  parentPagination() {
-    return this.initializePagination(1);
   }
   handleInputChange(e) {
     this.setState({
@@ -185,67 +150,44 @@ class AgentTable extends React.Component {
     const pager = { page: 1, perPage: this.state.perPage};
     this.setState({ page: 1 });
     this.props.getUserList(pager,user);
-    if (user) {
-      // 发请求啦
-      // this.list(serialNumber, pager);
-    }
+
   }
   render() {
     const { list, detailTotal, params: {id} } = this.props;
-    let data = '';
     let dataSource = [];
     const self = this;
     if(id) {
       if(list){
         if(list.fetch == true){
-          data = list.result.data.list;
+          const data = list.result.data.list;
           dataSource = data.map(function (item, key) {
-            return (
-            {
-              id: item.id,
-              key: item.id,
-              user: item.name,
-              contact: item.contact,
-              account: item.account,
-              address: item.address,
-              number: item.deviceTotal ? item.deviceTotal : 0,
-              action: self.showChild,
-              showAction: false,
-            }
-            )
+            item.key = item.id;
+            item.showAction = false;
+            return item;
           })
-          self.loading = false;
         }
+        self.loading = false;
 
       }
     } else {
       if(detailTotal) {
         if(detailTotal.fetch == true) {
-          data = detailTotal.result.data;
-          dataSource = [{
-            id: data.id,
-            key: data.id,
-            user: data.name,
-            contact: data.contact,
-            account: data.account,
-            address: data.address,
-            number: data.deviceTotal ? data.deviceTotal : 0,
-            action: self.showChild,
-            showAction: true,
-          }
-          ];
-          self.loading = false;
+          const data = detailTotal.result.data;
+          data.key = data.id;
+          data.showAction = true;
+          dataSource = [data];
         }
+        self.loading = false;
       }
     }
     const pagination =id? {'pagination':this.childPagination()}:{'pagination':false}
-    // const pagination = {};
+    pagination.current = this.state.page;
     return (
       <section className="view-user-list">
         <header>
           {id?
             <Breadcrumb>
-              <Breadcrumb.Item><Link to="/user" onClick={this.hideChild.bind(this)}>运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>下级运营商</Breadcrumb.Item>
             </Breadcrumb>
             :
@@ -259,7 +201,7 @@ class AgentTable extends React.Component {
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新运营商
             </Link>
-            <Input style={{width:120}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
+            <Input style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
             <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
           </div>:
           ''
