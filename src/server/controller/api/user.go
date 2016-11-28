@@ -707,11 +707,12 @@ func (self *UserController) Basic(ctx *iris.Context) {
 func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
+	searchStr := ctx.URLParam("searchStr")
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	list, err := userService.SubList(userId, page, perPage)
+	list, err := userService.SubList(userId, searchStr, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01010701", err, user_msg["01010701"]}
 		common.Log(ctx, result)

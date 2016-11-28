@@ -120,9 +120,16 @@ func (self *UserService) Basic(id int) (*model.User, error) {
 	return user, nil
 }
 
-func (self *UserService) SubList(parentId int, page int, perPage int) (*[]*model.User, error) {
+func (self *UserService) SubList(parentId int, searchStr string, page int, perPage int) (*[]*model.User, error) {
 	list := &[]*model.User{}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("parent_id = ? AND id != ?", parentId, parentId).Order("id desc").Find(list)
+	sql := "parent_id = ? AND id != ?"
+	params := make([]interface{}, 0)
+	params = append(params, parentId, parentId)
+	if searchStr != "" {
+		sql += " and (name like ? or account like ?) "
+		params = append(params, "%"+searchStr+"%", "%"+searchStr+"%")
+	}
+	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
