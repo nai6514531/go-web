@@ -74,6 +74,8 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	page := functions.StringToInt(params["page"])
 	perPage := functions.StringToInt(params["perPage"])
 	cashAccountType := functions.StringToInt(params["cashAccountType"])      //提现方式
+	searchStr := "工商"//params["searchStr"]
+	common.Logger.Debugln("searchStr=========", searchStr)
 	var status []string
 	var _status []string
 	userId := -1
@@ -127,14 +129,14 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
 		return
 	}
-	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId)
+	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId, searchStr)
 	if err != nil {
 		result = &enity.Result{"01060102", err.Error(), daily_bill_msg["01060102"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, billAt, userId, page, perPage)
+	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, billAt, userId, searchStr, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01060101", err.Error(), daily_bill_msg["01060101"]}
 		common.Log(ctx, result)
