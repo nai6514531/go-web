@@ -41,12 +41,31 @@ const App = React.createClass({
 					return moment(bill_at).format('YYYY-MM-DD')
 				}
 			}, {
-				title: '结账日期',
+				title: '结账信息',
 				dataIndex: 'settledAt',
 				key: 'settledAt',
-				render: (settled_at, record) => {
-					return record.status == 2?settled_at:'/';
-				}
+        width: 250,
+        render: (settled_at, record) => {
+          if(record.accountType == 1) {
+            return <div>
+              {record.realName?<span>{record.realName}</span>:''}
+              {record.realName && record.account ?' | ':''}
+              {record.account?<span className="info">账号: {record.account}</span>:''}
+              {record.account && record.mobile ?' | ':''}
+              {record.mobile?<span className="info">手机号: {record.mobile}</span>:''}
+            </div>
+          } else if (record.accountType == 3) {
+            return <div>
+              {record.realName?<span>户名: {record.realName}</span>:''}
+              {record.realName && record.bankName ?' | ':''}
+              {record.bankName?<span className="info">{record.bankName}</span>:''}
+              {record.bankName && record.account ?' | ':''}
+              {record.account?<span className="info">{record.account}</span>:''}
+              {record.account && record.mobile ?' | ':''}
+              {record.mobile?<span className="info">{record.mobile}</span>:''}
+            </div>
+          }
+        }
 			}, {
 				title: '状态',
 				dataIndex: 'status',
