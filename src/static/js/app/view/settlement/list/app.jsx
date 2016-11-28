@@ -9,6 +9,7 @@ import moment from 'moment';
 const App = React.createClass({
 	getInitialState() {
 		return {
+      rowColor:[],
 			columns: [{
 				title: '账单号',
 				dataIndex: 'id',
@@ -114,20 +115,26 @@ const App = React.createClass({
 						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
+          const mark = <a onClick={this.markRow.bind(this,record.key)}>{this.state.rowColor[record.key]? '取消标记' :'标记'}</a>;
 					switch (roleId) {
 						case 1:
 							spanDiv = (
-								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-							)
+                <div>
+                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                  <span> | </span>
+                  {mark}
+                </div>
+              )
 							break;
 						case 2:
 						case 5:
-
 							if(accountType == 1){
 								spanDiv = (
 									<span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			</span>
+	          			  <span> | </span>
+                    {mark}
+                  </span>
 								)
 							}else{
 								if(status == 0){
@@ -138,13 +145,17 @@ const App = React.createClass({
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			</span>
+		          			  <span> | </span>
+                      {mark}
+                    </span>
 									)
 								}else if(status == 2 || status == 3){
 									spanDiv = (
 										<span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			</span>
+		          			  <span> | </span>
+                      {mark}
+                    </span>
 									)
 								}else if(status == 4){
 									spanDiv = (
@@ -154,7 +165,9 @@ const App = React.createClass({
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			</span>
+		          			  <span> | </span>
+                      {mark}
+                    </span>
 									)
 								}else{
 									spanDiv = (
@@ -164,7 +177,9 @@ const App = React.createClass({
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			</span>
+		          			  <span> | </span>
+                      {mark}
+                    </span>
 									)
 								}
 							}
@@ -172,7 +187,11 @@ const App = React.createClass({
 						case 3:
 							if( status==2||status==3 ){
 								spanDiv = (
-									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                  <div>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <span> | </span>
+                    {mark}
+                  </div>
 								)
 							}else if( status == 4){
 								spanDiv = (
@@ -182,6 +201,8 @@ const App = React.createClass({
 				            </Popconfirm>
 				            <span> | </span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                     <span> | </span>
+                    {mark}
 	          			</span>
 								)
 							}else{
@@ -192,6 +213,8 @@ const App = React.createClass({
 				            </Popconfirm>
 				            <span> | </span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <span> | </span>
+                    {mark}
 	          			</span>
 								)
 							}
@@ -246,7 +269,13 @@ const App = React.createClass({
 				});
 				if (data && data.status == "00") {
 					this.clearSelectRows(); //清空结账勾选
+          const list = data.data.list;
+          let rowColor = {};
+          for (let i=0;i < list.length;i++) {
+            rowColor[list[i].id] = '';
+          }
 					this.setState({
+            rowColor: rowColor,
 						total: data.data.total,
 						list: data.data.list.map((item) => {
 							item.key = item.id;
@@ -263,6 +292,15 @@ const App = React.createClass({
 				});
 			})
 	},
+  markRow(e) {
+    const rowColor = this.state.rowColor;
+    if(!rowColor[e]){
+      rowColor[e] = 'marked';
+    } else {
+      rowColor[e] = '';
+    }
+    this.setState({rowColor: rowColor});
+  },
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });
   },
@@ -331,8 +369,8 @@ const App = React.createClass({
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let aliPayNum = 0;
 		let list = this.state.list;
-		console.log(data)
-		console.log(list)
+		// console.log(data)
+		// console.log(list)
 		for(var i=0; i<data.length; i++){
 			for(var j=0; j<list.length; j++){
 				if(data[i].idArr.indexOf(list[j].id) >= 0){
@@ -483,6 +521,7 @@ const App = React.createClass({
 			size: "small",
 			total: total,
 			showSizeChanger: true,
+      pageSizeOptions: ['10','20','30','40','300'],
 			onShowSizeChange(page, perPage) {
 				let listObj = self.state.nowAjaxStatus;
 				listObj.page = page;
@@ -507,6 +546,9 @@ const App = React.createClass({
 	getAliPayOrderNum() {//获取支付宝的订单
 		return 123
 	},
+  rowClassName(record, index) {
+    return this.state.rowColor[record.key];
+  },
 	render(){
 		const self = this;
 		const {list, columns} = this.state;
@@ -533,7 +575,7 @@ const App = React.createClass({
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
 		  onSelect(record, selected, selectedRows) {
-		    //console.log(record, selected, selectedRows);
+		    // console.log(record, selected, selectedRows);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
 		  	var len = self.state.list.length;
@@ -602,9 +644,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table scroll={{ x: 980 }} className="table" rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 980 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table scroll={{ x: 980 }} className="table" dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 980 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
