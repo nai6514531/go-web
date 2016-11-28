@@ -18,9 +18,9 @@ import {
 } from '../constants/index';
 
 
-export function getUserList(pager) {
+export function getUserList(pager,searchValue) {
   return dispatch => {
-    UserService.list(pager).then((result) => {
+    UserService.list(pager,searchValue).then((result) => {
       dispatch({
         type: GET_USER_LIST,
         result: { fetch: true, result },

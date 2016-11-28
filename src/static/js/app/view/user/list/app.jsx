@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Table, Button, Breadcrumb } from 'antd';
+import { Table, Button,Input, Breadcrumb } from 'antd';
 import { Link } from 'react-router';
 
 import { connect } from 'react-redux';
@@ -84,6 +84,7 @@ class AgentTable extends React.Component {
       list: [],
       pager: {},
       total: 1,
+      searchValue: '',
     };
     this.showChild = this.showChild.bind(this);
   }
@@ -174,6 +175,21 @@ class AgentTable extends React.Component {
   parentPagination() {
     return this.initializePagination(1);
   }
+  handleInputChange(e) {
+    this.setState({
+      searchValue: e.target.value,
+    });
+  }
+  handleSearch() {
+    const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
+    const pager = { page: 1, perPage: this.state.perPage};
+    this.setState({ page: 1 });
+    this.props.getUserList(pager,user);
+    if (user) {
+      // 发请求啦
+      // this.list(serialNumber, pager);
+    }
+  }
   render() {
     const { list, detailTotal, params: {id} } = this.props;
     let data = '';
@@ -243,6 +259,8 @@ class AgentTable extends React.Component {
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新运营商
             </Link>
+            <Input style={{width:120}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
+            <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
           </div>:
           ''
         }
