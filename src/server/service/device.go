@@ -100,16 +100,16 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 	return list, nil
 }
 
-func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, deviceStr ...string) (int, error) {
+func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, serialNums ...string) (int, error) {
 	device := &model.Device{}
 	var total int
 	params := make([]interface{}, 0)
 	sql := "user_id = ? and school_id = ?"
 	params = append(params, userId, schoolId)
 
-	if len(deviceStr) > 0 && deviceStr[0] != ""{
+	if len(serialNums) > 0 && serialNums[0] != ""{
 		sql += " and serial_number in (?)"
-		params = append(params, deviceStr)
+		params = append(params, serialNums)
 	}
 	r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	if r.Error != nil {

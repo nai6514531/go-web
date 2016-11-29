@@ -945,7 +945,7 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := deviceService.TotalByByUserAndSchool(userId, schoolId, deviceStr) //计算总数
+	total, err := deviceService.TotalByByUserAndSchool(userId, schoolId, serialNums...) //计算总数
 	if err != nil {
 		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
 		common.Log(ctx, result)
