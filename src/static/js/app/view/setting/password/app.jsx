@@ -1,5 +1,5 @@
 import React from "react";
-import {Button,Form,Input, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
+import {Button,Form,Input, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import SettingService from "../../../service/setting";
 const FormItem = Form.Item;
 import './app.less';
@@ -36,14 +36,11 @@ const App = Form.create()(React.createClass({
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        console.log('Received values of form: ', values);
         const data = {
-          userId: USER.id,
-          oldPassword: md5(values.oldPassword),
-          password: md5(values.password),
-          confirm: md5(values.confirm),
+          current: md5(values.current),
+          newer: md5(values.newer),
         }
-        // this.set(data);
+        this.set(data);
       }
     });
   },
@@ -53,7 +50,7 @@ const App = Form.create()(React.createClass({
   },
   checkPassowrd(rule, value, callback) {
     const form = this.props.form;
-    if (value && value !== form.getFieldValue('password')) {
+    if (value && value !== form.getFieldValue('newer')) {
       callback('两次输入的密码不一致');
     } else {
       callback();
@@ -96,7 +93,7 @@ const App = Form.create()(React.createClass({
           {...formItemLayout}
           label="原密码"
         >
-          {getFieldDecorator('oldPassword', {
+          {getFieldDecorator('current', {
             rules: [{required: true, message: '请输入原密码',}],
           })(
             <Input type="password" placeholder="请输入原密码"/>
@@ -106,7 +103,7 @@ const App = Form.create()(React.createClass({
           {...formItemLayout}
           label="新密码"
         >
-          {getFieldDecorator('password', {
+          {getFieldDecorator('newer', {
             rules: [{
               required: true, message: '请输入新密码',
             }, {
