@@ -71,7 +71,7 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
-	api.Patch("/device/unlock",  device.UnLock)
+	api.Put("/device/unlock",  device.UnLock) 
 	api.Get("/device/:id", device.Basic)
 	api.Delete("/device/:id", device.Delete)
 	api.Patch("/device/:id/reset", device.OwnToMeOrTest, device.Reset)
