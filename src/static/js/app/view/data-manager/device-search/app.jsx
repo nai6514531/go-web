@@ -121,7 +121,8 @@ const App = React.createClass({
   },
   handleSearch() {
     const serialNumber = this.state.searchValue.replace(/[\r\n\s]/g,"");
-    const pager = {page: this.state.page, perPage: this.state.perPage}
+    const pager = {page: 1, perPage: this.state.perPage};
+    this.setState({pager});
     if (serialNumber) {
       this.list(serialNumber, pager);
     }
@@ -176,7 +177,9 @@ const App = React.createClass({
           <Input style={{width:120}} placeholder="请输入模块编号" onChange={this.handleInputChange}/>
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
           {USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 ?
-            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button> :''}
+            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>:
+            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>
+          }
         </div>
         <article>
           <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>

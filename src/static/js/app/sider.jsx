@@ -95,9 +95,7 @@ const App = React.createClass({
                     {item.name}
                   </Menu.Item>
           })}
-          <Menu.Item key="#/setting/password">修改密码</Menu.Item>
         </Menu>
-
       </nav>
     </div>)
   }
