@@ -24,7 +24,7 @@ func (self *DailyBillService) Total() (int, error) {
 	return int(total), nil
 }
 
-func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string) (int, error) {
+func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string,roleId int) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -53,6 +53,10 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 		params = append(params, "%"+searchStr+"%")
 		params = append(params, "%"+searchStr+"%")
 	}
+	if roleId==3{
+		//财务角色过滤掉测试账号的账单
+		sql += " and bill.user_id !=1 "
+	}
 
 	common.Logger.Debugln("params===========", params)
 	r := common.DB.Raw(sql, params...).Scan(result)
@@ -71,7 +75,7 @@ func (self *DailyBillService) List(page int, perPage int) (*[]*model.DailyBill, 
 	return list, nil
 }
 
-func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string, page int, perPage int) (*[]*model.DailyBill, error) {
+func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string, page int, perPage int,roleId int) (*[]*model.DailyBill, error) {
 	list := []*model.DailyBill{}
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
@@ -98,6 +102,10 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		sql += " and (uca.bank_name like ? or bill.user_name like ?) "
 		params = append(params, "%"+searchStr+"%")
 		params = append(params, "%"+searchStr+"%")
+	}
+	if roleId==3{
+		//财务角色过滤掉测试账号的账单
+		sql += " and bill.user_id !=1 "
 	}
 
 	sql += " order by bill.status, bill.user_id, bill.bill_at DESC, bill.id DESC limit " + _perPage + " offset " + _offset
