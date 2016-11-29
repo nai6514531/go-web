@@ -73,18 +73,18 @@ const columns = [{
   fixed: 'right',
   render: (text, record) => (
     <span>
-      <Link to={"/device/edit/" + record.key}>修改</Link>
+      <Link to={"/device/edit/" + record.id}>修改</Link>
       <span className="ant-divider" />
-      <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.key)}>
+      <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
         <a href="#">删除</a>
       </Popconfirm>
       <span className="ant-divider" />
       {record.statusCode == 9 ?
-        <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.key, true)}>
+        <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
           <a href="#">启用</a>
         </Popconfirm>
         :
-        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.key, false)}>
+        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
           <a href="#">锁定</a>
         </Popconfirm>
       }
@@ -235,6 +235,7 @@ class DeviceList extends React.Component {
           }
           return {
             id: item.id,
+            key: item.key,
             serialNumber: item.serialNumber,
             referenceDevice: referenceDevice,
             statusCode: item.status,
