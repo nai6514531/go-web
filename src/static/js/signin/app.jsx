@@ -106,6 +106,7 @@ export class LoginForm extends React.Component {
     }
   }
   render() {
+    console.log(md5(123456));
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: { span: 7 },
