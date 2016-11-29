@@ -4,7 +4,7 @@ import classnames from 'classnames';
 const SubMenu = Menu.SubMenu;
 import Menus from './menus.jsx'
 
-const Navbar = React.createClass({
+const App = React.createClass({
   propTypes: {
     forceShow: React.PropTypes.bool,
     onClickClose: React.PropTypes.func,
@@ -103,4 +103,4 @@ const Navbar = React.createClass({
   }
 });
 
-export default Navbar;
+export default App;

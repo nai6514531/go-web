@@ -91,12 +91,12 @@ const App = Form.create()(React.createClass({
       <Form horizontal onSubmit={this.handleSubmit}>
         <FormItem
           {...formItemLayout}
-          label="原密码"
+          label="原始密码"
         >
           {getFieldDecorator('current', {
-            rules: [{required: true, message: '请输入原密码',}],
+            rules: [{required: true, message: '请输入原始密码',}],
           })(
-            <Input type="password" placeholder="请输入原密码"/>
+            <Input type="password" placeholder="请输入原始密码"/>
           )}
         </FormItem>
         <FormItem
