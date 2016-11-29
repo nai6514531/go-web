@@ -255,15 +255,11 @@ class SchoolFilter extends React.Component {
             )}
           </FormItem>
           <FormItem>
-            {getFieldDecorator('serialNumber', {
-              rules: [
-                // { required: true, message: '必填' },
-              ],
-            })(
-              <Input type="textarea" placeholder="请输入设备编号" autosize={{ minRows: 2, maxRows: 6 }} />
+            {getFieldDecorator('serialNumber', {})(
+              <Input type="textarea" placeholder="请输入设备编号" autosize />
             )}
           </FormItem>
-          <Button style={{verticalAlign:"top",height:32}} type="primary" htmlType="submit">筛选</Button>
+          <Button style={{verticalAlign:"baseline",height:32}} type="primary" htmlType="submit">筛选</Button>
         </Form>
       </div>
     );

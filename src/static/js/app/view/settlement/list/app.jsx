@@ -76,20 +76,20 @@ const App = React.createClass({
 					switch (status) {
 						case 0:
 							if(this.state.roleId == 3 || record.accountType == 1){
-								return <div className="status">未结账</div>
+								return <div className="status unfinished">未结账</div>
 							}else{
-								return <div className="status">未结账</div>
+								return <div className="status unfinished">未结账</div>
 							}
 							break;
 						case 1:
 							if(this.state.roleId == 3 || record.accountType == 1){
-								return <div className="status">未结账</div>
+								return <div className="status unfinished">未结账</div>
 							}else{
 								return <div className="status">已申请结账</div>
 							}
 							break;
 						case 2:
-							return <div className="status">已结账</div>
+							return <div className="status done">已结账</div>
 							break;
 						case 3:
 							return <div className="status">结账中</div>
