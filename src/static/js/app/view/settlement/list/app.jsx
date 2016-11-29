@@ -488,8 +488,9 @@ const App = React.createClass({
 			cashAccountType: cashAccountType,
 			status: status,
 			hasApplied: hasApplied,
-			billAt: billAt
-		});
+			billAt: billAt,
+      perPage: this.perPage,
+    });
 	},
   texthandleFilter() {
     const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
