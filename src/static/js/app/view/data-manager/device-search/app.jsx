@@ -175,7 +175,8 @@ const App = React.createClass({
           <span> 模块编号：</span>
           <Input style={{width:120}} placeholder="请输入模块编号" onChange={this.handleInputChange}/>
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
-          <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>
+          {USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 ?
+            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button> :''}
         </div>
         <article>
           <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
