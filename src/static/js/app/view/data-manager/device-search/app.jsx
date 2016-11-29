@@ -176,9 +176,9 @@ const App = React.createClass({
           <span> 模块编号：</span>
           <Input style={{width:120}} placeholder="请输入模块编号" onChange={this.handleInputChange}/>
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
-          {USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 ?
+          {USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 || USER.id == 1140 || USER.id == 1631?
             <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>:
-            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>
+          ""
           }
         </div>
         <article>

@@ -58,12 +58,17 @@ const App = Form.create()(React.createClass({
   },
   checkConfirm(rule, value, callback) {
     const form = this.props.form;
-    var pattern = new RegExp(/^(?=.*[0-9]{1,})(?=.*[a-zA-Z]{1,})([a-zA-Z0-9]{8,})$/);
-    if(pattern.test(value) || !value){
+    // var pattern = new RegExp(/^(?=.*[0-9]{1,})(?=.*[a-zA-Z]{1,})([a-zA-Z0-9]{8,})$/);
+    if( (value.length >= 6 && value.length <= 16) || !value){
       callback();
     } else {
-      callback('至少是8位数字和字母组成');
+      callback('位数为6到16位');
     }
+    // if(pattern.test(value) || !value){
+    //   callback();
+    // } else {
+    //   callback('至少是8位数字和字母组成');
+    // }
     if (value && this.state.passwordDirty) {
       form.validateFields(['confirm'], { force: true });
     }

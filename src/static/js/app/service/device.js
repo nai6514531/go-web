@@ -27,7 +27,7 @@ const DeviceService = {
     return apiPatch(`/api/device/${id}/status`, device);
   },
   statusBySN: (serialNumber,status) => {
-    return apiPut(`/api/device/unlock?serial-number=${serialNumber}`,status);
+    return apiPut(`/api/device-unlock?serial-number=${serialNumber}`,status);
   },
   pulseName: (id, device) => {
     return apiPatch(`/api/device/${id}/pulse-name`, device);
