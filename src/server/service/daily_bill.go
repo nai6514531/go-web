@@ -100,7 +100,7 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		params = append(params, "%"+searchStr+"%")
 	}
 
-	sql += " order by bill.id DESC limit " + _perPage + " offset " + _offset
+	sql += " order by bill.status, bill.bill_at DESC, bill.id DESC limit " + _perPage + " offset " + _offset
 	common.Logger.Debugln("params===========", params)
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()
