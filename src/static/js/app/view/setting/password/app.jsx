@@ -3,6 +3,8 @@ import {Button,Form,Input, Table, Icon, Popconfirm,Breadcrumb, message} from "an
 import SettingService from "../../../service/setting";
 const FormItem = Form.Item;
 import './app.less';
+import md5 from 'md5';
+
 
 const App = Form.create()(React.createClass({
   propTypes: {
@@ -35,8 +37,13 @@ const App = Form.create()(React.createClass({
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
-        values.userId = USER.id;
-        // this.set(values);
+        const data = {
+          userId: USER.id,
+          oldPassword: md5(values.oldPassword),
+          password: md5(values.password),
+          confirm: md5(values.confirm),
+        }
+        // this.set(data);
       }
     });
   },
@@ -68,13 +75,13 @@ const App = Form.create()(React.createClass({
   render() {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 6 },
-      wrapperCol: { span: 14 },
+      labelCol: { span: 7 },
+      wrapperCol: { span: 12 },
     };
     const tailFormItemLayout = {
       wrapperCol: {
-        span: 14,
-        offset: 6,
+        span: 12,
+        offset: 7,
       },
     };
     return (
