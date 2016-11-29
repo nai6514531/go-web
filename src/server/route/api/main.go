@@ -49,6 +49,7 @@ func Api() {
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
 	api.Post("/user", user.Create)
+	api.Put("/user/password", user.Password)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
 	api.Get("/user/:id/device", user.DeviceList)
