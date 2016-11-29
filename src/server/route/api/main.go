@@ -49,7 +49,7 @@ func Api() {
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
 	api.Post("/user", user.Create)
-	api.Put("/user/password", user.Password)
+	api.Put("/user-password", user.Password)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
 	api.Get("/user/:id/device", user.DeviceList)
@@ -71,7 +71,6 @@ func Api() {
 	api.Get("/district/:id", region.DistrictDetail)
 
 	api.Get("/device", device.List)
-	api.Put("/device/unlock",  device.UnLock)
 	api.Get("/device/:id", device.Basic)
 	api.Delete("/device/:id", device.Delete)
 	api.Patch("/device/:id/reset", device.OwnToMeOrTest, device.Reset)
@@ -80,6 +79,7 @@ func Api() {
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
 	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
+	api.Put("/device-unlock",  device.UnLock)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
