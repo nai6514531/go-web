@@ -103,7 +103,7 @@ func (self *SyncController) SyncDevice(ctx *iris.Context) {
 
 func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
 	syncService := &service.SyncService{}
-	boo, err := syncService.SyncDailyBill()
+	boo, err := syncService.SyncDailyBillManual()
 	result := &enity.Result{}
 	if !boo {
 		result = &enity.Result{"1", err.Error(), "同步账单数据失败!"}
