@@ -1007,7 +1007,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	}
 	if len(serialNums) > 0 && serialNums[0] != "" {
 		common.Logger.Debugln("=======================")
-		list, err := deviceService.ListBySerialNumber(schoolId, serialNums...)
+		list, err := deviceService.ListBySerialNumber(userId, schoolId, serialNums...)
 		if len(*list) <= 0 {
 			result = &enity.Result{"01011100", nil, user_msg["01011100"]}
 			common.Log(ctx, result)

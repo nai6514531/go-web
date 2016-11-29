@@ -29,12 +29,13 @@ func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Devi
 	return device, nil
 }
 
-func (self *DeviceService) ListBySerialNumber(schoolId int, serialNumber ...string) (*[]*model.Device, error) {
+func (self *DeviceService) ListBySerialNumber(userId int, schoolId int, serialNumber ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	params := make([]interface{}, 0)
-	sql := ""
+	sql := "user_id = ? and "
+	params = append(params, userId)
 	if schoolId != -1 {
-		sql += "school_id = ? and "
+		sql += " school_id = ? and "
 		params = append(params, schoolId)
 	}
 	sql += " serial_number in (?)"

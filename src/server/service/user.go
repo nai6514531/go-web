@@ -1,14 +1,10 @@
 package service
 
 import (
-	// "crypto/md5"
-	// "fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"github.com/jinzhu/gorm"
-	"maizuo.com/soda-manager/src/server/kit/functions"
-	"strconv"
 )
 
 type UserService struct {
@@ -132,19 +128,19 @@ func (self *UserService) Password(userId int, password string) (bool, error) {
 	}
 	txmn := common.MNDB.Begin()
 	rmn = txmn.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", userId - 1).Update("PASSWORD", password)
-	if r.Error != nil {
+	if rmn.Error != nil {
 		tx.Rollback()
 		txmn.Rollback()
 		return false, r.Error
 	}
-	if r.RowsAffected != rmn.RowsAffected {
+	/*if r.RowsAffected != rmn.RowsAffected {
 		tx.Rollback()
 		txmn.Rollback()
 		e := &functions.DefinedError{}
 		e.Msg = "新旧数据库更新条数不一致: new_system:" + strconv.FormatInt(r.RowsAffected, 10) + ", old_system:" + strconv.FormatInt(rmn.RowsAffected, 10)
 		err := e
 		return false, err
-	}
+	}*/
 	txmn.Commit()
 	tx.Commit()
 	return true, nil
