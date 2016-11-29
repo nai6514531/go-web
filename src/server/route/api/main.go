@@ -44,7 +44,7 @@ func Api() {
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
-	api.Get("/sync/use-all", sync.SyncAllUserAndRel)
+	api.Get("/sync/user-all", sync.SyncAllUserAndRel)
 
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)

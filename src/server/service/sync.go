@@ -339,7 +339,7 @@ func (self *SyncService) SyncDailyBill() (bool, error) {
 
 func (self *SyncService) SyncDailyBillDetail() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("status = 0 or status =1").Find(list)
+	r := common.MNDB.Where("status = 0 or status = 1 or status = 2").Find(list)
 	syncService := &SyncService{}
 	dailyBillDetailService := &DailyBillDetailService{}
 	if r.Error != nil {
