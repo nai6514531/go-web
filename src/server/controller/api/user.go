@@ -169,7 +169,7 @@ var (
 		"01011403": "原始密码错误,请重新输入!",
 		"01011404": "新密码不能为空",
 
-		"01011501": "该用户信息不存在",
+		"01011501": "该设备用户信息不存在",
 		"01011502": "请操作你自身、下级或Test账号下的设备",
 	}
 )
@@ -873,7 +873,7 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	}
 */
 func (self *UserController) DeviceList(ctx *iris.Context) {
-	userId, _ := ctx.ParamInt("userId")
+	userId, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
@@ -939,7 +939,7 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	}
 **/
 func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
-	userId, _ := ctx.ParamInt("userId")
+	userId, _ := ctx.ParamInt("id")
 	schoolId, _ := ctx.ParamInt("schoolId")
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
@@ -992,7 +992,7 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 **/
 func (self *UserController) SchoolList(ctx *iris.Context) {
 	//获取学校id列表
-	userId, _ := ctx.ParamInt("userId")
+	userId, _ := ctx.ParamInt("id")
 	schoolId, _ := ctx.URLParamInt("schoolId")
 	hasDeviceTotal, _ := ctx.URLParamInt("hasDeviceTotal")
 	deviceStr := ctx.URLParam("deviceStr")
@@ -1259,7 +1259,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 }
 
 func (self *UserController) IsMeOrSub(ctx *iris.Context) {
-	id, _ := ctx.ParamInt("userId")//前端传的id
+	id, _ := ctx.ParamInt("id")//前端传的id
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找

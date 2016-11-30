@@ -59,6 +59,8 @@ var (
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
 		"01030512": "你已经添加了该设备!",
+		"01030513": "请操作你自身、下级或Test账号下的设备!",
+		"01030514": "无该设备用户信息",
 
 		"01030600": "重置设备成功!",
 		"01030601": "重置设备失败!",
@@ -450,10 +452,10 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 */
 func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
+	userService := &service.UserService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
-	userId, _ := ctx.ParamInt("userId")
 	if device.SerialNumber == "" {
 		result = &enity.Result{"01030502", nil, device_msg["01030502"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -483,18 +485,28 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	/*//修改设备的用户为当前用户id
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//修改设备的用户为当前用户id
+	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	user, err := userService.Basic(device.UserId)
+	if err != nil {
+		result = &enity.Result{"01030514", err.Error(), device_msg["01030514"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if sessionUserId != device.UserId && sessionUserId != user.ParentId && sessionUserId != 1 {
+		result = &enity.Result{"01030513", nil, device_msg["01030513"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	//判断一下这批设备的用户id是否为1或者自己
-	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(userId, serialList)
+	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(device.UserId, serialList)
 	if !isOwntoMeOrTest {
 		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}*/
+	}
 	common.Logger.Debugln("device.UserId===========", device.UserId)
-	common.Logger.Debugln("userId==================", userId)
-	device.UserId = userId
+	//device.UserId = userId
 	success := deviceService.BatchUpdateBySerialNumber(&device, serialList)
 	if !success {
 		result = &enity.Result{"01030501", nil, device_msg["01030501"]}
