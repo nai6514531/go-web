@@ -131,7 +131,7 @@ class DeviceForm extends React.Component {
     }
     const pulseName = nextProps.pulseName;
     // 修改服务名的反馈
-    if(this.theName == 0){
+    if(this.theName == 1 && this.state.addNew == false){
       if(pulseName && pulseName.fetch == true) {
         message.success('服务名修改成功',3);
         const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
@@ -139,7 +139,7 @@ class DeviceForm extends React.Component {
       } else if (pulseName && pulseName.fetch == false) {
         message.error('服务名修改失败,请重试.',3);
       }
-      self.theName = 1;
+      self.theName = 0;
     }
     // 修改设备或者添加设备的反馈
     if(this.saveDetail == 1){
@@ -253,7 +253,6 @@ class DeviceForm extends React.Component {
 		// 被修改的脉冲 key-value
 		thePulseName[pulseNameKey] = pulseName;
 		const addNew = this.state.addNew;
-		this.theName = 0;
 		this.pulseName = pulseName;
 		if(addNew) {
 			this[pulseNameKey] = pulseName;
@@ -261,7 +260,8 @@ class DeviceForm extends React.Component {
 			const device = { deviceId: deviceId };
 			let data = Object.assign({}, device, thePulseName);
 			this.props.patchPulseName(deviceId, data);
-		}
+      this.theName = 1;
+    }
 	}
 	showModal() {
 		this.setState({ visible: true });
@@ -269,14 +269,6 @@ class DeviceForm extends React.Component {
 	hideModal() {
 		// 取消就重置内部数据
 		this.setState({ visible: false });
-	}
-	checkChinese(rule, value, callback) {
-		var pattern=new RegExp(/^[0-9a-zA-Z]*$/);
-		if(value && !pattern.test(value)){
-			callback('请输入正确的设备编号');
-		} else {
-			callback();
-		}
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);

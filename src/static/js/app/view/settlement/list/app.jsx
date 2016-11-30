@@ -12,12 +12,13 @@ const App = React.createClass({
       rowColor:[],
       textValue: '',
 			columns: [
-        // {
-			// 	title: '账单号',
-			// 	dataIndex: 'id',
-			// 	key: 'id',
-			// 	sorter: (a, b) => +a.id - +b.id
-			// },
+        {
+				title: '账单号',
+				dataIndex: 'id',
+				key: 'id',
+          width:50,
+				sorter: (a, b) => +a.id - +b.id
+			},
         {
 				  title: '运营商',
 				  dataIndex: 'userName',
@@ -674,9 +675,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table scroll={{ x: 800, y: 300 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 800 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table scroll={{ x: 800, y: 300 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 800 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
