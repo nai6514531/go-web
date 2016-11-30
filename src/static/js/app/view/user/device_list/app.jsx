@@ -10,20 +10,20 @@ import * as UserActions from '../../../actions/user';
 
 
 function mapStateToProps(state) {
-  const { user: { school, schoolDevice, device, allSchool } } = state;
-  return { school, schoolDevice, device, allSchool };
+  const { user: { school, schoolDevice, device, allSchool, detail } } = state;
+  return { school, schoolDevice, device, allSchool, detail };
 }
 
 function mapDispatchToProps(dispatch) {
   const {
     getUserSchool,
-    getUserDevice,
     getAllSchool,
+    getUserDetail
   } = bindActionCreators(UserActions, dispatch);
   return {
     getUserSchool,
-    getUserDevice,
     getAllSchool,
+    getUserDetail
   };
 }
 
@@ -45,7 +45,7 @@ const columns = [{
   key: 'action',
   width: 100,
   fixed: 'right',
-  render: (text, record) => <Link to={"/user/device/school/" + record.id}>查看模块</Link>,
+  render: (text, record) => <Link to={"/user/"+record.userId+"/device/school/" + record.id}>查看模块</Link>,
 }];
 
 
@@ -66,8 +66,12 @@ class SchoolTable extends React.Component {
     const pager = {page: this.state.page, perPage: this.state.perPage};
     const schoolId = -1;
     this.loading = true;
-    this.props.getUserSchool(USER.id, schoolId, pager);
-    this.props.getAllSchool(USER.id, schoolId);
+    // this.props.getUserSchool(USER.id, schoolId, pager);
+    // this.props.getAllSchool(USER.id, schoolId);
+    const { id } = this.props.params;
+    this.props.getUserSchool(id, schoolId, pager);
+    this.props.getAllSchool(id, schoolId);
+    this.props.getUserDetail(id);
   }
   componentWillReceiveProps(nextProps) {
     if(this.getSchool == 1 && nextProps.school) {
@@ -85,6 +89,7 @@ class SchoolTable extends React.Component {
     if(this.state.schoolId) {
       schoolId = this.state.schoolId;
     }
+    const {id} = this.props.params;
     return {
       total: total,
       showSizeChanger: true,
@@ -97,14 +102,16 @@ class SchoolTable extends React.Component {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
         self.loading = true;
-        self.props.getUserSchool(USER.id, schoolId, pager);
+        // self.props.getUserSchool(USER.id, schoolId, pager);
+        self.props.getUserSchool(id, schoolId, pager);
         self.getSchool = 1;
       },
       onChange(current) {
         const pager = { page: current, perPage: self.state.perPage};
         self.setState(pager);
         self.loading = true;
-        self.props.getUserSchool(USER.id, schoolId, pager);
+        // self.props.getUserSchool(USER.id, schoolId, pager);
+        self.props.getUserSchool(id, schoolId, pager);
         self.getSchool = 1;
       },
     }
@@ -113,7 +120,12 @@ class SchoolTable extends React.Component {
     this.setState({schoolId:schoolId})
   }
   render() {
+    let userName = '';
+    if(this.props.detail && this.props.detail.fetch == true) {
+      userName = this.props.detail.result.data.name;
+    }
     const self = this;
+    const { id } = this.props.params;
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
     const school = this.props.school;
@@ -126,6 +138,7 @@ class SchoolTable extends React.Component {
           return {
             id: item.id,
             key: item.id,
+            userId: id,
             school: item.name,
             number: item.deviceTotal,
           }
@@ -136,10 +149,19 @@ class SchoolTable extends React.Component {
     return (
       <section className="view-user-list">
         <header>
-          <Breadcrumb >
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-            <Breadcrumb.Item>设备管理</Breadcrumb.Item>
-          </Breadcrumb>
+          {id==USER.id?
+            <Breadcrumb >
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>{userName}的设备管理</Breadcrumb.Item>
+            </Breadcrumb>
+            :
+            <Breadcrumb >
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/"+USER.id}>下级运营商</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>{userName}的设备管理</Breadcrumb.Item>
+            </Breadcrumb>
+          }
+
         </header>
         <div className="toolbar">
           <SchoolFilter
@@ -149,8 +171,9 @@ class SchoolTable extends React.Component {
             perPage={this.state.perPage}
             pagination={pagination}
             changeSchoolId={this.changeSchoolId.bind(this)}
+            id={id}
             />
-          <Link to="/user/device/school/-1/edit" className="ant-btn ant-btn-primary add-btn">
+          <Link to={"/user/"+id+"/device/school/-1/edit"} className="ant-btn ant-btn-primary add-btn">
             添加新设备
           </Link>
         </div>
@@ -200,7 +223,7 @@ class SchoolFilter extends React.Component {
     e.preventDefault();
     const schoolId = parseInt(this.props.form.getFieldsValue().school);
     let serialNumber = this.props.form.getFieldsValue().serialNumber;
-    
+
     // 根据换行切割字符串
     if(serialNumber) {
       const splitted = serialNumber.split("\n");
@@ -211,7 +234,10 @@ class SchoolFilter extends React.Component {
     }
     this.props.changeSchoolId(schoolId);
     const pager = {page: this.props.page, perPage: this.props.perPage};
-    this.props.getUserSchool(USER.id, schoolId, pager, serialNumber);
+    const {id} = this.props;
+    // this.props.getUserSchool(USER.id, schoolId, pager, serialNumber);
+    this.props.getUserSchool(id, schoolId, pager, serialNumber);
+
     // if(schoolId == -1) {
     //   // 调所有学校的接口
     //   this.props.pagination.onChange(1);

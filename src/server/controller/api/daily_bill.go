@@ -755,13 +755,13 @@ func (self *DailyBillController) CancelBatchAliPay(ctx *iris.Context) {
 /**
 	定时修改"未结算"的支付宝账单状态为"已申请"
  */
-/*func (self *DailyBillController) TimedApplyAliPayBill() {
+/*func (self *DailyBillController) TimedApplyBill() {
 	common.Logger.Warningln("=============定时更新'未结账'支付宝账单状态'已申请'开始=============")
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userIds := make([]int, 0)
 	var err error
-	accountList, err := userCashAccountService.List(1)  //支付宝账户
+	accountList, err := userCashAccountService.List(1, 2, 3)  //支付宝账户
 	if err != nil {
 		common.Logger.Warningln("获取支付宝结账用户失败:", err.Error())
 	}

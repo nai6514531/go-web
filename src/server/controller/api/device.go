@@ -17,7 +17,8 @@ var (
 	device_msg = map[string]string{
 
 		"01030001": "该设备id不存在",
-		"01030002": "请操作你自身的设备或Test账号下的设备",
+		"01030002": "请操作你自身、下级或Test账号下的设备",
+		"01020003": "无该设备用户信息",
 
 		"01030100": "拉取设备详情成功!",
 		"01030101": "拉取设备详情失败!",
@@ -58,6 +59,8 @@ var (
 		"01030510": "请填写标准洗价格!",
 		"01030511": "请填写大件洗价格!",
 		"01030512": "你已经添加了该设备!",
+		"01030513": "请操作你自身、下级或Test账号下的设备!",
+		"01030514": "无该设备用户信息",
 
 		"01030600": "重置设备成功!",
 		"01030601": "重置设备失败!",
@@ -95,13 +98,14 @@ var (
 	}
 )
 
-//中间件-判断操作的设备是否属于我或者测试账号
+//中间件-判断操作的设备是否属于我,我的下级或者测试账号
 func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //要操作的设备id
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	deviceService := &service.DeviceService{}
+	userService := &service.UserService{}
 	device, err := deviceService.Basic(id)
 	if err != nil {
 		//如果没有找到条目不做处理
@@ -110,7 +114,13 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || device.UserId == 1 {
+	user, err := userService.Basic(device.UserId)
+	if err != nil {
+		result = &enity.Result{"01030003", nil, device_msg["01030003"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.UserId == userId || device.UserId == 1 || user.ParentId == userId {
 		ctx.Next()
 		return
 	} else {
@@ -443,6 +453,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 */
 func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
+	userService := &service.UserService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
@@ -477,16 +488,27 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		return
 	}
 	//修改设备的用户为当前用户id
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	user, err := userService.Basic(device.UserId)
+	if err != nil {
+		result = &enity.Result{"01030514", err.Error(), device_msg["01030514"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if sessionUserId != device.UserId && sessionUserId != user.ParentId && sessionUserId != 1 {
+		result = &enity.Result{"01030513", nil, device_msg["01030513"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	//判断一下这批设备的用户id是否为1或者自己
-	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(userId, serialList)
+	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(device.UserId, serialList)
 	if !isOwntoMeOrTest {
 		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
-	device.UserId = userId
+	common.Logger.Debugln("device.UserId===========", device.UserId)
+	//device.UserId = userId
 	success := deviceService.BatchUpdateBySerialNumber(&device, serialList)
 	if !success {
 		result = &enity.Result{"01030501", nil, device_msg["01030501"]}

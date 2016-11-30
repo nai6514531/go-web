@@ -28,29 +28,35 @@ const columns = [{
   title: '用户编号',
   dataIndex: 'id',
   key: 'id',
+  width: 50,
 }, {
   title: '运营商名称',
   dataIndex: 'name',
   key: 'name',
+  width: 100,
   className: 'table-col',
 }, {
   title: '联系人',
   dataIndex: 'contact',
   key: 'contact',
+  width:100,
   className: 'table-col',
 }, {
   title: '登录账号',
   dataIndex: 'account',
   key: 'account',
+  width:120,
 }, {
   title: '地址',
   dataIndex: 'address',
   key: 'address',
+  width:200,
   className: 'table-col',
 }, {
   title: '模块数量',
   dataIndex: 'deviceTotal',
   key: 'deviceTotal',
+  width:60,
   render: (deviceTotal) => {
     return deviceTotal || '0';
   }
@@ -59,18 +65,16 @@ const columns = [{
   dataIndex: 'action',
   key: 'action',
   width: 100,
-  fixed: 'right',
+  // fixed: 'right',
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
       {record.showAction?
-        <div>
-          <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
-          {USER.role.id == 1 ? "" :
-              <p><Link to='/user/device/list'>设备管理</Link></p>
-          }
-        </div>
+        <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
       :''}
+      {USER.role.id == 1 ? "" :
+        <p><Link to={'/user/'+record.id+'/device/list'}>设备管理</Link></p>
+      }
     </div>
   ),
 }];
@@ -93,22 +97,28 @@ class AgentTable extends React.Component {
       // this.showChild();
       this.props.getUserList(pager);
     } else {
-      this.props.getDetailTotal(USER.id);
+      // this.props.getDetailTotal(USER.id);
     }
   }
   componentWillUpdate(nextProps, nextState) {
-    const pager = { page : this.state.page, perPage: this.state.perPage};
-    const id = nextProps.params.id;
-    // 首次加载子代理商
-    if(this.props.list == undefined && nextProps.list == undefined && id) {
-      this.loading = true;
-      this.props.getUserList(pager);
-    }
-    // 首次加载父代理商
-    if(this.props.detailTotal == undefined && nextProps.detailTotal == undefined && !id) {
-      this.loading = true;
-      this.props.getDetailTotal(USER.id);
-    }
+    // const pager = { page : this.state.page, perPage: this.state.perPage};
+    // const id = nextProps.params.id;
+    // // 首次加载子代理商
+    // if(this.props.list == undefined && nextProps.list == undefined && id) {
+    //   this.loading = true;
+    //   this.props.getUserList(pager);
+    // }
+    // // 首次加载父代理商
+    // if(this.props.detailTotal == undefined && nextProps.detailTotal == undefined && !id) {
+    //   this.loading = true;
+    //   this.props.getDetailTotal(USER.id);
+    // }
+    // 切换父子代理商页面,每次切换成子代理商要重新拉数据
+    // console.log(this.params);
+    // if(!this.params && nextProps.params.id) {
+    //   this.props.getUserList(pager);
+    // }
+
   }
   initializePagination(total) {
     const self = this;
@@ -153,7 +163,6 @@ class AgentTable extends React.Component {
     const pager = { page: 1, perPage: this.state.perPage};
     this.setState({ page: 1 });
     this.props.getUserList(pager,user);
-
   }
   render() {
     const { list, detailTotal, params: {id} } = this.props;
@@ -165,6 +174,7 @@ class AgentTable extends React.Component {
           const data = list.result.data.list;
           dataSource = data.map(function (item, key) {
             item.key = item.id;
+            // 子列表不能看到进一步的操作
             item.showAction = false;
             return item;
           })
@@ -173,42 +183,33 @@ class AgentTable extends React.Component {
 
       }
     } else {
-      if(detailTotal) {
-        if(detailTotal.fetch == true) {
-          const data = detailTotal.result.data;
-          data.key = data.id;
-          data.showAction = true;
-          dataSource = [data];
-        }
-        self.loading = false;
-      }
+      // if(detailTotal) {
+      //   if(detailTotal.fetch == true) {
+      //     const data = detailTotal.result.data;
+      //     data.key = data.id;
+      //     data.showAction = true;
+      //     dataSource = [data];
+      //   }
+      //   self.loading = false;
+      // }
     }
     const pagination =id? {'pagination':this.childPagination()}:{'pagination':false}
     pagination.current = this.state.page;
     return (
       <section className="view-user-list">
         <header>
-          {id?
             <Breadcrumb>
               <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>下级运营商</Breadcrumb.Item>
             </Breadcrumb>
-            :
-            <Breadcrumb>
-              <Breadcrumb.Item>运营商管理</Breadcrumb.Item>
-            </Breadcrumb>
-          }
         </header>
-        {id?
           <div className="toolbar">
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新运营商
             </Link>
             <Input style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
             <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
-          </div>:
-          ''
-        }
+          </div>
         <article>
           <Table
             scroll={{ x: 980 }}
