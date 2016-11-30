@@ -52,9 +52,9 @@ func Api() {
 	api.Put("/user-password", user.Password)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
-	api.Get("/user/:id/device", user.DeviceList)
-	api.Get("/user/:id/school", user.SchoolList)
-	api.Get("/user/:id/school/:schoolId/device", user.DeviceOfSchool)
+	api.Get("/user/:id/device", user.IsMeOrSub,user.DeviceList)
+	api.Get("/user/:id/school", user.IsMeOrSub, user.SchoolList)
+	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
 

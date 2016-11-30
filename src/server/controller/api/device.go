@@ -118,7 +118,7 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || device.UserId == 1 || user.Id == userId {
+	if device.UserId == userId || device.UserId == 1 || user.ParentId == userId {
 		ctx.Next()
 		return
 	} else {

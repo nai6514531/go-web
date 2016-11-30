@@ -168,6 +168,9 @@ var (
 		"01011402": "无当前用户信息",
 		"01011403": "原始密码错误,请重新输入!",
 		"01011404": "新密码不能为空",
+
+		"01011501": "该用户信息不存在",
+		"01011502": "请操作你自身、下级或Test账号下的设备",
 	}
 )
 
@@ -1253,4 +1256,26 @@ func (self *UserController) Password(ctx *iris.Context) {
 	result = &enity.Result{"01011400", nil, user_msg["01011400"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *UserController) IsMeOrSub(ctx *iris.Context) {
+	id, _ := ctx.ParamInt("id")//前端传的id
+	result := &enity.Result{}
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//根据要操作的设备id查找
+	userService := &service.UserService{}
+	user, err := userService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01011501", nil, device_msg["01011501"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if id == userId || user.ParentId == userId || userId == 1 {
+		ctx.Next()
+		return
+	} else {
+		result = &enity.Result{"01011502", nil, device_msg["01011502"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 }
