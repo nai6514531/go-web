@@ -192,7 +192,7 @@ export function getUserPermission(id) {
 export function userLogout() {
   return dispatch => {
     UserService.logout().then((result) => {
-      console.log('IMLOGOUT');
+      //console.log('IMLOGOUT');
       dispatch({
         type: USER_LOGOUT,
         result: { fetch: true, result },

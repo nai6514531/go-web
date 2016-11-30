@@ -111,7 +111,7 @@ class SchoolSelect extends React.Component {
       this.props.getProvinceSchoolList(this.props.provinceId);
     }
     this.showBox();
-    console.log(this.state);
+    //console.log(this.state);
   }
   onCancel() {
     this.hideBox();

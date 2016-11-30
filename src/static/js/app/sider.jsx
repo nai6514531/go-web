@@ -36,7 +36,7 @@ const App = React.createClass({
     const state = this.state;
     // 找出符合条件的元素
     openKeys.find(function (key) {
-      console.log(state.openKeys.indexOf(key));
+      //console.log(state.openKeys.indexOf(key));
     })
     // 找出上次打开的元素
     const latestOpenKey = openKeys.find(key => !(state.openKeys.indexOf(key) > -1));

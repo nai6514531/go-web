@@ -50,7 +50,8 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 		params = append(params, billAt)
 	}
 	if searchStr != "" {
-		sql += " and (bill.bank_name like ? or bill.user_name like ?) "
+		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
+		params = append(params, "%" + searchStr + "%")
 		params = append(params, "%" + searchStr + "%")
 		params = append(params, "%" + searchStr + "%")
 	}
@@ -100,7 +101,8 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		params = append(params, billAt)
 	}
 	if searchStr != "" {
-		sql += " and (bill.bank_name like ? or bill.user_name like ?) "
+		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
+		params = append(params, "%" + searchStr + "%")
 		params = append(params, "%" + searchStr + "%")
 		params = append(params, "%" + searchStr + "%")
 	}

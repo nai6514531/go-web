@@ -253,7 +253,7 @@ const App = React.createClass({
           _.each(body.data || [], function (v) {
             _data.push([moment(v.date).toDate().getTime(), v.count])
           });
-          console.info(_data)
+          //console.info(_data)
           Highstock.stockChart('user', {
             chart: {
               height: 400

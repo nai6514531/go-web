@@ -1,10 +1,10 @@
 package service
 
 import (
+	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
-	"github.com/jinzhu/gorm"
 )
 
 type UserService struct {
@@ -99,8 +99,17 @@ func (self *UserService) Create(user *model.User) bool {
 
 func (self *UserService) Update(user *model.User) bool {
 	transAction := common.DB.Begin()
-	r:=transAction.Save(&user).Scan(user)
-	//r := transAction.Model(&model.User{}).Updates(user).Scan(user)
+	//r:=transAction.Save(&user).Scan(user)
+	//{"name":"0","contact":"0","mobile":"12132131213","telephone":"0","address":"0","email":"","cashAccount":{"type":3,"realName":"1","bankName":"1","account":"1","mobile":"11111111111","cityId":210500,"provinceId":210000}}
+	_user := map[string]interface{}{
+		"name":      user.Name,
+		"contact":   user.Contact,
+		"mobile":    user.Mobile,
+		"telephone": user.Telephone,
+		"address":   user.Address,
+		"email":     user.Email,
+	}
+	r := transAction.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user).Scan(user)
 	if r.Error != nil {
 		common.Logger.Warningln("MNDB Save model.User:", r.Error.Error())
 		transAction.Rollback()
@@ -135,7 +144,7 @@ func (self *UserService) Password(userId int, password string) (bool, error) {
 		return false, r.Error
 	}
 	txmn := common.MNDB.Begin()
-	rmn = txmn.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", userId - 1).Update("PASSWORD", password)
+	rmn = txmn.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", userId-1).Update("PASSWORD", password)
 	if rmn.Error != nil {
 		tx.Rollback()
 		txmn.Rollback()

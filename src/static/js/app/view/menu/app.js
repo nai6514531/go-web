@@ -33,14 +33,14 @@ class LeftMenu extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
   handleClick(e) {
-    console.log('click ', e);
+    //console.log('click ', e);
     this.setState({ current: e.key });
   }
   componentDidMount() {
     this.props.getUserMenu(20);
   }
   showMe() {
-    console.log(this.props.menu);
+    //console.log(this.props.menu);
   }
   render() {
     const menu = this.props.menu;

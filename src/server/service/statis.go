@@ -196,7 +196,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 			"order by d desc"
 	}
 
-	if admin.UserType == "2" || admin.UserType == "1"{
+	if admin.UserType == "2" || admin.UserType == "0"{
 		companyId = admin.LocalId
 	}
 
@@ -204,7 +204,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		param = append(param, companyId)
 	}else {
 		e := &functions.DefinedError{}
-		e.Msg = "no authorize!"
+		e.Msg = "无操作权限"
 		err = e
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 	if serialNumber != "" || date != "" {
 		if len(param) < 3 {
 			e := &functions.DefinedError{}
-			e.Msg = "less param!"
+			e.Msg = "less param"
 			err = e
 			return nil, err
 		}

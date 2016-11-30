@@ -18,7 +18,7 @@ var (
 		"01070201": "拉取经营统计数据失败",
 
 		"01070300": "拉取模块统计数据成功",
-		"01070301": "拉取模块统计数据失败",
+		"01070301": "模块统计无数据",
 		"01070302": "参数错误",
 
 		"01070400": "拉取每日结账数据成功",
@@ -93,7 +93,7 @@ func (self *StatisController) Device(ctx *iris.Context) {
 	}
 	list, err := statisService.Device(userId, serialNumber, date)
 	if err != nil {
-		result = &enity.Result{"01070301", err.Error(), statis_msg["01070301"]}
+		result = &enity.Result{"01070301", err.Error(), statis_msg["01070301"]+":"+err.Error()}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return

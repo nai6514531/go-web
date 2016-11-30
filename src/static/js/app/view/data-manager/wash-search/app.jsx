@@ -137,7 +137,7 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        console.log(data);
+        //console.log(data);
         if (data && data.status == '00') {
           message.success('退款成功',3);
           self.list(account,pager);

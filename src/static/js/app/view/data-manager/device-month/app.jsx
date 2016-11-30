@@ -91,6 +91,8 @@ const App = React.createClass({
               return item;
             })
           });
+        } else if (data && data.status == '01') {
+          // nothing to do
         } else {
           message.info(data.msg);
         }

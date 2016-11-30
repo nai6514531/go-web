@@ -20,7 +20,7 @@ const FormList = React.createClass({
 	},
 	render(){
 		const payList = this.props.payList;
-		console.log(payList)
+		//console.log(payList)
 		return (
 			<form name="alipayment" action={payList.request_url+"?_input_charset="+payList._input_charset} method="post" target="_blank">
       	<div id="body">

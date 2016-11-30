@@ -182,10 +182,10 @@ const App = React.createClass({
 								}else{
 									spanDiv = (
 										<span>
-											<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>
-					              <a>取消申请</a>
-					            </Popconfirm>
-					            <span> | </span>
+											{/*<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>*/}
+					              {/*<a>取消申请</a>*/}
+					            {/*</Popconfirm>*/}
+					            {/*<span> | </span>*/}
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 		          			  <span> | </span>
                       {mark}
@@ -380,8 +380,8 @@ const App = React.createClass({
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let aliPayNum = 0;
 		let list = this.state.list;
-		// console.log(data)
-		// console.log(list)
+		// //console.log(data)
+		// //console.log(list)
 		for(var i=0; i<data.length; i++){
 			for(var j=0; j<list.length; j++){
 				if(data[i].idArr.indexOf(list[j].id) >= 0){
@@ -394,7 +394,7 @@ const App = React.createClass({
 				}
 			}
 		}
-		console.log(aliPayNum)
+		//console.log(aliPayNum)
 		this.setState({
 			list: list,
 			getAliPayOrderNum: aliPayNum
@@ -667,8 +667,8 @@ const App = React.createClass({
 					style={{width: 120 }}
 					onChange={this.handleStatusChange}>
 					<Option value="">全部</Option>
-					<Option value="0">未结账</Option>
-					<Option value="1">已申请结账</Option>
+					<Option value="1">未结账</Option>
+					{/*<Option value="1">已申请结账</Option>*/}
 					<Option value="2">已结账</Option>
 					<Option value="3">结账中</Option>
 					<Option value="4">结账失败</Option>
