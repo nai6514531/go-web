@@ -28,29 +28,35 @@ const columns = [{
   title: '用户编号',
   dataIndex: 'id',
   key: 'id',
+  width: 50,
 }, {
   title: '运营商名称',
   dataIndex: 'name',
   key: 'name',
+  width: 100,
   className: 'table-col',
 }, {
   title: '联系人',
   dataIndex: 'contact',
   key: 'contact',
+  width:100,
   className: 'table-col',
 }, {
   title: '登录账号',
   dataIndex: 'account',
   key: 'account',
+  width:120,
 }, {
   title: '地址',
   dataIndex: 'address',
   key: 'address',
+  width:200,
   className: 'table-col',
 }, {
   title: '模块数量',
   dataIndex: 'deviceTotal',
   key: 'deviceTotal',
+  width:60,
   render: (deviceTotal) => {
     return deviceTotal || '0';
   }
@@ -59,7 +65,7 @@ const columns = [{
   dataIndex: 'action',
   key: 'action',
   width: 100,
-  fixed: 'right',
+  // fixed: 'right',
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>

@@ -28,29 +28,35 @@ const columns = [{
   title: '用户编号',
   dataIndex: 'id',
   key: 'id',
+  width: 50,
 }, {
   title: '运营商名称',
   dataIndex: 'name',
   key: 'name',
+  width: 100,
   className: 'table-col',
 }, {
   title: '联系人',
   dataIndex: 'contact',
   key: 'contact',
   className: 'table-col',
+  width:100,
 }, {
   title: '登录账号',
   dataIndex: 'account',
   key: 'account',
+  width:120,
 }, {
   title: '地址',
   dataIndex: 'address',
   key: 'address',
   className: 'table-col',
+  width:200,
 }, {
   title: '模块数量',
   dataIndex: 'deviceTotal',
   key: 'deviceTotal',
+  width:60,
   render: (deviceTotal) => {
     return deviceTotal || '0';
   }
@@ -58,8 +64,8 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 100,
-  fixed: 'right',
+  width: 120,
+  // fixed: 'right',
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
@@ -104,7 +110,7 @@ class AgentTable extends React.Component {
         </header>
         <article>
           <Table
-            scroll={{ x: 980 }}
+            scroll={{ x: 700 }}
             columns={columns}
             rowKey={record => record.key}
             dataSource={dataSource}
