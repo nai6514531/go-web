@@ -59,8 +59,12 @@ const App = Form.create()(React.createClass({
   checkConfirm(rule, value, callback) {
     const form = this.props.form;
     // var pattern = new RegExp(/^(?=.*[0-9]{1,})(?=.*[a-zA-Z]{1,})([a-zA-Z0-9]{8,})$/);
-    if( (value.length >= 6 && value.length <= 16) || !value){
-      callback();
+    if(value) {
+      if(value.length >= 6 && value.length <= 16){
+        callback();
+      } else {
+        callback('位数为6到16位');
+      }
     } else {
       callback('位数为6到16位');
     }
