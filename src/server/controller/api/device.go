@@ -17,7 +17,8 @@ var (
 	device_msg = map[string]string{
 
 		"01030001": "该设备id不存在",
-		"01030002": "请操作你自身的设备或Test账号下的设备",
+		"01030002": "请操作你自身、下级或Test账号下的设备",
+		"01020003": "无该设备用户信息",
 
 		"01030100": "拉取设备详情成功!",
 		"01030101": "拉取设备详情失败!",
@@ -95,13 +96,14 @@ var (
 	}
 )
 
-//中间件-判断操作的设备是否属于我或者测试账号
+//中间件-判断操作的设备是否属于我,我的下级或者测试账号
 func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //要操作的设备id
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	deviceService := &service.DeviceService{}
+	userService := &service.UserService{}
 	device, err := deviceService.Basic(id)
 	if err != nil {
 		//如果没有找到条目不做处理
@@ -110,7 +112,13 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || device.UserId == 1 {
+	user, err := userService.Basic(device.UserId)
+	if err != nil {
+		result = &enity.Result{"01030003", nil, device_msg["01030003"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if device.UserId == userId || device.UserId == 1 || user.Id == userId {
 		ctx.Next()
 		return
 	} else {
