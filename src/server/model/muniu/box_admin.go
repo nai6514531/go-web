@@ -6,7 +6,7 @@ import (
 )
 
 type BoxAdmin struct {
-	LocalId        int     `json:"local_id" gorm:"column:LOCALID"`
+	LocalId        int     `json:"local_id" gorm:"column:LOCALID;primary_key"`
 	Name           string  `json:"name" gorm:"column:NAME"`
 	Contact        string  `json:"contact" gorm:"column:CONTCAT"`
 	Address        string  `json:"address" gorm:"column:ADDRESS"`

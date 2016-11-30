@@ -1,7 +1,7 @@
 package muniu
 
 type BoxStatBill struct {
-	LocalId     int     `json:"local_id" gorm:"column:LOCALID"`
+	LocalId     int     `json:"local_id" gorm:"column:LOCALID;primary_key"`
 	AgencyId    string  `json:"agency_id" gorm:"column:AGENCYID"`
 	CompanyId   int     `json:"company_id" gorm:"column:COMPANYID"`
 	AgencyName  string  `json:"agency_name" gorm:"column:AGENCYNAME"`

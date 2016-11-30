@@ -99,20 +99,28 @@ func (self *UserService) Create(user *model.User) bool {
 
 func (self *UserService) Update(user *model.User) bool {
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.User{}).Updates(user).Scan(user)
-	if r.Error != nil || r.RowsAffected <= 0 {
+	r:=transAction.Save(&user).Scan(user)
+	//r := transAction.Model(&model.User{}).Updates(user).Scan(user)
+	if r.Error != nil {
+		common.Logger.Warningln("MNDB Save model.User:", r.Error.Error())
 		transAction.Rollback()
 		return false
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUser(user)
-	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	r = common.MNDB.Save(&boxAdmin)
 	if r.Error != nil {
+		common.Logger.Warningln("MNDB Save BoxAdmin:", r.Error.Error())
 		transAction.Rollback()
-		common.Logger.Warningln("MNDB Update BoxAdmin:", r.Error.Error())
 		return false
 	}
+	//r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
+	//if r.Error != nil {
+	//	transAction.Rollback()
+	//	common.Logger.Warningln("MNDB Update BoxAdmin:", r.Error.Error())
+	//	return false
+	//}
 	transAction.Commit()
 	return true
 }

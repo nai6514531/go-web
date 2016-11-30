@@ -22,7 +22,11 @@ var (
 
 func SetUpCommon() {
 
-	iris.Use(recovery.Handler)
+	isDevelopment := viper.GetBool("isDevelopment")
+
+	if !isDevelopment{
+		iris.Use(recovery.Handler)
+	}
 
 	iris.UseFunc(func(ctx *iris.Context) {
 		startAt := time.Now().UnixNano() / 1000000

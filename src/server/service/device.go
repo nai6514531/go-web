@@ -159,6 +159,7 @@ func (self *DeviceService) Update(device model.Device) bool {
 	device_zero["fourthPulsePrice"] = device.FourthPulsePrice
 	//避免schoolId为0时不更新
 	device_zero["school_id"] = device.SchoolId
+	device_zero["address"] = device.Address
 	r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device_zero).Scan(&device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
@@ -182,6 +183,7 @@ func (self *DeviceService) Update(device model.Device) bool {
 	boxInfoPrice["PRICE_602"] = boxInfo.Price_602
 	boxInfoPrice["PRICE_603"] = boxInfo.Price_603
 	boxInfoPrice["PRICE_604"] = boxInfo.Price_604
+	boxInfoPrice["ADDRESS"] = boxInfo.Address
 	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfoPrice)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())

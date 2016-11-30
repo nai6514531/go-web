@@ -1,7 +1,7 @@
 package muniu
 
 type BoxWash struct {
-	LocalId    int `json:"local_id"  gorm:"column:LOCALID"`
+	LocalId    int `json:"local_id"  gorm:"column:LOCALID;primary_key"`
 	DeviceId   string `json:"device_id" gorm:"column:DEVICENO"`
 	UserMobile string `json:"user_mobile" gorm:"column:USERMOBILE"`
 	Password   string `json:"password" gorm:"column:PASSWD"`

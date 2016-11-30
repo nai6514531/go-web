@@ -32,7 +32,7 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 	params := make([]interface{}, 0)
 	//sql := "select count(*) as total from  daily_bill bill,cash_account_type cat,user_cash_account uca where " +
 	//	"bill.user_id=uca.user_id and uca.type=cat.id and bill.deleted_at IS NULL"
-	sql := "select count(*) from daily_bill bill where bill.deleted_at IS NULL "
+	sql := "select count(*) as total from daily_bill bill where bill.deleted_at IS NULL "
 	if userId != -1 {
 		sql += " and bill.user_id = ? "
 		params = append(params, userId)
