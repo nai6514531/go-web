@@ -492,7 +492,8 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}*/
-
+	common.Logger.Debugln("device.UserId===========", device.UserId)
+	common.Logger.Debugln("userId==================", userId)
 	device.UserId = userId
 	success := deviceService.BatchUpdateBySerialNumber(&device, serialList)
 	if !success {

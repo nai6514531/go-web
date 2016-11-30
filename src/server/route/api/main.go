@@ -76,7 +76,7 @@ func Api() {
 	api.Patch("/device/:id/reset", device.OwnToMeOrTest, device.Reset)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.OwnToMeOrTest, device.Update)
-	api.Put("/device/:id/serial-number", device.OwnToMeOrTest, device.UpdateBySerialNumber)
+	api.Put("/device/:id/serial-number", user.IsMeOrSub, device.UpdateBySerialNumber)
 	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock",  device.UnLock)
