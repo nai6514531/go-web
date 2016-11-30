@@ -453,6 +453,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
+	userId, _ := ctx.ParamInt("userId")
 	if device.SerialNumber == "" {
 		result = &enity.Result{"01030502", nil, device_msg["01030502"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -482,7 +483,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//修改设备的用户为当前用户id
+	/*//修改设备的用户为当前用户id
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//判断一下这批设备的用户id是否为1或者自己
 	isOwntoMeOrTest := deviceService.IsOwntoMeOrTest(userId, serialList)
@@ -490,7 +491,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		result = &enity.Result{"01030508", nil, device_msg["01030508"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 
 	device.UserId = userId
 	success := deviceService.BatchUpdateBySerialNumber(&device, serialList)
