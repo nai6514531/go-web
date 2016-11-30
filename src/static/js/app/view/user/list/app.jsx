@@ -64,13 +64,11 @@ const columns = [{
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
       {record.showAction?
-        <div>
-          <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
-          {USER.role.id == 1 ? "" :
-              <p><Link to='/user/device/list'>设备管理</Link></p>
-          }
-        </div>
+        <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
       :''}
+      {USER.role.id == 1 ? "" :
+        <p><Link to={'/user/'+record.id+'/device/list'}>设备管理</Link></p>
+      }
     </div>
   ),
 }];
@@ -165,6 +163,7 @@ class AgentTable extends React.Component {
           const data = list.result.data.list;
           dataSource = data.map(function (item, key) {
             item.key = item.id;
+            // 子列表不能看到进一步的操作
             item.showAction = false;
             return item;
           })

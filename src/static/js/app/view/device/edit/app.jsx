@@ -92,7 +92,7 @@ class DeviceForm extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     const pulseName = nextProps.pulseName;
-    if(this.theName == 0){
+    if(this.theName == 1 && this.state.addNew == false){
       if(pulseName && pulseName.fetch == true) {
         message.success('服务名修改成功',3);
         const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
@@ -100,7 +100,7 @@ class DeviceForm extends React.Component {
       } else if (pulseName && pulseName.fetch == false) {
         message.error('服务名修改失败,请重试.',3);
       }
-      self.theName = 1;
+      self.theName = 0;
     }
     // 修改详情时 设置初始省市 ID
     const deviceId = this.props.params.id;
@@ -239,15 +239,16 @@ class DeviceForm extends React.Component {
 		// 被修改的脉冲 key-value
 		thePulseName[pulseNameKey] = pulseName;
 		const addNew = this.state.addNew;
-		this.theName = 0;
 		this.pulseName = pulseName;
 		if(addNew) {
 			this[pulseNameKey] = pulseName;
 		} else {
 			const device = { deviceId: deviceId };
 			let data = Object.assign({}, device, thePulseName);
+      // 当不是新增设备时,则直接发请求修改服务名
 			this.props.patchPulseName(deviceId, data);
-		}
+      this.theName = 1;
+    }
 	}
 	showModal() {
 		this.setState({ visible: true });

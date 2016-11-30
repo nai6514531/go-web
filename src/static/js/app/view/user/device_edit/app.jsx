@@ -13,14 +13,17 @@ import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
 import * as SchoolActions from '../../../actions/school';
+import * as UserActions from '../../../actions/user';
+
 import { Link } from 'react-router';
 
 
 function mapStateToProps(state) {
   const { device: { detail, status, result, refDevice, pulseName, resultPutDetail, resultSerialNumber },
     region: {provinceList, provinceSchool},school:{schoolDetail} } = state;
+  const userDetail = state.user.detail;
   return { detail, status, result, refDevice, pulseName,
-    resultPutDetail, resultSerialNumber, provinceList, provinceSchool,schoolDetail };
+    resultPutDetail, resultSerialNumber, provinceList, provinceSchool,schoolDetail, userDetail };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -39,6 +42,9 @@ function mapDispatchToProps(dispatch) {
   const {
     getSchoolDetail,
   } = bindActionCreators(SchoolActions, dispatch);
+  const {
+    getUserDetail,
+  } = bindActionCreators(UserActions, dispatch);
   return {
     getDeviceDetail,
     putDeviceDetail,
@@ -49,6 +55,7 @@ function mapDispatchToProps(dispatch) {
     getProvinceList,
     getProvinceSchoolList,
     getSchoolDetail,
+    getUserDetail
   };
 }
 const key = ['first','second','third','fourth'];
@@ -84,14 +91,16 @@ class DeviceForm extends React.Component {
     router: React.PropTypes.object
   }
   componentWillMount() {
-    const deviceId = this.props.params.id;
+    const {id,schoolId,deviceId} = this.props.params;
     if(deviceId) {
       this.props.getDeviceDetail(deviceId);
     } else {
       this.setState({addNew: true});
     }
+    // 获取用户详情
+    this.props.getUserDetail(id);
+    // 获取关联设备
     this.props.getRefDevice();
-    const { schoolId } = this.props.params;
     if(schoolId >= 0) {
       this.props.getSchoolDetail(schoolId);
     }
@@ -103,7 +112,7 @@ class DeviceForm extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 修改详情时 设置初始省市 ID
-    const deviceId = this.props.params.id;
+    const {id,schoolId, deviceId} = this.props.params;
     if(deviceId) {
       if(this.props.provinceList !== nextProps.provinceList) {
         if(nextProps.detail) {
@@ -131,7 +140,7 @@ class DeviceForm extends React.Component {
     }
     const pulseName = nextProps.pulseName;
     // 修改服务名的反馈
-    if(this.theName == 0){
+    if(this.theName == 1 && this.state.addNew == false){
       if(pulseName && pulseName.fetch == true) {
         message.success('服务名修改成功',3);
         const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
@@ -139,7 +148,7 @@ class DeviceForm extends React.Component {
       } else if (pulseName && pulseName.fetch == false) {
         message.error('服务名修改失败,请重试.',3);
       }
-      self.theName = 1;
+      self.theName = 0;
     }
     // 修改设备或者添加设备的反馈
     if(this.saveDetail == 1){
@@ -224,7 +233,7 @@ class DeviceForm extends React.Component {
 				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
 				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			}
-			const deviceId = this.props.params.id;
+			const {id,schoolId,deviceId} = this.props.params;
 			if(deviceId) {
 				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
@@ -246,14 +255,13 @@ class DeviceForm extends React.Component {
 		this.showModal();
 	}
 	changePulseName(pulseName) {
-		const deviceId = this.props.params.id;
+		const {id,shcoolId,deviceId} = this.props.params;
 		// 被修改脉冲的 key
 		const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
 		const thePulseName = {};
 		// 被修改的脉冲 key-value
 		thePulseName[pulseNameKey] = pulseName;
 		const addNew = this.state.addNew;
-		this.theName = 0;
 		this.pulseName = pulseName;
 		if(addNew) {
 			this[pulseNameKey] = pulseName;
@@ -261,7 +269,8 @@ class DeviceForm extends React.Component {
 			const device = { deviceId: deviceId };
 			let data = Object.assign({}, device, thePulseName);
 			this.props.patchPulseName(deviceId, data);
-		}
+      this.theName = 1;
+    }
 	}
 	showModal() {
 		this.setState({ visible: true });
@@ -269,14 +278,6 @@ class DeviceForm extends React.Component {
 	hideModal() {
 		// 取消就重置内部数据
 		this.setState({ visible: false });
-	}
-	checkChinese(rule, value, callback) {
-		var pattern=new RegExp(/^[0-9a-zA-Z]*$/);
-		if(value && !pattern.test(value)){
-			callback('请输入正确的设备编号');
-		} else {
-			callback();
-		}
 	}
 	checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -331,6 +332,10 @@ class DeviceForm extends React.Component {
     this.schoolIdHelp = {};
   }
   render() {
+    let userName = '';
+    if(this.props.userDetail && this.props.userDetail.fetch == true) {
+      userName = this.props.userDetail.result.data.name;
+    }
     // 省份列表
     let ProvinceNode = [];
     if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -373,9 +378,9 @@ class DeviceForm extends React.Component {
 		// 初始化参数
 		const self = this;
 		const detail = this.props.detail;
-		const { id, schoolId } = this.props.params;
+		const { id, schoolId, deviceId } = this.props.params;
 		let initialValue = {};
-		if(detail && id) {
+		if(detail && deviceId) {
 			if(detail.fetch == true){
 				const device = detail.result.data;
 				initialValue = {
@@ -402,31 +407,31 @@ class DeviceForm extends React.Component {
 			wrapperCol: { span: 12 },
 		};
 		let breadcrumb = '添加设备';
-		if(id) {
+		if(deviceId) {
 			breadcrumb = '修改设备';
 		}
     if(!this.cityIdHelp){
       this.cityIdHelp = {};
     }
+    // 设备管理需要用户 ID
     return (
 			<section className="view-user-list" >
 				<header>
 					{
 						schoolId !== "-1" ?
 						<Breadcrumb >
-							<Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-							<Breadcrumb.Item><Link className="breadcrumb" to={"/user/device/school/"+ schoolId}>{schoolName?schoolName:'未分类学校'}</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{userName}的设备管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link className="breadcrumb" to={"/user/"+id+"/device/school/"+ schoolId}>{schoolName?schoolName:'未分类学校'}</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 						</Breadcrumb>
 							:
 						<Breadcrumb >
 							<Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-							<Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
+							<Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{userName}的设备管理</Link></Breadcrumb.Item>
 							<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 						</Breadcrumb>
 					}
-
 				</header>
 				<section className="view-content">
 					<Form horizontal>
@@ -443,7 +448,7 @@ class DeviceForm extends React.Component {
 									{ required: true, message: '必填' },
 								],
 								initialValue: initialValue.serialNumber,
-							})( id ?
+							})( deviceId ?
 								<Input disabled placeholder="请输入设备编号" />
 								:
                 <div>

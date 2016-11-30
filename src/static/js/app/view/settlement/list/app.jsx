@@ -11,30 +11,37 @@ const App = React.createClass({
 		return {
       rowColor:[],
       textValue: '',
-			columns: [{
+			columns: [
+        {
 				title: '账单号',
 				dataIndex: 'id',
 				key: 'id',
+          width:50,
 				sorter: (a, b) => +a.id - +b.id
-			}, {
-				title: '运营商',
-				dataIndex: 'userName',
-				key: 'userName'
+			},
+        {
+				  title: '运营商',
+				  dataIndex: 'userName',
+				  key: 'userName',
+          width:80,
 			}, {
 				title: '金额',
 				dataIndex: 'totalAmount',
 				key: 'totalAmount',
+          width:90,
 				render: (total_amount) => {
 					return <p className="bigger">{total_amount / 100}</p>;
 				}
 			},  {
 				title: '收款方式',
 				dataIndex: 'accountName',
-				key: 'accountName'
+				key: 'accountName',
+          width:60
 			}, {
 				title: '账期',
 				dataIndex: 'billAt',
 				key: 'billAt',
+          width:95,
 				render: (bill_at) => {
 					return moment(bill_at).format('YYYY-MM-DD')
 				}
@@ -67,11 +74,13 @@ const App = React.createClass({
 			},{
         title: '订单量',
         dataIndex: 'orderCount',
-        key: 'orderCount'
+        key: 'orderCount',
+          width:60
       }, {
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
+          width:80,
 				render: (status, record) => {
 					switch (status) {
 						case 0:
@@ -103,8 +112,8 @@ const App = React.createClass({
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
-				width: 150,
-				fixed: 'right',
+				width: 100,
+				// fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -483,16 +492,20 @@ const App = React.createClass({
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
-		this.setState({currentPage: 1})
+    const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
+    this.setState({currentPage: 1})
 		this.list({
 			cashAccountType: cashAccountType,
 			status: status,
 			hasApplied: hasApplied,
 			billAt: billAt,
       perPage: this.perPage,
+      page:1,
+      searchStr: textValue,
     });
 	},
-  texthandleFilter() {
+  textHandleFilter() {
+    // 单独文本搜搜
     const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1});
     this.list({
@@ -637,9 +650,9 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120, display: "none"}}
+					style={{width: 120 }}
 					onChange={this.handleStatusChange}>
-					<Option value="">请选择账单状态</Option>
+					<Option value="">全部</Option>
 					<Option value="1">未结账</Option>
 					<Option value="2">已结账</Option>
 					<Option value="3">结账中</Option>
@@ -651,9 +664,9 @@ const App = React.createClass({
     		<Select
 					className="item"
 					defaultValue=""
-					style={{width: 120, display: "none"}}
+					style={{width: 120 }}
 					onChange={this.handleStatusChange}>
-					<Option value="">请选择账单状态</Option>
+					<Option value="">全部</Option>
 					<Option value="0">未申请结账</Option>
 					<Option value="1">已申请结账</Option>
 					<Option value="2">已结账</Option>
@@ -666,9 +679,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table scroll={{ x: 980 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 800 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table scroll={{ x: 980 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 800 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
@@ -680,18 +693,17 @@ const App = React.createClass({
 			<div className="filter">
 				<Select className="item"
 						defaultValue="0"
-						style={{width: 120, display: "none"}}
+						style={{width: 120 }}
 						onChange={this.handleCashAccountTypeChange}>
-					<Option value="0">请选择收款方式</Option>
+					<Option value="0">全部</Option>
 					<Option value="1">支付宝</Option>
 					<Option value="2">微信</Option>
 					<Option value="3">银行</Option>
 				</Select>
 				{orderSelectOption}
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
-				<Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
-        <Input style={{width: 160}} className="" placeholder="输入运营商名称或者银行名称" onChange={this.textChange}/>
-        <Button className="item" type="primary" icon="search" onClick={this.texthandleFilter}>筛选</Button>
+        <Input style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
+        <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
       </div>
 			{tableDiv}
 			<Modal

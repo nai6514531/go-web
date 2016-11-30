@@ -10,8 +10,8 @@ import * as UserActions from '../../../actions/user';
 import * as SchoolActions from '../../../actions/school';
 
 function mapStateToProps(state) {
-  const { device: { list, status, resultReset }, user: {schoolDevice}, school:{schoolDetail} } = state;
-  return { list, status, resultReset, schoolDevice, schoolDetail };
+  const { device: { list, status, resultReset }, user: {schoolDevice, detail}, school:{schoolDetail} } = state;
+  return { list, status, resultReset, schoolDevice, detail, schoolDetail };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -23,6 +23,7 @@ function mapDispatchToProps(dispatch) {
   } = bindActionCreators(DeviceActions, dispatch);
   const {
     getSchoolDevice,
+    getUserDetail
   } = bindActionCreators(UserActions, dispatch);
   const {
     getSchoolDetail,
@@ -33,6 +34,7 @@ function mapDispatchToProps(dispatch) {
     patchDeviceStatus,
     resetDevice,
     getSchoolDevice,
+    getUserDetail,
     getSchoolDetail,
   };
 }
@@ -81,7 +83,7 @@ const columns = [{
   fixed: 'right',
   render: (text, record) => (
     <div>
-      <p><Link to={"/user/device/school/"+record.schoolId+"/edit/" + record.id}>修改</Link></p>
+      <p><Link to={"/user/"+record.userId+"/device/school/"+record.schoolId+"/edit/" + record.id}>修改</Link></p>
       <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
         <p><a href="#">删除</a></p>
       </Popconfirm>
@@ -117,9 +119,12 @@ class DeviceTable extends React.Component {
 
   }
   componentDidMount() {
-    const schoolId = this.props.params.id;
+    const {id, schoolId} = this.props.params;
     const pager = { page: this.state.page, perPage: this.state.perPage };
-    this.props.getSchoolDevice(USER.id, schoolId, pager);
+
+    // this.props.getSchoolDevice(USER.id, schoolId, pager);
+    this.props.getSchoolDevice(id, schoolId, pager);
+    this.props.getUserDetail(id);
     this.loading = true;
     if(schoolId >= 0) {
       this.props.getSchoolDetail(schoolId);
@@ -128,18 +133,19 @@ class DeviceTable extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
-    const schoolId = this.props.params.id;
+    const { id, schoolId }= this.props.params;
     const pager = { page : this.state.page, perPage: this.state.perPage};
     if(this.theStatus !== -1 && this.theStatus !== undefined) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true) {
-          this.props.getSchoolDevice(USER.id, schoolId, pager);
+          // this.props.getSchoolDevice(USER.id, schoolId, pager);
+          this.props.getSchoolDevice(id, schoolId, pager);
           self.loading = true;
           message.success('修改成功!',3);
         } else {
-          message.error('修改失败!',3);
-          console.log(nextProps.status.result.msg);
+          message.error(nextProps.status.result.msg,3);
+          // console.log(nextProps.status.result.msg);
         }
         self.theStatus = -1;
       }
@@ -148,12 +154,13 @@ class DeviceTable extends React.Component {
       const reset = nextProps.resultReset;
       if(reset) {
         if(reset.fetch == true) {
-          this.props.getSchoolDevice(USER.id, schoolId, pager);
+          // this.props.getSchoolDevice(USER.id, schoolId, pager);
+          this.props.getSchoolDevice(id, schoolId, pager);
           self.loading = true;
           message.success('删除成功!',3);
         } else {
-          message.error('删除失败!',3);
-          console.log(nextProps.status.result.msg);
+          message.error(nextProps.status.result.msg,3);
+          // console.log(nextProps.status.result.msg);
         }
         self.reset = -1;
       }
@@ -169,7 +176,7 @@ class DeviceTable extends React.Component {
       total = this.props.schoolDevice.result.data.total;
     }
     const self = this;
-    const schoolId = this.props.params.id;
+    const {id, schoolId }= this.props.params;
     return {
       total: total,
       showSizeChanger: true,
@@ -181,13 +188,16 @@ class DeviceTable extends React.Component {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
         self.loading = true;
-        self.props.getSchoolDevice(USER.id, schoolId, pager);
+        // self.props.getSchoolDevice(USER.id, schoolId, pager);
+        self.props.getSchoolDevice(id, schoolId, pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
         self.loading = true;
-        self.props.getSchoolDevice(USER.id, schoolId, pager);
+        // self.props.getSchoolDevice(USER.id, schoolId, pager);
+        self.props.getSchoolDevice(id, schoolId, pager);
+
       },
     }
   }
@@ -227,8 +237,9 @@ class DeviceTable extends React.Component {
       const numbers = this.removeNull(this.removeDuplicates(splitted));
       device = numbers.join(",");
     }
-    const schoolId = this.props.params.id;
-    this.props.getSchoolDevice(USER.id, schoolId, pager, device);
+    const { id,schoolId }  = this.props.params;
+    // this.props.getSchoolDevice(USER.id, schoolId, pager, device);
+    this.props.getSchoolDevice(id, schoolId, pager, device);
     // this.list(account, pager);
   }
   removeDuplicates(arr) {
@@ -254,6 +265,10 @@ class DeviceTable extends React.Component {
     return arr;
   }
   render() {
+    let userName = '';
+    if(this.props.detail && this.props.detail.fetch == true) {
+      userName = this.props.detail.result.data.name;
+    }
     this.pagination = this.initializePagination();
     this.pagination.current = this.state.page;
     const schoolDevice = this.props.schoolDevice;
@@ -262,7 +277,7 @@ class DeviceTable extends React.Component {
     if(schoolDetail && schoolDetail.fetch == true){
       schoolName = schoolDetail.result.data.name;
     }
-    const schoolId = this.props.params.id;
+    const { id, schoolId } = this.props.params;
     const self = this;
     let dataSource = [];
     if(schoolDevice) {
@@ -298,6 +313,7 @@ class DeviceTable extends React.Component {
           return {
             id: item.id,
             key: item.id,
+            userId: id,
             schoolId: schoolId,
             serialNumber: item.serialNumber,
             referenceDevice: referenceDevice,
@@ -314,14 +330,25 @@ class DeviceTable extends React.Component {
         })
       }
     }
+    // 此处设备管理需要用户 ID
     return (
       <section className="view-school-device-list">
         <header>
-          <Breadcrumb >
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-            <Breadcrumb.Item><Link to="/user/device/list">设备管理</Link></Breadcrumb.Item>
-            <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
-          </Breadcrumb>
+          {id == USER.id?
+            <Breadcrumb >
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{id}的设备管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
+            </Breadcrumb>
+            :
+            <Breadcrumb >
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/"+USER.id}>下级运营商</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{userName}的设备管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
+            </Breadcrumb>
+          }
+
         </header>
         <div className="toolbar">
           <Input style={{width:160,height:32,verticalAlign:'middle'}}type="textarea" placeholder="请输入设备编号" autosize onChange={this.handleInputChange.bind(this)}/>
