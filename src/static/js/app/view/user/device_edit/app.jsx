@@ -234,6 +234,7 @@ class DeviceForm extends React.Component {
 				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			}
 			const {id,schoolId,deviceId} = this.props.params;
+      deviceValue.userId = +id;
 			if(deviceId) {
 				this.props.putDeviceDetail(deviceId,deviceValue);
 			} else {
