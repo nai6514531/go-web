@@ -87,6 +87,11 @@ var (
 		"01030901": "删除设备失败!",
 		"01030902": "设备id不能小于0!",
 		"01030903": "该设备已被注册或不存在!",
+
+		"01031000": "解除占用成功",
+		"01031001": "解除占用失败",
+		"01031002": "无该设备信息",
+		"01031003": "当前用户无操作权限",
 	}
 )
 
@@ -275,6 +280,37 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	result = &enity.Result{"01030200", nil, device_msg["01030200"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
+}
+
+func (self *DeviceController) UnLock(ctx *iris.Context) {
+	serialNum := ctx.URLParam("serial-number")
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	/*userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	if userId != 4 || userId != 5 || userId != 368 || userId != 465 || userId != 1140 {
+		result = &enity.Result{"01031003", nil, device_msg["01031003"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}*/
+	device, err := deviceService.BasicBySerialNumber(serialNum)
+	if err != nil {
+		result = &enity.Result{"01031002", err.Error(), device_msg["01031002"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	device.Status = 0
+	boo := deviceService.UpdateStatus(*device)
+	if !boo {
+		result = &enity.Result{"01031001", nil, device_msg["01031001"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01031000", nil, device_msg["01031000"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
@@ -683,3 +719,4 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }
+

@@ -147,7 +147,7 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	if len(alipayUserIds) > 0 {
 		alipay, err := dailyBillService.SumByDate(alipayUserIds...)
 		if err != nil {
-			result = &enity.Result{"01070404", nil, daily_bill_msg["01070404"]}
+			result = &enity.Result{"01070404", err.Error(), daily_bill_msg["01070404"]}
 			common.Log(ctx, result)
 		}
 		data["alipay"] = alipay
@@ -155,7 +155,7 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	if len(bankUserIds) > 0 {
 		bank, err := dailyBillService.SumByDate(bankUserIds...)
 		if err != nil {
-			result = &enity.Result{"01070405", nil, daily_bill_msg["01070405"]}
+			result = &enity.Result{"01070405", err.Error(), daily_bill_msg["01070405"]}
 			common.Log(ctx, result)
 		}
 		data["bank"] = bank

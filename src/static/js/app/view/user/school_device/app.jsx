@@ -315,7 +315,7 @@ class DeviceTable extends React.Component {
       }
     }
     return (
-      <section className="view-user-list">
+      <section className="view-school-device-list">
         <header>
           <Breadcrumb >
             <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
@@ -324,7 +324,7 @@ class DeviceTable extends React.Component {
           </Breadcrumb>
         </header>
         <div className="toolbar">
-          <Input style={{width:120}}  type="textarea" placeholder="请输入设备编号" onChange={this.handleInputChange.bind(this)}/>
+          <Input style={{width:160,height:32,verticalAlign:'middle'}}type="textarea" placeholder="请输入设备编号" autosize onChange={this.handleInputChange.bind(this)}/>
           <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
         </div>
         <article>

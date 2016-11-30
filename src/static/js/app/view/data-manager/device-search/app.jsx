@@ -2,8 +2,8 @@ import React from "react";
 import {Input,Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 // import "./app.less";
 import StatisDeviceService from "../../../service/device_search";
-import { Link } from 'react-router';
-const _ = require('lodash');
+import DeviceService from "../../../service/device";
+
 import moment from 'moment';
 
 
@@ -77,10 +77,6 @@ const App = React.createClass({
       loading: false
     };
   },
-  componentWillMount() {
-    const pager = {page: this.state.page, perPage:this.state.perPage};
-    // this.list(pager);
-  },
   list(serialNumber,pager) {
     var self = this;
     this.setState({
@@ -105,12 +101,36 @@ const App = React.createClass({
         }
       })
   },
+  status(serialNumber,status) {
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    DeviceService.statusBySN(serialNumber,status)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        message.success(data.msg,3);
+      },(error)=>{
+        self.setState({
+          loading: false,
+        });
+        message.error(error.msg,3);
+      })
+  },
   handleSearch() {
     const serialNumber = this.state.searchValue.replace(/[\r\n\s]/g,"");
-    const pager = {page: this.state.page, perPage: this.state.perPage}
+    const pager = {page: 1, perPage: this.state.perPage};
+    this.setState({pager});
     if (serialNumber) {
-      // 发请求啦
       this.list(serialNumber, pager);
+    }
+  },
+  changeStatus() {
+    const serialNumber = this.state.searchValue.replace(/[\r\n\s]/g,"");
+    if (serialNumber) {
+      this.status(serialNumber, {status:0});
     }
   },
   handleInputChange(e) {
@@ -125,6 +145,9 @@ const App = React.createClass({
       total: self.state.total,
       showSizeChanger: true,
       size:'small',
+      showTotal (total) {
+        return <span>总计 {total} 条</span>
+      },
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
@@ -140,6 +163,8 @@ const App = React.createClass({
   render() {
     var self = this;
     const {list, total, columns} = this.state;
+    const pagination = this.initializePagination();
+    pagination.current = this.state.page;
     return (
       <section className="view-statis-device-search">
         <header>
@@ -151,6 +176,10 @@ const App = React.createClass({
           <span> 模块编号：</span>
           <Input style={{width:120}} placeholder="请输入模块编号" onChange={this.handleInputChange}/>
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
+          {USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 || USER.id == 1140 || USER.id == 1631?
+            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button>:
+          ""
+          }
         </div>
         <article>
           <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>

@@ -86,7 +86,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 
 func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
 	list := &[]*muniu.BoxAdmin{}
-	_time := time.Now().Add(-35 * time.Minute).Format("2006-01-02 15:04:05")
+	_time := time.Now().Add(-12 * time.Minute).Format("2006-01-02 15:04:05")
 	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
@@ -265,7 +265,7 @@ func (self *SyncService) SyncUserCashAccount(list *[]*muniu.BoxAdmin) (bool, err
 
 func (self *SyncService) ListBySyncBoxInfo() (*[]*muniu.BoxInfo, error) {
 	list := &[]*muniu.BoxInfo{}
-	_time := time.Now().Add(-35 * time.Minute).Format("2006-01-02 15:04:05")
+	_time := time.Now().Add(-12 * time.Minute).Format("2006-01-02 15:04:05")
 	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
@@ -309,7 +309,37 @@ func (self *SyncService) SyncDevice() (bool, error) {
 
 func (self *SyncService) SyncDailyBill() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("status = 0 or status =1 or status = 2").Find(list)
+	r := common.MNDB.Where("status = 0 or status = 1").Find(list)
+	syncService := &SyncService{}
+	dailyBillService := &DailyBillService{}
+	if r.Error != nil {
+		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
+		return false, r.Error
+	}
+	boo := true
+	for _, boxStatBill := range *list {
+		userId := (boxStatBill.CompanyId + 1)
+		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
+		if dailyBill == nil && err != nil {
+			boo, _ = syncService.AddDailyBill(boxStatBill)
+			if !boo {
+				common.Logger.Warningln("Soda_Sync_Error:AddDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
+				break
+			}
+		} else {
+			boo, _ = syncService.UpdateDailyBill(boxStatBill)
+			if !boo {
+				common.Logger.Warningln("Soda_Sync_Error:UpdateDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
+				break
+			}
+		}
+	}
+	return boo, nil
+}
+
+func (self *SyncService) SyncDailyBillManual() (bool, error) {
+	list := &[]*muniu.BoxStatBill{}
+	r := common.MNDB.Where("status = 0 or status = 1 or status = 2").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
 	if r.Error != nil {

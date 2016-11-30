@@ -162,6 +162,12 @@ var (
 
 		"01011300": "拉取用户权限列表成功!",
 		"01011301": "拉取用户权限列表失败!",
+
+		"01011400": "修改密码成功",
+		"01011401": "修改密码失败",
+		"01011402": "无当前用户信息",
+		"01011403": "原始密码错误,请重新输入!",
+		"01011404": "新密码不能为空",
 	}
 )
 
@@ -1001,7 +1007,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	}
 	if len(serialNums) > 0 && serialNums[0] != "" {
 		common.Logger.Debugln("=======================")
-		list, err := deviceService.ListBySerialNumber(schoolId, serialNums...)
+		list, err := deviceService.ListBySerialNumber(userId, schoolId, serialNums...)
 		if len(*list) <= 0 {
 			result = &enity.Result{"01011100", nil, user_msg["01011100"]}
 			common.Log(ctx, result)
@@ -1206,4 +1212,45 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	result = &enity.Result{"01011300", permissionList, user_msg["01011300"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
+}
+
+
+func (self *UserController) Password(ctx *iris.Context) {
+	userService := &service.UserService{}
+	result := &enity.Result{}
+	var err error
+	current := ctx.URLParam("current")
+	newer := ctx.URLParam("newer")
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	user, err := userService.Basic(userId)
+	if err != nil {
+		result = &enity.Result{"01011402", err.Error() , user_msg["01011402"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	common.Logger.Debugln("password====", user.Password)
+	common.Logger.Debugln("current=====", current)
+	if user.Password != current {
+		result = &enity.Result{"01011403", nil , user_msg["01011403"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if newer == "" {
+		result = &enity.Result{"01011404", nil, user_msg["01011404"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	_, err = userService.Password(userId, newer)
+	if err != nil {
+		result = &enity.Result{"01011401", err.Error() , user_msg["01011401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01011400", nil, user_msg["01011400"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
 }
