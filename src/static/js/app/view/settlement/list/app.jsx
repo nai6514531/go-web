@@ -11,30 +11,36 @@ const App = React.createClass({
 		return {
       rowColor:[],
       textValue: '',
-			columns: [{
-				title: '账单号',
-				dataIndex: 'id',
-				key: 'id',
-				sorter: (a, b) => +a.id - +b.id
-			}, {
-				title: '运营商',
-				dataIndex: 'userName',
-				key: 'userName'
+			columns: [
+        // {
+			// 	title: '账单号',
+			// 	dataIndex: 'id',
+			// 	key: 'id',
+			// 	sorter: (a, b) => +a.id - +b.id
+			// },
+        {
+				  title: '运营商',
+				  dataIndex: 'userName',
+				  key: 'userName',
+          width:80,
 			}, {
 				title: '金额',
 				dataIndex: 'totalAmount',
 				key: 'totalAmount',
+          width:90,
 				render: (total_amount) => {
 					return <p className="bigger">{total_amount / 100}</p>;
 				}
 			},  {
 				title: '收款方式',
 				dataIndex: 'accountName',
-				key: 'accountName'
+				key: 'accountName',
+          width:60
 			}, {
 				title: '账期',
 				dataIndex: 'billAt',
 				key: 'billAt',
+          width:95,
 				render: (bill_at) => {
 					return moment(bill_at).format('YYYY-MM-DD')
 				}
@@ -67,11 +73,13 @@ const App = React.createClass({
 			},{
         title: '订单量',
         dataIndex: 'orderCount',
-        key: 'orderCount'
+        key: 'orderCount',
+          width:60
       }, {
 				title: '状态',
 				dataIndex: 'status',
 				key: 'status',
+          width:80,
 				render: (status, record) => {
 					switch (status) {
 						case 0:
@@ -103,8 +111,8 @@ const App = React.createClass({
 				title: '操作',
 				dataIndex: 'id',
 				key: 'method',
-				width: 150,
-				fixed: 'right',
+				width: 100,
+				// fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -666,9 +674,9 @@ const App = React.createClass({
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
-    	<Table scroll={{ x: 980 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
+    	<Table scroll={{ x: 800, y: 300 }} className="table" rowClassName={this.rowClassName} rowSelection={rowSelection} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} footer={() => footer} />
     ):(
-    	<Table scroll={{ x: 980 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
+    	<Table scroll={{ x: 800, y: 300 }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 
 		return (<section className="view-settlement-list">
