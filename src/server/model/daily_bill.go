@@ -12,12 +12,12 @@ type DailyBill struct {
 	Status      int    `json:"status"` //0:未申请提现or未结账 1:已申请提现 2:已结账 3:结账中 4:结账失败
 	SubmitAt    time.Time `json:"submitAt"`
 	OrderCount  int    `json:"orderCount"`
-	AccountType int    `json:"accountType" gorm:"-"`
-	AccountName string `json:"accountName" gorm:"-"`
-	Account     string `json:"account" gorm:"-"`
-	RealName    string `json:"realName" gorm:"-"`
-	BankName    string `json:"bankName" gorm:"-"`
-	Mobile      string `json:"mobile" gorm:"-"`
+	AccountType int    `json:"accountType"`
+	AccountName string `json:"accountName"`
+	Account     string `json:"account"`
+	RealName    string `json:"realName"`
+	BankName    string `json:"bankName"`
+	Mobile      string `json:"mobile"`
 }
 
 func (DailyBill) TableName() string {
