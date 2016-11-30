@@ -337,7 +337,7 @@ class DeviceTable extends React.Component {
           {id == USER.id?
             <Breadcrumb >
               <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-              <Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{id}的设备管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item><Link to={"/user/"+id+"/device/list"}>{userName}的设备管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>{schoolName}</Breadcrumb.Item>
             </Breadcrumb>
             :

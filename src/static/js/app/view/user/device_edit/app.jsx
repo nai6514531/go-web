@@ -170,7 +170,7 @@ class DeviceForm extends React.Component {
           self.context.router.goBack();
           self.saveDetail = -1;
         } else if(nextProps.resultPutDetail.fetch == false) {
-          message.error('修改设备失败',3);
+          message.error(nextProps.resultPutDetail.result.msg,3);
           self.saveDetail = -1;
         }
       }

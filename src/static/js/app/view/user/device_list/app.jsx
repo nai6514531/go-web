@@ -17,13 +17,11 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   const {
     getUserSchool,
-    getUserDevice,
     getAllSchool,
     getUserDetail
   } = bindActionCreators(UserActions, dispatch);
   return {
     getUserSchool,
-    getUserDevice,
     getAllSchool,
     getUserDetail
   };
