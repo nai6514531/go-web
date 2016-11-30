@@ -9,15 +9,15 @@ import (
 func Api() {
 
 	var (
-		user            = &controller.UserController{}
-		region          = &controller.RegionController{}
-		device          = &controller.DeviceController{}
-		school          = &controller.SchoolController{}
+		user = &controller.UserController{}
+		region = &controller.RegionController{}
+		device = &controller.DeviceController{}
+		school = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
-		dailyBill       = &controller.DailyBillController{}
-		sync            = &controller.SyncController{}
-		statis          = &controller.StatisController{}
-		trade           = &controller.TradeController{}
+		dailyBill = &controller.DailyBillController{}
+		sync = &controller.SyncController{}
+		statis = &controller.StatisController{}
+		trade = &controller.TradeController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -79,7 +79,7 @@ func Api() {
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
 	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
-	api.Put("/device-unlock",  device.UnLock)
+	api.Put("/device-unlock", device.UnLock)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)

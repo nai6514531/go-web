@@ -399,7 +399,8 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 	// }
 	//判断序列号名是否已经被使用了
 	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
-	if (currentDevice != nil) && (currentDevice.Id != id) { //可以找到并且不为当前要修改的记录
+	if (currentDevice != nil) && (currentDevice.Id != id) {
+		//可以找到并且不为当前要修改的记录
 		result = &enity.Result{"01030313", nil, device_msg["01030313"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -452,7 +453,8 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 { //必须为10位的
+		if len(v) != 10 {
+			//必须为10位的
 			result = &enity.Result{"01030503", nil, device_msg["01030503"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -525,7 +527,8 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
-	if currentDevice == nil || currentDevice.UserId == 1 { //设备被重置了或不存在
+	if currentDevice == nil || currentDevice.UserId == 1 {
+		//设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -571,7 +574,8 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 		return
 
 	}
-	if currentDevice == nil || currentDevice.UserId != 1 { //设备正在使用了或不存在
+	if currentDevice == nil || currentDevice.UserId != 1 {
+		//设备正在使用了或不存在
 		result = &enity.Result{"01030903", nil, device_msg["01030903"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -624,7 +628,8 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 { //必须为10位的
+		if len(v) != 10 {
+			//必须为10位的
 			result = &enity.Result{"01030703", nil, device_msg["01030703"]}
 			ctx.JSON(iris.StatusOK, result)
 			return

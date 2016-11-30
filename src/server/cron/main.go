@@ -23,8 +23,8 @@ func SetUpCron() {
 		syncDeviceSpec := viper.GetString("cron.syncDeviceSpec")
 		syncUserSpec := viper.GetString("cron.syncUserSpec")
 		updateSpec := viper.GetString("cron.updateSpec")
-		applySpec := viper.GetString("cron.applySpec")
-		c.AddFunc(applySpec, dailyBill.TimedApplyAliPayBill)
+		//applySpec := viper.GetString("cron.applySpec")
+		//c.AddFunc(applySpec, dailyBill.TimedApplyAliPayBill)
 		c.AddFunc(updateSpec, dailyBill.TimedUpdateAliPayStatus)
 
 		c.AddFunc(syncDailyBillDetailSpec, func() {

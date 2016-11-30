@@ -507,7 +507,8 @@ func (self *UserController) Update(ctx *iris.Context) {
 	user.Id = userId
 	//user信息校验
 	//判断登陆名是否已经存在,不能对account进行更新
-	if user.Account != "" { //如果有登陆账号传入
+	if user.Account != "" {
+		//如果有登陆账号传入
 		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1002,7 +1003,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	serialNums := strings.Split(deviceStr, ",")
 	common.Logger.Debugln("serialNums===========", serialNums)
 	common.Logger.Debugln("schoolId===========", schoolId)
-	if schoolId != -1 && ctx.URLParam("schoolId") != ""{
+	if schoolId != -1 && ctx.URLParam("schoolId") != "" {
 		schoolIds = append(schoolIds, schoolId)
 	}
 	if len(serialNums) > 0 && serialNums[0] != "" {
@@ -1029,7 +1030,8 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	common.Logger.Debugln("schoolId===========", schoolId)
 
 	//返回全部学校列表
-	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds)<=0 { //?schoolId=-1或者没有筛选条件
+	if (schoolId == -1 || ctx.URLParam("schoolId") == "") && len(schoolIds) <= 0 {
+		//?schoolId=-1或者没有筛选条件
 		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
 			result = &enity.Result{"01011101", err, user_msg["01011101"]}
@@ -1214,7 +1216,6 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	common.Log(ctx, nil)
 }
 
-
 func (self *UserController) Password(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
@@ -1224,7 +1225,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, err := userService.Basic(userId)
 	if err != nil {
-		result = &enity.Result{"01011402", err.Error() , user_msg["01011402"]}
+		result = &enity.Result{"01011402", err.Error(), user_msg["01011402"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1232,7 +1233,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 	common.Logger.Debugln("password====", user.Password)
 	common.Logger.Debugln("current=====", current)
 	if user.Password != current {
-		result = &enity.Result{"01011403", nil , user_msg["01011403"]}
+		result = &enity.Result{"01011403", nil, user_msg["01011403"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1245,7 +1246,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 	}
 	_, err = userService.Password(userId, newer)
 	if err != nil {
-		result = &enity.Result{"01011401", err.Error() , user_msg["01011401"]}
+		result = &enity.Result{"01011401", err.Error(), user_msg["01011401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
