@@ -83,6 +83,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	}
 	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
 	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
+	roleId:=userRoleRel.RoleId
 	if err != nil {
 		result = &enity.Result{"01060103", err.Error(), daily_bill_msg["01060103"]}
 		common.Log(ctx, result)
@@ -90,7 +91,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		return
 	}
 	if len(_status) <= 0 {
-		switch userRoleRel.RoleId {
+		switch roleId {
 		case 1:
 			status = _status
 			break
@@ -103,7 +104,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		}
 	} else {
 		for _, s := range _status {
-			switch userRoleRel.RoleId {
+			switch roleId {
 			case 1:
 				status = append(status, s)
 				break
@@ -120,7 +121,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 			}
 		}
 	}
-	if userRoleRel.RoleId == 3 && len(status) <= 0 {
+	if roleId == 3 && len(status) <= 0 {
 		status = append(status, []string{"1", "2", "3", "4"}...)
 	}
 	billAt := params["billAt"]
@@ -128,14 +129,14 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
 		return
 	}
-	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId, searchStr)
+	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, billAt, userId, searchStr,roleId)
 	if err != nil {
 		result = &enity.Result{"01060102", err.Error(), daily_bill_msg["01060102"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, billAt, userId, searchStr, page, perPage)
+	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, billAt, userId, searchStr, page, perPage,roleId)
 	if err != nil {
 		result = &enity.Result{"01060101", err.Error(), daily_bill_msg["01060101"]}
 		common.Log(ctx, result)
@@ -753,13 +754,13 @@ func (self *DailyBillController) CancelBatchAliPay(ctx *iris.Context) {
 /**
 	定时修改"未结算"的支付宝账单状态为"已申请"
  */
-func (self *DailyBillController) TimedApplyAliPayBill() {
+func (self *DailyBillController) TimedApplyBill() {
 	common.Logger.Warningln("=============定时更新'未结账'支付宝账单状态'已申请'开始=============")
 	dailyBillService := &service.DailyBillService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	userIds := make([]int, 0)
 	var err error
-	accountList, err := userCashAccountService.List(1)  //支付宝账户
+	accountList, err := userCashAccountService.List(1, 2, 3)  //支付宝账户
 	if err != nil {
 		common.Logger.Warningln("获取支付宝结账用户失败:", err.Error())
 	}
