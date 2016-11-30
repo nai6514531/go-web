@@ -44,10 +44,19 @@ const columns = [{
   dataIndex: 'id',
   key: 'id',
 }, {
-  title: '编号',
+  title: '编号/楼道信息',
   dataIndex: 'serialNumber',
   key: 'serialNumber',
-}, {
+  render: (serialNumber,record) => {
+    return <span>{serialNumber}{record.address?' / '+record.address:''}</span>;
+  }
+},
+//   {
+//   title: '楼道信息',
+//   dataIndex: 'address',
+//   key: 'address',
+// },
+  {
   title: '关联设备类型',
   dataIndex: 'referenceDevice',
   key: 'referenceDevice',
@@ -55,11 +64,7 @@ const columns = [{
   title: '状态',
   dataIndex: 'status',
   key: 'status',
-}, {
-  title: '楼道信息',
-  dataIndex: 'address',
-  key: 'address',
-}, {
+},  {
   title: '单脱',
   dataIndex: 'firstPulsePrice',
   key: 'firstPulsePrice',

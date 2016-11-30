@@ -24,7 +24,12 @@ const router = (
             callback(null, require('./view/home/app.jsx').default);
           });
         }} />
-        <Route path="/user(/:id)" getComponent={(location, callback) => {
+        <Route path="/user" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+            callback(null, require('./view/user/detail/app.jsx').default);
+          });
+        }} />
+        <Route path="/user/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
             callback(null, require('./view/user/list/app.jsx').default);
           });
