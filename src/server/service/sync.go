@@ -434,14 +434,14 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill, userCashAc
 	if status == 0 {
 		status = 1
 	}
-	accountType := ""
+	accountType := 0
 	accountName := ""
 	account := ""
 	realName := ""
 	bankName := ""
 	mobile := ""
 	if userCashAccount != nil {
-		accountType := userCashAccount.Type
+		accountType = userCashAccount.Type
 		if accountType == 1 {
 			accountName = "支付宝"
 		} else if accountType == 2 {
@@ -484,14 +484,14 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCas
 	if status == 0 {
 		status = 1
 	}
-	accountType := ""
+	accountType := 0
 	accountName := ""
 	account := ""
 	realName := ""
 	bankName := ""
 	mobile := ""
 	if userCashAccount != nil {
-		accountType := userCashAccount.Type
+		accountType = userCashAccount.Type
 		if accountType == 1 {
 			accountName = "支付宝"
 		} else if accountType == 2 {
