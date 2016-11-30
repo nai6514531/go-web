@@ -17,7 +17,7 @@ func ListByTimed(isCreated bool) (*[]*muniu.BoxAdmin, error) {
 	_column := ""
 	if isCreated {
 		_column = "INSERTTIME"
-	}else{
+	} else {
 		_column = "UPDATETIME"
 	}
 	r := common.MNDB.Where(_column+" > ?", _time).Find(list)
@@ -33,15 +33,15 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 	syncService := &SyncService{}
 	newUserIds := make([]int, 0)
 	exitsUserMap := make(map[int]*model.User, 0)
-	newAdminList, err := ListByTimed(true)       //查询旧数据库新增用户
+	newAdminList, err := ListByTimed(true) //查询旧数据库新增用户
 	if err != nil {
 		common.Logger.Warningln("Soda_Sync_Error:", err.Error())
 		return false, err
 	}
 	for _, _admin := range *newAdminList {
-		newUserIds = append(newUserIds, _admin.LocalId+1)       //新库用户id
+		newUserIds = append(newUserIds, _admin.LocalId+1) //新库用户id
 	}
-	exitsUserList, err := userService.ListById(newUserIds...)       //判断新数据库中是否存在
+	exitsUserList, err := userService.ListById(newUserIds...) //判断新数据库中是否存在
 	if err != nil {
 		common.Logger.Warningln("Soda_Sync_Error:", err.Error())
 		return false, err
@@ -132,7 +132,6 @@ func (self *SyncService) SyncAllUserAndRel() (bool, error) {
 	}
 	return true, nil
 }
-
 
 func (self *SyncService) UserSync(list *[]*muniu.BoxAdmin) (bool, error) {
 	syncService := &SyncService{}
@@ -312,6 +311,7 @@ func (self *SyncService) SyncDailyBill() (bool, error) {
 	r := common.MNDB.Where("status = 0 or status = 1").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
+	userCashAccountService := &UserCashAccountService{}
 	if r.Error != nil {
 		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
@@ -320,14 +320,15 @@ func (self *SyncService) SyncDailyBill() (bool, error) {
 	for _, boxStatBill := range *list {
 		userId := (boxStatBill.CompanyId + 1)
 		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
+		userCashAccount, _ := userCashAccountService.BasicByUserId(userId)
 		if dailyBill == nil && err != nil {
-			boo, _ = syncService.AddDailyBill(boxStatBill)
+			boo, _ = syncService.AddDailyBill(boxStatBill, userCashAccount)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:AddDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		} else {
-			boo, _ = syncService.UpdateDailyBill(boxStatBill)
+			boo, _ = syncService.UpdateDailyBill(boxStatBill, userCashAccount)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:UpdateDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
@@ -342,6 +343,7 @@ func (self *SyncService) SyncDailyBillManual() (bool, error) {
 	r := common.MNDB.Where("status = 0 or status = 1 or status = 2").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
+	userCashAccountService := &UserCashAccountService{}
 	if r.Error != nil {
 		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
@@ -350,14 +352,15 @@ func (self *SyncService) SyncDailyBillManual() (bool, error) {
 	for _, boxStatBill := range *list {
 		userId := (boxStatBill.CompanyId + 1)
 		dailyBill, err := dailyBillService.BasicByUserIdAndBillAt(userId, boxStatBill.PeriodStart)
+		userCashAccount, _ := userCashAccountService.BasicByUserId(userId)
 		if dailyBill == nil && err != nil {
-			boo, _ = syncService.AddDailyBill(boxStatBill)
+			boo, _ = syncService.AddDailyBill(boxStatBill, userCashAccount)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:AddDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
 			}
 		} else {
-			boo, _ = syncService.UpdateDailyBill(boxStatBill)
+			boo, _ = syncService.UpdateDailyBill(boxStatBill, userCashAccount)
 			if !boo {
 				common.Logger.Warningln("Soda_Sync_Error:UpdateDailyBill:UserId:BillAt:", userId, boxStatBill.PeriodStart)
 				break
@@ -425,8 +428,34 @@ func (self *SyncService) AddDailyBillDetail(boxWash *muniu.BoxWash) (bool, error
 	return true, nil
 }
 
-func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) (bool, error) {
+func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill, userCashAccount *model.UserCashAccount) (bool, error) {
 	status, _ := strconv.Atoi(boxStatBill.Status)
+	//同步账单时，将状态为未结账的单，处理为已申请提现状态
+	if status == 0 {
+		status = 1
+	}
+	accountType := ""
+	accountName := ""
+	account := ""
+	realName := ""
+	bankName := ""
+	mobile := ""
+	if userCashAccount != nil {
+		accountType := userCashAccount.Type
+		if accountType == 1 {
+			accountName = "支付宝"
+		} else if accountType == 2 {
+			accountName = "微信"
+		} else if accountType == 3 {
+			accountName = "银行"
+		} else {
+			accountName = "/"
+		}
+		account = userCashAccount.Account
+		realName = userCashAccount.RealName
+		bankName = userCashAccount.BankName
+		mobile = userCashAccount.Mobile
+	}
 	dailyBill := &model.DailyBill{
 		UserId:      (boxStatBill.CompanyId + 1),
 		UserName:    boxStatBill.MerchName,
@@ -435,6 +464,12 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) (bool, err
 		BillAt:      boxStatBill.PeriodStart,
 		OrderCount:  boxStatBill.Times,
 		Status:      status,
+		AccountType: accountType,
+		AccountName: accountName,
+		Account:     account,
+		RealName:    realName,
+		BankName:    bankName,
+		Mobile:      mobile,
 	}
 	r := common.DB.Create(dailyBill)
 	if r.Error != nil {
@@ -443,8 +478,34 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill) (bool, err
 	return true, nil
 }
 
-func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) (bool, error) {
+func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCashAccount *model.UserCashAccount) (bool, error) {
 	status, _ := strconv.Atoi(boxStatBill.Status)
+	//同步账单时，将状态为未结账的单，处理为已申请提现状态
+	if status == 0 {
+		status = 1
+	}
+	accountType := ""
+	accountName := ""
+	account := ""
+	realName := ""
+	bankName := ""
+	mobile := ""
+	if userCashAccount != nil {
+		accountType := userCashAccount.Type
+		if accountType == 1 {
+			accountName = "支付宝"
+		} else if accountType == 2 {
+			accountName = "微信"
+		} else if accountType == 3 {
+			accountName = "银行"
+		} else {
+			accountName = "/"
+		}
+		account = userCashAccount.Account
+		realName = userCashAccount.RealName
+		bankName = userCashAccount.BankName
+		mobile = userCashAccount.Mobile
+	}
 	userId := (boxStatBill.CompanyId + 1)
 	billAt := boxStatBill.PeriodStart
 	data := map[string]interface{}{
@@ -455,6 +516,12 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill) (bool, 
 		"bill_at":      billAt,
 		"order_count":  boxStatBill.Times,
 		"status":       status,
+		"accountType":  accountType,
+		"accountName":  accountName,
+		"account":      account,
+		"realName":     realName,
+		"bankName":     bankName,
+		"mobile":       mobile,
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", userId, billAt).Updates(data)
 	if r.Error != nil {
