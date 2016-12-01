@@ -94,6 +94,16 @@ const router = (
             callback(null, require('./view/data-manager/consume-daily/app.jsx').default);
           });
         }} />
+        <Route path="/data/consume/month/:id/:date" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+            callback(null, require('./view/data-manager/consume-daily-device/app.jsx').default);
+          });
+        }} />
+        <Route path="/data/consume/month/:id/:date/:deviceId" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+            callback(null, require('./view/data-manager/consume-daily-device-detail/app.jsx').default);
+          });
+        }} />
         <Route path="/data/manage" getComponent={(location, callback) => {
           require.ensure([], (require) => {
             callback(null, require('./view/data-manager/operate-month/app.jsx').default);
