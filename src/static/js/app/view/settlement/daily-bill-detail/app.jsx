@@ -13,11 +13,13 @@ const App = React.createClass({
         title: '账单号',
         dataIndex: 'id',
         key: 'id',
+        width:50,
         sorter: (a, b) => +a.id - +b.id
       }, {
         title: '设备编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
+        width:100,
         render: (serialNumber,record)=>{
           return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
         }
@@ -25,6 +27,7 @@ const App = React.createClass({
         title: '服务类型',
         dataIndex: 'pulseType',
         key: 'pulseType',
+        width:20,
         render: (data) => {
           if (data == 601) {
             return <div>单脱</div>
@@ -40,6 +43,7 @@ const App = React.createClass({
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
+        width:60,
         render: (total_amount) => {
           return total_amount / 100 + "元";
         }
@@ -47,14 +51,17 @@ const App = React.createClass({
         title: '洗衣手机号',
         dataIndex: 'mobile',
         key: 'mobile',
+        width:60,
       }, {
         title: '下单时间',
         dataIndex: 'billAt',
-        key: 'billAt'
+        key: 'billAt',
+        width:70,
       }, {
         title: '状态',
         dataIndex: 'status',
         key: 'status',
+        width:50,
         render: (status) => {
           if (status == 0) {
             return <div className="status">正常</div>
@@ -123,7 +130,7 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
     </section>);
   }
 });

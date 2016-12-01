@@ -31,20 +31,22 @@ const columns = [{
   title: '序号',
   dataIndex: 'id',
   key: 'id',
+  width:50,
 }, {
   title: '学校',
   dataIndex: 'school',
   key: 'school',
+  width:120,
 }, {
   title: '模块数量',
   dataIndex: 'number',
   key: 'number',
+  width:60,
 }, {
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 100,
-  fixed: 'right',
+  width: 80,
   render: (text, record) => <Link to={"/user/"+record.userId+"/device/school/" + record.id}>查看模块</Link>,
 }];
 
@@ -176,7 +178,7 @@ class SchoolTable extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 980 }}
+            scroll={{ x:350 }}
             columns={columns}
                dataSource={dataSource}
                pagination={pagination}

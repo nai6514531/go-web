@@ -19,10 +19,12 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       },{
         title: '日期',
         dataIndex: 'date',
         key: 'date',
+        width:100,
         // render(text, record, index) {
         //   return <Link to={"/data/consume/month/" + record.date.substr(0,7) + "/" + record.date}>{text}</Link>;
           // if (index < self.state.total-1) {
@@ -37,10 +39,12 @@ const App = React.createClass({
         title: '模块数',
         dataIndex: 'deviceCount',
         key: 'deviceCount',
+        width:55,
       }, {
         title: '单脱',
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
+        width:50,
         render: (firstPulseAmount) => {
           return Math.round(firstPulseAmount*100)/100 + "次";
         }
@@ -48,6 +52,7 @@ const App = React.createClass({
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
+        width:50,
         render: (secondPulseAmount) => {
           return Math.round(secondPulseAmount*100)/100 + "次";
         }
@@ -55,6 +60,7 @@ const App = React.createClass({
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
+        width:50,
         render: (thirdPulseAmount) => {
           return Math.round(thirdPulseAmount*100)/100 + "次"
         }
@@ -62,6 +68,7 @@ const App = React.createClass({
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
+        width:50,
         render: (fourthPulseAmount) => {
           return Math.round(fourthPulseAmount*100)/100 + "次"
         }
@@ -69,6 +76,7 @@ const App = React.createClass({
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
+        width:80,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
         }
@@ -135,7 +143,7 @@ const App = React.createClass({
           <Breadcrumb.Item>{id}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 450 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });

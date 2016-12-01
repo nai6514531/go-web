@@ -24,30 +24,37 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       }, {
         title: '运营商',
         dataIndex: 'user',
         key: 'user',
+        width:50
       }, {
         title: '服务电话',
         dataIndex: 'telephone',
         key: 'telephone',
+        width:100,
       }, {
         title: '楼道信息',
         dataIndex: 'address',
         key: 'address',
+        width:100,
       },{
         title: '洗衣手机号',
         dataIndex: 'account',
         key: 'account',
+        width:100,
       },{
         title: '洗衣密码',
         dataIndex: 'token',
         key: 'token',
+        width:40,
       },{
         title: '洗衣金额',
         dataIndex: 'amount',
         key: 'amount',
+        width:40,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
         }
@@ -55,6 +62,7 @@ const App = React.createClass({
         title: '洗衣类型',
         dataIndex: 'pulseType',
         key: 'pulseType',
+        width:30,
         render: (pulseType) => {
           if(pulseType == 601){
             return "单脱";
@@ -70,6 +78,7 @@ const App = React.createClass({
         title: '下单时间',
         dataIndex: 'time',
         key: 'time',
+        width:90,
         render: (time) => {
           return moment(time).format('YYYY-MM-DD HH:mm:ss')
         }
@@ -182,7 +191,7 @@ const App = React.createClass({
           }
         </div>
         <article>
-          <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+          <Table scroll={{ x: 580 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
         </article>
       </section>
       );

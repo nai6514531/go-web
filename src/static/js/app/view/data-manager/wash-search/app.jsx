@@ -26,18 +26,22 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       }, {
         title: '运营商',
         dataIndex: 'user',
         key: 'user',
+        width:50,
       }, {
         title: '服务电话',
         dataIndex: 'telephone',
         key: 'telephone',
+        width:100,
       }, {
         title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
+        width:100,
         render: (serialNumber,record)=>{
           return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
         }
@@ -51,10 +55,12 @@ const App = React.createClass({
         title: '洗衣密码',
         dataIndex: 'token',
         key: 'token',
+          width:40,
       },{
         title: '洗衣金额',
         dataIndex: 'amount',
         key: 'amount',
+          width:50,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
         }
@@ -62,6 +68,7 @@ const App = React.createClass({
         title: '洗衣类型',
         dataIndex: 'pulseType',
         key: 'pulseType',
+          width:30,
         render: (pulseType) => {
           if(pulseType == 601){
             return "单脱";
@@ -77,6 +84,7 @@ const App = React.createClass({
         title: '下单时间',
         dataIndex: 'time',
         key: 'time',
+          width:80,
         render: (time) => {
           return moment(time).format('YYYY-MM-DD HH:mm:ss')
         },
@@ -84,7 +92,7 @@ const App = React.createClass({
         title: '操作',
         dataIndex: 'washId',
         key: 'washId',
-        width: 100,
+        width: 40,
         render: (text, record) => (
           <div>
             { USER.role.id == 4 ?
@@ -201,7 +209,7 @@ const App = React.createClass({
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
         </div>
         <article>
-          <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+          <Table scroll={{ x: 550 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
         </article>
       </section>
     );

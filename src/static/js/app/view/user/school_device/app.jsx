@@ -43,10 +43,12 @@ const columns = [{
   title: '序号',
   dataIndex: 'id',
   key: 'id',
+  width:50,
 }, {
   title: '编号/楼道信息',
   dataIndex: 'serialNumber',
   key: 'serialNumber',
+  width:120,
   render: (serialNumber,record) => {
     return <span>{serialNumber}{record.address?' / '+record.address:''}</span>;
   }
@@ -60,32 +62,37 @@ const columns = [{
   title: '关联设备类型',
   dataIndex: 'referenceDevice',
   key: 'referenceDevice',
+    width:40,
 }, {
   title: '状态',
   dataIndex: 'status',
   key: 'status',
+    width:20,
 },  {
   title: '单脱',
   dataIndex: 'firstPulsePrice',
   key: 'firstPulsePrice',
+    width:50,
 }, {
   title: '快洗',
   dataIndex: 'secondPulsePrice',
   key: 'secondPulsePrice',
+    width:50,
 }, {
   title: '标准洗',
   dataIndex: 'thirdPulsePrice',
   key: 'thirdPulsePrice',
+    width:50,
 }, {
   title: '大物洗',
   dataIndex: 'fourthPulsePrice',
   key: 'fourthPulsePrice',
+    width:50,
 }, {
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 100,
-  fixed: 'right',
+  width: 60,
   render: (text, record) => (
     <div>
       <p><Link to={"/user/"+record.userId+"/device/school/"+record.schoolId+"/edit/" + record.id}>修改</Link></p>
@@ -361,7 +368,7 @@ class DeviceTable extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 980 }}
+            scroll={{ x: 500,y:200 }}
             columns={columns}
                dataSource={dataSource}
                pagination={this.pagination}
