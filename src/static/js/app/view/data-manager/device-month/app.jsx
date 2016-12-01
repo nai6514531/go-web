@@ -24,7 +24,7 @@ const App = React.createClass({
         title: '月份',
         dataIndex: 'date',
         key: 'date',
-        width:30,
+        width:80,
         render(text, record, index) {
             return <Link to={"/data/device/month/" + record.date + "/" + record.serialNumber}>{text}</Link>;
         },
@@ -32,7 +32,7 @@ const App = React.createClass({
         title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
-        width:100,
+        width:110,
         render: (serialNumber,record)=>{
           return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
         }
@@ -72,7 +72,7 @@ const App = React.createClass({
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
-        width:80,
+        width:100,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
         }
@@ -117,7 +117,7 @@ const App = React.createClass({
           <Breadcrumb.Item>模块统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 550 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 650 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });

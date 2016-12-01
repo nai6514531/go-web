@@ -27,13 +27,6 @@ const App = React.createClass({
         width:100,
         // render(text, record, index) {
         //   return <Link to={"/data/consume/month/" + record.date.substr(0,7) + "/" + record.date}>{text}</Link>;
-          // if (index < self.state.total-1) {
-          // }
-          // return {
-          //   props: {
-          //     colSpan: 0,
-          //   },
-          // };
         // },
       }, {
         title: '模块数',
