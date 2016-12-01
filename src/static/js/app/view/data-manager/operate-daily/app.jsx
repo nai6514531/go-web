@@ -21,10 +21,12 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       }, {
         title: '日期',
         dataIndex: 'date',
         key: 'date',
+        width:80,
         render(text, record, index) {
           if (index < self.state.total) {
             return moment(text).format('YYYY-MM-DD')
@@ -39,18 +41,22 @@ const App = React.createClass({
         title: '新增用户数',
         dataIndex: 'increaseUserCount',
         key: 'increaseUserCount',
+        width:60,
       }, {
         title: '启用模块',
         dataIndex: 'enabledDeviceCount',
         key: 'enabledDeviceCount',
+        width:60,
       },{
         title: '新增模块',
         dataIndex: 'increaseDeviceCount',
         key: 'increaseDeviceCount',
+        width:50,
       },{
         title: '充值金额',
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
+        width:100,
         render: (recharge_amount) => {
           return Math.round(recharge_amount*100)/100 + "元";
         }
@@ -58,6 +64,7 @@ const App = React.createClass({
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
+        width:100,
         render: (consume_amount) => {
           return Math.round(consume_amount*100)/100 + "元";
         }
@@ -123,7 +130,7 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });

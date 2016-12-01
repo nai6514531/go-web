@@ -18,6 +18,7 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
         render(text, row, index) {
           if (index < self.state.total - 1) {
             return <span>{text + 1}</span>;
@@ -33,6 +34,7 @@ const App = React.createClass({
         title: '月份',
         dataIndex: 'date',
         key: 'date',
+        width:80,
         render(text, record, index) {
           if (index < self.state.total - 1) {
             return <Link to={"/data/manage/month/" + record.date}>{text}</Link>;
@@ -47,18 +49,22 @@ const App = React.createClass({
         title: '新增用户数',
         dataIndex: 'increaseUserCount',
         key: 'increaseUserCount',
+        width:70,
       }, {
         title: '启用模块',
         dataIndex: 'enabledDeviceCount',
         key: 'enabledDeviceCount',
+        width:60,
       },{
         title: '新增模块',
         dataIndex: 'increaseDeviceCount',
         key: 'increaseDeviceCount',
+        width:60,
       },{
         title: '充值金额',
         dataIndex: 'rechargeAmount',
         key: 'rechargeAmount',
+        width:90,
         render: (rechargeAmount) => {
           return Math.round(rechargeAmount*100)/100 + "元";
         }
@@ -66,6 +72,7 @@ const App = React.createClass({
         title: '消费金额',
         dataIndex: 'consumeAmount',
         key: 'consumeAmount',
+        width:90,
         render: (consumeAmount) => {
           return Math.round(consumeAmount*100)/100 + "元";
         }
@@ -122,7 +129,7 @@ const App = React.createClass({
           <Breadcrumb.Item>经营统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 465 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });
