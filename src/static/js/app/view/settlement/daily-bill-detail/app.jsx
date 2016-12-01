@@ -15,9 +15,12 @@ const App = React.createClass({
         key: 'id',
         sorter: (a, b) => +a.id - +b.id
       }, {
-        title: '设备编号',
+        title: '设备编号/楼道信息',
         dataIndex: 'serialNumber',
-        key: 'serialNumber'
+        key: 'serialNumber',
+        render: (serialNumber,record)=>{
+          return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
+        }
       }, {
         title: '服务类型',
         dataIndex: 'pulseType',

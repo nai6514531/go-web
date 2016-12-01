@@ -35,14 +35,19 @@ const App = React.createClass({
         dataIndex: 'telephone',
         key: 'telephone',
       }, {
-        title: '设备编号',
+        title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
-      },{
-        title: '地址',
-        dataIndex: 'address',
-        key: 'address',
-      },{
+        render: (serialNumber,record)=>{
+          return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
+        }
+      },
+      //   {
+      //   title: '地址',
+      //   dataIndex: 'address',
+      //   key: 'address',
+      // },
+        {
         title: '洗衣密码',
         dataIndex: 'token',
         key: 'token',

@@ -24,9 +24,12 @@ const App = React.createClass({
         dataIndex: 'date',
         key: 'date',
       }, {
-        title: '编号',
+        title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
+        render: (serialNumber,record)=>{
+          return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
+        }
       }, {
         title: '单脱',
         dataIndex: 'firstPulseAmount',

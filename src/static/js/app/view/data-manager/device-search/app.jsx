@@ -33,7 +33,7 @@ const App = React.createClass({
         dataIndex: 'telephone',
         key: 'telephone',
       }, {
-        title: '地址',
+        title: '楼道信息',
         dataIndex: 'address',
         key: 'address',
       },{
