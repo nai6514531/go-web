@@ -164,10 +164,11 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 	var companyId int = -1
 	list := make([]*map[string]interface{}, 0)
 	param := make([]interface{}, 0)
-	admin, err := BoxAdminByLocalId(userId - 1)
+	var err error
+	/*admin, err := BoxAdminByLocalId(userId - 1)
 	if err != nil {
 		return nil, err
-	}
+	}*/
 
 	var sql string = ""
 	sql = "select i.companyid, case when b.inserttime is null then substring(curdate(),1,7) else substring(b.inserttime,1,7) end d," +
@@ -196,10 +197,12 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 			"order by d desc"
 	}
 
-	if admin.UserType == "2" || admin.UserType == "0"{
+	companyId = userId - 1
+	param = append(param, companyId)
+
+	/*if admin.UserType == "1" || admin.UserType == "0"{
 		companyId = admin.LocalId
 	}
-
 	if companyId != -1 {
 		param = append(param, companyId)
 	}else {
@@ -207,7 +210,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		e.Msg = "无操作权限"
 		err = e
 		return nil, err
-	}
+	}*/
 	if serialNumber != "" {
 		param = append(param, serialNumber)
 	}
@@ -223,9 +226,6 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 			return nil, err
 		}
 	}
-
-	common.Logger.Debugln("=========================", admin.UserType)
-	common.Logger.Debugln("------------------------------", companyId)
 
 	rows, err := common.MNDB.Raw(sql, param...).Rows()
 	defer rows.Close()
