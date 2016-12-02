@@ -2,6 +2,7 @@ import React from "react";
 import {Input,Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 // import "./app.less";
 import DailyBillDetailService from "../../../service/daily_bill_detail";
+import { Link } from 'react-router';
 
 import moment from 'moment';
 
@@ -35,7 +36,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
+          return Math.round(amount*100)/10000 + "元";
         }
       },{
         title: '洗衣手机号',
@@ -93,8 +94,9 @@ const App = React.createClass({
         if (data && data.status == '00') {
           this.setState({
             total: data.data.total,
-            list: data.data.list.map((item) => {
+            list: data.data.list.map((item,key) => {
               item.url = baseUrl+item.serialNumber;
+              item.key = key + 1;
               return item;
             })
           });

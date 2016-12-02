@@ -634,6 +634,8 @@ const App = React.createClass({
       });
       // 备选方案
       // self.multiSettle();
+    } else {
+      message.info('请勾选您需要计算金额的账单',3);
     }
     // 备选方案
     // this.setState({

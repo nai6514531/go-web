@@ -24,11 +24,10 @@ const App = React.createClass({
         dataIndex: 'serialNumber',
         key: 'serialNumber',
         render: (serialNumber,record)=>{
-          return
-          <span>
+          return <div>
             <Link to={record.url}>{serialNumber}</Link>
             {record.address?' / '+record.address:""}
-          </span>
+          </div>
         }
       }, {
         title: '运营商名称',
@@ -67,7 +66,7 @@ const App = React.createClass({
         dataIndex: 'amount',
         key: 'amount',
         render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
+          return Math.round(amount*100)/10000 + "元";
         }
       }],
       loading: false
@@ -93,8 +92,9 @@ const App = React.createClass({
         if (data && data.status == '00') {
           this.setState({
             total: data.data.total,
-            list: data.data.list.map((item) => {
+            list: data.data.list.map((item,key) => {
               item.url = baseUrl+item.serialNumber;
+              item.key = key + 1;
               return item;
             })
           });
