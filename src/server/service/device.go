@@ -488,3 +488,17 @@ func (self *DeviceService) ListByUserId(userId ...int) (*[]*model.Device, error)
 	}
 	return &list, nil
 }
+
+
+func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]interface{}, error) {
+	list := []*model.Device{}
+	deviceMap := make(map[int]interface{}, 0)
+	r := common.DB.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	for _, _device := range list {
+		deviceMap[_device.SerialNumber] = _device
+	}
+	return deviceMap, nil
+}

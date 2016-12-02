@@ -29,6 +29,7 @@ var (
 		"01060200": "拉取日账单明细列表成功",
 		"01060201": "拉取日账单明细列表失败",
 		"01060202": "拉取日账单明细总数失败",
+		"01060203": "无该用户设备信息",
 
 		"01060300": "更新日账单状态成功",
 		"01060301": "更新日账单状态失败",
@@ -148,35 +149,6 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
-func (self *DailyBillController) DetailList(ctx *iris.Context) {
-	dailyBillDetailService := &service.DailyBillDetailService{}
-	result := &enity.Result{}
-	page, _ := ctx.URLParamInt("page")
-	perPage, _ := ctx.URLParamInt("perPage")
-	userId, _ := ctx.URLParamInt("userId")
-	billAt := ctx.URLParam("billAt")
-	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt)
-	if err != nil {
-		result = &enity.Result{"01060202", err.Error(), daily_bill_msg["01060202"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	list, err := dailyBillDetailService.ListByUserIdAndBillAt(userId, billAt, page, perPage)
-	if err != nil {
-		result = &enity.Result{"01060201", err.Error(), daily_bill_msg["01060201"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	result = &enity.Result{"01060200", &enity.Pagination{total, list}, daily_bill_msg["01060200"]}
-	common.Log(ctx, nil)
-	ctx.JSON(iris.StatusOK, result)
-}
-
-/**
-	申请结账
- */
 func (self *DailyBillController) Apply(ctx *iris.Context) {
 	result := &enity.Result{}
 	dailyBillService := &service.DailyBillService{}
@@ -231,6 +203,45 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01060300", nil, daily_bill_msg["01060300"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
+/**
+	申请结账
+ */
+func (self *DailyBillController) DetailList(ctx *iris.Context) {
+	dailyBillDetailService := &service.DailyBillDetailService{}
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("perPage")
+	userId, _ := ctx.URLParamInt("userId")
+	billAt := ctx.URLParam("billAt")
+
+	deviceMap, err := deviceService.BasicMapByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01060203", err.Error(), daily_bill_msg["01060203"]}
+		common.Log(ctx, result)
+	}
+	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt)
+	if err != nil {
+		result = &enity.Result{"01060202", err.Error(), daily_bill_msg["01060202"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	list, err := dailyBillDetailService.ListByUserIdAndBillAt(userId, billAt, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01060201", err.Error(), daily_bill_msg["01060201"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	for _, _detail := range *list {
+		_detail.Address = deviceMap[_detail.SerialNumber]
+	}
+	result = &enity.Result{"01060200", &enity.Pagination{total, list}, daily_bill_msg["01060200"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }
