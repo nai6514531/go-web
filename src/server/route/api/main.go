@@ -89,7 +89,7 @@ func Api() {
 	api.Get("/daily-bill/apply", dailyBill.Apply)
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
 	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
-	api.Post("/daily-bill/mark", dailyBill.Mark)
+	api.Get("/daily-bill/mark", dailyBill.Mark)
 
 	api.Get("/statis/consume", statis.Consume)
 	api.Get("/statis/operate", statis.Operate)
