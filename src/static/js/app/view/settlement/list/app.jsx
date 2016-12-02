@@ -6,9 +6,12 @@ import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
 import moment from 'moment';
+const confirm = Modal.confirm;
 const App = React.createClass({
 	getInitialState() {
 		return {
+      amount:0, // 选中项的金额合计
+      // amountVisible: false,
       rowColor:[],
       textValue: '',
 			columns: [
@@ -428,6 +431,7 @@ const App = React.createClass({
 		let idArr = [];
 		this.state.selectedList.map((item, i)=>{
 			let billAt = moment(item.billAt).format('YYYY-MM-DD')
+      // 按照日期来存储当天所有需要结算的单
 			if(!billAtObj[billAt]){
 				billAtObj[billAt] = [];
 			}
@@ -441,11 +445,15 @@ const App = React.createClass({
 				userIdArr.push(billAtObj[i][j].userId);
 				idArr.push(billAtObj[i][j].id)
 			}
+      // 具体某日的所有结算的用户的ID
 			paramsObj.userId = userIdArr.join(',');
+      // 具体某日的所有结算的账单号
 			paramsObj.idArr = idArr;
+      // 按照日期聚合的账单号以及用户ID数组
 			params.push(paramsObj);
 		}
 		this.settleAjax(params);
+    this.closeAmountVisible();
 	},
 	settleAjax(data) {
 		let self = this;
@@ -468,8 +476,10 @@ const App = React.createClass({
 		if(this.state.clickLock){ return; } //是否存在点击锁
 		this.setState({clickLock: true});
 		DailyBillService.updateSettlement(data).then((res)=>{
+      // res 为结账状态,res.data 为返回的结账字段(支付宝),见上注释
 			this.setState({clickLock: false});
 			if(res.status == "00"){
+        // 只有返回了支付宝相关字段才会出现支付宝二次确认框
 				if(res.data != undefined){
 					self.setState({ payList: res.data, nowSettlement: data });
 					self.setPayModalVisible(true);
@@ -584,6 +594,42 @@ const App = React.createClass({
   rowClassName(record, index) {
     return this.state.rowColor[record.key];
   },
+  closeAmountVisible() {
+    this.setState({
+      amountVisible: false,
+    });
+  },
+  CalculateAmount() {
+    const self = this;
+    if(this.state.amount >0) {
+      confirm({
+        title:'确认结算?',
+        content: '选中账单金额总额为:'+this.state.amount +'元',
+        onOk() {
+          self.multiSettle();
+        },
+        onCancel() {
+        },
+      });
+      // 备选方案
+      // self.multiSettle();
+    }
+    // 备选方案
+    // this.setState({
+    //   amountVisible: true,
+    // });
+  },
+  confirmPay() {
+    // 备选方案
+    // if(this.state.amount >0) {
+    //   this.multiSettle();
+    // }
+    // <Modal title='确认支付？' visible={this.state.amountVisible}
+    //        onOk={this.confirmPay} onCancel={this.closeAmountVisible}
+    // >
+    //   <p>选中的账单金额总额为: <span style={{fontSize:16,color:'red'}}>{this.state.amount}</span>元</p>
+    // </Modal>
+  },
 	render(){
 		const self = this;
 		const {list, columns} = this.state;
@@ -594,7 +640,8 @@ const App = React.createClass({
 		const rowSelection = {
 			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
-		  	let newSelectedRows = [];
+        // 被勾选的行
+        let newSelectedRows = [];
 		  	let newSelectedRowKeys = [];
 		  	for(var i=0; i<selectedRows.length; i++){
 		  		let status = selectedRows[i].status;
@@ -603,9 +650,14 @@ const App = React.createClass({
 		  			newSelectedRowKeys.push(selectedRows[i].key);
 		  		}
 		  	}
+        const amountList = selectedRows.filter(function (item) {
+          return item.status == 1;
+        })
+        const amount = Math.round(amountList.reduce((total,item)=>{return total+item.totalAmount/100},0)*100)/100;
 		  	self.setState({
 		  		selectedList: newSelectedRows,
-		  		selectedRowKeys: newSelectedRowKeys
+		  		selectedRowKeys: newSelectedRowKeys,
+          amount:amount,
 		  	})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
@@ -691,6 +743,7 @@ const App = React.createClass({
 				</Breadcrumb>
 			</header>
 			<div className="filter">
+        <Button style={{marginRight:20}} onClick={this.CalculateAmount} type="primary">计算金额</Button>
 				<Select className="item"
 						defaultValue="0"
 						style={{width: 120 }}
