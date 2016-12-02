@@ -38,7 +38,15 @@ func (self *DailyBillDetailService) DeleteByUserAndBillAt(userId int, billAt str
 func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt string, serialNum string) (int, error) {
 	dailyBillDetail := &model.DailyBillDetail{}
 	var total int64
-	r := common.DB.Model(dailyBillDetail).Where("user_id = ? and date(bill_at) = ?", userId, billAt).Count(&total)
+	params := make([]interface{}, 0)
+	sql := ""
+	if serialNum != "" {
+		sql += " serial_number = ? and "
+		params = append(params, serialNum)
+	}
+	sql += " user_id = ? and date(bill_at) = ? "
+	params = append(params , userId, billAt)
+	r := common.DB.Model(dailyBillDetail).Where(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -50,10 +58,10 @@ func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt str
 	params := make([]interface{}, 0)
 	sql := ""
 	if serialNum != "" {
-		sql += "serial_number = ? and"
+		sql += " serial_number = ? and "
 		params = append(params, serialNum)
 	}
-	sql += "user_id = ? and date(bill_at) = ?"
+	sql += " user_id = ? and date(bill_at) = ? "
 	params = append(params , userId, billAt)
 	r := common.DB.Model(&model.DailyBillDetail{}).Where(sql, params...).Offset((page - 1) * perPage).Limit(perPage).Find(list)
 	if r.Error != nil {
