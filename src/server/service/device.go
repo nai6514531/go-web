@@ -336,7 +336,7 @@ func (self *DeviceService) BatchUpdateBySerialNumber(device *model.Device, seria
 func (self *DeviceService) Reset(id int) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.Device{}).Where("id = ?", id).Update("user_id", 1).Scan(device)
+	r := transAction.Model(&model.Device{}).Where("id = ?", id).Updates(map[string]interface{}{"user_id": "1", "status": 9}).Scan(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-Reset:", r.Error.Error())
 		transAction.Rollback()
@@ -345,7 +345,7 @@ func (self *DeviceService) Reset(id int) bool {
 	//重置，在木牛数据库
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(device)
-	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("COMPANYID", "0")
+	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(map[string]interface{}{"COMPANYID": "0", "STATUS": "9"})
 	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Update BoxInfo-Reset:", r.Error.Error())

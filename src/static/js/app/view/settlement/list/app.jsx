@@ -128,7 +128,7 @@ const App = React.createClass({
 						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
-          const mark = <a onClick={this.markRow.bind(this,record.key)}>{this.state.rowColor[record.key]? '取消标记' :'标记'}</a>;
+          const mark = <a onClick={this.markRow.bind(this,record.key)}>{record.hasMarked? '取消标记' :'标记'}</a>;
 					switch (roleId) {
 						case 1:
 							spanDiv = (
@@ -707,13 +707,13 @@ const App = React.createClass({
         self.checkedRow(ids);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
-		  	// var len = self.state.list.length;
-		  	// if(changeRows.length < len){
-		  	// 	self.setState({
-			  // 		selectedList: [],
-			  // 		selectedRowKeys: []
-			  // 	})
-		  	// }
+		  	var len = self.state.list.length;
+		  	if(changeRows.length < len){
+		  		self.setState({
+			  		selectedList: [],
+			  		selectedRowKeys: []
+			  	})
+		  	}
         let ids = [];
         for(var i=0; i<selectedRows.length; i++){
           ids.push(selectedRows[i].id);

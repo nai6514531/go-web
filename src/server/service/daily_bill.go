@@ -1,14 +1,14 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/common"
-	"maizuo.com/soda-manager/src/server/model"
-	"strconv"
 	"github.com/jinzhu/gorm"
-	"maizuo.com/soda-manager/src/server/model/muniu"
-	"time"
+	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/muniu"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type DailyBillService struct {
@@ -110,7 +110,7 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		//财务角色过滤掉测试账号的账单
 		sql += " and bill.user_id !=1 "
 	}
-	sql += " order by bill.status, bill.user_id, bill.bill_at DESC, bill.id DESC limit ? offset ? "
+	sql += " order by bill.has_marked, bill.status, bill.user_id, bill.bill_at DESC, bill.id DESC limit ? offset ? "
 	params = append(params, _perPage)
 	params = append(params, _offset)
 	common.Logger.Debugln("params===========", params)
@@ -183,8 +183,8 @@ func (self *DailyBillService) BasicMap(billAt string, status int, userIds ...str
 }
 
 /**
-	如果参数全为0时有可能出现不会更新的问题
- */
+如果参数全为0时有可能出现不会更新的问题
+*/
 func (self *DailyBillService) Update(id int, dailyBill *model.DailyBill) (int, error) {
 	r := common.DB.Model(&model.DailyBill{}).Where(" id  = ? ", id).Update(dailyBill)
 	if r.Error != nil {
@@ -220,7 +220,7 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 			}
 			common.Logger.Warningln("_billMap===================", _billMap)
 			param := map[string]interface{}{
-				"Status": strconv.Itoa(status),
+				"Status":   strconv.Itoa(status),
 				"BillDate": settledAt,
 			}
 			common.Logger.Warningln("param---------------------------", param)
@@ -252,8 +252,8 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 }
 
 /**
-	只更新新系统数据
- */
+只更新新系统数据
+*/
 func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface{}) (int, error) {
 	param := make(map[string]interface{}, 0)
 	param["status"] = status
@@ -274,8 +274,8 @@ func (self *DailyBillService) BatchUpdateStatusById(status int, ids ...interface
 }
 
 /**
-	新旧系统数据库更新
- */
+新旧系统数据库更新
+*/
 func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userIds ...string) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []string{}
@@ -326,7 +326,7 @@ func (self *DailyBillService) BatchUpdateStatus(status int, billAt string, userI
 	return int(r.RowsAffected), nil
 }
 
-func (self *DailyBillService)UpdateStatusByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
+func (self *DailyBillService) UpdateStatusByUserIdAndStatus(oldStatus int, newStatus int, userIds ...int) (int, error) {
 	var r *gorm.DB
 	mnUserIds := []int{}
 	txmn := common.MNDB.Begin()
@@ -395,7 +395,7 @@ func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 
 /**
 每日账单总额，按天统计
- */
+*/
 func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSumByDate, error) {
 	list := []*muniu.BillSumByDate{}
 	IdStr := ""
@@ -424,9 +424,10 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	}
 	return &list, nil
 }
+
 /**
 最近7天，微信充值金额，不含当天
- */
+*/
 func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error) {
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
@@ -449,9 +450,10 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 	}
 	return &list, nil
 }
+
 /**
 最近7天，支付宝充值金额，不含当天
- */
+*/
 func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error) {
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
@@ -501,4 +503,27 @@ func (self *DailyBillService) BasicMapByBillAtAndUserId(billAt string, userIds i
 		billMap[bill.UserId] = bill
 	}
 	return billMap, nil
+}
+
+func (self *DailyBillService) Mark(id int) (bool, error) {
+	dailyBill, err := self.Basic(id)
+	if err != nil {
+		return false, err
+	}
+	userId := dailyBill.UserId
+	hasMarked := 0
+	if dailyBill.HasMarked == 0 {
+		hasMarked = 1
+	} else {
+		hasMarked = 0
+	}
+	data := map[string]interface{}{
+		"has_marked": hasMarked,
+	}
+	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ?", userId).Updates(data)
+	if r.Error != nil {
+		return false, r.Error
+	}
+	return true, nil
+
 }

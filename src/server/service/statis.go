@@ -5,12 +5,13 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"strings"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"fmt"
 )
 
 type StatisService struct {
 }
 
-func  BoxAdminByLocalId(localId int) (*muniu.BoxAdmin, error) {
+func BoxAdminByLocalId(localId int) (*muniu.BoxAdmin, error) {
 	admin := &muniu.BoxAdmin{}
 	r := common.MNDB.Where("localid = ?", localId).First(admin)
 	if r.Error != nil {
@@ -33,43 +34,55 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 
 	if admin.UserType == "1" {
 		agencyId = admin.LocalId
-	}else if admin.UserType == "2" {
+	} else if admin.UserType == "2" {
 		companyId = admin.LocalId
 	}
 
 	sql = "select substring(b.inserttime,1,7) d," +
-	"sum(b.price) money,count(distinct deviceno) dc," +
-	"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-	"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-	"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-	"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-	"from box_wash b where b.companyid=? " +
-	"group by substring(b.inserttime,1,7) order by d desc"
-	if len(date) == 7  {
-		sql = "select substring(b.inserttime,1,10) d," +
 		"sum(b.price) money,count(distinct deviceno) dc," +
 		"sum(case when b.washtype='601' then 1 else 0 end) dt," +
 		"sum(case when b.washtype='602' then 1 else 0 end) kx," +
 		"sum(case when b.washtype='603' then 1 else 0 end) bz," +
 		"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-		"from box_wash b where substring(b.inserttime,1,7)=? and b.companyid=? " +
-		"group by substring(b.inserttime,1,10) order by d desc"
-	}else if len(date) == 10 {
-		//i.devicetype,i.companyid,i.deviceno,a.name,i.address address,
+		"from box_wash b where b.companyid=? " +
+		"group by substring(b.inserttime,1,7) order by d desc"
+	if len(date) == 7 {
 		sql = "select substring(b.inserttime,1,10) d," +
-		" sum(case when b.price is null then 0 else b.price end) money, count(distinct b.deviceno) dc," +
-		"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-		"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-		"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-		"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-		"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=? and companyid!=0) b on b.deviceno=i.deviceno " +
-		"left join box_admin a on i.companyid=a.localid " +
-		"where i.companyid=? " +
-		"group by i.deviceno order by a.localid,i.deviceno"
+			"sum(b.price) money,count(distinct deviceno) dc," +
+			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
+			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
+			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
+			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
+			"from box_wash b where substring(b.inserttime,1,7)=? and b.companyid=? " +
+			"group by substring(b.inserttime,1,10) order by d desc"
+	} else if len(date) == 10 {
+		//i.devicetype,i.companyid,i.deviceno,a.name,i.address address,
+		sql = "select i.devicetype,i.companyid,i.deviceno,IFNULL(a.name,'') name,IFNULL(i.address,'') address," +
+			"sum(case when b.price is null then 0 else b.price end) money, " +
+			"count(distinct b.deviceno) dc," +
+			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
+			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
+			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
+			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
+			"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=? and companyid!=0) b on b.deviceno=i.deviceno " +
+			"left join box_admin a on i.companyid=a.localid " +
+			"where i.companyid=? " +
+			"group by i.deviceno order by a.localid,i.deviceno"
+	} else {
+		sql = "select i.devicetype,i.companyid,substring(b.inserttime,1,10) d,i.deviceno,IFNULL(a.name,''),IFNULL(i.address,'') address," +
+			"sum(case when b.price is null then 0 else b.price end) money, " +
+			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
+			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
+			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
+			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
+			"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=curdate() and companyid!=0) b on b.deviceno=i.deviceno " +
+			"left join box_admin a on i.companyid=a.localid " +
+			"where i.companyid=? " +
+			"group by i.deviceno order by a.localid,i.deviceno";
 	}
 
 	if companyId == -1 {
-		if agencyId == -1{
+		if agencyId == -1 {
 			sql = strings.Replace(sql, " and b.companyid=?", " and b.companyid!=0", -1)
 			sql = strings.Replace(sql, "where b.companyid=?", "where b.companyid!=0", -1)
 			sql = strings.Replace(sql, "where i.companyid=?", "where i.companyid!=0", -1)
@@ -98,24 +111,49 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
-		var d string    //日期
+		var _date string    //日期
 		var money float64 //金额
+		var userId int
+		var userName string
+		var deviceType int
+		var serialNumber string
+		var address string
 		var dc int      //模块数
 		var dt int      //单脱
 		var kx int      //快洗
 		var bz int      //标准
 		var dw int      //大物
-		err := rows.Scan(&d, &money, &dc, &dt, &kx, &bz, &dw)
-		if err != nil {
-			return nil, err
+
+		if len(date) == 10 {
+			err := rows.Scan(&deviceType, &userId, &serialNumber, &userName, &address, &money, &dc, &dt, &kx, &bz, &dw)
+			if err != nil {
+				return nil, err
+			}
+			m["deviceType"] = _date
+			m["userId"] = userId
+			m["serialNumber"] = serialNumber
+			m["userName"] = userName
+			m["address"] = address
+			m["money"] = money
+			m["deviceCount"] = dc
+			m["firstPulseAmount"] = dt
+			m["secondPulseAmount"] = kx
+			m["thirdPulseAmount"] = bz
+			m["fourthPulseAmount"] = dw
+			m["amount"] = money
+		} else {
+			err := rows.Scan(&_date, &money, &dc, &dt, &kx, &bz, &dw)
+			if err != nil {
+				return nil, err
+			}
+			m["date"] = _date
+			m["deviceCount"] = dc
+			m["firstPulseAmount"] = dt
+			m["secondPulseAmount"] = kx
+			m["thirdPulseAmount"] = bz
+			m["fourthPulseAmount"] = dw
+			m["amount"] = money
 		}
-		m["date"] = d
-		m["deviceCount"] = dc
-		m["firstPulseAmount"] = dt
-		m["secondPulseAmount"] = kx
-		m["thirdPulseAmount"] = bz
-		m["fourthPulseAmount"] = dw
-		m["amount"] = money
 		list = append(list, &m)
 	}
 	return &list, nil
@@ -174,15 +212,15 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 
 	var sql string = ""
 	sql = "select i.companyid, case when b.inserttime is null then substring(curdate(),1,7) else substring(b.inserttime,1,7) end d," +
-	"i.deviceno,i.address,sum(case when b.companyid=i.companyid then b.price else 0 end) money, " +
-	"sum(case when b.washtype='601' and b.companyid=i.companyid then 1 else 0 end) dt," +
-	"sum(case when b.washtype='602' and b.companyid=i.companyid then 1 else 0 end) kx," +
-	"sum(case when b.washtype='603' and b.companyid=i.companyid then 1 else 0 end) bz," +
-	"sum(case when b.washtype='604' and b.companyid=i.companyid then 1 else 0 end) dw " +
-	"from box_info i left join box_wash b on i.deviceno=b.deviceno " +
-	"where i.companyid=? group by i.deviceno,substring(b.inserttime,1,7) " +
-	"order by d desc,deviceno"
-	if len(date)==7 {
+		"i.deviceno,i.address,sum(case when b.companyid=i.companyid then b.price else 0 end) money, " +
+		"sum(case when b.washtype='601' and b.companyid=i.companyid then 1 else 0 end) dt," +
+		"sum(case when b.washtype='602' and b.companyid=i.companyid then 1 else 0 end) kx," +
+		"sum(case when b.washtype='603' and b.companyid=i.companyid then 1 else 0 end) bz," +
+		"sum(case when b.washtype='604' and b.companyid=i.companyid then 1 else 0 end) dw " +
+		"from box_info i left join box_wash b on i.deviceno=b.deviceno " +
+		"where i.companyid=? group by i.deviceno,substring(b.inserttime,1,7) " +
+		"order by d desc,deviceno"
+	if len(date) == 7 {
 		sql = "select b.companyid,substring(b.inserttime,1,10) d," +
 			"i.deviceno,i.address,sum(b.price) money, " +
 			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
@@ -192,7 +230,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 			"from box_wash b left join box_info i on b.deviceno=i.deviceno " +
 			"where b.companyid=? and b.deviceno=? and substring(b.inserttime,1,7)=? " +
 			"group by substring(b.inserttime,1,10) order by d desc"
-	}else if len(date) == 10 {
+	} else if len(date) == 10 {
 		sql = "select b.inserttime d,i.deviceno,i.address,b.price money,b.usermobile from box_wash b " +
 			"left join box_info i on b.deviceno=i.deviceno " +
 			"where b.companyid=? and b.deviceno=? and substring(b.inserttime,1,10)=? " +

@@ -67,6 +67,7 @@ var (
 
 		"01060700":"标记账单成功",
 		"01060701":"标记账单失败",
+		"01060703":"请选择需要标记的账单",
 	}
 )
 
@@ -877,14 +878,20 @@ func (self *DailyBillController) SumByDate(ctx *iris.Context) {
 }
 
 func (self *DailyBillController) Mark(ctx *iris.Context) {
-	//dailyBillService := &service.DailyBillService{}
+	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
-	id := params["id"]
-	if id != "" {
+	id, _ := strconv.Atoi(params["id"])
+	if id == 0 {
+		result = &enity.Result{"01060703", nil, daily_bill_msg["01060703"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	boo, err := dailyBillService.Mark(id)
+	if boo {
 		result = &enity.Result{"01060700", nil, daily_bill_msg["01060700"]}
 	} else {
-		result = &enity.Result{"01060701", nil, daily_bill_msg["01060701"]}
+		result = &enity.Result{"01060701", err.Error(), daily_bill_msg["01060701"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }

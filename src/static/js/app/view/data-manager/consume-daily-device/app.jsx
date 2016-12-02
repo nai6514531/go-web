@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import DailyBillDetailService from "../../../service/daily_bill_detail";
+import StatisConsumeService from "../../../service/statis_consume";
 import { Link } from 'react-router';
 
 const App = React.createClass({
@@ -27,14 +28,14 @@ const App = React.createClass({
         width:100,
         render: (serialNumber,record)=>{
           return <div>
-            <Link to={record.url}>{serialNumber}</Link>
+            <Link to={"/data/consume/month/"+record.id+"/"+record.billAt+"/"+serialNumber+""}>{serialNumber}</Link>
             {record.address?' / '+record.address:""}
           </div>
         }
       }, {
         title: '运营商名称',
-        dataIndex: 'name',
-        key: 'name',
+        dataIndex: 'userName',
+        key: 'userName',
         width:60,
       }, {
         title: '单脱',
@@ -92,7 +93,45 @@ const App = React.createClass({
     });
     const {id} = this.props.params;
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    DailyBillDetailService.list(userId, billAt, '', pager)
+    StatisConsumeService.dateList(billAt,{})
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        if (data && data.status == '00') {
+          const list = data.data;
+          const firstPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.firstPulseAmount},0)*100)/100;
+          const secondPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.secondPulseAmount},0)*100)/100;
+          const thirdPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.thirdPulseAmount},0)*100)/100;
+          const fourthPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.fourthPulseAmount},0)*100)/100;
+          const amount = Math.round(list.reduce((total,item)=>{return total+item.amount},0)*100)/100;
+          const total = {
+            "firstPulseAmount": firstPulseAmount,
+            "secondPulseAmount": secondPulseAmount,
+            "thirdPulseAmount": thirdPulseAmount,
+            "fourthPulseAmount": fourthPulseAmount,
+            "amount": amount,
+          };
+          let theList = list.map((item, key) => {
+            item.id=id;
+            item.billAt=billAt;
+            item.url = baseUrl+item.serialNumber;
+            item.key = key +1;
+            return item;
+          });
+          theList.push(total);
+          this.setState({
+            total: theList.length,
+            list: theList,
+          });
+        } else {
+          message.info(data.msg);
+        }
+      });
+    // return
+
+    // const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
+    /*DailyBillDetailService.list(userId, billAt, '', pager)
       .then((data) => {
         self.setState({
           loading: false,
@@ -109,7 +148,7 @@ const App = React.createClass({
         } else {
           message.info(data.msg);
         }
-      })
+      })*/
   },
 
   initializePagination() {
