@@ -173,9 +173,6 @@ class SchoolTable extends React.Component {
             changeSchoolId={this.changeSchoolId.bind(this)}
             id={id}
             />
-          <Link to={"/user/"+id+"/device/school/-1/edit"} className="ant-btn ant-btn-primary add-btn">
-            添加新设备
-          </Link>
         </div>
         <article>
           <Table
