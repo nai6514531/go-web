@@ -5,7 +5,6 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"strings"
 	"maizuo.com/soda-manager/src/server/kit/functions"
-	"fmt"
 )
 
 type StatisService struct {
@@ -68,7 +67,9 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			"left join box_admin a on i.companyid=a.localid " +
 			"where i.companyid=? " +
 			"group by i.deviceno order by a.localid,i.deviceno"
-	} else {
+	}
+	/**
+	else {
 		sql = "select i.devicetype,i.companyid,substring(b.inserttime,1,10) d,i.deviceno,IFNULL(a.name,''),IFNULL(i.address,'') address," +
 			"sum(case when b.price is null then 0 else b.price end) money, " +
 			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
@@ -80,7 +81,7 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			"where i.companyid=? " +
 			"group by i.deviceno order by a.localid,i.deviceno";
 	}
-
+	*/
 	if companyId == -1 {
 		if agencyId == -1 {
 			sql = strings.Replace(sql, " and b.companyid=?", " and b.companyid!=0", -1)

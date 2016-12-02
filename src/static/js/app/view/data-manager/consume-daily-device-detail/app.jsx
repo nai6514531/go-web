@@ -43,8 +43,8 @@ const App = React.createClass({
         }
       },{
         title: '洗衣手机号',
-        dataIndex: 'account',
-        key: 'account',
+        dataIndex: 'mobile',
+        key: 'mobile',
         width:100,
       },
       //   {
