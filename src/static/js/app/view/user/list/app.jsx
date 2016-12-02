@@ -95,6 +95,7 @@ class AgentTable extends React.Component {
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
       const user = query.user;
+      this.setState({searchValue:user})
       this.props.getUserList(pager,user);
     } else {
       this.props.getUserList(pager);
@@ -120,8 +121,16 @@ class AgentTable extends React.Component {
     // }
 
   }
-  initializePagination(total) {
+  initializePagination() {
+    let total = 1;
+    const { id } = this.props.params;
+    if(id){
+      if (this.props.list && this.props.list.fetch == true) {
+        total = this.props.list.result.data.total;
+      }
+    }
     const self = this;
+    const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
     return {
       total: total,
       showSizeChanger: true,
@@ -133,26 +142,26 @@ class AgentTable extends React.Component {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
         self.loading = true;
-        self.props.getUserList(pager);
+        self.props.getUserList(pager,user);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.loading = true;
         self.setState(pager);
-        self.props.getUserList(pager);
+        self.props.getUserList(pager,user);
       },
     }
   }
-  childPagination() {
-    let total = 1;
-    const { id } = this.props.params;
-    if(id){
-      if (this.props.list && this.props.list.fetch == true) {
-        total = this.props.list.result.data.total;
-      }
-    }
-    return this.initializePagination(total);
-  }
+  // childPagination() {
+  //   let total = 1;
+  //   const { id } = this.props.params;
+  //   if(id){
+  //     if (this.props.list && this.props.list.fetch == true) {
+  //       total = this.props.list.result.data.total;
+  //     }
+  //   }
+  //   return this.initializePagination(total);
+  // }
   handleInputChange(e) {
     this.setState({
       searchValue: e.target.value,
@@ -199,7 +208,7 @@ class AgentTable extends React.Component {
       //   self.loading = false;
       // }
     }
-    const pagination =id? {'pagination':this.childPagination()}:{'pagination':false}
+    const pagination = this.initializePagination();
     pagination.current = this.state.page;
     return (
       <section className="view-user-list">
@@ -220,12 +229,12 @@ class AgentTable extends React.Component {
           <Table
             scroll={{ x: 980 }}
             className="table"
-                 columns={columns}
-               rowKey={record => record.key}
-               dataSource={dataSource}
-              {...pagination}
-               loading={this.loading ? this.loading : false}
-               bordered
+            columns={columns}
+            rowKey={record => record.key}
+            dataSource={dataSource}
+            pagination={pagination}
+            loading={this.loading ? this.loading : false}
+            bordered
           />
         </article>
       </section>
