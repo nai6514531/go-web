@@ -169,6 +169,11 @@ class AgentTable extends React.Component {
     this.props.getUserList(pager,user);
   }
   render() {
+    const query = this.props.location.query;
+    let user = '';
+    if(!_.isEmpty(query)) {
+      user = query.user;
+    }
     const { list, detailTotal, params: {id} } = this.props;
     let dataSource = [];
     const self = this;
@@ -208,7 +213,7 @@ class AgentTable extends React.Component {
             <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
               添加新运营商
             </Link>
-            <Input style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
+            <Input defaultValue={user} style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
             <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
           </div>
         <article>
