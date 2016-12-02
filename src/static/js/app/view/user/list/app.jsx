@@ -1,7 +1,8 @@
 import React from 'react';
 import './app.less';
 import { Table, Button,Input, Breadcrumb } from 'antd';
-import { Link } from 'react-router';
+import { Link, hashHistory } from 'react-router';
+const _ = require('lodash');
 
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -90,11 +91,13 @@ class AgentTable extends React.Component {
   componentWillMount() {
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.loading = true;
-    if(this.props.params.id) {
-      // this.showChild();
-      this.props.getUserList(pager);
+      // 页面刷新的时候需要按照 URL 参数加载搜索结果,有参则传参
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      const user = query.user;
+      this.props.getUserList(pager,user);
     } else {
-      // this.props.getDetailTotal(USER.id);
+      this.props.getUserList(pager);
     }
   }
   componentWillUpdate(nextProps, nextState) {
@@ -159,6 +162,10 @@ class AgentTable extends React.Component {
     const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
     const pager = { page: 1, perPage: this.state.perPage};
     this.setState({ page: 1 });
+    // 重置 URL 参数
+    this.props.location.query.user = user;
+    hashHistory.replace(this.props.location);
+    // 发 AJAX
     this.props.getUserList(pager,user);
   }
   render() {
