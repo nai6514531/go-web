@@ -148,6 +148,9 @@ class SchoolTable extends React.Component {
         self.loading = false;
       }
     }
+    // <Link to={"/user/"+id+"/device/school/-1/edit"} className="ant-btn ant-btn-primary add-btn">
+    //   添加新设备
+    // </Link>
     return (
       <section className="view-user-list">
         <header>

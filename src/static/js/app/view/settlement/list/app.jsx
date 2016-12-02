@@ -189,9 +189,6 @@ const App = React.createClass({
 							if( status==2){
 								spanDiv = (
                   <div>
-                    /*<Popconfirm title="确认取消结账吗?" onConfirm={this.cancelSettle.bind(this, data)}>
-                       <a>取消结账</a>
-                    </Popconfirm>*/
                     <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
@@ -447,6 +444,9 @@ const App = React.createClass({
 	},
   cancelSettle(data) {
     // 取消结算
+    // <Popconfirm title="确认取消结账吗?" onConfirm={this.cancelSettle.bind(this, data)}>
+    //  <a>取消结账</a>
+    //  </Popconfirm>
   },
 	multiSettle() {
 
