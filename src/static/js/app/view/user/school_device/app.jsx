@@ -368,7 +368,7 @@ class DeviceTable extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 500,y:200 }}
+            scroll={{ x: 500 }}
             columns={columns}
                dataSource={dataSource}
                pagination={this.pagination}
