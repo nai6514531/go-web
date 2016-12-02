@@ -18,6 +18,7 @@ type DailyBill struct {
 	RealName    string    `json:"realName"`
 	BankName    string    `json:"bankName"`
 	Mobile      string    `json:"mobile"`
+	HasMarked   int       `json:"hasMarked"`
 }
 
 func (DailyBill) TableName() string {

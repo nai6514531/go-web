@@ -64,6 +64,9 @@ var (
 		"01060601": "取消支付宝批量支付失败,请联系技术人员解锁提交账单",
 		"01060602": "无取消订单号",
 		"01060603": "参数异常",
+
+		"01060700":"标记账单成功",
+		"01060701":"标记账单失败",
 	}
 )
 
@@ -869,6 +872,19 @@ func (self *DailyBillController) SumByDate(ctx *iris.Context) {
 		result = &enity.Result{"1", err.Error(), "拉取账单数据异常"}
 	} else {
 		result = &enity.Result{"0", list, "拉取账单数据成功"}
+	}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *DailyBillController) Mark(ctx *iris.Context) {
+	//dailyBillService := &service.DailyBillService{}
+	result := &enity.Result{}
+	params := ctx.URLParams()
+	id := params["id"]
+	if id != "" {
+		result = &enity.Result{"01060700", nil, daily_bill_msg["01060700"]}
+	} else {
+		result = &enity.Result{"01060701", nil, daily_bill_msg["01060701"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
 }
