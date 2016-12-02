@@ -286,7 +286,7 @@ const App = React.createClass({
           const list = data.data.list;
           let rowColor = {};
           for (let i=0;i < list.length;i++) {
-            rowColor[list[i].id] = '';
+            rowColor[list[i].id] = list[i].hasMarked?'marked':'';
           }
 					this.setState({
             rowColor: rowColor,
@@ -306,14 +306,35 @@ const App = React.createClass({
 				});
 			})
 	},
-  markRow(e) {
-    const rowColor = this.state.rowColor;
-    if(!rowColor[e]){
-      rowColor[e] = 'marked';
-    } else {
-      rowColor[e] = '';
-    }
-    this.setState({rowColor: rowColor});
+  markRow(id) {
+    this.mark(id);
+    // 前端实现标记功能,判断当前行是否有样式
+    // const rowColor = this.state.rowColor;
+    // if(!rowColor[e]){
+    //   rowColor[e] = 'marked';
+    // } else {
+    //   rowColor[e] = '';
+    // }
+    // this.setState({rowColor: rowColor});
+  },
+  mark(id) {
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    DailyBillService.mark(id)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        if (data && data.status == '00') {
+          message.success(data.msg,3);
+          // 成功则需要重新拉数据,做保持搜索条件功能时此处需要再加上搜索的条件
+          this.list({perPage: this.perPage, page:1,});
+        } else {
+          message.error(data.msg,3);
+        }
+      })
   },
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });

@@ -29,6 +29,13 @@ const Service = {
     return api.put('/api/daily-bill/batch-pay', {
       params: data
     })
+  },
+  mark: (id) => {
+    return api.get('/api/daily-bill/mark',{
+      params: {
+        id: id
+      }
+    })
   }
 };
 

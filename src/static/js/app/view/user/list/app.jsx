@@ -101,26 +101,6 @@ class AgentTable extends React.Component {
       this.props.getUserList(pager);
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    // const pager = { page : this.state.page, perPage: this.state.perPage};
-    // const id = nextProps.params.id;
-    // // 首次加载子代理商
-    // if(this.props.list == undefined && nextProps.list == undefined && id) {
-    //   this.loading = true;
-    //   this.props.getUserList(pager);
-    // }
-    // // 首次加载父代理商
-    // if(this.props.detailTotal == undefined && nextProps.detailTotal == undefined && !id) {
-    //   this.loading = true;
-    //   this.props.getDetailTotal(USER.id);
-    // }
-    // 切换父子代理商页面,每次切换成子代理商要重新拉数据
-    // console.log(this.params);
-    // if(!this.params && nextProps.params.id) {
-    //   this.props.getUserList(pager);
-    // }
-
-  }
   initializePagination() {
     let total = 1;
     const { id } = this.props.params;
@@ -152,16 +132,6 @@ class AgentTable extends React.Component {
       },
     }
   }
-  // childPagination() {
-  //   let total = 1;
-  //   const { id } = this.props.params;
-  //   if(id){
-  //     if (this.props.list && this.props.list.fetch == true) {
-  //       total = this.props.list.result.data.total;
-  //     }
-  //   }
-  //   return this.initializePagination(total);
-  // }
   handleInputChange(e) {
     this.setState({
       searchValue: e.target.value,
@@ -197,17 +167,7 @@ class AgentTable extends React.Component {
         }
         self.loading = false;
       }
-    } else {
-      // if(detailTotal) {
-      //   if(detailTotal.fetch == true) {
-      //     const data = detailTotal.result.data;
-      //     data.key = data.id;
-      //     data.showAction = true;
-      //     dataSource = [data];
-      //   }
-      //   self.loading = false;
-      // }
-    }
+    } 
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
     return (
