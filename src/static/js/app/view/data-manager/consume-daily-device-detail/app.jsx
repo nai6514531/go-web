@@ -76,44 +76,16 @@ const App = React.createClass({
   componentWillMount() {
     const {id, date, serialNumber}= this.props.params;
     const pager = { page : this.state.page, perPage: this.state.perPage};
-    this.list(USER.id,date, serialNumber, this.state.page,this.state.perPage);
+    this.list(USER.id,date, serialNumber, pager);
   },
-  // list(date, serialNumber, pager) {
-  //   var self = this;
-  //   this.setState({
-  //     loading: true,
-  //   });
-  //   const { id } = this.props.params;
-  //   const baseUrl = "/data/consume/month/"+id+"/"+date+"/";
-  //   StatisConsumeService.deviceDetail(date, serialNumber, pager)
-  //     .then((data) => {
-  //       self.setState({
-  //         loading: false,
-  //       });
-  //       //console.log(data);
-  //       if (data && data.status == '00') {
-  //         const total = data.data.length;
-  //         this.setState({
-  //           total: total,
-  //           list: data.data.map((item, key) => {
-  //             item.key = key + 1;
-  //             item.url = baseUrl+item.serialNumber;
-  //             return item;
-  //           })
-  //         });
-  //       } else {
-  //         message.info(data.msg);
-  //       }
-  //     })
-  // },
-  list(userId, billAt, serialNumber, page, perPage) {
+  list(userId, billAt, serialNumber, pager) {
     var self = this;
     this.setState({
       loading: true,
     });
     const { id } = this.props.params;
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    DailyBillDetailService.list(userId, billAt, serialNumber, page, perPage)
+    DailyBillDetailService.list(userId, billAt, serialNumber, pager)
       .then((data) => {
         self.setState({
           loading: false,
@@ -142,12 +114,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(USER.id,date,serialNumber,current,pageSize);
+        self.list(USER.id,date,serialNumber,pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(USER.id,date,serialNumber,current,self.state.perPage);
+        self.list(USER.id,date,serialNumber,pager);
       },
     }
   },

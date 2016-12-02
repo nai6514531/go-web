@@ -240,7 +240,10 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 		return
 	}
 	for _, _detail := range *list {
-		_detail.Address = deviceMap[_detail.SerialNumber].Address
+		if deviceMap[_detail.SerialNumber] != nil {
+			_detail.Address = deviceMap[_detail.SerialNumber].Address
+		}
+
 	}
 	result = &enity.Result{"01060200", &enity.Pagination{total, list}, daily_bill_msg["01060200"]}
 	common.Log(ctx, nil)

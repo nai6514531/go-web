@@ -77,12 +77,12 @@ const App = React.createClass({
       loading: false
     };
   },
-  list(userId, billAt, serialNumber, page, perPage) {
+  list(userId, billAt, serialNumber, pager) {
     var self = this;
     this.setState({
       loading: true,
     });
-    DailyBillDetailService.list(userId, billAt, serialNumber, page, perPage)
+    DailyBillDetailService.list(userId, billAt, serialNumber, pager)
       .then((data) => {
         self.setState({
           loading: false,
@@ -104,7 +104,8 @@ const App = React.createClass({
   },
   componentWillMount() {
     const {user_id, bill_at}=this.props.params;
-    this.list(user_id, bill_at);
+    const pager = {page:1,perPage:10}
+    this.list(user_id, bill_at,'',pager);
   },
   render() {
     var self = this;
@@ -117,10 +118,12 @@ const App = React.createClass({
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
-        self.list(user_id, bill_at, '',current, pageSize);
+        const pager = {page:current,perPage: pageSize}
+        self.list(user_id, bill_at, '',pager);
       },
       onChange(current) {
-        self.list(user_id, bill_at, '', this.current, this.pageSize);
+        const pager = {page: current, perPage:this.pageSize};
+        self.list(user_id, bill_at, '', pager);
       }
     };
     return (<section className="view-daily-bill-detail">
