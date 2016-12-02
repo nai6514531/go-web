@@ -77,12 +77,12 @@ const App = React.createClass({
       loading: false
     };
   },
-  list(userId, billAt, page, perPage) {
+  list(userId, billAt, serialNumber, page, perPage) {
     var self = this;
     this.setState({
       loading: true,
     });
-    DailyBillDetailService.list(userId, billAt, page, perPage)
+    DailyBillDetailService.list(userId, billAt, serialNumber, page, perPage)
       .then((data) => {
         self.setState({
           loading: false,
@@ -117,10 +117,10 @@ const App = React.createClass({
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
-        self.list(user_id, bill_at, current, pageSize);
+        self.list(user_id, bill_at, '',current, pageSize);
       },
       onChange(current) {
-        self.list(user_id, bill_at, this.current, this.pageSize);
+        self.list(user_id, bill_at, '', this.current, this.pageSize);
       }
     };
     return (<section className="view-daily-bill-detail">

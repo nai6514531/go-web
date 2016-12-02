@@ -1,7 +1,7 @@
 import React from "react";
 import {Input,Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 // import "./app.less";
-import StatisConsumeService from "../../../service/statis_consume";
+import DailyBillDetailService from "../../../service/daily_bill_detail";
 
 import moment from 'moment';
 
@@ -74,29 +74,54 @@ const App = React.createClass({
     };
   },
   componentWillMount() {
-    const {id, date, deviceId}= this.props.params;
+    const {id, date, serialNumber}= this.props.params;
     const pager = { page : this.state.page, perPage: this.state.perPage};
-    this.list(date, deviceId, pager);
+    this.list(USER.id,date, serialNumber, this.state.page,this.state.perPage);
   },
-  list(id, deviceId, pager) {
+  // list(date, serialNumber, pager) {
+  //   var self = this;
+  //   this.setState({
+  //     loading: true,
+  //   });
+  //   const { id } = this.props.params;
+  //   const baseUrl = "/data/consume/month/"+id+"/"+date+"/";
+  //   StatisConsumeService.deviceDetail(date, serialNumber, pager)
+  //     .then((data) => {
+  //       self.setState({
+  //         loading: false,
+  //       });
+  //       //console.log(data);
+  //       if (data && data.status == '00') {
+  //         const total = data.data.length;
+  //         this.setState({
+  //           total: total,
+  //           list: data.data.map((item, key) => {
+  //             item.key = key + 1;
+  //             item.url = baseUrl+item.serialNumber;
+  //             return item;
+  //           })
+  //         });
+  //       } else {
+  //         message.info(data.msg);
+  //       }
+  //     })
+  // },
+  list(userId, billAt, serialNumber, page, perPage) {
     var self = this;
     this.setState({
       loading: true,
     });
-    const { date } = this.props.params;
-    const baseUrl = "/data/consume/month/"+date.substr(0,7)+"/"+date+"/";
-    StatisConsumeService.deviceDetail(id, deviceId, pager)
+    const { id } = this.props.params;
+    const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
+    DailyBillDetailService.list(userId, billAt, serialNumber, page, perPage)
       .then((data) => {
         self.setState({
           loading: false,
         });
-        //console.log(data);
         if (data && data.status == '00') {
-          const total = data.data.length;
           this.setState({
-            total: total,
-            list: data.data.map((item, key) => {
-              item.key = key + 1;
+            total: data.data.total,
+            list: data.data.list.map((item) => {
               item.url = baseUrl+item.serialNumber;
               return item;
             })
@@ -106,8 +131,9 @@ const App = React.createClass({
         }
       })
   },
+
   initializePagination() {
-    const {id,deviceId} = this.props.params;
+    const {id, date, serialNumber} = this.props.params;
     const self = this;
     return {
       total: self.state.total,
@@ -116,25 +142,25 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(id,deviceId, pager);
+        self.list(USER.id,date,serialNumber,current,pageSize);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(id,deviceId, pager);
+        self.list(USER.id,date,serialNumber,current,self.state.perPage);
       },
     }
   },
   render() {
     const {list, total, columns} = this.state;
-    const {id,date,deviceId} = this.props.params;
+    const {id,date,serialNumber} = this.props.params;
     return (<section className="view-consume-daily-device">
       <header>
         <Breadcrumb>
           <Breadcrumb.Item><Link to="/data/consume">消费统计</Link></Breadcrumb.Item>
           <Breadcrumb.Item><Link to={"/data/consume/month/"+id}>{id}</Link></Breadcrumb.Item>
           <Breadcrumb.Item><Link to={"/data/consume/month/"+id+"/"+date}>{date}</Link></Breadcrumb.Item>
-          <Breadcrumb.Item>{deviceId}</Breadcrumb.Item>
+          <Breadcrumb.Item>{serialNumber}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
       <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>

@@ -74,18 +74,18 @@ const App = React.createClass({
     };
   },
   componentWillMount() {
-    const date = this.props.params.id;
+    const { date } = this.props.params;
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.list(date, pager);
   },
-  list(id, pager) {
+  list(date, pager) {
     var self = this;
     this.setState({
       loading: true,
     });
-    const { date } = this.props.params;
-    const baseUrl = "/data/consume/month/"+date.substr(0,7)+"/"+date+"/";
-    StatisConsumeService.deviceList(id, pager)
+    const {id} = this.props.params;
+    const baseUrl = "/data/consume/month/"+id+"/"+date+"/";
+    StatisConsumeService.deviceList(date, pager)
       .then((data) => {
         self.setState({
           loading: false,
@@ -106,7 +106,7 @@ const App = React.createClass({
       })
   },
   initializePagination() {
-    const {id} = this.props.params;
+    const {date} = this.props.params;
     const self = this;
     return {
       total: self.state.total,
@@ -115,12 +115,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(id, pager);
+        self.list(date, pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(id, pager);
+        self.list(date, pager);
       },
     }
   },

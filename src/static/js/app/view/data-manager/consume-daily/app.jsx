@@ -25,9 +25,9 @@ const App = React.createClass({
         dataIndex: 'date',
         key: 'date',
         width:100,
-        // render(text, record, index) {
-        //   return <Link to={"/data/consume/month/" + record.date.substr(0,7) + "/" + record.date}>{text}</Link>;
-        // },
+        render(text, record, index) {
+          return <Link to={"/data/consume/month/" + record.date.substr(0,7) + "/" + record.date}>{text}</Link>;
+        },
       }, {
         title: '模块数',
         dataIndex: 'deviceCount',
