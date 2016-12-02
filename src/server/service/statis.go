@@ -256,6 +256,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		m["thirdPulseAmount"] = bz
 		m["fourthPulseAmount"] = dw
 		m["amount"] = money
+		m["address"] = address
 		list = append(list, &m)
 	}
 	return &list, nil

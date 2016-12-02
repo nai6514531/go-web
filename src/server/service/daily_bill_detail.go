@@ -35,7 +35,7 @@ func (self *DailyBillDetailService) DeleteByUserAndBillAt(userId int, billAt str
 	return true, nil
 }
 
-func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt string) (int, error) {
+func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt string, serialNum string) (int, error) {
 	dailyBillDetail := &model.DailyBillDetail{}
 	var total int64
 	r := common.DB.Model(dailyBillDetail).Where("user_id = ? and date(bill_at) = ?", userId, billAt).Count(&total)
@@ -45,9 +45,36 @@ func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt st
 	return int(total), nil
 }
 
-func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt string, page int, perPage int) (*[]*model.DailyBillDetail, error) {
+func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt string, page int, perPage int, serialNum string) (*[]*model.DailyBillDetail, error) {
 	list := &[]*model.DailyBillDetail{}
-	r := common.DB.Model(&model.DailyBillDetail{}).Where("user_id = ? and date(bill_at) = ?", userId, billAt).Offset((page - 1) * perPage).Limit(perPage).Find(list)
+	params := make([]interface{}, 0)
+	sql := ""
+	if serialNum != "" {
+		sql += "serial_number = ? and"
+		params = append(params, serialNum)
+	}
+	sql += "user_id = ? and date(bill_at) = ?"
+	params = append(params , userId, billAt)
+	r := common.DB.Model(&model.DailyBillDetail{}).Where(sql, params...).Offset((page - 1) * perPage).Limit(perPage).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *DailyBillDetailService) TotalBySerialNumAndBillAt(serialNum string, billAt string) (int, error) {
+	dailyBillDetail := &model.DailyBillDetail{}
+	var total int64
+	r := common.DB.Model(dailyBillDetail).Where("serial_number = ? and date(bill_at) = ?", serialNum, billAt).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return int(total), nil
+}
+
+func (self *DailyBillService) ListBySerialNumAndBillAt(serialNum string, billAt string, page int, perPage int) (*[]*model.DailyBillDetail, error) {
+	list := &[]*model.DailyBillDetail{}
+	r := common.DB.Model(&model.DailyBillDetail{}).Where("serial_number = ? and date(bill_at) = ?", serialNum, billAt).Offset((page - 1) * perPage).Limit(perPage).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

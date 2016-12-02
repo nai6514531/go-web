@@ -490,9 +490,9 @@ func (self *DeviceService) ListByUserId(userId ...int) (*[]*model.Device, error)
 }
 
 
-func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]interface{}, error) {
+func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.Device, error) {
 	list := []*model.Device{}
-	deviceMap := make(map[int]interface{}, 0)
+	deviceMap := make(map[string]*model.Device, 0)
 	r := common.DB.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
 	if r.Error != nil {
 		return nil, r.Error

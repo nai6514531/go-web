@@ -218,20 +218,21 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	perPage, _ := ctx.URLParamInt("perPage")
 	userId, _ := ctx.URLParamInt("userId")
 	billAt := ctx.URLParam("billAt")
+	serialNum := ctx.URLParam("serialNumber")
 
 	deviceMap, err := deviceService.BasicMapByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01060203", err.Error(), daily_bill_msg["01060203"]}
 		common.Log(ctx, result)
 	}
-	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt)
+	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt, serialNum)
 	if err != nil {
 		result = &enity.Result{"01060202", err.Error(), daily_bill_msg["01060202"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillDetailService.ListByUserIdAndBillAt(userId, billAt, page, perPage)
+	list, err := dailyBillDetailService.ListByUserIdAndBillAt(userId, billAt, page, perPage, serialNum)
 	if err != nil {
 		result = &enity.Result{"01060201", err.Error(), daily_bill_msg["01060201"]}
 		common.Log(ctx, result)
@@ -239,7 +240,7 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 		return
 	}
 	for _, _detail := range *list {
-		_detail.Address = deviceMap[_detail.SerialNumber]
+		_detail.Address = deviceMap[_detail.SerialNumber].Address
 	}
 	result = &enity.Result{"01060200", &enity.Pagination{total, list}, daily_bill_msg["01060200"]}
 	common.Log(ctx, nil)
