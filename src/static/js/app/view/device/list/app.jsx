@@ -33,44 +33,57 @@ const columns = [{
   title: '序号',
   dataIndex: 'id',
   key: 'id',
+  width:50,
 }, {
   title: '编号/楼道信息',
   dataIndex: 'serialNumber',
   key: 'serialNumber',
-}, {
-  title: '楼道信息',
-  dataIndex: 'address',
-  key: 'address',
-},{
+  width:120,
+  render: (serialNumber,record) => {
+    return <span>{serialNumber}{record.address?' / '+record.address:''}</span>;
+  }
+}, 
+//   {
+//   title: '楼道信息',
+//   dataIndex: 'address',
+//   key: 'address',
+// },
+  {
   title: '关联设备类型',
   dataIndex: 'referenceDevice',
-  key: 'referenceDevice',
+  key: 'referenceDevice', 
+    width:40,
 }, {
   title: '状态',
   dataIndex: 'status',
   key: 'status',
+    width:20,
 },  {
   title: '单脱',
   dataIndex: 'firstPulsePrice',
   key: 'firstPulsePrice',
+    width:50,
 }, {
   title: '快洗',
   dataIndex: 'secondPulsePrice',
   key: 'secondPulsePrice',
+    width:50,
 }, {
   title: '标准洗',
   dataIndex: 'thirdPulsePrice',
   key: 'thirdPulsePrice',
+    width:50,
 }, {
   title: '大物洗',
   dataIndex: 'fourthPulsePrice',
   key: 'fourthPulsePrice',
+    width:50,
 }, {
   title: '操作',
   dataIndex: 'action',
   key: 'action',
   width: 150,
-  fixed: 'right',
+  // fixed: 'right',
   render: (text, record) => (
     <span>
       <Link to={"/device/edit/" + record.id}>修改</Link>
@@ -265,7 +278,7 @@ class DeviceList extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 980 }}
+            scroll={{ x: 600 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}

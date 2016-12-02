@@ -134,8 +134,6 @@ const App = React.createClass({
 							spanDiv = (
                 <div>
                   <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-                  <span> | </span>
-                  {mark}
                 </div>
               )
 							break;
@@ -145,8 +143,6 @@ const App = React.createClass({
 								spanDiv = (
 									<span>
 										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-	          			  <span> | </span>
-                    {mark}
                   </span>
 								)
 							}else{
@@ -158,16 +154,12 @@ const App = React.createClass({
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			  <span> | </span>
-                      {mark}
                     </span>
 									)
 								}else if(status == 2 || status == 3){
 									spanDiv = (
 										<span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			  <span> | </span>
-                      {mark}
                     </span>
 									)
 								}else if(status == 4){
@@ -178,8 +170,6 @@ const App = React.createClass({
 					            </Popconfirm>
 					            <span> | </span>
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			  <span> | </span>
-                      {mark}
                     </span>
 									)
 								}else{
@@ -190,23 +180,32 @@ const App = React.createClass({
 					            {/*</Popconfirm>*/}
 					            {/*<span> | </span>*/}
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-		          			  <span> | </span>
-                      {mark}
                     </span>
 									)
 								}
 							}
 							break;
 						case 3:
-							if( status==2||status==3 ){
+							if( status==2){
 								spanDiv = (
                   <div>
+                    /*<Popconfirm title="确认取消结账吗?" onConfirm={this.cancelSettle.bind(this, data)}>
+                       <a>取消结账</a>
+                    </Popconfirm>*/
                     <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
                   </div>
 								)
-							}else if( status == 4){
+							}else if (status == 3) {
+                spanDiv = (
+                  <div>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <span> | </span>
+                    {mark}
+                  </div>
+                )
+              }else if( status == 4){
 								spanDiv = (
 									<span>
 										<Popconfirm title="确认重新结账吗?" onConfirm={this.settle.bind(this, data)}>
@@ -308,14 +307,22 @@ const App = React.createClass({
 	},
   markRow(id) {
     this.mark(id);
-    // 前端实现标记功能,判断当前行是否有样式
-    // const rowColor = this.state.rowColor;
-    // if(!rowColor[e]){
-    //   rowColor[e] = 'marked';
-    // } else {
-    //   rowColor[e] = '';
-    // }
-    // this.setState({rowColor: rowColor});
+  },
+  checkedRow(ids) {
+    // 无论什么情况,先把所有的灰色置空,然后再把 ids 里的 ID 放进去
+    const rowColor = this.state.rowColor;
+    // 不管什么情况,勾选就变色,取消勾选就变会原来的颜色
+    for (var id in rowColor) {
+      if(rowColor[id] !== 'marked'){
+        rowColor[id]='';
+      }
+    }
+    for (let i=0;i < ids.length;i++) {
+      if(!rowColor[ids[i]]){
+        rowColor[ids[i]] = 'checked';
+      }
+    }
+    this.setState({rowColor: rowColor});
   },
   mark(id) {
     var self = this;
@@ -346,7 +353,7 @@ const App = React.createClass({
   		if(res.status == "00"){
   			this.refuseSettlementStatus(this.state.nowSettlement);
   			this.setState({ payModalVisible: false });
-  			self.clearSelectRows();
+        self.clearSelectRows();
   		}else{
   			message.info(res.msg)
   		}
@@ -438,6 +445,9 @@ const App = React.createClass({
 		params.push(paramsObj);
 		this.settleAjax(params);
 	},
+  cancelSettle(data) {
+    // 取消结算
+  },
 	multiSettle() {
 
 		if(this.state.selectedList.length == 0){
@@ -608,6 +618,8 @@ const App = React.createClass({
 			selectedRowKeys: [],
 			selectedList: []
 		})
+    // 清空选中颜色
+    this.checkedRow([]);
 	},
 	getAliPayOrderNum() {//获取支付宝的订单
 		return 123
@@ -625,7 +637,7 @@ const App = React.createClass({
     if(this.state.amount >0) {
       confirm({
         title:'确认结算?',
-        content: '选中账单金额总额为:'+this.state.amount +'元',
+        content: '选中账单总笔数为'+this.state.selectedList.length+'笔，总金额为:'+this.state.amount +'元',
         onOk() {
           self.multiSettle();
         },
@@ -668,7 +680,9 @@ const App = React.createClass({
 		  	let newSelectedRowKeys = [];
 		  	for(var i=0; i<selectedRows.length; i++){
 		  		let status = selectedRows[i].status;
-		  		if( status!=2 && status!=3 ){
+          let hasMarked = selectedRows[i].hasMarked;
+          // 已结账,结账中,被标记均不可选
+		  		if( status!=2 && status!=3 && !hasMarked){
 		  			newSelectedRows.push(selectedRows[i]);
 		  			newSelectedRowKeys.push(selectedRows[i].key);
 		  		}
@@ -685,17 +699,27 @@ const App = React.createClass({
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
 		  },
 		  onSelect(record, selected, selectedRows) {
-		    // console.log(record, selected, selectedRows);
+        let ids = [];
+        for(var i=0; i<selectedRows.length; i++){
+          ids.push(selectedRows[i].id);
+        }
+        // 改变背景色,取消的时候,获取不到选中的ID
+        self.checkedRow(ids);
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
-		  	var len = self.state.list.length;
-		  	if(changeRows.length < len){
-		  		self.setState({
-			  		selectedList: [],
-			  		selectedRowKeys: []
-			  	})
-		  	}
-
+		  	// var len = self.state.list.length;
+		  	// if(changeRows.length < len){
+		  	// 	self.setState({
+			  // 		selectedList: [],
+			  // 		selectedRowKeys: []
+			  // 	})
+		  	// }
+        let ids = [];
+        for(var i=0; i<selectedRows.length; i++){
+          ids.push(selectedRows[i].id);
+        }
+        // 改变背景色,取消的时候,获取不到选中的ID
+        self.checkedRow(ids);
 		    //console.log(selected, selectedRows, changeRows);
 		  },
 		};
@@ -766,7 +790,8 @@ const App = React.createClass({
 				</Breadcrumb>
 			</header>
 			<div className="filter">
-        <Button style={{marginRight:20}} onClick={this.CalculateAmount} type="primary">计算金额</Button>
+        {USER.role.id == 3 ? <Button style={{marginRight:20}} onClick={this.CalculateAmount} type="primary">计算金额</Button>
+        :""}
 				<Select className="item"
 						defaultValue="0"
 						style={{width: 120 }}

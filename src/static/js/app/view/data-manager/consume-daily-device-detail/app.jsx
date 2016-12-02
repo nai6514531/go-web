@@ -24,10 +24,12 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       }, {
         title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
+        width:100,
         render: (serialNumber,record)=>{
           return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
         }
@@ -35,6 +37,7 @@ const App = React.createClass({
         title: '洗衣金额',
         dataIndex: 'amount',
         key: 'amount',
+        width:40,
         render: (amount) => {
           return Math.round(amount*100)/10000 + "元";
         }
@@ -42,6 +45,7 @@ const App = React.createClass({
         title: '洗衣手机号',
         dataIndex: 'account',
         key: 'account',
+        width:100,
       },
       //   {
       //   title: '洗衣密码',
@@ -67,6 +71,7 @@ const App = React.createClass({
         title: '下单时间',
         dataIndex: 'time',
         key: 'time',
+          width:140,
         render: (time) => {
           return moment(time).format('YYYY-MM-DD HH:mm:ss')
         }
@@ -125,6 +130,7 @@ const App = React.createClass({
       },
     }
   },
+  /*<Breadcrumb.Item><Link to={"/data/consume/month/"+id}>{id}</Link></Breadcrumb.Item>*/
   render() {
     const {list, total, columns} = this.state;
     const {id,date,serialNumber} = this.props.params;
@@ -132,12 +138,11 @@ const App = React.createClass({
       <header>
         <Breadcrumb>
           <Breadcrumb.Item><Link to="/data/consume">消费统计</Link></Breadcrumb.Item>
-          <Breadcrumb.Item><Link to={"/data/consume/month/"+id}>{id}</Link></Breadcrumb.Item>
           <Breadcrumb.Item><Link to={"/data/consume/month/"+id+"/"+date}>{date}</Link></Breadcrumb.Item>
           <Breadcrumb.Item>{serialNumber}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 400 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });

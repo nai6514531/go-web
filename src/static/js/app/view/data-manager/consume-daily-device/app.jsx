@@ -19,10 +19,12 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
+        width:10,
       },{
         title: '编号/楼道信息',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
+        width:100,
         render: (serialNumber,record)=>{
           return <div>
             <Link to={record.url}>{serialNumber}</Link>
@@ -33,10 +35,12 @@ const App = React.createClass({
         title: '运营商名称',
         dataIndex: 'name',
         key: 'name',
+        width:60,
       }, {
         title: '单脱',
         dataIndex: 'firstPulseAmount',
         key: 'firstPulseAmount',
+        width:50,
         render: (firstPulseAmount) => {
           return firstPulseAmount + "次";
         }
@@ -44,6 +48,7 @@ const App = React.createClass({
         title: '快洗',
         dataIndex: 'secondPulseAmount',
         key: 'secondPulseAmount',
+        width:50,
         render: (secondPulseAmount) => {
           return secondPulseAmount + "次";
         }
@@ -51,6 +56,7 @@ const App = React.createClass({
         title: '标准洗',
         dataIndex: 'thirdPulseAmount',
         key: 'thirdPulseAmount',
+        width:50,
         render: (thirdPulseAmount) => {
           return thirdPulseAmount + "次"
         }
@@ -58,6 +64,7 @@ const App = React.createClass({
         title: '大物洗',
         dataIndex: 'fourthPulseAmount',
         key: 'fourthPulseAmount',
+        width:50,
         render: (fourthPulseAmount) => {
           return fourthPulseAmount + "次"
         }
@@ -65,6 +72,7 @@ const App = React.createClass({
         title: '金额',
         dataIndex: 'amount',
         key: 'amount',
+        width:80,
         render: (amount) => {
           return Math.round(amount*100)/10000 + "元";
         }
@@ -134,7 +142,7 @@ const App = React.createClass({
           <Breadcrumb.Item>{date}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
     </section>);
   }
 });
