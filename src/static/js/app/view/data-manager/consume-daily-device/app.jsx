@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
-import StatisConsumeService from "../../../service/statis_consume";
+import DailyBillDetailService from "../../../service/daily_bill_detail";
 import { Link } from 'react-router';
 
 const App = React.createClass({
@@ -78,24 +78,49 @@ const App = React.createClass({
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.list(date, pager);
   },
-  list(date, pager) {
+  // list(date, pager) {
+  //   var self = this;
+  //   this.setState({
+  //     loading: true,
+  //   });
+  //   const {id} = this.props.params;
+  //   const baseUrl = "/data/consume/month/"+id+"/"+date+"/";
+  //   StatisConsumeService.deviceList(date, pager)
+  //     .then((data) => {
+  //       self.setState({
+  //         loading: false,
+  //       });
+  //       if (data && data.status == '00') {
+  //         const total = data.data.length;
+  //         this.setState({
+  //           total: total,
+  //           list: data.data.map((item, key) => {
+  //             item.key = key + 1;
+  //             item.url = baseUrl+item.serialNumber;
+  //             return item;
+  //           })
+  //         });
+  //       } else {
+  //         message.info(data.msg);
+  //       }
+  //     })
+  // },
+  list(userId, billAt, serialNumbr, page, perPage) {
     var self = this;
     this.setState({
       loading: true,
     });
     const {id} = this.props.params;
-    const baseUrl = "/data/consume/month/"+id+"/"+date+"/";
-    StatisConsumeService.deviceList(date, pager)
+    const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
+    DailyBillDetailService.list(userId, billAt, '', page, perPage)
       .then((data) => {
         self.setState({
           loading: false,
         });
         if (data && data.status == '00') {
-          const total = data.data.length;
           this.setState({
-            total: total,
-            list: data.data.map((item, key) => {
-              item.key = key + 1;
+            total: data.data.total,
+            list: data.data.list.map((item) => {
               item.url = baseUrl+item.serialNumber;
               return item;
             })
@@ -105,6 +130,7 @@ const App = React.createClass({
         }
       })
   },
+
   initializePagination() {
     const {date} = this.props.params;
     const self = this;
@@ -115,12 +141,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(date, pager);
+        self.list(USER.id,date,'', current,pageSize);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(date, pager);
+        self.list(USER.id,date,'', current,self.state.perPage);
       },
     }
   },
