@@ -55,7 +55,9 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 		"from box_wash b where substring(b.inserttime,1,7)=? and b.companyid=? " +
 		"group by substring(b.inserttime,1,10) order by d desc"
 	}else if len(date) == 10 {
-		sql = "select i.devicetype,i.companyid,substring(b.inserttime,1,10) d,i.deviceno,a.name,i.address address,sum(case when b.price is null then 0 else b.price end) money, " +
+		//i.devicetype,i.companyid,i.deviceno,a.name,i.address address,
+		sql = "select substring(b.inserttime,1,10) d," +
+		" sum(case when b.price is null then 0 else b.price end) money, count(distinct b.deviceno) dc," +
 		"sum(case when b.washtype='601' then 1 else 0 end) dt," +
 		"sum(case when b.washtype='602' then 1 else 0 end) kx," +
 		"sum(case when b.washtype='603' then 1 else 0 end) bz," +
