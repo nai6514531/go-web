@@ -90,7 +90,7 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 	params := make([]interface{}, 0)
 	sql := "user_id = ? and school_id = ?"
 	params = append(params, userId, schoolId)
-	if len(serialNums) > 0 && serialNums[0] != ""{
+	if len(serialNums) > 0 && serialNums[0] != "" {
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
@@ -108,7 +108,7 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, seri
 	sql := "user_id = ? and school_id = ?"
 	params = append(params, userId, schoolId)
 
-	if len(serialNums) > 0 && serialNums[0] != ""{
+	if len(serialNums) > 0 && serialNums[0] != "" {
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
@@ -489,6 +489,40 @@ func (self *DeviceService) ListByUserId(userId ...int) (*[]*model.Device, error)
 	return &list, nil
 }
 
+func (self *DeviceService) DailyBill(serialNumber string, billAt string, page int, perPage int) (*[]*map[string]interface{}, error) {
+	sql := "select b.address,bw.price,bw.usermobile mobile,bw.washtype,bw.INSERTTIME createdAt " +
+		" from box_wash bw,box_info b " +
+		"where  b.deviceno='" + serialNumber + "' and date(bw.inserttime)='" + billAt + "' and bw.deviceno=b.DEVICENO"
+	rows, err := common.MNDB.Raw(sql).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]*map[string]interface{}, 0)
+	for rows.Next() {
+		var address string
+		var price float64
+		var mobile string
+		var washtype int
+		var createdAt string
+
+		err := rows.Scan(&address, &price, &mobile, &washtype, &createdAt)
+		if err != nil {
+			return nil, err
+		}
+		m := map[string]interface{}{
+			"serialNumber": serialNumber,
+			"address":      address,
+			"price":        price,
+			"mobile":       mobile,
+			"washType":     washtype,
+			"createdAt":    createdAt,
+		}
+		list = append(list, &m)
+	}
+
+	return &list, nil
+}
 
 func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.Device, error) {
 	list := []*model.Device{}

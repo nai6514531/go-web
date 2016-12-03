@@ -95,6 +95,9 @@ var (
 		"01031001": "解除占用失败",
 		"01031002": "无该设备信息",
 		"01031003": "当前用户无操作权限",
+
+		"01031100": "拉取设备消费详情成功",
+		"01031101": "拉取设备消费详情失败",
 	}
 )
 
@@ -319,6 +322,26 @@ func (self *DeviceController) UnLock(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01031000", nil, device_msg["01031000"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *DeviceController) DailyBill(ctx *iris.Context) {
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("perPage")
+	//userId, _ := ctx.URLParamInt("userId")
+	billAt := ctx.URLParam("billAt")
+	serialNumber := ctx.Param("serialNumber")
+	list, err := deviceService.DailyBill(serialNumber, billAt, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01031101", err.Error(), device_msg["01031101"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01031100", list, device_msg["01031100"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }

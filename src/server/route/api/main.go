@@ -81,6 +81,7 @@ func Api() {
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock", device.UnLock)
 
+
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
 
@@ -90,6 +91,7 @@ func Api() {
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
 	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
 	api.Get("/daily-bill/mark", dailyBill.Mark)
+	api.Get("/daily-bill/device/:serialNumber", device.DailyBill)
 
 	api.Get("/statis/consume", statis.Consume)
 	api.Get("/statis/operate", statis.Operate)

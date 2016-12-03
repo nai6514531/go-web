@@ -27,10 +27,17 @@ const App = React.createClass({
         key: 'serialNumber',
         width:100,
         render: (serialNumber,record)=>{
-          return <div>
-            <Link to={"/data/consume/month/"+record.id+"/"+record.billAt+"/"+serialNumber+""}>{serialNumber}</Link>
-            {record.address?' / '+record.address:""}
-          </div>
+          if(record.amount>0){
+            return <div>
+              <Link to={"/data/consume/month/"+record.id+"/"+record.billAt+"/"+serialNumber+""}>{serialNumber}</Link>
+              {record.address?' / '+record.address:""}
+            </div>
+          }else{
+            return <div>
+              {serialNumber}
+              {record.address?' / '+record.address:""}
+            </div>
+          }
         }
       }, {
         title: '运营商名称',
@@ -75,7 +82,7 @@ const App = React.createClass({
         key: 'amount',
         width:80,
         render: (amount) => {
-          return Math.round(amount*100)/10000 + "元";
+          return Math.round(amount*100)/100 + "元";
         }
       }],
       loading: false
