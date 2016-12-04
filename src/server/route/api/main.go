@@ -57,6 +57,7 @@ func Api() {
 	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
+	api.Get("/user-detail/:account", user.DetailByAccount)
 
 	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
@@ -80,6 +81,7 @@ func Api() {
 	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock", device.UnLock)
+	api.Put("/device-assign", device.Assign)
 
 
 	api.Get("/reference-device", referenceDevice.List)

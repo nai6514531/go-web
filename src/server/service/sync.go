@@ -516,11 +516,11 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCas
 		"bill_at":      billAt,
 		"order_count":  boxStatBill.Times,
 		"status":       status,
-		"account_type":  accountType,
-		"account_name":  accountName,
+		"account_type": accountType,
+		"account_name": accountName,
 		"account":      account,
-		"real_name":     realName,
-		"bank_name":     bankName,
+		"real_name":    realName,
+		"bank_name":    bankName,
 		"mobile":       mobile,
 	}
 	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", userId, billAt).Updates(data)

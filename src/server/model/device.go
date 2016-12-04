@@ -3,6 +3,11 @@ package model
 type Device struct {
 	Model
 	UserId            int    `json:"userId"`
+	UserName          string `json:"userName" gorm:"-"`
+	UserMobile        string `json:"userName" gorm:"-"`
+	FromUserId        int    `json:"fromUserId"`
+	FromUserName      string `json:"fromUserName" gorm:"-"`
+	FromUserMobile    string `json:"fromUserMobile" gorm:"-"`
 	Label             string `json:"label"`
 	SerialNumber      string `json:"serialNumber"`
 	ReferenceDeviceId int    `json:"referenceDeviceId"`
@@ -21,6 +26,9 @@ type Device struct {
 	FourthPulseName   string `json:"fourthPulseName"`
 	Password          string `json:"password"`
 	Step              int    `json:"step"`
+	HasAssigned       int    `json:"hasAssigned" gorm:"-"`
+	AssignedAt        string `json:"assignedAt"`
+	HasRetrofited     int    `json:"hasRetrofited"`
 	Status            int    `json:"status"`
 }
 

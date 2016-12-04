@@ -98,6 +98,15 @@ var (
 
 		"01031100": "拉取设备消费详情成功",
 		"01031101": "拉取设备消费详情失败",
+
+		"01031200": "所选设备分配成功",
+		"01031201": "所选设备分配失败",
+		"01031202": "被分配的用户账户不存在",
+		"01031203": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
+		"01031204": "被分配的用户账户不能为空",
+		"01031205": "被分配的设备不能为空",
+		"01031206": "被分配的设备数据异常",
+		"01031207": "获取被分配的设备所有者信息异常",
 	}
 )
 
@@ -232,23 +241,56 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	list, err := deviceService.ListByUser(userId, page, perPage)
+	list, err := deviceService.ListByUserAndNextLevel(userId, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01030401", err, device_msg["01030401"]}
+		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := deviceService.TotalByUser(userId)
+	total, err := deviceService.TotalByUserAndNextLevel(userId)
 	if err != nil {
-		result = &enity.Result{"01030401", err, device_msg["01030401"]}
+		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
+	}
+	userService := &service.UserService{}
+	user, _ := userService.Basic(userId)
+	for _, device := range *list {
+		// 每个登录账户只拉取属于自己和由自己分配出去的设备，即user_id & from_user_id为当前登录的用户id的设备
+		// 如果设备的userId等于当前登录的用户id，则表明此设备未分配，还属于当前账户
+		if user.Id == device.UserId {
+			device.HasAssigned = 0
+			if user != nil {
+				device.UserId = user.Id
+				device.UserName = user.Name
+				device.UserMobile = user.Mobile
+			}
+			fromUser, _ := userService.Basic(device.FromUserId)
+			if fromUser != nil {
+				device.FromUserId = fromUser.Id
+				device.FromUserName = fromUser.Name
+				device.FromUserMobile = fromUser.Mobile
+			}
+		} else {
+			device.HasAssigned = 1
+			if user != nil {
+				device.FromUserId = user.Id
+				device.FromUserName = user.Name
+				device.FromUserMobile = user.Mobile
+			}
+			toUser, _ := userService.Basic(device.UserId)
+			if toUser != nil {
+				device.UserId = toUser.Id
+				device.UserName = toUser.Name
+				device.UserMobile = toUser.Mobile
+			}
+		}
 	}
 	result = &enity.Result{"01030400", &enity.Pagination{total, list}, device_msg["01030400"]}
-	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
 }
 
 /**
@@ -578,7 +620,10 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	success := deviceService.Reset(id)
+	userService := &service.UserService{}
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	user, _ := userService.Basic(userId)
+	success := deviceService.Reset(id, user)
 	if !success {
 		result = &enity.Result{"01030601", nil, device_msg["01030601"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -770,3 +815,76 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	common.Log(ctx, nil)
 }
 
+func (self *DeviceController) Assign(ctx *iris.Context) {
+
+	/*
+	"01031200": "所选设备分配成功",
+	"01031201": "所选设备分配失败",
+	"01031202": "被分配的用户账户不存在",
+	"01031203": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
+	"01031204": "分配的用户账户不能为空",
+	"01031205": "被分配的设备不能为空",
+	"01031206": "被分配的设备数据异常",
+	"01031207": "获取被分配的设备所有者信息异常",
+	*/
+	type AssignData struct {
+		userAccount   string
+		SerialNumbers string
+	}
+	var assignData AssignData
+	ctx.ReadJSON(&assignData)
+	result := &enity.Result{}
+	if assignData.userAccount == "" {
+		result = &enity.Result{"01031204", nil, device_msg["01031204"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if assignData.SerialNumbers == "" {
+		result = &enity.Result{"01031205", nil, device_msg["01031205"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	userService := &service.UserService{}
+	toUser, err := userService.FindByAccount(assignData.userAccount)
+	if err != nil || toUser == nil {
+		result = &enity.Result{"01031202", err.Error(), device_msg["01031202"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	deviceService := &service.DeviceService{}
+	serialNumberList := strings.Split(assignData.SerialNumbers, ",")
+	serialNumbers := assignData.SerialNumbers
+	devices, err := deviceService.ListBySerialNumbers(serialNumbers)
+	if err != nil || len(*devices) != len(serialNumberList) {
+		result = &enity.Result{"01031206", err.Error(), device_msg["01031206"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	devices, err = deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumbers)
+	if err != nil || len(*devices) != len(serialNumberList) {
+		result = &enity.Result{"01031203", err.Error(), device_msg["01031203"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	fromUser, err := userService.Basic(sessionUserId)
+	if err != nil || fromUser == nil {
+		result = &enity.Result{"01031207", err.Error(), device_msg["01031207"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	success, err := deviceService.Assign(toUser, fromUser, serialNumbers)
+	if !success || err != nil {
+		result = &enity.Result{"01031201", err.Error(), device_msg["01031201"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01031200", err.Error(), device_msg["01031200"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+
+}

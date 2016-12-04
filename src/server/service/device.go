@@ -75,10 +75,47 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
+func (self *DeviceService) TotalByUserAndNextLevel(userId int) (int, error) {
+	device := &model.Device{}
+	var total int
+	r := common.DB.Model(device).Where("user_id = ? and from_user_id= ?", userId, userId).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return total, nil
+}
+
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *DeviceService) ListByUserAndNextLevel(userId int, page int, perPage int) (*[]*model.Device, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? and from_user_id= ?", userId, userId).Order("id desc").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *DeviceService) ListBySerialNumbers(serialNumbers string) (*[]*model.Device, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Where("serial_number in = (?) ", serialNumbers).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
+func (self *DeviceService) ListByUserAndSerialNumbers(userId int, serialNumbers string) (*[]*model.Device, error) {
+	list := &[]*model.Device{}
+	r := common.DB.Where("user_id = ? and serial_number in = (?) ", userId, serialNumbers).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -94,7 +131,7 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
-	r := common.DB.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -333,10 +370,16 @@ func (self *DeviceService) BatchUpdateBySerialNumber(device *model.Device, seria
 	return true
 }
 
-func (self *DeviceService) Reset(id int) bool {
+func (self *DeviceService) Reset(id int, user *model.User) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
-	r := transAction.Model(&model.Device{}).Where("id = ?", id).Updates(map[string]interface{}{"user_id": "1", "status": 9}).Scan(device)
+	data := map[string]interface{}{
+		"user_id":          "1",
+		"from_user_id":     user.Id,
+		"status":           9,
+		"has_retrofited":   1,
+	}
+	r := transAction.Model(&model.Device{}).Where("id = ?", id).Updates(data).Scan(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-Reset:", r.Error.Error())
 		transAction.Rollback()
@@ -446,7 +489,7 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	for k, serial := range serialList {
 		val := fmt.Sprintf("(%d,'%s','%s',%d,%d,%d,%d,%d,'%s',%d,%d,%d,%d,'%s','%s','%s','%s',%d,'%s','%s')", device.UserId, device.Label, serial, device.ReferenceDeviceId, device.ProvinceId, device.CityId, device.DistrictId, device.SchoolId, device.Address, device.FirstPulsePrice, device.SecondPulsePrice, device.ThirdPulsePrice, device.FourthPulsePrice, device.FirstPulseName, device.SecondPulseName, device.ThirdPulseName, device.FourthPulseName, device.Status, device.CreatedAt, device.UpdatedAt)
 		sql = sql + val
-		if k != len(serialList)-1 {
+		if k != len(serialList) - 1 {
 			sql = sql + ","
 		}
 	}
@@ -464,7 +507,7 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	for k, serial := range serialList {
 		val := fmt.Sprintf("('%s',%d,'%s','%s',%d,'%s','%s','%s',%f,%f,%f,%f,'%s')", serial, boxInfo.CompanyId, boxInfo.Status, boxInfo.Password, boxInfo.Location, boxInfo.InsertTime, boxInfo.UpdateTime, boxInfo.Address, boxInfo.Price_601, boxInfo.Price_602, boxInfo.Price_603, boxInfo.Price_604, boxInfo.DeviceType)
 		mnsql = mnsql + val
-		if k != len(serialList)-1 {
+		if k != len(serialList) - 1 {
 			mnsql = mnsql + ","
 		}
 	}
@@ -535,4 +578,39 @@ func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.De
 		deviceMap[_device.SerialNumber] = _device
 	}
 	return deviceMap, nil
+}
+
+func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, serialNumbers string) (bool, error) {
+	transAction := common.DB.Begin()
+	mnTransAction := common.MNDB.Begin()
+	assignedAt := time.Now().Local().Format("2006-01-02 15:04:05")
+	data := map[string]interface{}{
+		"user_id":        toUser.Id,
+		"assigned_at":    assignedAt,
+		"from_user_id":   fromUser.Id,
+		"has_retrofited": 0,
+		"status":         0,
+	}
+	r := transAction.Model(&model.Device{}).Where("serial_number in = (?) ", serialNumbers).Updates(data)
+	if r.Error != nil {
+		transAction.Rollback()
+		common.Logger.Warningln("DB Device Assign:", r.Error.Error())
+		return false, r.Error
+	}
+	_data := map[string]interface{}{
+		"COMPANYID":  toUser.Id,
+		"UPDATETIME": assignedAt,
+		"STATUS":     0,
+	}
+	mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in = (?) ", serialNumbers).Updates(_data)
+	if r.Error != nil {
+		mnTransAction.Rollback()
+		transAction.Rollback()
+		common.Logger.Warningln("MNDB BoxInfo Assign:", r.Error.Error())
+		return false, r.Error
+	}
+
+	transAction.Commit()
+	mnTransAction.Commit()
+	return true, nil
 }
