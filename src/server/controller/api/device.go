@@ -8,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strings"
+	"fmt"
 )
 
 type DeviceController struct {
@@ -102,11 +103,11 @@ var (
 		"01031200": "所选设备分配成功",
 		"01031201": "所选设备分配失败",
 		"01031202": "被分配的用户账户不存在",
-		"01031203": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
+		"01031203": "获取被分配的设备信息异常",
 		"01031204": "被分配的用户账户不能为空",
 		"01031205": "被分配的设备不能为空",
-		"01031206": "被分配的设备数据异常",
-		"01031207": "获取被分配的设备所有者信息异常",
+		"01031206": "获取被分配的设备所有者信息异常",
+		"01031207": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
 	}
 )
 
@@ -821,20 +822,21 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	"01031200": "所选设备分配成功",
 	"01031201": "所选设备分配失败",
 	"01031202": "被分配的用户账户不存在",
-	"01031203": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
-	"01031204": "分配的用户账户不能为空",
+	"01031203": "获取被分配的设备信息异常",
+	"01031204": "被分配的用户账户不能为空",
 	"01031205": "被分配的设备不能为空",
-	"01031206": "被分配的设备数据异常",
-	"01031207": "获取被分配的设备所有者信息异常",
+	"01031206": "获取被分配的设备所有者信息异常",
+	"01031207": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
 	*/
 	type AssignData struct {
-		userAccount   string
-		SerialNumbers string
+		UserAccount   string `json:"userAccount"`
+		SerialNumbers string `json:"serialNumbers"`
 	}
 	var assignData AssignData
 	ctx.ReadJSON(&assignData)
+	fmt.Println(assignData)
 	result := &enity.Result{}
-	if assignData.userAccount == "" {
+	if assignData.UserAccount == "" {
 		result = &enity.Result{"01031204", nil, device_msg["01031204"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -845,7 +847,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 		return
 	}
 	userService := &service.UserService{}
-	toUser, err := userService.FindByAccount(assignData.userAccount)
+	toUser, err := userService.FindByAccount(assignData.UserAccount)
 	if err != nil || toUser == nil {
 		result = &enity.Result{"01031202", err.Error(), device_msg["01031202"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -854,24 +856,23 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	serialNumberList := strings.Split(assignData.SerialNumbers, ",")
 	serialNumbers := assignData.SerialNumbers
-	devices, err := deviceService.ListBySerialNumbers(serialNumbers)
-	if err != nil || len(*devices) != len(serialNumberList) {
-		result = &enity.Result{"01031206", err.Error(), device_msg["01031206"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	devices, err = deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumbers)
-	if err != nil || len(*devices) != len(serialNumberList) {
+
+	devices, err := deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumbers)
+	if err != nil {
 		result = &enity.Result{"01031203", err.Error(), device_msg["01031203"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if len(*devices) != len(serialNumberList) {
+		result = &enity.Result{"01031207", nil, device_msg["01031207"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	fromUser, err := userService.Basic(sessionUserId)
 	if err != nil || fromUser == nil {
-		result = &enity.Result{"01031207", err.Error(), device_msg["01031207"]}
+		result = &enity.Result{"01031206", err.Error(), device_msg["01031206"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -883,7 +884,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	result = &enity.Result{"01031200", err.Error(), device_msg["01031200"]}
+	result = &enity.Result{"01031200", nil, device_msg["01031200"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 
