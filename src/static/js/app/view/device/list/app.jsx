@@ -70,7 +70,7 @@ const columns = [{
     key: 'assignedAt',
     width:100,
     render: (assignedAt) => {
-      return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):''
+      return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):'/'
     }
   }, {
     title: '是否为返厂设备',
@@ -181,7 +181,7 @@ class DeviceList extends React.Component {
         contact:'',
       },// 获取的用户信息
       bindResult:'',//绑定结果反馈
-      selectList:[],
+      selectedList:[],
       selectedRowKeys:[],
     };
     this.remove = this.remove.bind(this);
@@ -296,7 +296,7 @@ class DeviceList extends React.Component {
     }
   }
   handleAllocate() {
-    if(this.state.selectList.length > 0) {
+    if(this.state.selectedList.length > 0) {
       this.showModal();
     } else {
       message.info('请至少选择一个设备',3);
@@ -314,7 +314,6 @@ class DeviceList extends React.Component {
     });
   }
   handleCancel(e) {
-    console.log(e);
     this.setState({
       visible: false,
       userAccount:'',
@@ -325,16 +324,22 @@ class DeviceList extends React.Component {
     var self = this;
     UserService.detailByAccount(account)
       .then((data) => {
-        // const userInfo = `${data.name}| ${data.contact}|${data.mobile}`;
         const current = this.state.current + 1;
         this.setState({
           current,
           userInfo:data.data
         });
-        message.success(data.msg,3);
+        // message.success(data.msg,3);
+        // 成功以后重新拉取设备列表
       },(error)=>{
         message.error(error.msg,3);
       })
+  }
+  clearSelectRows() {
+    this.setState({
+      selectedRowKeys: [],
+      selectedList: []
+    })
   }
   deviceAssign(data) {
     var self = this;
@@ -346,6 +351,10 @@ class DeviceList extends React.Component {
           bindResult:'绑定成功'
         });
         message.success(data.msg,3);
+        self.clearSelectRows();
+        const pager = { page: this.state.page, perPage: this.state.perPage };
+        self.props.getDeviceList(pager);
+        self.loading = true;
       },(error)=>{
         message.error(error.msg,3);
       })
@@ -353,8 +362,6 @@ class DeviceList extends React.Component {
   next() {
     if(this.state.current == 0) {
       // 第一步,提交账号信息,确认是否存在该用户
-      console.log('提交账号信息,检查是否存在');
-      // 回调时调用
       if(this.state.userAccount) {
         const account = this.state.userAccount.replace(/[\r\n\s]/g,"");
         this.detail(account);
@@ -363,16 +370,14 @@ class DeviceList extends React.Component {
       }
     } else if(this.state.current == 1) {
       // 第二步,如果账号信息存在,则提交账号信息和设备编号,否则不能进入到下一步
-      const serialNumbers = this.state.selectList.join(",");
+      const serialNumbers = this.state.selectedList.join(",");
       const { account }= this.state.userInfo;
-      console.log(this.state.userInfo);
       const data = {
         userAccount: account,
         serialNumbers: serialNumbers
       }
       this.deviceAssign(data);
     }
-
   }
   prev() {
     const current = this.state.current - 1;
@@ -394,7 +399,7 @@ class DeviceList extends React.Component {
     const rowSelection = {
       selectedRowKeys: selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        // const selectList = selectedRows.filter(function (item,key) {
+        // const selectedList = selectedRows.filter(function (item,key) {
         //   return item.hasAssigned == 0;
         // }).map(function (item,key) {
         //   return item.serialNumber;
@@ -404,12 +409,12 @@ class DeviceList extends React.Component {
         for(var i=0; i<selectedRows.length; i++){
           let hasAssigned = selectedRows[i].hasAssigned;
           if(!hasAssigned){
-            newSelectedRows.push(selectedRows[i]);
+            newSelectedRows.push(selectedRows[i].serialNumber);
             newSelectedRowKeys.push(selectedRows[i].id);
           }
         }
         this.setState({
-          selectList:newSelectedRows,
+          selectedList:newSelectedRows,
           selectedRowKeys:newSelectedRowKeys,
         });
         // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
@@ -469,7 +474,7 @@ class DeviceList extends React.Component {
     // console.log(userInfo);
     if (this.state.current == 0){
       show = <div>
-        <p className="device-tips">您已选择{this.state.selectList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
+        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
         <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
       </div>
     } else if(this.state.current == 1){
