@@ -58,9 +58,9 @@ const columns = [{
     title: '运营商信息',
     dataIndex: 'userName',
     key: 'userName',
-    width:60,
+    width:100,
     render: (userName,record) => {
-      return <span>{userName}{record.mobile?' | '+record.mobile:''}</span>;
+      return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
     }
   },{
   title: '关联设备类型',
@@ -72,8 +72,10 @@ const columns = [{
     dataIndex: 'assignedAt',
     key: 'assignedAt',
     width:100,
-    render: (assignedAt) => {
-      return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):'/'
+    render: (assignedAt,record) => {
+      return assignedAt?
+        moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
+        moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')
     }
   }, {
     title: '返厂设备',
@@ -250,7 +252,7 @@ class DeviceList extends React.Component {
         if(resultReset.fetch == true){
           this.props.getDeviceList(pager);
           self.loading = true;
-          message.success('重置设备归属人成功!',3);
+          message.success('删除成功',3);
         } else {
           message.error(resultReset.result.msg,3);
         }
@@ -525,7 +527,7 @@ class DeviceList extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 760 }}
+            scroll={{ x: 800 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
