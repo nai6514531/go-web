@@ -73,9 +73,16 @@ const columns = [{
     key: 'assignedAt',
     width:100,
     render: (assignedAt,record) => {
-      return assignedAt?
-        moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
-        moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')
+      // if(USER.role.id == 5) {
+        return assignedAt?
+          moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
+          moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')
+      // }
+      // return {
+      //   props: {
+      //     colSpan: 2,
+      //   },
+      // };
     }
   }, {
     title: '返厂设备',
@@ -84,7 +91,14 @@ const columns = [{
     width:20,
     render: (hasRetrofited) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
+      // if(USER.role.id == 5) {
+        return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
+      // }
+      // return {
+      //   props: {
+      //     colSpan: 0,
+      //   },
+      // };
     }
   }, {
   title: '状态',
@@ -507,7 +521,7 @@ class DeviceList extends React.Component {
     } else if(this.state.current == 1){
       show = <div>你将把设备分配给：{userInfo.name}|{userInfo.contact}|{userInfo.mobile}，是否继续？</div>
     } else if(this.state.current == 2){
-      show = <p><Icon type="check-circle" />{this.state.bindResult}</p>
+      show = <p className="result-text"><Icon type="check-circle" /> {this.state.bindResult}</p>
     };
     return (
       <section className="view-device-list">
