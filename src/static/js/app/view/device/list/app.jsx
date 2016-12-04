@@ -70,7 +70,7 @@ const columns = [{
     key: 'assignedAt',
     width:100,
     render: (assignedAt) => {
-      return moment(assignedAt).format('YYYY-MM-DD HH:mm:ss')
+      return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):''
     }
   }, {
     title: '是否为返厂设备',
@@ -182,6 +182,7 @@ class DeviceList extends React.Component {
       },// 获取的用户信息
       bindResult:'',//绑定结果反馈
       selectList:[],
+      selectedRowKeys:[],
     };
     this.remove = this.remove.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
@@ -328,7 +329,7 @@ class DeviceList extends React.Component {
         const current = this.state.current + 1;
         this.setState({
           current,
-          userInfo:data
+          userInfo:data.data
         });
         message.success(data.msg,3);
       },(error)=>{
@@ -364,6 +365,7 @@ class DeviceList extends React.Component {
       // 第二步,如果账号信息存在,则提交账号信息和设备编号,否则不能进入到下一步
       const serialNumbers = this.state.selectList.join(",");
       const { account }= this.state.userInfo;
+      console.log(this.state.userInfo);
       const data = {
         userAccount: account,
         serialNumbers: serialNumbers
@@ -384,11 +386,13 @@ class DeviceList extends React.Component {
     this.handleCancel();
   }
   render() {
+    const self = this;
     const { current } = this.state;
     this.pagination = this.initializePagination();
     // 勾选项,需要限制只能勾选自己的设备
+    const selectedRowKeys = this.state.selectedRowKeys;
     const rowSelection = {
-      selectedRowKeys: this.state.selectedRowKeys,
+      selectedRowKeys: selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         // const selectList = selectedRows.filter(function (item,key) {
         //   return item.hasAssigned == 0;
@@ -401,23 +405,23 @@ class DeviceList extends React.Component {
           let hasAssigned = selectedRows[i].hasAssigned;
           if(!hasAssigned){
             newSelectedRows.push(selectedRows[i]);
-            newSelectedRowKeys.push(selectedRows[i].key);
+            newSelectedRowKeys.push(selectedRows[i].id);
           }
         }
         this.setState({
           selectList:newSelectedRows,
           selectedRowKeys:newSelectedRowKeys,
         });
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       },
       onSelect: (record, selected, selectedRows) => {
-        console.log(record, selected, selectedRows);
+        // console.log(record, selected, selectedRows);
       },
       onSelectAll: (selected, selectedRows, changeRows) => {
-        console.log(selected, selectedRows, changeRows);
+        // console.log(selected, selectedRows, changeRows);
       },
     };
-    const self = this;
+    
     const list = this.props.list;
     let dataSource = [];
     if(list) {
@@ -450,6 +454,7 @@ class DeviceList extends React.Component {
             default:
               status = '启用';
           }
+          item.key = item.id;
           item.referenceDevice = referenceDevice;
           item.statusCode = item.status;
           item.status = status;
@@ -461,6 +466,7 @@ class DeviceList extends React.Component {
     }
     let show = '';
     const userInfo = this.state.userInfo;
+    // console.log(userInfo);
     if (this.state.current == 0){
       show = <div>
         <p className="device-tips">您已选择{this.state.selectList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
@@ -471,7 +477,6 @@ class DeviceList extends React.Component {
     } else if(this.state.current == 2){
       show = <p><Icon type="check-circle" />{this.state.bindResult}</p>
     };
-
     return (
       <section className="view-device-list">
         <header>
