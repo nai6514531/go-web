@@ -201,7 +201,7 @@ class DeviceList extends React.Component {
       selectedList:[],
       selectedRowKeys:[],
       selected: true,
-      rowColor:[],
+      rowColor:{},
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -410,6 +410,9 @@ class DeviceList extends React.Component {
     // 完成绑定,也有可能绑定失败,关闭 modal,重置提交栏
     this.handleCancel();
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   render() {
     const self = this;
     const { current } = this.state;
@@ -466,6 +469,7 @@ class DeviceList extends React.Component {
         let rowColor = {};
         dataSource = data.map(function (item, key) {
           rowColor[item.id] = item.hasAssigned?'lock':'';
+          self.rowColor = rowColor;
           let referenceDevice = '';
           switch (item.referenceDeviceId){
             case 1:
@@ -528,6 +532,7 @@ class DeviceList extends React.Component {
             loading={this.loading}
             onChange={this.handleTableChange}
             rowSelection={rowSelection}
+            rowClassName={this.rowClassName.bind(this)}
             bordered
             />
           <Modal title="批量分配" visible={this.state.visible}
