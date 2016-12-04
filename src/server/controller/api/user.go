@@ -173,9 +173,8 @@ var (
 		"01011502": "请操作你自身、下级或Test账号下的设备",
 
 		"01011600": "拉取用户详情成功",
-		"01011601": "拉取用户详情失败",
+		"01011601": "用户账户不能为空",
 		"01011602": "该用户不存在",
-		"01011603": "用户账户不能为空",
 	}
 )
 
@@ -1272,7 +1271,7 @@ func (self *UserController) IsMeOrSub(ctx *iris.Context) {
 	userService := &service.UserService{}
 	user, err := userService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01011501", nil, device_msg["01011501"]}
+		result = &enity.Result{"01011501", nil, user_msg["01011501"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -1280,7 +1279,7 @@ func (self *UserController) IsMeOrSub(ctx *iris.Context) {
 		ctx.Next()
 		return
 	} else {
-		result = &enity.Result{"01011502", nil, device_msg["01011502"]}
+		result = &enity.Result{"01011502", nil, user_msg["01011502"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -1290,24 +1289,19 @@ func (self *UserController) DetailByAccount(ctx *iris.Context) {
 	result := &enity.Result{}
 	account := ctx.Param("account")
 	if strings.Trim(account, " ") == "" {
-		result = &enity.Result{"01011603", nil, device_msg["01011603"]}
+		result = &enity.Result{"01011601", nil, user_msg["01011601"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	userService := &service.UserService{}
 	user, err := userService.FindByAccount(account)
-	if err != nil {
-		result = &enity.Result{"01011601", err.Error(), device_msg["01011601"]}
+	if err != nil || user == nil {
+		result = &enity.Result{"01011602", err.Error(), user_msg["01011602"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if user == nil {
-		result = &enity.Result{"01011602", nil, device_msg["01011602"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	result = &enity.Result{"01011600", nil, device_msg["01011600"]}
+	result = &enity.Result{"01011600", user, user_msg["01011600"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 
