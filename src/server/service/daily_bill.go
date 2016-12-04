@@ -533,7 +533,7 @@ func (self *DailyBillService) DailyBillByAccountType(accountType int) (*[]*muniu
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := "select sum(total_amount) as amount, date(bill_at) as `date` " +
+	sql := "select sum(total_amount) as amount, bill_at as `date` " +
 		" from `daily_bill` " +
 		" where `user_id` !=1 and `account_type` =" + _accountType + " " +
 		" and `bill_at` >='" + start + "' and bill_at<'" + end + "' group by bill_at"
@@ -545,6 +545,9 @@ func (self *DailyBillService) DailyBillByAccountType(accountType int) (*[]*muniu
 	for rows.Next() {
 		sumByDate := &muniu.BillSumByDate{}
 		common.DB.ScanRows(rows, sumByDate)
+		sumByDate.Amount = sumByDate.Amount / 100
+		d,_:=time.Parse(time.RFC3339,sumByDate.Date)
+		sumByDate.Date=d.Format("2006-01-02")
 		list = append(list, sumByDate)
 	}
 	return &list, nil

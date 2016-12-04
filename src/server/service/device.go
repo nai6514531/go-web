@@ -606,9 +606,9 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 		return false, r.Error
 	}
 	_data := map[string]interface{}{
-		"COMPANYID":  toUser.Id,
+		"COMPANYID": (toUser.Id - 1),
 		"UPDATETIME": assignedAt,
-		"STATUS":     0,
+		"STATUS":     "0",
 	}
 	mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)
 	if r.Error != nil {
