@@ -106,7 +106,7 @@ func (self *DeviceService) ListByUserAndNextLevel(userId int, page int, perPage 
 
 func (self *DeviceService) ListBySerialNumbers(serialNumbers string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Where("serial_number in = (?) ", serialNumbers).Find(list)
+	r := common.DB.Where("serial_number in (?) ", serialNumbers).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -115,7 +115,7 @@ func (self *DeviceService) ListBySerialNumbers(serialNumbers string) (*[]*model.
 
 func (self *DeviceService) ListByUserAndSerialNumbers(userId int, serialNumbers string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Where("user_id = ? and serial_number in = (?) ", userId, serialNumbers).Find(list)
+	r := common.DB.Where("user_id = ? and serial_number in (?) ", userId, serialNumbers).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -591,7 +591,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 		"has_retrofited": 0,
 		"status":         0,
 	}
-	r := transAction.Model(&model.Device{}).Where("serial_number in = (?) ", serialNumbers).Updates(data)
+	r := transAction.Model(&model.Device{}).Where("serial_number in  (?) ", serialNumbers).Updates(data)
 	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("DB Device Assign:", r.Error.Error())
@@ -602,7 +602,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 		"UPDATETIME": assignedAt,
 		"STATUS":     0,
 	}
-	mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in = (?) ", serialNumbers).Updates(_data)
+	mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)
 	if r.Error != nil {
 		mnTransAction.Rollback()
 		transAction.Rollback()
