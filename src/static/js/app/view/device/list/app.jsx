@@ -91,10 +91,10 @@ const columns = [{
     title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
-    width:20,
-    render: (hasRetrofited) => {
+    width:100,
+    render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
+      return hasRetrofited?<span style={{color:'red'}}>是 / ({record.fromUserName})</span>:<span>否</span>;
       // if(USER.role.id == 5) {
       // }
       // return {
@@ -124,7 +124,7 @@ const columns = [{
   title: '单脱',
   dataIndex: 'firstPulsePrice',
   key: 'firstPulsePrice',
-    width:50,
+    width:40,
     render: (firstPulsePrice) => {
       return firstPulsePrice/100;
     }
@@ -132,7 +132,7 @@ const columns = [{
   title: '快洗',
   dataIndex: 'secondPulsePrice',
   key: 'secondPulsePrice',
-    width:50,
+    width:40,
     render: (secondPulsePrice) => {
       return secondPulsePrice/100;
     }
@@ -140,7 +140,7 @@ const columns = [{
   title: '标准洗',
   dataIndex: 'thirdPulsePrice',
   key: 'thirdPulsePrice',
-    width:50,
+    width:40,
     render: (thirdPulsePrice) => {
       return thirdPulsePrice/100;
     }
@@ -148,7 +148,7 @@ const columns = [{
   title: '大物洗',
   dataIndex: 'fourthPulsePrice',
   key: 'fourthPulsePrice',
-    width:50,
+    width:40,
     render: (fourthPulsePrice) => {
       return fourthPulsePrice/100;
     }
@@ -546,7 +546,7 @@ class DeviceList extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 800 }}
+            scroll={{ x: 850 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
