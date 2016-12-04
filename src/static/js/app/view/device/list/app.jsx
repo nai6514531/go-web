@@ -501,7 +501,7 @@ class DeviceList extends React.Component {
     // console.log(userInfo);
     if (this.state.current == 0){
       show = <div>
-        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
+        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登录账号</p>
         <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
       </div>
     } else if(this.state.current == 1){
