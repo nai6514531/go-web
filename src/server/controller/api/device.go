@@ -241,22 +241,28 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	list, err := deviceService.ListByUserAndNextLevel(userId, page, perPage)
-	if err != nil {
-		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	total, err := deviceService.TotalByUserAndNextLevel(userId)
-	if err != nil {
-		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	userService := &service.UserService{}
-	user, _ := userService.Basic(userId)
+	user, err:= userService.Basic(userId)
+	if err != nil {
+		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	list, err := deviceService.ListByUserAndNextLevel(user, page, perPage)
+	if err != nil {
+		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	total, err := deviceService.TotalByUserAndNextLevel(user)
+	if err != nil {
+		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	for _, device := range *list {
 		// 每个登录账户只拉取属于自己和由自己分配出去的设备，即user_id & from_user_id为当前登录的用户id的设备
 		// 如果设备的userId等于当前登录的用户id，则表明此设备未分配，还属于当前账户

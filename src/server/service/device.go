@@ -75,29 +75,37 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(userId int) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(user *model.User) (int, error) {
 	device := &model.Device{}
 	var total int
-	r := common.DB.Model(device).Where("user_id = ? or from_user_id= ?", userId, userId).Count(&total)
+	sql := "user_id = ? or from_user_id= ? and has_retrofited = 0 "
+	if user.Id == 1 {
+		sql = "user_id = ? or from_user_id= ? or has_retrofited = 1 "
+	}
+	r := common.DB.Model(device).Where(sql, user.Id, user.Id).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
 	return total, nil
 }
 
-func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(user *model.User, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
+	sql := "user_id = ? or from_user_id= ? and has_retrofited = 0 "
+	if user.Id == 1 {
+		sql = "user_id = ? or from_user_id= ? or has_retrofited = 1 "
+	}
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, user.Id, user.Id).Order("has_retrofited desc,assigned_at desc,id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	return list, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(userId int, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? or from_user_id= ?", userId, userId).Order("id desc").Find(list)
+	//limit perPage offset (page-1)*perPage
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
