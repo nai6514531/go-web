@@ -164,7 +164,7 @@ class AgentTable extends React.Component {
         }
         self.loading = false;
       }
-    } 
+    }
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
     return (
@@ -175,13 +175,13 @@ class AgentTable extends React.Component {
               <Breadcrumb.Item>下级运营商</Breadcrumb.Item>
             </Breadcrumb>
         </header>
-          <div className="toolbar">
-            <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
-              添加新运营商
-            </Link>
-            <Input defaultValue={user} style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
-            <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
-          </div>
+        <div className="toolbar">
+          <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
+            添加新运营商
+          </Link>
+          <Input defaultValue={user} style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
+          <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
+        </div>
         <article>
           <Table
             scroll={{ x: 980 }}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input} from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon} from 'antd';
 import { Link } from 'react-router';
 const Step = Steps.Step;
 import { connect } from 'react-redux';
@@ -155,7 +155,7 @@ const columns = [{
 const steps = [{
   title: '填写运营商账号',
 }, {
-  title: '验证运营商账号',
+  title: '验证运营商信息',
 }, {
   title: '完成',
 }];
@@ -355,7 +355,8 @@ class DeviceList extends React.Component {
       console.log('提交账号信息,检查是否存在');
       // 回调时调用
       if(this.state.userAccount) {
-        this.detail(this.state.userAccount);
+        const account = this.state.userAccount.replace(/[\r\n\s]/g,"");
+        this.detail(account);
       } else {
         message.info('请填写账号信息',3);
       }
@@ -387,11 +388,26 @@ class DeviceList extends React.Component {
     this.pagination = this.initializePagination();
     // 勾选项,需要限制只能勾选自己的设备
     const rowSelection = {
+      selectedRowKeys: this.state.selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        const selectList = selectedRows.map(function (item,key) {
-          return item.serialNumber;
-        })
-        this.setState({selectList:selectList});
+        // const selectList = selectedRows.filter(function (item,key) {
+        //   return item.hasAssigned == 0;
+        // }).map(function (item,key) {
+        //   return item.serialNumber;
+        // });
+        let newSelectedRows = [];
+        let newSelectedRowKeys = [];
+        for(var i=0; i<selectedRows.length; i++){
+          let hasAssigned = selectedRows[i].hasAssigned;
+          if(!hasAssigned){
+            newSelectedRows.push(selectedRows[i]);
+            newSelectedRowKeys.push(selectedRows[i].key);
+          }
+        }
+        this.setState({
+          selectList:newSelectedRows,
+          selectedRowKeys:newSelectedRowKeys,
+        });
         console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       },
       onSelect: (record, selected, selectedRows) => {
@@ -447,13 +463,13 @@ class DeviceList extends React.Component {
     const userInfo = this.state.userInfo;
     if (this.state.current == 0){
       show = <div>
-        <p>您已选择{this.state.selectList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
-        <Input type="text" value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
+        <p className="device-tips">您已选择{this.state.selectList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
+        <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
       </div>
     } else if(this.state.current == 1){
       show = <div>你将把设备分配给：{userInfo.name}|{userInfo.contact}|{userInfo.mobile}，是否继续？</div>
     } else if(this.state.current == 2){
-      show = <p>{this.state.bindResult}</p>
+      show = <p><Icon type="check-circle" />{this.state.bindResult}</p>
     };
 
     return (
@@ -471,7 +487,6 @@ class DeviceList extends React.Component {
               添加新设备
             </Link>:""
           }
-          
         </div>
         <article>
           <Table
@@ -495,19 +510,13 @@ class DeviceList extends React.Component {
               {show}
             </div>
             <div className="steps-action">
-              {
-                this.state.current < steps.length - 1
-                &&
+              {this.state.current < steps.length - 1 &&
                 <Button type="primary" onClick={() => this.next()}>下一步</Button>
               }
-              {
-                this.state.current === steps.length - 1
-                &&
+              {this.state.current === steps.length - 1 &&
                 <Button type="primary" onClick={this.comAllocate.bind(this)}>完成</Button>
               }
-              {
-                this.state.current == 1
-                &&
+              {this.state.current == 1 &&
                 <Button style={{ marginLeft: 8 }} type="ghost" onClick={() => this.prev()}>
                   上一步
                 </Button>

@@ -100,20 +100,22 @@ class AgentTable extends React.Component {
     //   设备管理
     // </Link>
     return (
-      <section className="view-user-list">
+      <section className="view-user-detail">
         <header>
             <Breadcrumb>
               <Breadcrumb.Item>运营商管理</Breadcrumb.Item>
             </Breadcrumb>
         </header>
-        <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">
-          下级运营商
-        </Link>
-        {USER.role.id == 1?"":
-        <Link to={"/device"} className="ant-btn ant-btn-primary item">
-          设备管理
-        </Link>
+        <div className="toolbar">
+          <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">
+            下级运营商
+          </Link>
+          {USER.role.id == 1?"":
+            <Link to={"/device"} className="ant-btn ant-btn-primary item">
+              设备管理
+            </Link>
           }
+        </div>
         <article>
           <Table
             scroll={{ x: 700 }}
