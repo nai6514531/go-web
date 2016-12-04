@@ -374,7 +374,7 @@ func (self *DeviceService) Reset(id int, user *model.User) bool {
 	device := &model.Device{}
 	transAction := common.DB.Begin()
 	data := map[string]interface{}{
-		"user_id":          "1",
+		"user_id":          1,
 		"from_user_id":     user.Id,
 		"status":           9,
 		"has_retrofited":   1,
