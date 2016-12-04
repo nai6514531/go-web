@@ -4,7 +4,7 @@ type Device struct {
 	Model
 	UserId            int    `json:"userId"`
 	UserName          string `json:"userName" gorm:"-"`
-	UserMobile        string `json:"userName" gorm:"-"`
+	UserMobile        string `json:"userMobile" gorm:"-"`
 	FromUserId        int    `json:"fromUserId"`
 	FromUserName      string `json:"fromUserName" gorm:"-"`
 	FromUserMobile    string `json:"fromUserMobile" gorm:"-"`

@@ -78,7 +78,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 func (self *DeviceService) TotalByUserAndNextLevel(userId int) (int, error) {
 	device := &model.Device{}
 	var total int
-	r := common.DB.Model(device).Where("user_id = ? and from_user_id= ?", userId, userId).Count(&total)
+	r := common.DB.Model(device).Where("user_id = ? or from_user_id= ?", userId, userId).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -97,7 +97,7 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 
 func (self *DeviceService) ListByUserAndNextLevel(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? and from_user_id= ?", userId, userId).Order("id desc").Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ? or from_user_id= ?", userId, userId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
