@@ -94,7 +94,7 @@ const columns = [{
     width:100,
     render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?<span style={{color:'red'}}>是 / ({record.fromUserName})</span>:<span>否</span>;
+      return hasRetrofited?<div style={{color:'red'}}>是<p>({record.fromUserName}</p><p>{record.fromUserMobile})</p></div>:<span>否</span>;
       // if(USER.role.id == 5) {
       // }
       // return {
