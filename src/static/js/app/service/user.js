@@ -42,6 +42,9 @@ const UserService = {
   },
   device: (id) => {
     return apiGet(`/api/user/${id}/device`);
+  },
+  detailByAccount: (account) => {
+    return apiGet(`/api/user-detail/${account}`);
   }
 };
 
