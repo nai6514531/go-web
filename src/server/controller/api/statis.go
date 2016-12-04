@@ -6,7 +6,6 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/common"
-	"strconv"
 )
 
 var (
@@ -105,10 +104,18 @@ func (self *StatisController) Device(ctx *iris.Context) {
 }
 
 func (self *StatisController) DailyPay(ctx *iris.Context) {
-	userCashAccountService := &service.UserCashAccountService{}
+	//userCashAccountService := &service.UserCashAccountService{}
 	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	data := make(map[string]interface{}, 0)
+	alipayBill,_:=dailyBillService.DailyBillByAccountType(1)
+	bankBill,_:=dailyBillService.DailyBillByAccountType(3)
+	data["alipay"]=alipayBill
+	data["bank"]=bankBill
+	result = &enity.Result{"01070400", &data, statis_msg["01070400"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+	/*
 	alipayUserIds := make([]string, 0)
 	bankUserIds := make([]string, 0)
 	alipayAccount, err := userCashAccountService.BasicMapByType(1)        //支付宝
@@ -126,7 +133,7 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	}
 	for _, _account := range bankAccount {
 		bankUserIds = append(bankUserIds, strconv.Itoa(_account.UserId-1))
-	}
+	}*/
 	/*alipayAccount, err := dailyBillService.MnznBasicMapByType("0")        //支付宝
 	if err != nil {
 		result = &enity.Result{"01070402", err.Error(), daily_bill_msg["01070402"]}
@@ -144,7 +151,7 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 		bankUserIds = append(bankUserIds, strconv.Itoa(_account.LocalId))
 	}*/
 
-	if len(alipayUserIds) > 0 {
+	/*if len(alipayUserIds) > 0 {
 		alipay, err := dailyBillService.SumByDate(alipayUserIds...)
 		if err != nil {
 			result = &enity.Result{"01070404", err.Error(), daily_bill_msg["01070404"]}
@@ -162,5 +169,5 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	}
 	result = &enity.Result{"01070400", &data, statis_msg["01070400"]}
 	common.Log(ctx, nil)
-	ctx.JSON(iris.StatusOK, result)
+	ctx.JSON(iris.StatusOK, result)*/
 }

@@ -527,3 +527,25 @@ func (self *DailyBillService) Mark(id int) (bool, error) {
 	return true, nil
 
 }
+
+func (self *DailyBillService) DailyBillByAccountType(accountType int) (*[]*muniu.BillSumByDate, error) {
+	_accountType := strconv.Itoa(accountType)
+	list := []*muniu.BillSumByDate{}
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := "select sum(total_amount) as amount, date(bill_at) as `date` " +
+		" from `daily_bill` " +
+		" where `user_id` !=1 and `account_type` =" + _accountType + " " +
+		" and `bill_at` >='" + start + "' and bill_at<'" + end + "' group by bill_at"
+	rows, err := common.DB.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		sumByDate := &muniu.BillSumByDate{}
+		common.DB.ScanRows(rows, sumByDate)
+		list = append(list, sumByDate)
+	}
+	return &list, nil
+}
