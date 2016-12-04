@@ -113,7 +113,7 @@ func (self *DeviceService) ListBySerialNumbers(serialNumbers string) (*[]*model.
 	return list, nil
 }
 
-func (self *DeviceService) ListByUserAndSerialNumbers(userId int, serialNumbers string) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndSerialNumbers(userId int, serialNumbers []string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	r := common.DB.Where("user_id = ? and serial_number in (?) ", userId, serialNumbers).Find(list)
 	if r.Error != nil {
@@ -580,7 +580,7 @@ func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.De
 	return deviceMap, nil
 }
 
-func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, serialNumbers string) (bool, error) {
+func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, serialNumbers []string) (bool, error) {
 	transAction := common.DB.Begin()
 	mnTransAction := common.MNDB.Begin()
 	assignedAt := time.Now().Local().Format("2006-01-02 15:04:05")

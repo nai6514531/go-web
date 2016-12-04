@@ -8,7 +8,6 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strings"
-	"fmt"
 )
 
 type DeviceController struct {
@@ -817,24 +816,12 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 }
 
 func (self *DeviceController) Assign(ctx *iris.Context) {
-
-	/*
-	"01031200": "所选设备分配成功",
-	"01031201": "所选设备分配失败",
-	"01031202": "被分配的用户账户不存在",
-	"01031203": "获取被分配的设备信息异常",
-	"01031204": "被分配的用户账户不能为空",
-	"01031205": "被分配的设备不能为空",
-	"01031206": "获取被分配的设备所有者信息异常",
-	"01031207": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
-	*/
 	type AssignData struct {
 		UserAccount   string `json:"userAccount"`
 		SerialNumbers string `json:"serialNumbers"`
 	}
 	var assignData AssignData
 	ctx.ReadJSON(&assignData)
-	fmt.Println(assignData)
 	result := &enity.Result{}
 	if assignData.UserAccount == "" {
 		result = &enity.Result{"01031204", nil, device_msg["01031204"]}
@@ -855,10 +842,10 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	}
 	deviceService := &service.DeviceService{}
 	serialNumberList := strings.Split(assignData.SerialNumbers, ",")
-	serialNumbers := assignData.SerialNumbers
+	//serialNumbers := assignData.SerialNumbers
 	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
-	devices, err := deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumbers)
+	devices, err := deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumberList)
 	if err != nil {
 		result = &enity.Result{"01031203", err.Error(), device_msg["01031203"]}
 		common.Log(ctx, result)
@@ -877,7 +864,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	success, err := deviceService.Assign(toUser, fromUser, serialNumbers)
+	success, err := deviceService.Assign(toUser, fromUser, serialNumberList)
 	if !success || err != nil {
 		result = &enity.Result{"01031201", err.Error(), device_msg["01031201"]}
 		common.Log(ctx, result)
