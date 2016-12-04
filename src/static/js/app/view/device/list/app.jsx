@@ -73,12 +73,15 @@ const columns = [{
     key: 'assignedAt',
     width:100,
     render: (assignedAt,record) => {
+      const time = assignedAt?
+        moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
+        moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
+      return <span>{time}</span>
+
       // if(USER.role.id == 5) {
-        return assignedAt?
-          moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
-          moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')
       // }
       // return {
+      //   children: <span>{time}</span>,
       //   props: {
       //     colSpan: 2,
       //   },
@@ -91,8 +94,8 @@ const columns = [{
     width:20,
     render: (hasRetrofited) => {
       // 这里如果是普通运营商则不需要展示
+      return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
       // if(USER.role.id == 5) {
-        return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
       // }
       // return {
       //   props: {
