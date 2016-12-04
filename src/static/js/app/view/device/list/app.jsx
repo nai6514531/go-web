@@ -58,9 +58,9 @@ const columns = [{
     title: '运营商信息',
     dataIndex: 'userName',
     key: 'userName',
-    width:60,
+    width:100,
     render: (userName,record) => {
-      return <span>{userName}{record.mobile?' | '+record.mobile:''}</span>;
+      return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
     }
   },{
   title: '关联设备类型',
@@ -72,17 +72,36 @@ const columns = [{
     dataIndex: 'assignedAt',
     key: 'assignedAt',
     width:100,
-    render: (assignedAt) => {
-      return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):'/'
+    render: (assignedAt,record) => {
+      const time = assignedAt!=''&&assignedAt!='0000-00-00 00:00:00'?
+        moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
+        moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
+      return <span>{time}</span>
+
+      // if(USER.role.id == 5) {
+      // }
+      // return {
+      //   children: <span>{time}</span>,
+      //   props: {
+      //     colSpan: 2,
+      //   },
+      // };
     }
   }, {
     title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
-    width:20,
-    render: (hasRetrofited) => {
+    width:100,
+    render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
+      return hasRetrofited?<div style={{color:'red'}}>是<p>({record.fromUserName}</p><p>{record.fromUserMobile})</p></div>:<span>否</span>;
+      // if(USER.role.id == 5) {
+      // }
+      // return {
+      //   props: {
+      //     colSpan: 0,
+      //   },
+      // };
     }
   }, {
   title: '状态',
@@ -96,6 +115,8 @@ const columns = [{
         statusText = '启用';
       } else if(status == 9) {
         statusText = '锁定';
+      } else if(status == 601 || status == 602 || status == 603 || status == 604) {
+        statusText = '使用中';
       }
       return statusText;
     }
@@ -103,7 +124,7 @@ const columns = [{
   title: '单脱',
   dataIndex: 'firstPulsePrice',
   key: 'firstPulsePrice',
-    width:50,
+    width:40,
     render: (firstPulsePrice) => {
       return firstPulsePrice/100;
     }
@@ -111,7 +132,7 @@ const columns = [{
   title: '快洗',
   dataIndex: 'secondPulsePrice',
   key: 'secondPulsePrice',
-    width:50,
+    width:40,
     render: (secondPulsePrice) => {
       return secondPulsePrice/100;
     }
@@ -119,7 +140,7 @@ const columns = [{
   title: '标准洗',
   dataIndex: 'thirdPulsePrice',
   key: 'thirdPulsePrice',
-    width:50,
+    width:40,
     render: (thirdPulsePrice) => {
       return thirdPulsePrice/100;
     }
@@ -127,7 +148,7 @@ const columns = [{
   title: '大物洗',
   dataIndex: 'fourthPulsePrice',
   key: 'fourthPulsePrice',
-    width:50,
+    width:40,
     render: (fourthPulsePrice) => {
       return fourthPulsePrice/100;
     }
@@ -201,7 +222,7 @@ class DeviceList extends React.Component {
       selectedList:[],
       selectedRowKeys:[],
       selected: true,
-      rowColor:[],
+      rowColor:{},
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -250,7 +271,7 @@ class DeviceList extends React.Component {
         if(resultReset.fetch == true){
           this.props.getDeviceList(pager);
           self.loading = true;
-          message.success('重置设备归属人成功!',3);
+          message.success('删除成功',3);
         } else {
           message.error(resultReset.result.msg,3);
         }
@@ -410,6 +431,9 @@ class DeviceList extends React.Component {
     // 完成绑定,也有可能绑定失败,关闭 modal,重置提交栏
     this.handleCancel();
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   render() {
     const self = this;
     const { current } = this.state;
@@ -466,6 +490,7 @@ class DeviceList extends React.Component {
         let rowColor = {};
         dataSource = data.map(function (item, key) {
           rowColor[item.id] = item.hasAssigned?'lock':'';
+          self.rowColor = rowColor;
           let referenceDevice = '';
           switch (item.referenceDeviceId){
             case 1:
@@ -495,13 +520,13 @@ class DeviceList extends React.Component {
     // console.log(userInfo);
     if (this.state.current == 0){
       show = <div>
-        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登陆账号</p>
+        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登录账号</p>
         <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
       </div>
     } else if(this.state.current == 1){
       show = <div>你将把设备分配给：{userInfo.name}|{userInfo.contact}|{userInfo.mobile}，是否继续？</div>
     } else if(this.state.current == 2){
-      show = <p><Icon type="check-circle" />{this.state.bindResult}</p>
+      show = <p className="result-text"><Icon type="check-circle" /> {this.state.bindResult}</p>
     };
     return (
       <section className="view-device-list">
@@ -521,13 +546,14 @@ class DeviceList extends React.Component {
         </div>
         <article>
           <Table
-            scroll={{ x: 760 }}
+            scroll={{ x: 850 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
             loading={this.loading}
             onChange={this.handleTableChange}
             rowSelection={rowSelection}
+            rowClassName={this.rowClassName.bind(this)}
             bordered
             />
           <Modal title="批量分配" visible={this.state.visible}
