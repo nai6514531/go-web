@@ -34,7 +34,7 @@ function mapDispatchToProps(dispatch) {
     getSchoolDevice,
   };
 }
-
+const items = {}
 const columns = [{
   title: '序号',
   dataIndex: 'id',
@@ -55,10 +55,13 @@ const columns = [{
 //   key: 'address',
 // },
   {
-    title: '所属运营商',
+    title: '运营商信息',
     dataIndex: 'userName',
     key: 'userName',
     width:60,
+    render: (userName,record) => {
+      return <span>{userName}{record.mobile?' | '+record.mobile:''}</span>;
+    }
   },{
   title: '关联设备类型',
   dataIndex: 'referenceDevice',
@@ -73,19 +76,29 @@ const columns = [{
       return assignedAt?moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):'/'
     }
   }, {
-    title: '是否为返厂设备',
+    title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
     width:20,
     render: (hasRetrofited) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?'是':'否';
+      return hasRetrofited?<span style={{color:'red'}}>是</span>:<span>否</span>;
     }
   }, {
   title: '状态',
   dataIndex: 'status',
   key: 'status',
     width:20,
+    render: (status) => {
+      // 这里如果是普通运营商则不需要展示
+      let statusText = '';
+      if(status == 0){
+        statusText = '启用';
+      } else if(status == 9) {
+        statusText = '锁定';
+      }
+      return statusText;
+    }
 }, {
   title: '单脱',
   dataIndex: 'firstPulsePrice',
@@ -124,32 +137,36 @@ const columns = [{
   key: 'action',
   width: 150,
   // fixed: 'right',
-  render: (text, record) => (
-    <span>
-      <Link to={"/device/edit/" + record.id}>修改</Link>
-      <span className="ant-divider" />
-      {USER.role.id == 5 && USER.id == record.userId?
+  render: (text, record) => {
+    let node = '/';
+    if(USER.id == record.userId) {
+      node =     <span>
+  <Link to={"/device/edit/" + record.id}>修改</Link>
+  <span className="ant-divider" />
+        {USER.role.id == 5 && USER.id == record.userId?
           <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
             <a href="#">删除</a>
           </Popconfirm>
-        :
-        <Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.remove.bind(this, record.id)}>
-          <a href="#">删除</a>
-        </Popconfirm>
-      }
+          :
+          <Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
+            <a href="#">删除</a>
+          </Popconfirm>
+        }
 
-      <span className="ant-divider" />
-      {record.statusCode == 9 ?
-        <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-          <a href="#">启用</a>
-        </Popconfirm>
-        :
-        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
-          <a href="#">锁定</a>
-        </Popconfirm>
-      }
-    </span>
-  ),
+        <span className="ant-divider" />
+        {record.statusCode == 9 ?
+          <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+            <a href="#">启用</a>
+          </Popconfirm>
+          :
+          <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
+            <a href="#">锁定</a>
+          </Popconfirm>
+        }
+</span>
+    }
+    return node;
+  },
 }];
 
 const steps = [{
@@ -183,8 +200,11 @@ class DeviceList extends React.Component {
       bindResult:'',//绑定结果反馈
       selectedList:[],
       selectedRowKeys:[],
+      selected: true,
+      rowColor:[],
     };
     this.remove = this.remove.bind(this);
+    this.reset = this.reset.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
 
   }
@@ -234,7 +254,7 @@ class DeviceList extends React.Component {
         } else {
           message.error(resultReset.result.msg,3);
         }
-        self.removeDevice = -1;
+        self.resetDevice = -1;
       }
     }
 
@@ -394,6 +414,7 @@ class DeviceList extends React.Component {
     const self = this;
     const { current } = this.state;
     this.pagination = this.initializePagination();
+    this.pagination.current = this.state.page;
     // 勾选项,需要限制只能勾选自己的设备
     const selectedRowKeys = this.state.selectedRowKeys;
     const rowSelection = {
@@ -423,17 +444,28 @@ class DeviceList extends React.Component {
         // console.log(record, selected, selectedRows);
       },
       onSelectAll: (selected, selectedRows, changeRows) => {
+        var len = self.state.selectedList.length;
+        if(changeRows.length < len){
+          self.setState({
+            selectedList: [],
+            selectedRowKeys: [],
+            selected: false,
+          })
+        }
+
         // console.log(selected, selectedRows, changeRows);
       },
     };
-    
+
     const list = this.props.list;
     let dataSource = [];
     if(list) {
       if(list.fetch == true){
         const data = list.result.data.list;
         self.dataLen = data.length;
+        let rowColor = {};
         dataSource = data.map(function (item, key) {
+          rowColor[item.id] = item.hasAssigned?'lock':'';
           let referenceDevice = '';
           switch (item.referenceDeviceId){
             case 1:
@@ -448,22 +480,11 @@ class DeviceList extends React.Component {
             default:
               referenceDevice = '洗衣机';
           }
-          let status = '';
-          switch (item.status) {
-            case 0:
-              status = '启用';
-              break;
-            case 9:
-              status = '锁定';
-              break;
-            default:
-              status = '启用';
-          }
           item.key = item.id;
           item.referenceDevice = referenceDevice;
           item.statusCode = item.status;
-          item.status = status;
           item.remove = self.remove;
+          item.reset = self.reset;
           item.changeStatus = self.changeStatus;
           return item;
         })
