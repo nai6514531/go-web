@@ -69,12 +69,6 @@ const columns = [{
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
-      {record.showAction?
-        <p><Link to={'/user/' + record.id}>下级运营商</Link></p>
-      :''}
-      {USER.role.id == 1 ? "" :
-        <p><Link to={'/user/'+record.id+'/device/list'}>设备管理</Link></p>
-      }
     </div>
   ),
 }];
@@ -101,13 +95,27 @@ class AgentTable extends React.Component {
       }
       self.loading = false;
     }
+    // 原设备管理
+    // <Link to={"/user/"+ USER.id +"/device/list"} className="ant-btn ant-btn-primary item">
+    //   设备管理
+    // </Link>
     return (
-      <section className="view-user-list">
+      <section className="view-user-detail">
         <header>
             <Breadcrumb>
               <Breadcrumb.Item>运营商管理</Breadcrumb.Item>
             </Breadcrumb>
         </header>
+        <div className="toolbar">
+          <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">
+            下级运营商
+          </Link>
+          {USER.role.id == 1?"":
+            <Link to={"/device"} className="ant-btn ant-btn-primary item">
+              设备管理
+            </Link>
+          }
+        </div>
         <article>
           <Table
             scroll={{ x: 700 }}
