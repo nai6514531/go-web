@@ -634,7 +634,7 @@ const App = React.createClass({
   },
   CalculateAmount() {
     const self = this;
-    if(this.state.amount >0) {
+    if(this.state.amount >0 && this.state.selectedList.length>0) {
       confirm({
         title:'确认结算?',
         content: '选中账单总笔数为'+this.state.selectedList.length+'笔，总金额为:'+this.state.amount +'元',

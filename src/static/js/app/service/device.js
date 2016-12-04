@@ -35,6 +35,9 @@ const DeviceService = {
   serialNumber: (id, device) => {
     return apiPut(`/api/device/${id}/serial-number`, device);
   },
+  deviceAssign: (data) => {
+    return apiPut(`/api/device-assign`, data);
+  }
 };
 
 export default DeviceService;

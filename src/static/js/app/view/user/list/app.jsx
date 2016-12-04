@@ -70,9 +70,6 @@ const columns = [{
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
-      {USER.role.id == 1 ? "" :
-        <p><Link to={'/user/'+record.id+'/device/list'}>设备管理</Link></p>
-      }
     </div>
   ),
 }];
