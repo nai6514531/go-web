@@ -30,6 +30,20 @@ func (self *UserService) FindByMobile(mobile string) (*model.User, error) {
 	return user, nil
 }
 
+func (self *UserService) BasicMapByLikeName(name string) (map[int]*model.User, error) {
+	list := &[]*model.User{}
+	data := make(map[int]*model.User, 0)
+	r := common.DB.Where("name like ?", "%"+name+"%").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	for _, _user := range *list {
+		data[_user.Id] = _user
+	}
+	return data, nil
+}
+
 func (self *UserService) TotalByParentId(parentId int, searchStr string) (int, error) {
 	user := &model.User{}
 	var total int64

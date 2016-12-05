@@ -1,11 +1,14 @@
 package service
 
+
 import (
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
+	"strings"
+	"strconv"
 )
 
 type DeviceService struct {
@@ -75,27 +78,51 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(user *model.User) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNum string, schoolIds []string, userIds []string) (int, error) {
 	device := &model.Device{}
 	var total int
-	sql := "user_id = ? or from_user_id= ? and has_retrofited = 0 "
+	params := make([]interface{}, 0)
+	sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	if user.Id == 1 {
-		sql = "user_id = ? or from_user_id= ? or has_retrofited = 1 "
+		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	}
-	r := common.DB.Model(device).Where(sql, user.Id, user.Id).Count(&total)
+	params = append(params, user.Id, user.Id)
+	if len(userIds) > 0 {
+		sql += " and (user_id in (" + strings.Join(userIds, ",") + ") or from_user_id in ("+ strings.Join(userIds, ",")+ ")) "
+	}
+	if len(schoolIds) > 0 {
+		sql += " and school_id in (" + strings.Join(schoolIds, ",") + ") "
+	}
+	if serialNum != "" {
+		sql += " and serial_number like ? "
+		params = append(params, "%"+serialNum+"%")
+	}
+	r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(user *model.User, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNum string, schoolIds []string, userIds []string, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	sql := "user_id = ? or from_user_id= ? and has_retrofited = 0 "
+	params := make([]interface{}, 0)
+	sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	if user.Id == 1 {
-		sql = "user_id = ? or from_user_id= ? or has_retrofited = 1 "
+		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, user.Id, user.Id).Order("has_retrofited desc,assigned_at desc,id desc").Find(list)
+	params = append(params, user.Id, user.Id)
+	if len(userIds) > 0 {
+		sql += " and (user_id in (" + strings.Join(userIds, ",") + ") or from_user_id in ("+ strings.Join(userIds, ",")+ ")) "
+	}
+	if len(schoolIds) > 0 {
+		sql += " and school_id in (" + strings.Join(schoolIds, ",") + ") "
+	}
+	if serialNum != "" {
+		sql += " and serial_number like ? "
+		params = append(params, "%"+serialNum+"%")
+	}
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id, id desc,has_retrofited desc,assigned_at desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

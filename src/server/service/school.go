@@ -34,3 +34,42 @@ func (self *SchoolService) ListByIdList(idList []int) (*[]*model.School, error) 
 	}
 	return schools, nil
 }
+
+func (self *SchoolService) BasicMap(ids ...int) (map[int]*model.School, error) {
+	schoolService := &SchoolService{}
+	data := make(map[int]*model.School, 0)
+	list, err := schoolService.List(ids...)
+	if err != nil {
+		return nil, err
+	}
+	for _, _school := range *list {
+		data[_school.Id] = _school
+	}
+	return data, nil
+}
+
+func (self *SchoolService) BasicMapByLikeName(name string)  (map[int]*model.School, error) {
+	list := &[]*model.School{}
+	data := make(map[int]*model.School, 0)
+	r := common.DB.Where("name like ?", "%"+name+"%").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	for _, _school := range *list {
+		data[_school.Id] = _school
+	}
+	return data, nil
+}
+
+func (self *SchoolService) BasicMapAll() (map[int]*model.School, error) {
+	list := &[]*model.School{}
+	data := make(map[int]*model.School, 0)
+	r := common.DB.Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	for _, _school := range *list {
+		data[_school.Id] = _school
+	}
+	return data, nil
+}

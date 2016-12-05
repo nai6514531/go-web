@@ -8,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strings"
+	"strconv"
 )
 
 type DeviceController struct {
@@ -45,6 +46,7 @@ var (
 
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
+		"01030402": "拉取设备学校信息失败!",
 
 		"01030500": "更新设备成功!",
 		"01030501": "批量更新设备失败!",
@@ -238,7 +240,14 @@ func (self *DeviceController) Basic(ctx *iris.Context) {
 func (self *DeviceController) List(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
+	userName := ctx.URLParam("userName")
+	serialNum := ctx.URLParam("serialNumber")
+	schoolName := ctx.URLParam("schoolName")
+	userIds := make([]string, 0)
+	schoolIds := make([]string, 0)
+	//_list := make([]*model.Device, 0)
 	deviceService := &service.DeviceService{}
+	schoolService := &service.SchoolService{}
 	result := &enity.Result{}
 	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
@@ -249,23 +258,51 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := deviceService.ListByUserAndNextLevel(user, page, perPage)
+	schools, err := schoolService.BasicMapByLikeName(schoolName)
+	if err != nil {
+		result = &enity.Result{"01030402", err.Error(), device_msg["01030402"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if schoolName != ""{
+		for _schoolId, _ := range schools {
+			schoolIds = append(schoolIds, strconv.Itoa(_schoolId))
+		}
+	}
+	if userName != "" {
+		users, err := userService.BasicMapByLikeName(userName)
+		if err != nil {
+
+		}
+		for _userId, _ := range users {
+			userIds = append(userIds, strconv.Itoa(_userId))
+		}
+	}
+
+	list, err := deviceService.ListByUserAndNextLevel(user, serialNum, schoolIds, userIds, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := deviceService.TotalByUserAndNextLevel(user)
+	total, err := deviceService.TotalByUserAndNextLevel(user, serialNum, schoolIds, userIds)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//users, _ := userService.BasicMapByLikeName(name)
+
 	for _, device := range *list {
 		// 每个登录账户只拉取属于自己和由自己分配出去的设备，即user_id & from_user_id为当前登录的用户id的设备
 		// 如果设备的userId等于当前登录的用户id，则表明此设备未分配，还属于当前账户
+		/*if users[device.UserId] == nil && users[device.FromUserId] == nil{
+			total--
+			continue
+		}*/
 		if user.Id == device.UserId {
 			device.HasAssigned = 0
 			if user != nil {
@@ -293,6 +330,10 @@ func (self *DeviceController) List(ctx *iris.Context) {
 				device.UserMobile = toUser.Mobile
 			}
 		}
+		if schools[device.SchoolId] != nil {
+			device.SchoolName = schools[device.SchoolId].Name
+		}
+		//_list = append(_list, device)
 	}
 	result = &enity.Result{"01030400", &enity.Pagination{total, list}, device_msg["01030400"]}
 	common.Log(ctx, nil)

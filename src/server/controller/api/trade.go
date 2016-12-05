@@ -55,6 +55,7 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 		}
 	}*/
 	list, err := tradeService.BasicOfDevice(serialNumber, account)
+	common.Logger.Debug("list========", list)
 	if err != nil {
 		result = &enity.Result{"01080101", err.Error(), trade_msg["01080101"]}
 		common.Log(ctx, result)

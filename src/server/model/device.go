@@ -15,6 +15,7 @@ type Device struct {
 	CityId            int    `json:"cityId"`
 	DistrictId        int    `json:"districtId"`
 	SchoolId          int    `json:"schoolId"`
+	SchoolName        string `json:"schoolName" gorm:"-"`
 	Address           string `json:"address"`
 	FirstPulsePrice   int    `json:"firstPulsePrice"`
 	SecondPulsePrice  int    `json:"secondPulsePrice"`
