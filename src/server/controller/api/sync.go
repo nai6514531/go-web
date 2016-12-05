@@ -128,3 +128,18 @@ func (self *SyncController) SyncDailyBillDetail(ctx *iris.Context) {
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }
+
+func (self *SyncController) SyncUpdateBillStatusFromSodaToMnzn(ctx *iris.Context)  {
+	syncService := &service.SyncService{}
+	result := &enity.Result{}
+	boo, err := syncService.SyncUpdateBillStatusFromSodaToMnzn()
+	if err != nil {
+		result = &enity.Result{"1", err.Error(), "更新mnzn.box_stat_bill状态失败!"}
+		common.Log(ctx, result)
+	} else {
+		result = &enity.Result{"0", nil, "更新mnzn.box_stat_bill状态成功"}
+	}
+	common.Logger.Debug("boo========", boo)
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}

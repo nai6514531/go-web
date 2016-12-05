@@ -6,6 +6,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"strconv"
 	"time"
+	"github.com/jinzhu/gorm"
 )
 
 type SyncService struct {
@@ -688,4 +689,43 @@ func (self *SyncService) UpdateUserRoleRel(userId int, roleId int) (bool, error)
 		return false, r.Error
 	}
 	return true, nil
+}
+
+func (self *SyncService) SyncUpdateBillStatusFromSodaToMnzn() (bool, error) {
+	list := &[]*model.DailyBill{}
+	_map := make(map[string]string)
+	count := 0
+	var r *gorm.DB
+	r = common.DB.Model(&model.DailyBill{}).Where("status = 2").Find(list)
+	if r.Error != nil {
+		common.Logger.Debug("err: ", r.Error)
+		return false, r.Error
+	}
+
+	for _, _dailyBill := range *list {
+		_time, err := time.Parse(time.RFC3339, _dailyBill.BillAt)
+		if err == nil {
+			billAt := _time.Format("2006-01-02")
+			if _map[billAt] == "" {
+				_map[billAt] = strconv.Itoa(_dailyBill.UserId - 1)
+			}else {
+				_map[billAt] = _map[billAt] + "," + strconv.Itoa(_dailyBill.UserId - 1)
+			}
+		} else {
+			common.Logger.Debug("err:==========", err.Error())
+		}
+	}
+
+	for _billAt, _companyIds  := range _map {
+		r = common.MNDB.Model(&muniu.BoxStatBill{}).Where("COMPANYID in ("+_companyIds+") and PERIOD_START = date(?)", _billAt).Update("STATUS", "2")
+		if r.Error != nil {
+			common.Logger.Debug("false count=========", count)
+			return  false, r.Error
+		}
+		count++
+
+	}
+	common.Logger.Debug("count=========", count)
+	return true, nil
+
 }
