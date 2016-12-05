@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon} from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row} from 'antd';
 import { Link } from 'react-router';
 const Step = Steps.Step;
 import { connect } from 'react-redux';
@@ -10,7 +10,7 @@ import UserService from "../../../service/user";
 import DeviceService from "../../../service/device";
 import './app.less';
 import moment from 'moment';
-
+const InputGroup = Input.Group;
 function mapStateToProps(state) {
   const { device: { list, status, resultRemove,resultReset }, user: {schoolDevice} } = state;
   return { list, status, resultRemove,resultReset, schoolDevice };
@@ -73,7 +73,7 @@ const columns = [{
     key: 'assignedAt',
     width:100,
     render: (assignedAt,record) => {
-      const time = assignedAt!=''&&assignedAt!='0000-00-00 00:00:00'?
+      const time = assignedAt!=''&&assignedAt!='0001-01-01T00:00:00Z'?
         moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
         moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
       return <span>{time}</span>
@@ -223,6 +223,7 @@ class DeviceList extends React.Component {
       selectedRowKeys:[],
       selected: true,
       rowColor:{},
+      serialNumber:''
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -297,13 +298,13 @@ class DeviceList extends React.Component {
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
-        const pager = { page : current, perPage: pageSize};
+        const pager = { page : current, perPage: pageSize,serialNumber:self.state.serialNumber};
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
       },
       onChange(current) {
-        const pager = { page : current, perPage: self.state.perPage};
+        const pager = { page : current, perPage: self.state.perPage,serialNumber:self.state.serialNumber};
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
@@ -434,6 +435,21 @@ class DeviceList extends React.Component {
   rowClassName(record, index) {
     return this.rowColor[record.key];
   }
+  handleSerialNumberChange(e){
+    this.setState({
+      serialNumber: e.target.value
+    })
+  }
+  handleSearch(){
+    const pager = {
+      page: 1,
+      perPage: 10,
+      serialNumber:this.state.serialNumber
+    };
+    // 拉取设备详情
+    this.props.getDeviceList(pager);
+    this.loading = true;
+  }
   render() {
     const self = this;
     const { current } = this.state;
@@ -536,13 +552,23 @@ class DeviceList extends React.Component {
             <Breadcrumb.Item>设备管理</Breadcrumb.Item>
           </Breadcrumb>
         </header>
-        <div className="toolbar">
-          <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-          {USER.role.id == 5 ?
-            <Link to="/device/edit" className="ant-btn ant-btn-primary item">
-              添加新设备
-            </Link>:""
-          }
+        <div className="device-toolbar">
+            <div className="item assign">
+              <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+            </div>
+            <div className="item serialNumber">
+              <Input onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue="" placeholder="请输入设备编号"/>
+            </div>
+            <div className="item search">
+              <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
+            </div>
+            <div className="item new-device">
+              {USER.role.id == 5 ?
+                <Link to="/device/edit" className="ant-btn ant-btn-primary item">
+                  添加新设备
+                </Link>:""
+              }
+            </div>
         </div>
         <article>
           <Table

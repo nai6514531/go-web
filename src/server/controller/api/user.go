@@ -277,7 +277,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	userService := &service.UserService{}
 	user, err := userService.FindByAccount(account)
 	if err != nil {
-		result := &enity.Result{"01010109", nil, user_msg["01010109"]}
+		result := &enity.Result{"01010109", err.Error(), user_msg["01010109"]}
 		common.Log(ctx, result)
 		returnCleanCaptcha(result)
 		return
@@ -398,10 +398,10 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//判断登陆名是否已经存在
-	currentUser, _ := userService.FindByAccount(user.Account)
+	currentUser, err := userService.FindByAccount(user.Account)
 	if currentUser != nil {
 		//可以找到
-		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
+		result = &enity.Result{"01010407", err.Error(), user_msg["01010407"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -440,15 +440,15 @@ func (self *UserController) Create(ctx *iris.Context) {
 	//插入结算账号信息，type为0也新建
 	userNew, err := userService.FindByAccount(user.Account) //得到新插入的条目
 	if err != nil {
-		result = &enity.Result{"01010415", err, user_msg["01010415"]}
+		result = &enity.Result{"01010415", err.Error(), user_msg["01010415"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	cashAccount.UserId = userNew.Id //cash记录的userid设置为新插入条目的id
-	ok = userCashAccountService.Create(cashAccount)
+	ok ,err= userCashAccountService.Create(cashAccount)
 	if !ok {
-		result = &enity.Result{"01010411", nil, user_msg["01010411"]}
+		result = &enity.Result{"01010411", err.Error(), user_msg["01010411"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -459,9 +459,9 @@ func (self *UserController) Create(ctx *iris.Context) {
 	userRoleRel.UserId = user.Id
 	userRoleRel.RoleId = 2 //统一为用户角色
 	userRoleRelSevice := &service.UserRoleRelService{}
-	ok = userRoleRelSevice.Create(userRoleRel)
+	ok ,err= userRoleRelSevice.Create(userRoleRel)
 	if !ok {
-		result = &enity.Result{"01010412", nil, user_msg["01010412"]}
+		result = &enity.Result{"01010412", err.Error(), user_msg["01010412"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -564,9 +564,9 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// }
 
 	//更新到user表
-	ok := userService.Update(&user)
+	ok,err:= userService.Update(&user)
 	if !ok {
-		result = &enity.Result{"01010511", nil, user_msg["01010511"]}
+		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -598,9 +598,9 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// }
 
 	//修改直接前端传什么type就保存什么
-	ok, err := userCashAccountService.UpdateByUserId(cashAccount)
+	ok, err = userCashAccountService.UpdateByUserId(cashAccount)
 	if !ok {
-		result = &enity.Result{"01010512", err, user_msg["01010512"]}
+		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -660,7 +660,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01010602", err, user_msg["01010602"]}
+		result = &enity.Result{"01010602", err.Error(), user_msg["01010602"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -668,7 +668,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
 	cashAccount, err := userCashAccountService.BasicByUserId(id)
 	if err != nil {
-		result = &enity.Result{"01010601", err, user_msg["01010601"]}
+		result = &enity.Result{"01010601", err.Error(), user_msg["01010601"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -676,7 +676,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 	user.CashAccount = cashAccount
 	deviceTotal, err := userService.TotalOfDevice(id)
 	if err != nil {
-		result = &enity.Result{"01010601", err, user_msg["01010601"]}
+		result = &enity.Result{"01010601", err.Error(), user_msg["01010601"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -731,14 +731,14 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := userService.SubList(userId, searchStr, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01010701", err, user_msg["01010701"]}
+		result = &enity.Result{"01010701", err.Error(), user_msg["01010701"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	total, err := userService.TotalByParentId(userId, searchStr)
 	if err != nil {
-		result = &enity.Result{"01010702", err, user_msg["01010702"]}
+		result = &enity.Result{"01010702", err.Error(), user_msg["01010702"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -746,7 +746,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	for _, user := range *list {
 		userIds, err := userService.SubChildIdsByUserId(user.Id) //获取所有子子。。用户id列表
 		if err != nil {
-			result = &enity.Result{"01010701", err, user_msg["01010701"]}
+			result = &enity.Result{"01010701", err.Error(), user_msg["01010701"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -754,7 +754,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 		userIds = append(userIds, user.Id) //把自己也加上
 		deviceTotal, err := deviceService.TotalByUserIds(userIds)
 		if err != nil {
-			result = &enity.Result{"01010701", err, user_msg["01010701"]}
+			result = &enity.Result{"01010701", err.Error(), user_msg["01010701"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -803,7 +803,7 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	result := &enity.Result{}
 	user, err := userService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01010801", err, user_msg["01010801"]}
+		result = &enity.Result{"01010801", err.Error(), user_msg["01010801"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -813,7 +813,7 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	ids = append(ids, id)                                //把自己也算上
 	childIds, err := userService.SubChildIdsByUserId(id) //计算该用户下面的所有子子。。用户列表
 	if err != nil {
-		result = &enity.Result{"01010801", err, user_msg["01010801"]}
+		result = &enity.Result{"01010801", err.Error(), user_msg["01010801"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -823,7 +823,7 @@ func (self *UserController) BasicWithDeviceTotal(ctx *iris.Context) {
 	}
 	deviceTotal, err := deviceService.TotalByUserIds(ids) //根据userid列表算出设备总数
 	if err != nil {
-		result = &enity.Result{"01010801", err, user_msg["01010801"]}
+		result = &enity.Result{"01010801", err.Error(), user_msg["01010801"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -885,14 +885,14 @@ func (self *UserController) DeviceList(ctx *iris.Context) {
 	result := &enity.Result{}
 	list, err := deviceService.ListByUser(userId, page, perPage)
 	if err != nil {
-		result = &enity.Result{"01010901", err, user_msg["01010901"]}
+		result = &enity.Result{"01010901", err.Error(), user_msg["01010901"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, _ := deviceService.TotalByUser(userId)
+	total, err := deviceService.TotalByUser(userId)
 	if err != nil {
-		result = &enity.Result{"01010901", nil, user_msg["01010901"]}
+		result = &enity.Result{"01010901", err.Error(), user_msg["01010901"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -954,14 +954,14 @@ func (self *UserController) DeviceOfSchool(ctx *iris.Context) {
 	serialNums := strings.Split(deviceStr, ",")
 	list, err := deviceService.ListByUserAndSchool(userId, schoolId, page, perPage, serialNums...)
 	if err != nil {
-		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		result = &enity.Result{"01011001", err.Error(), user_msg["01011001"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	total, err := deviceService.TotalByByUserAndSchool(userId, schoolId, serialNums...) //计算总数
 	if err != nil {
-		result = &enity.Result{"01011001", nil, user_msg["01011001"]}
+		result = &enity.Result{"01011001", err.Error(), user_msg["01011001"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1016,19 +1016,18 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 	if len(serialNums) > 0 && serialNums[0] != "" {
 		common.Logger.Debugln("=======================")
 		list, err := deviceService.ListBySerialNumber(userId, schoolId, serialNums...)
-		if len(*list) <= 0 {
-			result = &enity.Result{"01011100", nil, user_msg["01011100"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, nil)
-			return
-		}
 		if err != nil {
-			result = &enity.Result{"01011104", err, user_msg["01011104"]}
+			result = &enity.Result{"01011104", err.Error(), user_msg["01011104"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-
+		if len(*list) <= 0 {
+			result = &enity.Result{"01011100", err.Error(), user_msg["01011100"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, nil)
+			return
+		}
 		for _, _device := range *list {
 			schoolIds = append(schoolIds, _device.SchoolId)
 		}
@@ -1041,7 +1040,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		//?schoolId=-1或者没有筛选条件
 		schoolIdList, err := deviceService.ListSchoolIdByUser(userId)
 		if err != nil {
-			result = &enity.Result{"01011101", err, user_msg["01011101"]}
+			result = &enity.Result{"01011101", err.Error(), user_msg["01011101"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -1049,7 +1048,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		//以id列表找学校详情
 		schools, err = schoolService.ListByIdList(*schoolIdList)
 		if err != nil {
-			result = &enity.Result{"01011101", err, user_msg["01011101"]}
+			result = &enity.Result{"01011101", err.Error(), user_msg["01011101"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -1059,7 +1058,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 		common.Logger.Debugln("schoolIds=====", schoolIds)
 		schoolList, err := schoolService.List(schoolIds...)
 		if err != nil {
-			result = &enity.Result{"01011102", err, user_msg["01011102"]}
+			result = &enity.Result{"01011102", err.Error(), user_msg["01011102"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -1073,7 +1072,7 @@ func (self *UserController) SchoolList(ctx *iris.Context) {
 			//以用户学校为条件查找数量
 			deviceTotal, err := deviceService.TotalByByUserAndSchool(userId, school.Id)
 			if err != nil {
-				result = &enity.Result{"01011101", err, user_msg["01011101"]}
+				result = &enity.Result{"01011101", err.Error(), user_msg["01011101"]}
 				common.Log(ctx, result)
 				ctx.JSON(iris.StatusOK, result)
 				return
@@ -1130,7 +1129,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	roleService := &service.RoleService{}
 	roleIds, err := roleService.ListIdByUserId(userId)
 	if err != nil {
-		result = &enity.Result{"01011201", err, user_msg["01011201"]}
+		result = &enity.Result{"01011201", err.Error(), user_msg["01011201"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1139,7 +1138,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	permissionService := &service.PermissionService{}
 	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
 	if err != nil {
-		result = &enity.Result{"01011201", nil, user_msg["01011201"]}
+		result = &enity.Result{"01011201", err.Error(), user_msg["01011201"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1148,7 +1147,7 @@ func (self *UserController) Menu(ctx *iris.Context) {
 	menuService := &service.MenuService{}
 	menuList, err := menuService.ListByPermissionIds(permissionIds)
 	if err != nil {
-		result = &enity.Result{"01011201", nil, user_msg["01011201"]}
+		result = &enity.Result{"01011201", err.Error(), user_msg["01011201"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1196,7 +1195,7 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	roleService := &service.RoleService{}
 	roleIds, err := roleService.ListIdByUserId(userId)
 	if err != nil {
-		result = &enity.Result{"01011301", err, user_msg["01011301"]}
+		result = &enity.Result{"01011301", err.Error(), user_msg["01011301"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1205,7 +1204,7 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	permissionService := &service.PermissionService{}
 	permissionIds, err := permissionService.ListIdsByRoleIds(roleIds)
 	if err != nil {
-		result = &enity.Result{"01011301", err, user_msg["01011301"]}
+		result = &enity.Result{"01011301", err.Error(), user_msg["01011301"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1213,7 +1212,7 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	//根据权限id列表找权限详情
 	permissionList, err := permissionService.ListByIds(permissionIds)
 	if err != nil {
-		result = &enity.Result{"01011301", nil, user_msg["01011301"]}
+		result = &enity.Result{"01011301", err.Error(), user_msg["01011301"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1271,7 +1270,7 @@ func (self *UserController) IsMeOrSub(ctx *iris.Context) {
 	userService := &service.UserService{}
 	user, err := userService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01011501", nil, user_msg["01011501"]}
+		result = &enity.Result{"01011501", err.Error(), user_msg["01011501"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}

@@ -20,7 +20,7 @@ func ListByTimed(isCreated bool) (*[]*muniu.BoxAdmin, error) {
 	} else {
 		_column = "UPDATETIME"
 	}
-	r := common.MNDB.Where(_column+" > ?", _time).Find(list)
+	r := common.MNDB.Where(_column + " > ?", _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -39,7 +39,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 		return false, err
 	}
 	for _, _admin := range *newAdminList {
-		newUserIds = append(newUserIds, _admin.LocalId+1) //新库用户id
+		newUserIds = append(newUserIds, _admin.LocalId + 1) //新库用户id
 	}
 	exitsUserList, err := userService.ListById(newUserIds...) //判断新数据库中是否存在
 	if err != nil {
@@ -52,17 +52,17 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 
 	for _, _admin := range *newAdminList {
 		boo := true
-		if exitsUserMap[_admin.LocalId+1] != nil {
+		if exitsUserMap[_admin.LocalId + 1] != nil {
 			boo, _ = syncService.UpdateUser(_admin)
 			if !boo {
-				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 				return false, err
 			}
 			continue
 		}
 		boo, _ = syncService.AddUser(_admin)
 		if !boo {
-			common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 			return false, err
 		}
 	}
@@ -76,7 +76,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 		boo := true
 		boo, _ = syncService.UpdateUser(_admin)
 		if !boo {
-			common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 			return false, err
 		}
 	}
@@ -484,6 +484,7 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCas
 	if status == 0 {
 		status = 1
 	}
+	/**
 	accountType := 0
 	accountName := ""
 	account := ""
@@ -506,6 +507,7 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCas
 		bankName = userCashAccount.BankName
 		mobile = userCashAccount.Mobile
 	}
+	*/
 	userId := (boxStatBill.CompanyId + 1)
 	billAt := boxStatBill.PeriodStart
 	data := map[string]interface{}{
@@ -516,14 +518,14 @@ func (self *SyncService) UpdateDailyBill(boxStatBill *muniu.BoxStatBill, userCas
 		"bill_at":      billAt,
 		"order_count":  boxStatBill.Times,
 		"status":       status,
-		"account_type": accountType,
-		"account_name": accountName,
-		"account":      account,
-		"real_name":    realName,
-		"bank_name":    bankName,
-		"mobile":       mobile,
+		//"account_type": accountType,
+		//"account_name": accountName,
+		//"account":      account,
+		//"real_name":    realName,
+		//"bank_name":    bankName,
+		//"mobile":       mobile,
 	}
-	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ?", userId, billAt).Updates(data)
+	r := common.DB.Model(&model.DailyBill{}).Where("user_id = ? and bill_at = ? and status <= 2", userId, billAt).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}

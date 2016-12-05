@@ -55,12 +55,12 @@ func (self *UserCashAccountService) BasicMapByType(payType ...int) (map[int]*mod
 	return accountMap, nil
 }
 
-func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) bool {
+func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccount) (bool,error) {
 	transAction := common.DB.Begin()
 	r := transAction.Create(userCashAccount)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		transAction.Rollback()
-		return false
+		return false,r.Error
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
@@ -68,10 +68,10 @@ func (self *UserCashAccountService) Create(userCashAccount *model.UserCashAccoun
 	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
 	if r.RowsAffected <= 0 || r.Error != nil {
 		transAction.Rollback()
-		return false
+		return false,r.Error
 	}
 	transAction.Commit()
-	return true
+	return true,nil
 }
 
 func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCashAccount) (bool, error) {

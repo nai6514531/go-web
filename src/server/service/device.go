@@ -1,13 +1,11 @@
 package service
 
-
 import (
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
-	"strings"
 	"strconv"
 )
 
@@ -78,7 +76,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNum string, schoolIds []string, userIds []string) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string) (int, error) {
 	device := &model.Device{}
 	var total int
 	params := make([]interface{}, 0)
@@ -87,15 +85,9 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNum s
 		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	}
 	params = append(params, user.Id, user.Id)
-	if len(userIds) > 0 {
-		sql += " and (user_id in (" + strings.Join(userIds, ",") + ") or from_user_id in ("+ strings.Join(userIds, ",")+ ")) "
-	}
-	if len(schoolIds) > 0 {
-		sql += " and school_id in (" + strings.Join(schoolIds, ",") + ") "
-	}
-	if serialNum != "" {
+	if serialNumber != "" {
 		sql += " and serial_number like ? "
-		params = append(params, "%"+serialNum+"%")
+		params = append(params, "%" + serialNumber + "%")
 	}
 	r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	if r.Error != nil {
@@ -104,7 +96,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNum s
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNum string, schoolIds []string, userIds []string, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	params := make([]interface{}, 0)
 	sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
@@ -112,17 +104,11 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNum st
 		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	}
 	params = append(params, user.Id, user.Id)
-	if len(userIds) > 0 {
-		sql += " and (user_id in (" + strings.Join(userIds, ",") + ") or from_user_id in ("+ strings.Join(userIds, ",")+ ")) "
-	}
-	if len(schoolIds) > 0 {
-		sql += " and school_id in (" + strings.Join(schoolIds, ",") + ") "
-	}
-	if serialNum != "" {
+	if serialNumber != "" {
 		sql += " and serial_number like ? "
-		params = append(params, "%"+serialNum+"%")
+		params = append(params, "%" + serialNumber + "%")
 	}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id, id desc,has_retrofited desc,assigned_at desc").Find(list)
+	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

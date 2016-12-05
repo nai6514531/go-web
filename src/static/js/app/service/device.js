@@ -1,18 +1,20 @@
-import { apiGet, apiPost, apiPut, apiDelete, apiPatch } from '../library/axios/api';
+import {apiGet, apiPost, apiPut, apiDelete, apiPatch} from '../library/axios/api';
 
 const DeviceService = {
   list: (pager) => {
-    const { page, perPage } = pager;
-    return apiGet(`/api/device?page=${page}&perPage=${perPage}`);
+    let {page, perPage,serialNumber} = pager;
+    serialNumber = serialNumber || '';
+    let url = `/api/device?page=${page}&perPage=${perPage}&serialNumber=${serialNumber}`;
+    return apiGet(url);
   },
   detail: (id) => {
     return apiGet(`/api/device/${id}`);
   },
   create: (device) => {
-    return apiPost(`/api/device`,device);
+    return apiPost(`/api/device`, device);
   },
   edit: (id, device) => {
-    return apiPut(`/api/device/${id}`,device);
+    return apiPut(`/api/device/${id}`, device);
   },
   reset: (id) => {
     return apiPatch(`/api/device/${id}/reset`);
@@ -26,8 +28,8 @@ const DeviceService = {
   status: (id, device) => {
     return apiPatch(`/api/device/${id}/status`, device);
   },
-  statusBySN: (serialNumber,status) => {
-    return apiPut(`/api/device-unlock?serial-number=${serialNumber}`,status);
+  statusBySN: (serialNumber, status) => {
+    return apiPut(`/api/device-unlock?serial-number=${serialNumber}`, status);
   },
   pulseName: (id, device) => {
     return apiPatch(`/api/device/${id}/pulse-name`, device);

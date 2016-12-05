@@ -36,17 +36,17 @@ func (self *UserRoleRelService) BasicByUserIdAndRoleId(userId int, roleId int) (
 	return userRoleRel, nil
 }
 
-func (self *UserRoleRelService) Create(userRoleRel *model.UserRoleRel) bool {
+func (self *UserRoleRelService) Create(userRoleRel *model.UserRoleRel) (bool,error) {
 	r := common.DB.Create(userRoleRel)
 	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+		return false,r.Error
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUserRoleRel(userRoleRel)
 	r = common.MNDB.Model(&muniu.BoxAdmin{}).Where("LOCALID = ?", boxAdmin.LocalId).Updates(boxAdmin)
 	if r.RowsAffected <= 0 || r.Error != nil {
-		return false
+		return false,r.Error
 	}
-	return true
+	return true,nil
 }

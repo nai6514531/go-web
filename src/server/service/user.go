@@ -111,7 +111,7 @@ func (self *UserService) Create(user *model.User) bool {
 	return true
 }
 
-func (self *UserService) Update(user *model.User) bool {
+func (self *UserService) Update(user *model.User) (bool, error) {
 	transAction := common.DB.Begin()
 	//r:=transAction.Save(&user).Scan(user)
 	//{"name":"0","contact":"0","mobile":"12132131213","telephone":"0","address":"0","email":"","cashAccount":{"type":3,"realName":"1","bankName":"1","account":"1","mobile":"11111111111","cityId":210500,"provinceId":210000}}
@@ -127,7 +127,7 @@ func (self *UserService) Update(user *model.User) bool {
 	if r.Error != nil {
 		common.Logger.Warningln("MNDB Save model.User:", r.Error.Error())
 		transAction.Rollback()
-		return false
+		return false,r.Error
 	}
 	//更新到木牛数据库
 	/*boxAdmin := &muniu.BoxAdmin{}
@@ -149,10 +149,10 @@ func (self *UserService) Update(user *model.User) bool {
 	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Update BoxAdmin:", r.Error.Error())
-		return false
+		return false,r.Error
 	}
 	transAction.Commit()
-	return true
+	return true,nil
 }
 
 func (self *UserService) Password(userId int, password string) (bool, error) {
