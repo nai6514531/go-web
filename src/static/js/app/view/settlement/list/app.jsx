@@ -305,6 +305,7 @@ const App = React.createClass({
 	},
   markRow(id) {
     this.mark(id);
+    this.setState({currentPage: 1})
   },
   checkedRow(ids) {
     // 无论什么情况,先把所有的灰色置空,然后再把 ids 里的 ID 放进去
@@ -706,7 +707,6 @@ const App = React.createClass({
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
 		pagination.current = this.state.currentPage;
-
 		const selectedRowKeys = this.state.selectedRowKeys;
 		const rowSelection = {
 			selectedRowKeys: selectedRowKeys,

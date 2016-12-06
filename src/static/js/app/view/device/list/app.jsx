@@ -186,10 +186,23 @@ const columns = [{
                 <a href="#">删除</a>
               </Popconfirm>
               :
-              <Popconfirm title="你确认要删除并占用该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
+              <Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
                 <a href="#">删除</a>
               </Popconfirm>
             }
+          {USER.role.id == 5?
+          <span>
+            <span className="ant-divider" />
+            {record.statusCode == 9 ?
+              <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+                <a href="#">解除占用</a>
+              </Popconfirm>
+              :
+              <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
+                <a href="#">锁定</a>
+              </Popconfirm>
+            }
+          </span>:""}
         </span>
     }
     return node;

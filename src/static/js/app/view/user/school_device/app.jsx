@@ -100,12 +100,12 @@ const columns = [{
         <p><a href="#">删除</a></p>
       </Popconfirm>
       {record.statusCode == 9 ?
-        <Popconfirm title="确认空闲吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-          <p><a href="#">空闲</a></p>
+        <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+          <p><a href="#">解除占用</a></p>
         </Popconfirm>
         :
-        <Popconfirm title="确认占用吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
-          <p><a href="#">占用</a></p>
+        <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
+          <p><a href="#">锁定</a></p>
         </Popconfirm>
       }
     </div>
