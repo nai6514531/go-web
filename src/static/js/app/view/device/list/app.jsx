@@ -64,9 +64,26 @@ const columns = [{
     }
   },{
   title: '关联设备类型',
-  dataIndex: 'referenceDevice',
-  key: 'referenceDevice',
+  dataIndex: 'referenceDeviceId',
+  key: 'referenceDeviceId',
     width:40,
+    render: (referenceDeviceId,record) => {
+      let referenceDevice = '';
+      switch (+referenceDeviceId){
+        case 1:
+          referenceDevice = '洗衣机';
+          break;
+        case 2:
+          referenceDevice = '充电桩';
+          break;
+        case 3:
+          referenceDevice = 'GPRS模块洗衣机';
+          break;
+        default:
+          referenceDevice = '';
+      }
+      return referenceDevice;
+    }
 }, {
     title: '添加时间',
     dataIndex: 'assignedAt',
@@ -115,7 +132,7 @@ const columns = [{
         statusText = '启用';
       } else if(status == 9) {
         statusText = '锁定';
-      } 
+      }
       // else if(status == 601 || status == 602 || status == 603 || status == 604) {
       //   statusText = '使用中';
       // }
@@ -391,7 +408,7 @@ class DeviceList extends React.Component {
         const current = this.state.current + 1;
         this.setState({
           current,
-          bindResult:'绑定成功'
+          bindResult:'分配成功'
         });
         message.success(data.msg,3);
         self.clearSelectRows();
@@ -508,22 +525,7 @@ class DeviceList extends React.Component {
         dataSource = data.map(function (item, key) {
           rowColor[item.id] = item.hasAssigned?'lock':'';
           self.rowColor = rowColor;
-          let referenceDevice = '';
-          switch (item.referenceDeviceId){
-            case 1:
-              referenceDevice = '洗衣机';
-              break;
-            case 2:
-              referenceDevice = '充电桩';
-              break;
-            case 3:
-              referenceDevice = 'GPRS模块洗衣机';
-              break;
-            default:
-              referenceDevice = '洗衣机';
-          }
           item.key = item.id;
-          item.referenceDevice = referenceDevice;
           item.statusCode = item.status;
           item.remove = self.remove;
           item.reset = self.reset;

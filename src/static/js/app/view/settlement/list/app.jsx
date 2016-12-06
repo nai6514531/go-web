@@ -699,14 +699,16 @@ const App = React.createClass({
           amount:amount,
 		  	})
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-		  },
-		  onSelect(record, selected, selectedRows) {
         let ids = [];
-        for(var i=0; i<selectedRows.length; i++){
-          ids.push(selectedRows[i].id);
+        for(var i=0; i< newSelectedRowKeys.length; i++){
+          console.log(newSelectedRowKeys);
+          ids.push(newSelectedRowKeys[i]);
         }
         // 改变背景色,取消的时候,获取不到选中的ID
         self.checkedRow(ids);
+      },
+		  onSelect(record, selected, selectedRows) {
+        
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
 		  	var len = self.state.list.length;
@@ -715,13 +717,8 @@ const App = React.createClass({
 			  		selectedList: [],
 			  		selectedRowKeys: []
 			  	})
-		  	}
-        let ids = [];
-        for(var i=0; i<selectedRows.length; i++){
-          ids.push(selectedRows[i].id);
+          self.checkedRow([]);
         }
-        // 改变背景色,取消的时候,获取不到选中的ID
-        self.checkedRow(ids);
 		    //console.log(selected, selectedRows, changeRows);
 		  },
 		};
