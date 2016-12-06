@@ -646,8 +646,10 @@ const App = React.createClass({
       });
       // 备选方案
       // self.multiSettle();
-    } else {
+    } else if (this.state.selectedList.length<=0) {
       message.info('请勾选您需要计算金额的账单',3);
+    } else if(this.state.amount <= 0 ){
+      message.info('勾选项金额合计为0或者账单状态不是未结账',3);
     }
     // 备选方案
     // this.setState({

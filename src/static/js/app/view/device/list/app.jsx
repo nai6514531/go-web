@@ -115,9 +115,10 @@ const columns = [{
         statusText = '启用';
       } else if(status == 9) {
         statusText = '锁定';
-      } else if(status == 601 || status == 602 || status == 603 || status == 604) {
-        statusText = '使用中';
-      }
+      } 
+      // else if(status == 601 || status == 602 || status == 603 || status == 604) {
+      //   statusText = '使用中';
+      // }
       return statusText;
     }
 }, {
