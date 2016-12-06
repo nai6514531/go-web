@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row} from 'antd';
-import { Link } from 'react-router';
+import { Link,hashHistory } from 'react-router';
 const Step = Steps.Step;
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -9,6 +9,7 @@ import * as UserActions from '../../../actions/user';
 import UserService from "../../../service/user";
 import DeviceService from "../../../service/device";
 import './app.less';
+import _ from 'lodash';
 import moment from 'moment';
 const InputGroup = Input.Group;
 function mapStateToProps(state) {
@@ -94,7 +95,6 @@ const columns = [{
         moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
         moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
       return <span>{time}</span>
-
       // if(USER.role.id == 5) {
       // }
       // return {
@@ -177,7 +177,7 @@ const columns = [{
   render: (text, record) => {
     let node = '/';
     if(USER.id == record.userId) {
-      node = 
+      node =
         <span>
           <Link to={"/device/edit/" + record.id}>修改</Link>
           <span className="ant-divider" />
@@ -250,15 +250,23 @@ class DeviceList extends React.Component {
 
   }
   componentWillMount() {
-    const pager = { page: this.state.page, perPage: this.state.perPage };
+    let pager = { page: this.state.page, perPage: this.state.perPage };
+    // serialNumber:this.state.serialNumber
     // 拉取设备详情
-    this.props.getDeviceList(pager);
     this.loading = true;
+    // const query = this.props.location.query;
+    // if(!_.isEmpty(query)) {
+    //   const serialNumber = query.serialNumber;
+    //   pager.serialNumber = serialNumber;
+    //   this.setState({serialNumber: serialNumber})
+    // }
+    this.props.getDeviceList(pager);
   }
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
     const pager = { page : this.state.page, perPage: this.state.perPage};
+    // serialNumber:this.state.serialNumber
     if(this.theStatus !== -1) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
@@ -458,11 +466,20 @@ class DeviceList extends React.Component {
       perPage: 10,
       serialNumber:this.state.serialNumber
     };
+    // 重置 URL 参数
+    // this.props.location.query.serialNumber = this.state.serialNumber;
+    // hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.loading = true;
   }
   render() {
+    // const query = this.props.location.query;
+    // let serialNumber = '';
+    // if(!_.isEmpty(query)) {
+    //   serialNumber = query.serialNumber;
+    // }
+    // defaultValue={this.state.serialNumber}
     const self = this;
     const { current } = this.state;
     this.pagination = this.initializePagination();
