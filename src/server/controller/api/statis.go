@@ -110,8 +110,10 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	data := make(map[string]interface{}, 0)
 	alipayBill,_:=dailyBillService.DailyBillByAccountType(1)
 	bankBill,_:=dailyBillService.DailyBillByAccountType(3)
+	noAccountTypeBill,_:=dailyBillService.DailyBillByAccountType(0)
 	data["alipay"]=alipayBill
 	data["bank"]=bankBill
+	data["rest"]=noAccountTypeBill
 	result = &enity.Result{"01070400", &data, statis_msg["01070400"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)

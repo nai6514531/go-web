@@ -400,17 +400,23 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	list := []*muniu.BillSumByDate{}
 	IdStr := ""
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	/*
+	select bsb.PERIOD_START as 'date', sum(bsb.MONEY) as 'amount'  from box_stat_bill bsb, box_admin ba where
+	bsb.PERIOD_START>='2016-11-29'  and bsb.PERIOD_START<'2016-12-06' and bsb.COMPANYID!=0 and ba.paytype!=-1
+	and bsb.companyid=ba.localid group by bsb.PERIOD_START;
+	*/
 	end := time.Now().Format("2006-01-02")
-	sql := " select PERIOD_START as 'date', sum(MONEY) as 'amount' " +
-		" from box_stat_bill " +
-		" where PERIOD_START>='" + start + "' " +
-		" and PERIOD_START<'" + end + "'"
+	sql := " select bsb.PERIOD_START as 'date', sum(bsb.MONEY) as 'amount' " +
+		" from box_stat_bill bsb, box_admin ba " +
+		" where bsb.PERIOD_START>='" + start + "' " +
+		" and bsb.PERIOD_START<'" + end + "'"
 	if len(companyIds) > 0 {
 		IdStr = strings.Join(companyIds, ",")
 		sql += " and COMPANYID in (" + IdStr + ") "
 	}
-	sql += " and COMPANYID!=0 " +
-		" group by PERIOD_START"
+	sql +=  " and bsb.COMPANYID!=0 " +
+		" and ba.paytype!=-1 and bsb.companyid=ba.localid " +
+		" group by bsb.PERIOD_START"
 	rows, err := common.MNDB.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
