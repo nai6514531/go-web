@@ -181,7 +181,7 @@ func (self *StatisService) Operate(date string) (*[]*map[string]interface{}, err
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
 		var d string    //日期
-		var dc int      //启用模块数
+		var dc int      //空闲模块数
 		var u int       //新增用户数
 		var r float64       //充值金额
 		var c float64       //消费金额

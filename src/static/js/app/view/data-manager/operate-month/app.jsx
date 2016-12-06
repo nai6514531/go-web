@@ -51,7 +51,7 @@ const App = React.createClass({
         key: 'increaseUserCount',
         width:70,
       }, {
-        title: '启用模块',
+        title: '空闲模块',
         dataIndex: 'enabledDeviceCount',
         key: 'enabledDeviceCount',
         width:60,

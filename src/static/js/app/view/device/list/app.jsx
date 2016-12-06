@@ -129,13 +129,12 @@ const columns = [{
       // 这里如果是普通运营商则不需要展示
       let statusText = '';
       if(status == 0){
-        statusText = '启用';
+        statusText = '空闲';
       } else if(status == 9) {
-        statusText = '锁定';
+        statusText = '占用';
+      } else if(status == 601 || status == 602 || status == 603 || status == 604) {
+        statusText = '正常';
       }
-      // else if(status == 601 || status == 602 || status == 603 || status == 604) {
-      //   statusText = '使用中';
-      // }
       return statusText;
     }
 }, {
@@ -175,34 +174,23 @@ const columns = [{
   dataIndex: 'action',
   key: 'action',
   width: 150,
-  // fixed: 'right',
   render: (text, record) => {
     let node = '/';
     if(USER.id == record.userId) {
-      node =     <span>
-  <Link to={"/device/edit/" + record.id}>修改</Link>
-  <span className="ant-divider" />
-        {USER.role.id == 5 && USER.id == record.userId?
-          <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
-            <a href="#">删除</a>
-          </Popconfirm>
-          :
-          <Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
-            <a href="#">删除</a>
-          </Popconfirm>
-        }
-
-        <span className="ant-divider" />
-        {record.statusCode == 9 ?
-          <Popconfirm title="确认启用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-            <a href="#">启用</a>
-          </Popconfirm>
-          :
-          <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
-            <a href="#">锁定</a>
-          </Popconfirm>
-        }
-</span>
+      node = 
+        <span>
+          <Link to={"/device/edit/" + record.id}>修改</Link>
+          <span className="ant-divider" />
+            {USER.role.id == 5 && USER.id == record.userId?
+              <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
+                <a href="#">删除</a>
+              </Popconfirm>
+              :
+              <Popconfirm title="你确认要删除并占用该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
+                <a href="#">删除</a>
+              </Popconfirm>
+            }
+        </span>
     }
     return node;
   },
@@ -368,7 +356,6 @@ class DeviceList extends React.Component {
     });
   }
   handleOk() {
-    console.log('Clicked OK');
     this.setState({
       visible: false,
     });
@@ -395,12 +382,6 @@ class DeviceList extends React.Component {
         message.error(error.msg,3);
       })
   }
-  clearSelectRows() {
-    this.setState({
-      selectedRowKeys: [],
-      selectedList: []
-    })
-  }
   deviceAssign(data) {
     var self = this;
     DeviceService.deviceAssign(data)
@@ -411,7 +392,6 @@ class DeviceList extends React.Component {
           bindResult:'分配成功'
         });
         message.success(data.msg,3);
-        self.clearSelectRows();
         const pager = { page: this.state.page, perPage: this.state.perPage };
         self.props.getDeviceList(pager);
         self.loading = true;
@@ -451,6 +431,7 @@ class DeviceList extends React.Component {
     this.handleCancel();
   }
   rowClassName(record, index) {
+    // 改变表格颜色
     return this.rowColor[record.key];
   }
   handleSerialNumberChange(e){
@@ -474,47 +455,32 @@ class DeviceList extends React.Component {
     this.pagination = this.initializePagination();
     this.pagination.current = this.state.page;
     // 勾选项,需要限制只能勾选自己的设备
-    const selectedRowKeys = this.state.selectedRowKeys;
     const rowSelection = {
-      selectedRowKeys: selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        // const selectedList = selectedRows.filter(function (item,key) {
-        //   return item.hasAssigned == 0;
-        // }).map(function (item,key) {
-        //   return item.serialNumber;
-        // });
-        let newSelectedRows = [];
-        let newSelectedRowKeys = [];
-        for(var i=0; i<selectedRows.length; i++){
-          let hasAssigned = selectedRows[i].hasAssigned;
-          if(!hasAssigned){
-            newSelectedRows.push(selectedRows[i].serialNumber);
-            newSelectedRowKeys.push(selectedRows[i].id);
-          }
-        }
-        this.setState({
-          selectedList:newSelectedRows,
-          selectedRowKeys:newSelectedRowKeys,
+        const selectedList = selectedRows.map(function (item,key) {
+          return item.serialNumber;
         });
-        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        this.setState({
+          selectedList:selectedList,
+        });
+        // let newSelectedRows = [];
+        // let newSelectedRowKeys = [];
+        // for(var i=0; i<selectedRows.length; i++){
+        //   let hasAssigned = selectedRows[i].hasAssigned;
+        //   if(!hasAssigned){
+        //     newSelectedRows.push(selectedRows[i].serialNumber);
+        //     newSelectedRowKeys.push(selectedRows[i].id);
+        //   }
+        // }
+        // this.setState({
+        //   selectedList:newSelectedRows,
+        //   selectedRowKeys:newSelectedRowKeys,
+        // });
       },
-      onSelect: (record, selected, selectedRows) => {
-        // console.log(record, selected, selectedRows);
-      },
-      onSelectAll: (selected, selectedRows, changeRows) => {
-        var len = self.state.selectedList.length;
-        if(changeRows.length < len){
-          self.setState({
-            selectedList: [],
-            selectedRowKeys: [],
-            selected: false,
-          })
-        }
-
-        // console.log(selected, selectedRows, changeRows);
-      },
+      getCheckboxProps: record => ({
+        disabled: record.hasAssigned,
+      }),
     };
-
     const list = this.props.list;
     let dataSource = [];
     if(list) {
@@ -555,23 +521,19 @@ class DeviceList extends React.Component {
             <Breadcrumb.Item>设备管理</Breadcrumb.Item>
           </Breadcrumb>
         </header>
-        <div className="device-toolbar">
-            <div className="item assign">
-              <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-            </div>
-            <div className="item serialNumber">
+        <div className="toolbar">
+          <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          <div className="search">
+            <div className="search-input">
               <Input onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue="" placeholder="请输入设备编号"/>
             </div>
-            <div className="item search">
-              <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
-            </div>
-            <div className="item new-device">
-              {USER.role.id == 5 ?
-                <Link to="/device/edit" className="ant-btn ant-btn-primary item">
-                  添加新设备
-                </Link>:""
-              }
-            </div>
+            <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
+          </div>
+          {USER.role.id == 5 ?
+            <Link to="/device/edit" className="ant-btn ant-btn-primary">
+              添加新设备
+            </Link>:""
+          }
         </div>
         <article>
           <Table

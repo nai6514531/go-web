@@ -1,28 +1,17 @@
 .view-device-list {
-  .device-toolbar {
-    height: 50px;
-    line-height: 50px;
-    margin-bottom: 12px;
-    .item {
-      float: left;
-      margin: 0px 5px;
+  .search {
+    display: inline-block;
+    margin-right: 10px;
+    .search-input {
+      display: inline-block;
+      width: 170px;
+      vertical-align: middle;
+      margin-left: 25px;
+      @media (max-width: 768px) {
+        margin-left: 0px;
+      }
     }
-    .new-device {
-      width: 80px;
-      margin-top: 10px;
-    }
-    .search {
-      width: 70px;
-      margin-top: 10px;
-    }
-    .assign {
-      width: 80px;
-    }
-    .serialNumber {
-      width: 200px;
-      margin-top: 11px;
-      height: 50px;
-    }
+
   }
 }
 
@@ -47,9 +36,8 @@
 }
 
 .lock {
-  .ant-checkbox-inner {
-    background: rgba(0, 0, 0, 0.1);
-  }
+  background: rgba(100, 100, 100, 0.1);
+  color: rgba(0, 0, 0, 0.3);
 }
 
 .result-text {

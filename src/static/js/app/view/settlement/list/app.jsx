@@ -7,13 +7,10 @@ import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
 import moment from 'moment';
 const confirm = Modal.confirm;
+import {hashHistory} from 'react-router';
 const App = React.createClass({
 	getInitialState() {
 		return {
-      amount:0, // 选中项的金额合计
-      // amountVisible: false,
-      rowColor:[],
-      textValue: '',
 			columns: [
         {
 				title: '账单号',
@@ -249,11 +246,15 @@ const App = React.createClass({
 			list: [],
 			total: 0,
 			loading: false,
-			cashAccountType: 0,
-			status: "",
-			hasApplied: 0,
-			billAt: '',
-			selectedList: [],   						//勾选的账单
+			cashAccountType: 0,             //搜索收款方式
+			status: "",                     //搜索账单状态
+			hasApplied: 0,                  //
+			billAt: '',                     //搜索结账时间
+      userOrBank: '',                  //搜索代理商或银行名
+      selectedList: [],   						//勾选的账单
+      amount:0,                       //选中项的金额合计
+      // amountVisible: false,
+      rowColor:[],
 			nowAliPayingOrderNum: 0,        //有多少笔支付宝的账单正在支付
 			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
@@ -533,7 +534,7 @@ const App = React.createClass({
 	},
 	handleFilter(){
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
-    const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
+    const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1})
 		this.list({
 			cashAccountType: cashAccountType,
@@ -542,33 +543,51 @@ const App = React.createClass({
 			billAt: billAt,
       perPage: this.perPage,
       page:1,
-      searchStr: textValue,
+      userOrBank: userOrBank,
     });
+    // this.props.location.query = {
+    //   cashAccountType: cashAccountType,
+    //   status: status,
+    //   billAt: billAt,
+    //   userOrBank: userOrBank,
+    // };
+    // hashHistory.replace(this.props.location);
 	},
   textHandleFilter() {
     // 单独文本搜搜
-    const textValue = this.state.textValue.replace(/[\r\n\s]/g,"");
+    const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1});
     this.list({
       page:1,
       perPage: this.perPage,
-      searchStr: textValue,
+      userOrBank: userOrBank,
     });
   },
   textChange(e) {
     this.setState({
-      textValue: e.target.value,
+      userOrBank: e.target.value,
     });
   },
 	componentWillMount() {
 		const {cashAccountType, status, hasApplied, billAt}=this.state;
-		this.list({
-			cashAccountType: cashAccountType,
-			status: status,
-			hasApplied: hasApplied,
-			billAt: billAt
-		});
-	},
+    let search = {
+      	cashAccountType: cashAccountType,
+      	status: status,
+      	hasApplied: hasApplied,
+      	billAt: billAt
+    }
+    // const query = this.props.location.query;
+    // if(!_.isEmpty(query)) {
+    //   search = {
+    //     cashAccountType: query.cashAccountType,
+    //     status: query.status,
+    //     billAt: query.billAt,
+    //     userOrBank: query.userOrBank
+    //   }
+    //   this.setState(search);
+    // }
+    this.list(search);
+  },
 	handleCashAccountTypeChange(value){
 		this.setState({
 			cashAccountType: value
@@ -668,6 +687,21 @@ const App = React.createClass({
     // </Modal>
   },
 	render(){
+    // let defaultValue = {
+    //   cashAccountType: this.state.cashAccountType,
+    //   status: this.state.status,
+    //   billAt: this.state.billAt,
+    //   userOrBank:this.state.userOrBank,
+    // };
+    // const query = this.props.location.query;
+    // if(!_.isEmpty(query)) {
+    //   defaultValue = {
+    //     cashAccountType: query.cashAccountType,
+    //     status: query.status,
+    //     billAt: query.billAt,
+    //     userOrBank:query.userOrBank,
+    //   };
+    // }
 		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
@@ -701,14 +735,13 @@ const App = React.createClass({
 		    //console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         let ids = [];
         for(var i=0; i< newSelectedRowKeys.length; i++){
-          console.log(newSelectedRowKeys);
           ids.push(newSelectedRowKeys[i]);
         }
         // 改变背景色,取消的时候,获取不到选中的ID
         self.checkedRow(ids);
       },
 		  onSelect(record, selected, selectedRows) {
-        
+
 		  },
 		  onSelectAll(selected, selectedRows, changeRows) {
 		  	var len = self.state.list.length;
