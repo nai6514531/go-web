@@ -15,7 +15,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 	list := make([]*map[string]interface{}, 0)
 	param := make([]interface{}, 0)
 	sql = "select a.name,a.servicephone,a.agencyid,w.deviceno,w.passwd,w.usermobile,w.price,w.washtype," +
-	"w.inserttime,i.address,w.status,w.localid from box_wash w left join box_admin a on " +
+	"w.inserttime,IFNULL(i.address, '') as address,w.status,w.localid from box_wash w left join box_admin a on " +
 	"w.companyid=a.localid left join box_info i on w.deviceno=i.deviceno "
 
 	if serialNumber != "" {
