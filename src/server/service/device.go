@@ -7,6 +7,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
 	"strconv"
+	"github.com/spf13/viper"
 )
 
 type DeviceService struct {
@@ -506,9 +507,11 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	mnTransAction := common.MNDB.Begin()
 	device.UserId = 1 //添加的设备userid为1
 	device.CreatedAt = time.Now()
-	sql := "INSERT INTO device (user_id,label,serial_number,reference_device_id,province_id,city_id,district_id,school_id,address,first_pulse_price,second_pulse_price,third_pulse_price,fourth_pulse_price,first_pulse_name,second_pulse_name,third_pulse_name,fourth_pulse_name,status,created_at,updated_at) VALUES "
+	step := viper.GetInt("device.step")
+	device.Step = step
+	sql := "INSERT INTO device (user_id,label,step,serial_number,reference_device_id,province_id,city_id,district_id,school_id,address,first_pulse_price,second_pulse_price,third_pulse_price,fourth_pulse_price,first_pulse_name,second_pulse_name,third_pulse_name,fourth_pulse_name,status,created_at,updated_at) VALUES "
 	for k, serial := range serialList {
-		val := fmt.Sprintf("(%d,'%s','%s',%d,%d,%d,%d,%d,'%s',%d,%d,%d,%d,'%s','%s','%s','%s',%d,'%s','%s')", device.UserId, device.Label, serial, device.ReferenceDeviceId, device.ProvinceId, device.CityId, device.DistrictId, device.SchoolId, device.Address, device.FirstPulsePrice, device.SecondPulsePrice, device.ThirdPulsePrice, device.FourthPulsePrice, device.FirstPulseName, device.SecondPulseName, device.ThirdPulseName, device.FourthPulseName, device.Status, device.CreatedAt, device.UpdatedAt)
+		val := fmt.Sprintf("(%d,'%s',%d,'%s',%d,%d,%d,%d,%d,'%s',%d,%d,%d,%d,'%s','%s','%s','%s',%d,'%s','%s')", device.UserId, device.Label, step, serial, device.ReferenceDeviceId, device.ProvinceId, device.CityId, device.DistrictId, device.SchoolId, device.Address, device.FirstPulsePrice, device.SecondPulsePrice, device.ThirdPulsePrice, device.FourthPulsePrice, device.FirstPulseName, device.SecondPulseName, device.ThirdPulseName, device.FourthPulseName, device.Status, device.CreatedAt, device.UpdatedAt)
 		sql = sql + val
 		if k != len(serialList) - 1 {
 			sql = sql + ","

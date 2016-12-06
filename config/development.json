@@ -65,5 +65,8 @@
       "maxActive": 50,
       "idleTimeout": 60
     }
+  },
+  "device": {
+    "step": 13
   }
 }
