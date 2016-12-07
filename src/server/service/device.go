@@ -77,19 +77,15 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 }
 
 func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string, userQuery string) (int, error) {
-	//device := &model.Device{}
 	var total int
 	params := make([]interface{}, 0)
-	/*sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
-	if user.Id == 1 {
-		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
+
+	sql := ""
+	if userQuery != "" {
+		sql = " select count(*) as total from device d, user u where 1=1 "
+	} else {
+		sql = " select count(*) as total from device d where 1=1 "
 	}
-	params = append(params, user.Id, user.Id)
-	if serialNumber != "" {
-		sql += " and serial_number like ? "
-		params = append(params, "%" + serialNumber + "%")
-	}*/
-	sql := "select count(*) as total from device d, user u where 1=1"
 	if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	} else {
@@ -99,12 +95,10 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	if serialNumber != "" {
 		sql += " and d.serial_number like ? "
 		params = append(params, "%" + serialNumber + "%")
-	}
-	if userQuery != "" {
-		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and ( u.name like ? or u.account like ? or u.contact like ? ) ) "
+	} else if userQuery != "" {
+		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
-	//r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	r := common.DB.Raw(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
@@ -115,7 +109,12 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, page int, perPage int) (*[]*model.Device, error) {
 	list := make([]*model.Device, 0)
 	params := make([]interface{}, 0)
-	sql := "select u.name, d.* from device d, user u where 1=1 "
+	sql := ""
+	if userQuery != "" {
+		sql = " select u.name as user_name, d.* from device d, user u where 1=1 "
+	} else {
+		sql = " select d.* from device d where 1=1 "
+	}
 	if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	} else {
@@ -125,12 +124,10 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	if serialNumber != "" {
 		sql += " and d.serial_number like ? "
 		params = append(params, "%" + serialNumber + "%")
-	}
-	if userQuery != "" {
-		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
+	} else if userQuery != "" {
+		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
-	//r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc").Find(list)
 	sql += " order by case when user_id=? then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc limit ? offset ?"
 	params = append(params, user.Id, perPage, (page - 1) * perPage)
 	rows, err := common.DB.Raw(sql, params...).Rows()
@@ -140,8 +137,8 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 		return nil, err
 	}
 	for rows.Next() {
-		var device *model.Device
-		common.DB.ScanRows(rows, &device)
+		device := &model.Device{}
+		common.DB.ScanRows(rows, device)
 		list = append(list, device)
 
 	}
