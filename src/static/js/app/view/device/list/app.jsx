@@ -509,7 +509,7 @@ class DeviceList extends React.Component {
         self.dataLen = data.length;
         let rowColor = {};
         dataSource = data.map(function (item, key) {
-          rowColor[item.id] = item.hasAssigned?'lock':'';
+          rowColor[item.serialNumber] = item.hasAssigned?'lock':'';
           self.rowColor = rowColor;
           item.key = item.serialNumber;
           item.statusCode = item.status;
