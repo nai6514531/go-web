@@ -2,9 +2,10 @@ import {apiGet, apiPost, apiPut, apiDelete, apiPatch} from '../library/axios/api
 
 const DeviceService = {
   list: (pager) => {
-    let {page, perPage,serialNumber} = pager;
+    let {page, perPage,serialNumber,userQuery} = pager;
     serialNumber = serialNumber || '';
-    let url = `/api/device?page=${page}&perPage=${perPage}&serialNumber=${serialNumber}`;
+    userQuery = userQuery || '';
+    let url = `/api/device?page=${page}&perPage=${perPage}&serialNumber=${serialNumber}&userQuery=${userQuery}`;
     return apiGet(url);
   },
   detail: (id) => {

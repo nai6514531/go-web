@@ -243,7 +243,8 @@ class DeviceList extends React.Component {
       selectedRowKeys:[],
       selected: true,
       rowColor:{},
-      serialNumber:''
+      serialNumber:'',
+      userQuery:''
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -251,21 +252,24 @@ class DeviceList extends React.Component {
 
   }
   componentWillMount() {
-    let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
+    let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
     // 拉取设备详情
     this.loading = true;
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
       const serialNumber = query.serialNumber;
+      const userQuery = query.userQuery;
       pager.serialNumber = serialNumber;
+      pager.userQuery = userQuery;
       this.setState({serialNumber: serialNumber})
+      this.setState({userQuery: userQuery})
     }
     this.props.getDeviceList(pager);
   }
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
-    const pager = { page : this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
+    const pager = { page : this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
     if(this.theStatus !== -1) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
@@ -324,13 +328,13 @@ class DeviceList extends React.Component {
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
-        const pager = { page : current, perPage: pageSize,serialNumber:self.state.serialNumber};
+        const pager = { page : current, perPage: pageSize,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
       },
       onChange(current) {
-        const pager = { page : current, perPage: self.state.perPage,serialNumber:self.state.serialNumber};
+        const pager = { page : current, perPage: self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
@@ -407,7 +411,7 @@ class DeviceList extends React.Component {
           bindResult:'分配成功'
         });
         message.success(data.msg,3);
-        const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
+        const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
         self.setState({selectedRowKeys:[]});
         self.props.getDeviceList(pager);
         self.loading = true;
@@ -460,16 +464,48 @@ class DeviceList extends React.Component {
       serialNumber: e.target.value
     })
   }
+  handleUserChange(e){
+    this.setState({
+      userQuery: e.target.value
+    })
+  }
   handleSearch(){
     const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g,"");
     const pager = {
       page: 1,
       perPage: this.state.perPage,
-      serialNumber:serialNumber
+      serialNumber:serialNumber,
+      userQuery:''
     };
-    this.setState({page:1});
+    this.setState({
+      page:1,
+      userQuery:''
+    });
+    this.refs.searchUserInput.refs.input.value=''
     // 重置 URL 参数
     this.props.location.query.serialNumber = this.state.serialNumber;
+    this.props.location.query.userQuery = '';
+    hashHistory.replace(this.props.location);
+    // 拉取设备详情
+    this.props.getDeviceList(pager);
+    this.loading = true;
+  }
+  handleUserSearch(){
+    const userQuery = this.state.userQuery.replace(/[\r\n\s]/g,"");
+    const pager = {
+      page: 1,
+      perPage: this.state.perPage,
+      userQuery:userQuery,
+      serialNumber:''
+    };
+    this.setState({
+      page:1,
+      serialNumber:''
+    });
+    this.refs.searchSerialInput.refs.input.value=''
+    // 重置 URL 参数
+    this.props.location.query.userQuery = this.state.userQuery;
+    this.props.location.query.serialNumber = '';
     hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
@@ -478,8 +514,12 @@ class DeviceList extends React.Component {
   render() {
     const query = this.props.location.query;
     let serialNumber = '';
+    let userQuery = '';
     if(!_.isEmpty(query)) {
       serialNumber = query.serialNumber;
+    }
+    if(!_.isEmpty(query)) {
+      userQuery = query.userQuery;
     }
     const self = this;
     const { current } = this.state;
@@ -546,10 +586,14 @@ class DeviceList extends React.Component {
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
           <div className="search">
-            <div className="search-input">
-              <Input onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
+            <div className="serial search-input">
+              <Input ref="searchSerialInput" onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
+            <div className="user search-input">
+              <Input ref="searchUserInput" onChange={this.handleUserChange.bind(this)} addonBefore="账户或用户名:" defaultValue={userQuery} placeholder="请输入用户账户或用户名"/>
+            </div>
+            <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
           </div>
           {USER.role.id == 5 ?
             <Link to="/device/edit" className="ant-btn ant-btn-primary">
