@@ -92,7 +92,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	sql := "select count(*) as total from device d, user u where 1=1"
 	if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
-	}else {
+	} else {
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)
@@ -102,7 +102,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	}
 	if userQuery != "" {
 		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and ( u.name like ? or u.account like ? or u.contact like ? ) ) "
-		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
+		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
 	//r := common.DB.Model(device).Where(sql, params...).Count(&total)
 	r := common.DB.Raw(sql, params...).Count(&total)
@@ -118,7 +118,7 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	sql := "select u.name, d.* from device d, user u where 1=1 "
 	if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
-	}else {
+	} else {
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)
@@ -128,11 +128,11 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	}
 	if userQuery != "" {
 		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
-		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
+		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
 	//r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc").Find(list)
 	sql += " order by case when user_id=? then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc limit ? offset ?"
-	params = append(params, user.Id, perPage, (page-1)*perPage)
+	params = append(params, user.Id, perPage, (page - 1) * perPage)
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -658,7 +658,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 		"UPDATETIME": assignedAt,
 		"STATUS":     "0",
 	}
-	mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)
 	if r.Error != nil {
 		mnTransAction.Rollback()
 		transAction.Rollback()
