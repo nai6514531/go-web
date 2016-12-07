@@ -95,30 +95,23 @@ const columns = [{
         moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
         moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss');
       return <span>{time}</span>
-      // if(USER.role.id == 5) {
-      // }
-      // return {
-      //   children: <span>{time}</span>,
-      //   props: {
-      //     colSpan: 2,
-      //   },
-      // };
     }
   }, {
     title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
-    width:100,
+    width:USER.role.id == 5?100:30,
+    colSpan:USER.role.id == 5?1:0,
     render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
-      return hasRetrofited?<div style={{color:'red'}}>是<p>({record.fromUserName}</p><p>{record.fromUserMobile})</p></div>:<span>否</span>;
-      // if(USER.role.id == 5) {
-      // }
-      // return {
-      //   props: {
-      //     colSpan: 0,
-      //   },
-      // };
+      if(USER.role.id == 5) {
+        return hasRetrofited?<div style={{color:'red'}}>是<p>({record.fromUserName}</p><p>{record.fromUserMobile})</p></div>:<span>否</span>;
+      }
+      return {
+        props: {
+          colSpan: 0,
+        },
+      };
     }
   }, {
   title: '状态',
