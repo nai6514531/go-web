@@ -6,7 +6,6 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
-	"strconv"
 	"github.com/spf13/viper"
 )
 
@@ -77,11 +76,11 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string) (int, error) {
-	device := &model.Device{}
+func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string, userQuery string) (int, error) {
+	//device := &model.Device{}
 	var total int
 	params := make([]interface{}, 0)
-	sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
+	/*sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	if user.Id == 1 {
 		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	}
@@ -89,31 +88,64 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	if serialNumber != "" {
 		sql += " and serial_number like ? "
 		params = append(params, "%" + serialNumber + "%")
+	}*/
+	sql := "select count(*) as total from device d, user u where 1=1"
+	if user.Id == 1 {
+		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
+	}else {
+		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
-	r := common.DB.Model(device).Where(sql, params...).Count(&total)
+	params = append(params, user.Id, user.Id)
+	if serialNumber != "" {
+		sql += " and d.serial_number like ? "
+		params = append(params, "%" + serialNumber + "%")
+	}
+	if userQuery != "" {
+		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and ( u.name like ? or u.account like ? or u.contact like ? ) ) "
+		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
+	}
+	//r := common.DB.Model(device).Where(sql, params...).Count(&total)
+	r := common.DB.Raw(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, page int, perPage int) (*[]*model.Device, error) {
-	list := &[]*model.Device{}
+func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, page int, perPage int) (*[]*model.Device, error) {
+	list := make([]*model.Device, 0)
 	params := make([]interface{}, 0)
-	sql := "(user_id = ? or from_user_id= ? and has_retrofited = 0) "
+	sql := "select u.name, d.* from device d, user u where 1=1 "
 	if user.Id == 1 {
-		sql = "(user_id = ? or from_user_id= ? or has_retrofited = 1) "
+		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
+	}else {
+		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)
 	if serialNumber != "" {
-		sql += " and serial_number like ? "
+		sql += " and d.serial_number like ? "
 		params = append(params, "%" + serialNumber + "%")
 	}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc").Find(list)
-	if r.Error != nil {
-		return nil, r.Error
+	if userQuery != "" {
+		sql += " and ( (u.id=d.user_id or u.id=d.from_user_Id) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
+		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
 	}
-	return list, nil
+	//r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order(" case when user_id=" + strconv.Itoa(user.Id) + " then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc").Find(list)
+	sql += " order by case when user_id=? then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc limit ? offset ?"
+	params = append(params, user.Id, perPage, (page-1)*perPage)
+	rows, err := common.DB.Raw(sql, params...).Rows()
+	defer rows.Close()
+	if err != nil {
+		common.Logger.Debug("-----------------", err.Error())
+		return nil, err
+	}
+	for rows.Next() {
+		var device *model.Device
+		common.DB.ScanRows(rows, &device)
+		list = append(list, device)
+
+	}
+	return &list, nil
 }
 
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
