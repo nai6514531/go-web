@@ -60,8 +60,17 @@ const columns = [{
     dataIndex: 'userName',
     key: 'userName',
     width:100,
+    colSpan:USER.role.id == 5?1:2,
     render: (userName,record) => {
-      return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
+      if(USER.role.id == 5) {
+        return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
+      }
+      return {
+        children: <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>,
+        props: {
+          colSpan: 2,
+        },
+      };
     }
   },{
   title: '关联设备类型',
@@ -100,7 +109,7 @@ const columns = [{
     title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
-    width:USER.role.id == 5?100:30,
+    width: 100,
     colSpan:USER.role.id == 5?1:0,
     render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
