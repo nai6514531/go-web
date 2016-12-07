@@ -411,6 +411,7 @@ class DeviceList extends React.Component {
         });
         message.success(data.msg,3);
         const pager = { page: this.state.page, perPage: this.state.perPage };
+        self.setState({selectedRowKeys:[]})
         self.props.getDeviceList(pager);
         self.loading = true;
       },(error)=>{
@@ -484,7 +485,9 @@ class DeviceList extends React.Component {
     this.pagination = this.initializePagination();
     this.pagination.current = this.state.page;
     // 勾选项,需要限制只能勾选自己的设备
+    const selectedRowKeys = this.state.selectedRowKeys;
     const rowSelection = {
+      selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         this.setState({
           selectedRowKeys:selectedRowKeys,
