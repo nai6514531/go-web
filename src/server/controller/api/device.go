@@ -864,6 +864,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	}
 	if len(*devices) != len(serialNumberList) {
 		result = &enity.Result{"01031207", nil, device_msg["01031207"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
