@@ -238,7 +238,6 @@ class DeviceList extends React.Component {
         contact:'',
       },// 获取的用户信息
       bindResult:'',//绑定结果反馈
-      selectedList:[],
       selectedRowKeys:[],
       selected: true,
       rowColor:{},
@@ -250,8 +249,7 @@ class DeviceList extends React.Component {
 
   }
   componentWillMount() {
-    let pager = { page: this.state.page, perPage: this.state.perPage };
-    // serialNumber:this.state.serialNumber
+    let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
     // 拉取设备详情
     this.loading = true;
     // const query = this.props.location.query;
@@ -265,8 +263,7 @@ class DeviceList extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
-    const pager = { page : this.state.page, perPage: this.state.perPage};
-    // serialNumber:this.state.serialNumber
+    const pager = { page : this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
     if(this.theStatus !== -1) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
@@ -365,7 +362,7 @@ class DeviceList extends React.Component {
     }
   }
   handleAllocate() {
-    if(this.state.selectedList.length > 0) {
+    if(this.state.selectedRowKeys.length > 0) {
       this.showModal();
     } else {
       message.info('请至少选择一个设备',3);
@@ -431,7 +428,7 @@ class DeviceList extends React.Component {
       }
     } else if(this.state.current == 1) {
       // 第二步,如果账号信息存在,则提交账号信息和设备编号,否则不能进入到下一步
-      const serialNumbers = this.state.selectedList.join(",");
+      const serialNumbers = this.state.selectedRowKeys.join(",");
       const { account }= this.state.userInfo;
       const data = {
         userAccount: account,
@@ -461,11 +458,13 @@ class DeviceList extends React.Component {
     })
   }
   handleSearch(){
+    const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g,"");
     const pager = {
       page: 1,
-      perPage: 10,
-      serialNumber:this.state.serialNumber
+      perPage: this.state.perPage,
+      serialNumber:serialNumber
     };
+    this.setState({page:1});
     // 重置 URL 参数
     // this.props.location.query.serialNumber = this.state.serialNumber;
     // hashHistory.replace(this.props.location);
@@ -487,25 +486,14 @@ class DeviceList extends React.Component {
     // 勾选项,需要限制只能勾选自己的设备
     const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-        const selectedList = selectedRows.map(function (item,key) {
-          return item.serialNumber;
-        });
         this.setState({
-          selectedList:selectedList,
+          selectedRowKeys:selectedRowKeys,
         });
-        // let newSelectedRows = [];
-        // let newSelectedRowKeys = [];
-        // for(var i=0; i<selectedRows.length; i++){
-        //   let hasAssigned = selectedRows[i].hasAssigned;
-        //   if(!hasAssigned){
-        //     newSelectedRows.push(selectedRows[i].serialNumber);
-        //     newSelectedRowKeys.push(selectedRows[i].id);
-        //   }
-        // }
-        // this.setState({
-        //   selectedList:newSelectedRows,
-        //   selectedRowKeys:newSelectedRowKeys,
-        // });
+        // console.log('onChange',selectedRows,selectedRowKeys);
+      },
+      onSelect: (record, selected, selectedRows) => {
+        // record 当前被操作的行,selected 是否选中当前被操作的行,selectedRows 所有被选中的行
+        // console.log('onSelect',record,selected,selectedRows);
       },
       getCheckboxProps: record => ({
         disabled: record.hasAssigned,
@@ -535,7 +523,7 @@ class DeviceList extends React.Component {
     // console.log(userInfo);
     if (this.state.current == 0){
       show = <div>
-        <p className="device-tips">您已选择{this.state.selectedList.length}个设备进行分配,请输入被分配运营商的登录账号</p>
+        <p className="device-tips">您已选择{this.state.selectedRowKeys.length}个设备进行分配,请输入被分配运营商的登录账号</p>
         <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
       </div>
     } else if(this.state.current == 1){
