@@ -240,6 +240,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
 	serialNumber := ctx.URLParam("serialNumber")
+	userQuery := ctx.URLParam("userQuery")
 	//_list := make([]*model.Device, 0)
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
@@ -252,14 +253,14 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := deviceService.ListByUserAndNextLevel(user, serialNumber,page, perPage)
+	list, err := deviceService.ListByUserAndNextLevel(user, serialNumber, userQuery, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := deviceService.TotalByUserAndNextLevel(user, serialNumber)
+	total, err := deviceService.TotalByUserAndNextLevel(user, serialNumber, userQuery)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
