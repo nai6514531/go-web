@@ -252,12 +252,12 @@ class DeviceList extends React.Component {
     let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
     // 拉取设备详情
     this.loading = true;
-    // const query = this.props.location.query;
-    // if(!_.isEmpty(query)) {
-    //   const serialNumber = query.serialNumber;
-    //   pager.serialNumber = serialNumber;
-    //   this.setState({serialNumber: serialNumber})
-    // }
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      const serialNumber = query.serialNumber;
+      pager.serialNumber = serialNumber;
+      this.setState({serialNumber: serialNumber})
+    }
     this.props.getDeviceList(pager);
   }
   componentWillReceiveProps(nextProps) {
@@ -373,11 +373,6 @@ class DeviceList extends React.Component {
       visible: true,
     });
   }
-  handleOk() {
-    this.setState({
-      visible: false,
-    });
-  }
   handleCancel(e) {
     this.setState({
       visible: false,
@@ -410,13 +405,18 @@ class DeviceList extends React.Component {
           bindResult:'分配成功'
         });
         message.success(data.msg,3);
-        const pager = { page: this.state.page, perPage: this.state.perPage };
-        self.setState({selectedRowKeys:[]})
+        const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber};
+        self.setState({selectedRowKeys:[]});
         self.props.getDeviceList(pager);
         self.loading = true;
       },(error)=>{
         message.error(error.msg,3);
       })
+  }
+  resetHashHistory() {
+    this.props.location.query.serialNumber = "";
+    hashHistory.replace(this.props.location);
+    this.setState({serialNumber:""})
   }
   next() {
     if(this.state.current == 0) {
@@ -467,19 +467,18 @@ class DeviceList extends React.Component {
     };
     this.setState({page:1});
     // 重置 URL 参数
-    // this.props.location.query.serialNumber = this.state.serialNumber;
-    // hashHistory.replace(this.props.location);
+    this.props.location.query.serialNumber = this.state.serialNumber;
+    hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.loading = true;
   }
   render() {
-    // const query = this.props.location.query;
-    // let serialNumber = '';
-    // if(!_.isEmpty(query)) {
-    //   serialNumber = query.serialNumber;
-    // }
-    // defaultValue={this.state.serialNumber}
+    const query = this.props.location.query;
+    let serialNumber = '';
+    if(!_.isEmpty(query)) {
+      serialNumber = query.serialNumber;
+    }
     const self = this;
     const { current } = this.state;
     this.pagination = this.initializePagination();
@@ -546,7 +545,7 @@ class DeviceList extends React.Component {
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
           <div className="search">
             <div className="search-input">
-              <Input onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue="" placeholder="请输入设备编号"/>
+              <Input onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
           </div>
@@ -570,7 +569,7 @@ class DeviceList extends React.Component {
             />
           <Modal title="批量分配" visible={this.state.visible}
                  wrapClassName="allocateModal"
-                 onOk={this.handleOk.bind(this)} onCancel={this.handleCancel.bind(this)}
+                 onCancel={this.handleCancel.bind(this)}
           >
             <Steps current={current}>
               {steps.map(item => <Step key={item.title} title={item.title} />)}
