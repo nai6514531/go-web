@@ -1,6 +1,7 @@
 {
 	"ImportPath": "maizuo.com/soda-manager",
 	"GoVersion": "go1.7",
+	"GodepVersion": "v75",
 	"Packages": [
 		"./..."
 	],
@@ -47,6 +48,10 @@
 			"ImportPath": "github.com/garyburd/redigo/redis",
 			"Comment": "v1.0.0-5-gffa8d46",
 			"Rev": "ffa8d46ada782d81cfda81a0fbd9f45ceae448e8"
+		},
+		{
+			"ImportPath": "github.com/go-errors/errors",
+			"Rev": "a41850380601eeb43f4350f7d17c6bbd8944aaf8"
 		},
 		{
 			"ImportPath": "github.com/go-sql-driver/mysql",
@@ -136,10 +141,6 @@
 		},
 		{
 			"ImportPath": "github.com/iris-contrib/middleware/cors",
-			"Rev": "e051726149192566c626ff399e057d95667a9998"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/middleware/recovery",
 			"Rev": "e051726149192566c626ff399e057d95667a9998"
 		},
 		{
