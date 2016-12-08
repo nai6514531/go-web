@@ -88,27 +88,27 @@ func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
 	return &list, nil
 }
 
-func (self *UserService) Create(user *model.User) bool {
+func (self *UserService) Create(user *model.User) (bool,error) {
 	//对明文密码md5
 	//user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
 	transAction := common.DB.Begin()
 	r := transAction.Create(user)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	if r.Error != nil {
 		transAction.Rollback()
-		return false
+		return false, r.Error
 	}
 	//更新到木牛数据库
 	boxAdmin := &muniu.BoxAdmin{}
 	boxAdmin.FillByUser(user)
 	boxAdmin.LastLoginTime = "0000-00-00 00:00:00"
 	r = common.MNDB.Create(boxAdmin)
-	if r.RowsAffected <= 0 || r.Error != nil {
+	if r.Error != nil {
 		transAction.Rollback()
 		common.Logger.Warningln("MNDB Create BoxAdmin:", r.Error.Error())
-		return false
+		return false, r.Error
 	}
 	transAction.Commit()
-	return true
+	return true,nil
 }
 
 func (self *UserService) Update(user *model.User) (bool, error) {
