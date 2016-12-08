@@ -192,7 +192,6 @@ const columns = [{
                 <a href="#">删除</a>
               </Popconfirm>
             }
-          {USER.role.id == 5?
           <span>
             <span className="ant-divider" />
             {record.statusCode == 9 ?
@@ -204,7 +203,7 @@ const columns = [{
                 <a href="#">锁定</a>
               </Popconfirm>
             }
-          </span>:""}
+          </span>
         </span>
     }
     return node;
