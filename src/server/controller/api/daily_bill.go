@@ -599,7 +599,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 
 	//用于更新旧系统数据
 	if len(successedBillIds) > 0 {
-		mnznSuccessedBillList, err := BasicMnznBillLists(&billIdSettledAtMap, successedBillIds...)
+		mnznSuccessedBillList, err := BasicMnznBillLists(true, &billIdSettledAtMap, successedBillIds...)
 		if err != nil {
 			common.Logger.Debugln(daily_bill_msg["01060504"], ":", err.Error())
 			result := &enity.Result{"01060504", err.Error(), daily_bill_msg["01060504"]}
@@ -610,7 +610,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 		mnznBillList = append(mnznBillList, mnznSuccessedBillList...)
 	}
 	if len(failureBillIds) > 0 {
-		mnznFailureBillList, err := BasicMnznBillLists(&billIdSettledAtMap, failureBillIds...)
+		mnznFailureBillList, err := BasicMnznBillLists(false, &billIdSettledAtMap, failureBillIds...)
 		if err != nil {
 			common.Logger.Debugln(daily_bill_msg["01060505"], ":", err.Error())
 			result := &enity.Result{"01060505", err.Error(), daily_bill_msg["01060505"]}
@@ -659,7 +659,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 	ctx.Response.SetBodyString("success")
 }
 
-func BasicMnznBillLists(billIdSettledAtMap *map[string]string, billIds ...int) ([]map[string]interface{}, error) {
+func BasicMnznBillLists(isSuccessed bool, billIdSettledAtMap *map[string]string, billIds ...int) ([]map[string]interface{}, error) {
 	dailyBillService := &service.DailyBillService{}
 
 	list := make([]map[string]interface{}, 0)
@@ -680,7 +680,12 @@ func BasicMnznBillLists(billIdSettledAtMap *map[string]string, billIds ...int) (
 		mnznBillMap["billAt"] = _billAt
 		common.Logger.Warningln("_bill.BillAt=======================", _bill.BillAt)
 		common.Logger.Warningln("mnznBillMap[billAt]===========", mnznBillMap["billAt"])
-		mnznBillMap["status"] = 2
+		if isSuccessed {
+			mnznBillMap["status"] = 2
+		}else {
+			mnznBillMap["status"] = 1
+		}
+
 		list = append(list, mnznBillMap)
 	}
 	common.Logger.Debugln("list============", list)
