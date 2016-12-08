@@ -126,7 +126,7 @@ class DeviceForm extends React.Component {
             message.success('修改设备成功',3);
             self.context.router.goBack();
           } else {
-            message.error('修改设备失败',3);
+            message.error(nextProps.resultPutDetail.result.msg,3);
           }
           self.saveDetail = -1;
         }
