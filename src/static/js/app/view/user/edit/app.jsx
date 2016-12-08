@@ -137,10 +137,15 @@ class UserForm extends React.Component {
       const self = this;
     this.props.form.validateFields((errors, values) => {
       let cityId = values.cityId;
-      if(values.cityId == -1) {
+      console.log(values.cityId,values.provinceId);
+      if(cityId == -1 || !cityId || cityId=="请选择城市") {
         cityId = 0;
         // self.cityIdHelp = {'help':'必选','className':'has-error'};
         // return false;
+      }
+      let provinceId = values.provinceId;
+      if(!provinceId || provinceId=="请选择省份" ) {
+        provinceId = 0;
       }
       if (errors) {
         return;
@@ -162,7 +167,7 @@ class UserForm extends React.Component {
               "account": values.account,
               "mobile": values.bankMobile,
               "cityId": parseInt(cityId),
-              "provinceId": parseInt(values.provinceId),
+              "provinceId": parseInt(provinceId),
           }
       } else if(values.type == 1){
           cashAccount = {
