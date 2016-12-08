@@ -243,7 +243,9 @@ class DeviceList extends React.Component {
       selected: true,
       rowColor:{},
       serialNumber:'',
-      userQuery:''
+      userQuery:'',
+      lockButton: false,
+
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -387,6 +389,7 @@ class DeviceList extends React.Component {
   }
   detail(account) {
     var self = this;
+    this.setState({lockButton: true}); // 给 Next Button 加锁
     UserService.detailByAccount(account)
       .then((data) => {
         const current = this.state.current + 1;
@@ -394,14 +397,17 @@ class DeviceList extends React.Component {
           current,
           userInfo:data.data
         });
+        this.setState({lockButton: false});
         // message.success(data.msg,3);
         // 成功以后重新拉取设备列表
       },(error)=>{
         message.error(error.msg,3);
+        this.setState({lockButton: false});
       })
   }
   deviceAssign(data) {
     var self = this;
+    this.setState({lockButton: true});
     DeviceService.deviceAssign(data)
       .then((data) => {
         const current = this.state.current + 1;
@@ -409,12 +415,14 @@ class DeviceList extends React.Component {
           current,
           bindResult:'分配成功'
         });
+        this.setState({lockButton: false});
         message.success(data.msg,3);
         const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
         self.setState({selectedRowKeys:[]});
         self.props.getDeviceList(pager);
         self.loading = true;
       },(error)=>{
+        this.setState({lockButton: false});
         message.error(error.msg,3);
       })
   }
@@ -574,6 +582,7 @@ class DeviceList extends React.Component {
     } else if(this.state.current == 2){
       show = <p className="result-text"><Icon type="check-circle" /> {this.state.bindResult}</p>
     };
+    const lockButton = this.state.lockButton?{disabled:"disabled"}:{};
     return (
       <section className="view-device-list">
         <header>
@@ -624,7 +633,7 @@ class DeviceList extends React.Component {
             </div>
             <div className="steps-action">
               {this.state.current < steps.length - 1 &&
-                <Button type="primary" onClick={() => this.next()}>下一步</Button>
+                <Button type="primary" {...lockButton} onClick={() => this.next()}>下一步</Button>
               }
               {this.state.current === steps.length - 1 &&
                 <Button type="primary" onClick={this.comAllocate.bind(this)}>完成</Button>

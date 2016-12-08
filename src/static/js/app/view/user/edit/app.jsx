@@ -137,7 +137,6 @@ class UserForm extends React.Component {
       const self = this;
     this.props.form.validateFields((errors, values) => {
       let cityId = values.cityId;
-      console.log(values.cityId,values.provinceId);
       if(cityId == -1 || !cityId || cityId=="请选择城市") {
         cityId = 0;
         // self.cityIdHelp = {'help':'必选','className':'has-error'};
