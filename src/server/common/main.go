@@ -4,8 +4,9 @@ import (
 	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
-	"github.com/iris-contrib/middleware/recovery"
 	"time"
+	"fmt"
+	"github.com/go-errors/errors"
 )
 
 var (
@@ -16,17 +17,21 @@ var (
 		"-4": "你所请求的API超过频率限制,请稍后再试!",
 		"-5": "你没有操作该用户id的权限",
 	}
-
 )
-
 
 func SetUpCommon() {
 
-	isDevelopment := viper.GetBool("isDevelopment")
-
-	if !isDevelopment{
-		iris.Use(recovery.Handler)
-	}
+	iris.Use(iris.HandlerFunc(func(ctx *iris.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				msg := fmt.Sprintf("Recovery_soda_manager_from_panic: %v\n", errors.Wrap(err, 2).ErrorStack())
+				result := &enity.Result{"-2", msg, common_msg["-2"]}
+				Log(ctx, result)
+				ctx.Panic()
+			}
+		}()
+		ctx.Next()
+	}))
 
 	iris.UseFunc(func(ctx *iris.Context) {
 		startAt := time.Now().UnixNano() / 1000000
@@ -37,7 +42,6 @@ func SetUpCommon() {
 
 	iris.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
 		result := &enity.Result{"-2", nil, common_msg["-2"]}
-		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 	})
 

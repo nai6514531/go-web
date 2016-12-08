@@ -398,10 +398,10 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//判断登陆名是否已经存在
-	currentUser, err := userService.FindByAccount(user.Account)
+	currentUser, _ := userService.FindByAccount(user.Account)
 	if currentUser != nil {
 		//可以找到
-		result = &enity.Result{"01010407", err.Error(), user_msg["01010407"]}
+		result = &enity.Result{"01010407", nil, user_msg["01010407"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
@@ -430,9 +430,9 @@ func (self *UserController) Create(ctx *iris.Context) {
 
 	//插入user到user表
 	user.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
-	ok := userService.Create(&user)
-	if !ok {
-		result = &enity.Result{"01010410", nil, user_msg["01010410"]}
+	_, err := userService.Create(&user)
+	if err != nil {
+		result = &enity.Result{"01010410", err.Error(), user_msg["01010410"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -446,8 +446,8 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	cashAccount.UserId = userNew.Id //cash记录的userid设置为新插入条目的id
-	ok ,err= userCashAccountService.Create(cashAccount)
-	if !ok {
+	_, err = userCashAccountService.Create(cashAccount)
+	if err != nil {
 		result = &enity.Result{"01010411", err.Error(), user_msg["01010411"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -459,8 +459,8 @@ func (self *UserController) Create(ctx *iris.Context) {
 	userRoleRel.UserId = user.Id
 	userRoleRel.RoleId = 2 //统一为用户角色
 	userRoleRelSevice := &service.UserRoleRelService{}
-	ok ,err= userRoleRelSevice.Create(userRoleRel)
-	if !ok {
+	_, err = userRoleRelSevice.Create(userRoleRel)
+	if err != nil {
 		result = &enity.Result{"01010412", err.Error(), user_msg["01010412"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -564,8 +564,8 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// }
 
 	//更新到user表
-	ok,err:= userService.Update(&user)
-	if !ok {
+	_, err := userService.Update(&user)
+	if err!=nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -598,8 +598,8 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// }
 
 	//修改直接前端传什么type就保存什么
-	ok, err = userCashAccountService.UpdateByUserId(cashAccount)
-	if !ok {
+	_, err = userCashAccountService.UpdateByUserId(cashAccount)
+	if err!=nil {
 		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
