@@ -178,9 +178,15 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-      if(values.schoolId == -1) {
-        self.schoolIdHelp = {'help':'必选','className':'has-error'};
-        return false;
+      let schoolId = values.schoolId;
+      if(schoolId == -1 || !schoolId || schoolId=="请选择学校") {
+        schoolId = 0;
+        // self.schoolIdHelp = {'help':'必选','className':'has-error'};
+        // return false;
+      }
+      let provinceId = values.provinceId;
+      if(!provinceId || provinceId=="请选择省份" ) {
+        provinceId = 0;
       }
 			if (errors) {
 				return;
@@ -194,8 +200,8 @@ class DeviceForm extends React.Component {
 
 			const deviceValue = {
 				"serialNumber": serialNumber,
-        "provinceId": parseInt(values.provinceId),
-        "schoolId": parseInt(values.schoolId),
+        "provinceId": parseInt(provinceId),
+        "schoolId": parseInt(schoolId),
 				// 'label': values.label,
 				"address": values.address,
 				"referenceDeviceId": values.referenceDevice,
@@ -423,9 +429,10 @@ class DeviceForm extends React.Component {
             >
               {getFieldDecorator('provinceId', {
                 rules: [
-                  { required: true, message: '必选' },
+                  // { required: true, message: '必选' },
                 ],
-                initialValue: initialValue.provinceId == "0"?'':initialValue.provinceId,
+                initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
+                // initialValue: initialValue.provinceId == "0"?'':initialValue.provinceId,
               })(
                 <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}
@@ -439,9 +446,10 @@ class DeviceForm extends React.Component {
             >
               {getFieldDecorator('schoolId', {
                 rules: [
-                  { required: true, message: '必选' },
+                  // { required: true, message: '必选' },
                 ],
-                initialValue: initialValue.schoolId,
+                initialValue: +initialValue.schoolId !==0?initialValue.schoolId:'请选择学校',
+                // initialValue: initialValue.schoolId,
               })(
                 <Select placeholder="请选择学校" onChange={this.schoolChange.bind(this)}>
                   {schoolNode}
