@@ -370,6 +370,9 @@ class DeviceList extends React.Component {
   }
   handleAllocate() {
     if(this.state.selectedRowKeys.length > 0) {
+      this.setState({
+        current:0,
+      });
       this.showModal();
     } else {
       message.info('请至少选择一个设备',3);
@@ -383,8 +386,7 @@ class DeviceList extends React.Component {
   handleCancel(e) {
     this.setState({
       visible: false,
-      userAccount:'',
-      current:0,
+      // userAccount:'',
     });
   }
   detail(account) {
