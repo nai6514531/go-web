@@ -265,7 +265,7 @@ func (self *SyncService) SyncUserCashAccount(list *[]*muniu.BoxAdmin) (bool, err
 
 func (self *SyncService) ListBySyncBoxInfo() (*[]*muniu.BoxInfo, error) {
 	list := &[]*muniu.BoxInfo{}
-	_time := time.Now().Add(-12 * time.Minute).Format("2006-01-02 15:04:05")
+	_time := time.Now().Add(-6 * time.Minute).Format("2006-01-02 15:04:05")
 	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
