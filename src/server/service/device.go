@@ -128,7 +128,12 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
-	sql += " order by case when user_id=? then 1 else 2 end asc, user_id, school_id,assigned_at desc,id desc limit ? offset ?"
+	//测试按设备编号排序
+	if user.Id == 1 {
+		sql += " order by case when user_id=? then 1 else 2 end asc, serial_number desc limit ? offset ?"
+	}else{//其它用户按楼层排序
+		sql += " order by case when user_id=? then 1 else 2 end asc, address desc limit ? offset ?"
+	}
 	params = append(params, user.Id, perPage, (page - 1) * perPage)
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()
