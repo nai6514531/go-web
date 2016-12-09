@@ -125,11 +125,11 @@ const App = React.createClass({
           loading: false,
         });
         if (data && data.status == '00') {
-          const total = data.data.length;
+          const total = data.data.total;
           this.setState({
             total: total,
-            list: data.data.map((item, key) => {
-              item.key = key + 1;
+            list: data.data.list.map((item, key) => {              
+              item.key = key + 1 + (self.state.page-1)*self.state.perPage;
               return item;
             })
           });
@@ -194,8 +194,8 @@ const App = React.createClass({
   render() {
     var self = this;
     const {list, total, columns} = this.state;
-    // const pagination = this.initializePagination();
-    // pagination.current = this.state.page;
+    const pagination = this.initializePagination();
+    pagination.current = this.state.page;
     return (
       <section className="view-statis-wash-search">
         <header>
@@ -209,7 +209,7 @@ const App = React.createClass({
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
         </div>
         <article>
-          <Table scroll={{ x: 550 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+          <Table scroll={{ x: 550 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
         </article>
       </section>
     );
