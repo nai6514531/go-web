@@ -10,7 +10,26 @@ import (
 type TradeService struct {
 }
 
-func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[]*map[string]interface{}, error) {
+func (self *TradeService) TotalOfDevice(serialNumber string, account string) (int, error) {
+	var total int
+	param := make([]interface{}, 0)
+	sql := "select count(*) as total from box_wash w left join box_admin a on " +
+		"w.companyid=a.localid left join box_info i on w.deviceno=i.deviceno "
+	if serialNumber != "" {
+		sql += " where i.deviceno=? "
+		param = append(param, serialNumber)
+	}else if account != "" {
+		sql += " where w.usermobile=? "
+		param = append(param, account)
+	}
+	r := common.MNDB.Raw(sql, param...).Count(&total)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return total, nil
+}
+
+func (self *TradeService) BasicOfDevice(serialNumber string, account string, page int, perPage int) (*[]*map[string]interface{}, error) {
 	var sql string = ""
 	list := make([]*map[string]interface{}, 0)
 	param := make([]interface{}, 0)
@@ -26,8 +45,8 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string) (*[
 		param = append(param, account)
 	}
 
-	sql += "order by w.inserttime desc limit 10"
-
+	sql += "order by w.inserttime desc limit ? offset ? "
+	param = append(param, perPage, (page - 1) * perPage)
 	rows, err := common.MNDB.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {

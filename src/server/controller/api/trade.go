@@ -13,6 +13,7 @@ var (
 		"01080100": "拉取模块数据成功",
 		"01080101": "拉取模块数据失败",
 		"01080102": "缺少参数",
+		"01080103": "查询分页总条数失败",
 
 		"01080200": "退款成功",
 		"01080201": "退款失败",
@@ -31,9 +32,10 @@ type TradeController struct {
 func (self *TradeController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	tradeService := service.TradeService{}
-
 	serialNumber := ctx.URLParam("serialNumber")
 	account := ctx.URLParam("account")
+	page, _ := ctx.URLParamInt("page")
+	perPage, _ := ctx.URLParamInt("perPage")
 	if serialNumber == "" && account == "" {
 		result = &enity.Result{"01080102", nil, trade_msg["01080102"]}
 		common.Log(ctx, result)
@@ -54,7 +56,7 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 
 		}
 	}*/
-	list, err := tradeService.BasicOfDevice(serialNumber, account)
+	list, err := tradeService.BasicOfDevice(serialNumber, account, page, perPage)
 	common.Logger.Debug("list========", list)
 	if err != nil {
 		result = &enity.Result{"01080101", err.Error(), trade_msg["01080101"]}
@@ -62,7 +64,14 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	result = &enity.Result{"01080100", &list, statis_msg["01080100"]}
+	total, err := tradeService.TotalOfDevice(serialNumber, account)
+	if err != nil {
+		result = &enity.Result{"01080103", err.Error(), trade_msg["01080103"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01080100", &enity.Pagination{total, list}, statis_msg["01080100"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }
