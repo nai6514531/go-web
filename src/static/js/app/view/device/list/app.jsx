@@ -178,9 +178,26 @@ const columns = [{
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 20,
+  width: 40,
   render: (text, record) => {
     let node = '/';
+    let action = '/';
+    const status = record.statusCode;
+    if(status == 9) {
+      action = <Popconfirm title="确认取消锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+        <a href="#">取消锁定</a>
+      </Popconfirm>
+    }
+    else if (status == 0) {
+      action = <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
+        <a href="#">锁定</a>
+      </Popconfirm>
+    }
+    else if (status == 601 || status == 602 || status == 603 || status == 604) {
+      action = <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+        <a href="#">解除占用</a>
+      </Popconfirm>
+    }
     if(USER.id == record.userId) {
       node =
         <span>
@@ -197,15 +214,7 @@ const columns = [{
             }
           <span>
             <span className="ant-divider" />
-            {record.statusCode == 9 ?
-              <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-                <a href="#">解除占用</a>
-              </Popconfirm>
-              :
-              <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
-                <a href="#">锁定</a>
-              </Popconfirm>
-            }
+            {action}
           </span>
         </span>
     }
@@ -361,6 +370,7 @@ class DeviceList extends React.Component {
   }
   changeStatus(id,start) {
     const self = this;
+    // 解除占用和取消锁定都是将设备状态转换为0
     if(start){
       const status = { status: 0 };
       this.props.patchDeviceStatus(id,status);
@@ -613,11 +623,11 @@ class DeviceList extends React.Component {
             </div>
             <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
           </div>
-          
+
         </div>
         <article>
           <Table
-            scroll={{ x: 260 }}
+            scroll={{ x: 280 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
