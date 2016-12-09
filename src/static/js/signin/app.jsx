@@ -220,10 +220,15 @@ const App = React.createClass({
   render() {
     return (<div className="application application-login">
       <h2>
-        <p>苏打生活管理系统</p>
+        <img src={require("./WechatIMG130.png")} alt=""/>
+        <p className="tips">木牛物联正式更名为苏打生活，更多服务敬请期待</p>
       </h2>
       <div className="form">
         <LoginForm />
+      </div>
+      <div className="copy">
+        Copyright &copy; 2016 苏打生活. All Rights Reserved<br/>
+        客服电话:4008290029 粤ICP备16090794号
       </div>
     </div>);
   }
