@@ -78,7 +78,7 @@ func Api() {
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.OwnToMeOrTest, device.Update)
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
-	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatus)
+	api.Patch("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatusLimiter, device.UpdateStatus)
 	api.Patch("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock", device.UnLock)
 	api.Put("/device-assign", device.Assign)

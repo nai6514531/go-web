@@ -8,6 +8,8 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"strings"
+	"strconv"
+	"time"
 )
 
 type DeviceController struct {
@@ -108,6 +110,10 @@ var (
 		"01031205": "被分配的设备不能为空",
 		"01031206": "获取被分配的设备所有者信息异常",
 		"01031207": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
+
+		"01031301": "获取操作次数失败",
+		"01031302": "设置操作次数失败",
+		"01031303": "该操作每日只能进行10次",
 	}
 )
 
@@ -346,6 +352,45 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	result = &enity.Result{"01030200", nil, device_msg["01030200"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
+}
+
+func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
+	result := &enity.Result{}
+	id, _ := ctx.ParamInt("id")
+	prefix := viper.GetString("device.rateLimiter.prefix")
+	maxRetry := viper.GetInt("device.rateLimiter.maxRetry")
+	key := prefix + strconv.Itoa(id)
+	common.Logger.Debug(id, "=======", prefix, "=======", maxRetry, "=======", key)
+	count, err := common.Redis.Get(key).Int64()
+	if err != nil {
+		result = &enity.Result{"01031301", err.Error(), device_msg["01031301"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	if int(count) >= maxRetry {
+		result = &enity.Result{"01031303", nil, device_msg["01031303"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	expirationAtStr := time.Now().AddDate(0, 0, 1).Format("2016-01-02 00:00:00")
+	expirationAt, err := time.Parse("2016-01-02 00:00:00", expirationAtStr)
+	if err != nil {
+
+	}
+
+	duration := time.Now().Sub(expirationAt)
+	common.Logger.Debug(duration, "==============11111")
+	_, err = common.Redis.Set(key, count+1, duration).Result()
+	if err != nil {
+		result = &enity.Result{"01031302", err.Error(), device_msg["01031302"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	ctx.Next()
+	return
 }
 
 func (self *DeviceController) UnLock(ctx *iris.Context) {

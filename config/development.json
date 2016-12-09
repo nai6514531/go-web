@@ -67,6 +67,10 @@
     }
   },
   "device": {
-    "step": 13
+    "step": 13,
+    "rateLimiter": {
+      "prefix": "soda-manager-update-device-limiter:",
+      "maxRetry": 10
+    }
   }
 }
