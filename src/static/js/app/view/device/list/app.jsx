@@ -598,6 +598,11 @@ class DeviceList extends React.Component {
         </header>
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          {USER.role.id == 5 ?
+            <Link to="/device/edit" className="ant-btn ant-btn-primary item">
+              添加新设备
+            </Link>:""
+          }
           <div className="search">
             <div className="serial search-input">
               <Input ref="searchSerialInput" onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
@@ -608,11 +613,7 @@ class DeviceList extends React.Component {
             </div>
             <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
           </div>
-          {USER.role.id == 5 ?
-            <Link to="/device/edit" className="ant-btn ant-btn-primary">
-              添加新设备
-            </Link>:""
-          }
+          
         </div>
         <article>
           <Table
