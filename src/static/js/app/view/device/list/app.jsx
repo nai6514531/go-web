@@ -87,7 +87,7 @@ const columns = [{
       } else if(status == 9) {
         statusText = '占用';
       } else if(status == 601 || status == 602 || status == 603 || status == 604) {
-        statusText = '正常';
+        statusText = '使用中';
       }
       return statusText;
     }
@@ -194,8 +194,8 @@ const columns = [{
       </Popconfirm>
     }
     else if (status == 601 || status == 602 || status == 603 || status == 604) {
-      action = <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-        <a href="#">解除占用</a>
+      action = <Popconfirm title="确认取消占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+        <a href="#">取消占用</a>
       </Popconfirm>
     }
     if(USER.id == record.userId) {
