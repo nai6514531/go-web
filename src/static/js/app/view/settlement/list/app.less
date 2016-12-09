@@ -19,6 +19,9 @@
 		.item {
 		  margin: 5px 10px;
 		}
+    .filter-select {
+      //margin-left: 100px;
+    }
   }
   .ant-table-footer{
  		overflow: hidden;
@@ -48,7 +51,18 @@
   .done {
     color: green;
   }
+  .calculate {
+    position: fixed;
+    z-index: 100;
+    top: 138px;
+    @media (max-width: 768px) {
+      top: 78px;
+      right: 20px;
+    }
+  }
+
 }
+
 
 .playModal{
 	text-align: right;

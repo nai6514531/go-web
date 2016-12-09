@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
-import {Button,Input, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
+import {Affix, Button,Input, Table, Icon, Popconfirm, Select, DatePicker, Breadcrumb, message, Modal} from 'antd';
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
@@ -822,9 +822,7 @@ const App = React.createClass({
 				</Breadcrumb>
 			</header>
 			<div className="filter">
-        {USER.role.id == 3 ? <Button style={{marginRight:20}} onClick={this.CalculateAmount} type="primary">计算金额</Button>
-        :""}
-				<Select className="item"
+				<Select className="item filter-select"
 						defaultValue="0"
 						style={{width: 120 }}
 						onChange={this.handleCashAccountTypeChange}>
@@ -837,6 +835,9 @@ const App = React.createClass({
 				<DatePicker onChange={this.handleBillAtChange} className="item"/>
         <Input style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
         <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
+        {USER.role.id == 3 ?
+          <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
+          :""}
       </div>
 			{tableDiv}
 			<Modal

@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import './app.less';
 import md5 from 'md5';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input, message,Checkbox } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 import LoginService from '../app/service/login';
@@ -15,10 +15,13 @@ export class LoginForm extends React.Component {
       account: '',
       password: '',
       captcha: '',
+      currentAccount:'',
+      currentPassword:'',
 
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     this.getCaptcha = this.getCaptcha.bind(this);
+    this.getCookie = this.getCookie.bind(this);
   }
   error(text) {
     if(text) {
@@ -36,10 +39,13 @@ export class LoginForm extends React.Component {
         this.setState({loginButton:true});
         return;
       } else {
-        const { account, password, verificode, captcha } = values;
+        const { account, password, verificode, captcha, remember } = values;
+        let thePassword = password.length==32?password:md5(password);
+        self.rememberPassword(remember,account,thePassword);
+        // 通过长度判断密码不够严谨
         const data = {
           account: account,
-          password: md5(password),
+          password: thePassword,
           verificode: verificode,
           captcha: captcha,
         };
@@ -69,6 +75,26 @@ export class LoginForm extends React.Component {
       }
     });
   }
+  getCookie(name) {
+    const domain = document.domain.sub(0,3);
+    //域名满足条件,才可获取 cookie
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+      }
+      return null;
+  }
+  rememberPassword(remember,account,password) {
+    if(remember) {
+      let date=new Date();
+      date.setTime(date.getTime() + 1000 * 60 * 10080);//过期时间一周
+      document.cookie = "user=" + JSON.stringify({account: account, password: password})+
+        ";expires=" + date.toGMTString();
+    }
+  }
   componentWillUpdate(nextProps, nextState) {
     const self = this;
     if(this.captcha && this.state.url !== nextState.url) {
@@ -97,6 +123,10 @@ export class LoginForm extends React.Component {
   componentWillMount() {
     this.getCaptcha();
     this.first = true;
+    const user = JSON.parse(this.getCookie('user'));
+    if(user) {
+      this.setState({currentAccount:user.account, currentPassword: user.password});
+    }
   }
   handleEnter(event) {
     if(this.state.loginButton) {
@@ -124,6 +154,7 @@ export class LoginForm extends React.Component {
               rules: [
                 { required: true, message: '请输入注册时填写的登录账号' },
               ],
+              initialValue: this.state.currentAccount,
             })(
               <Input placeholder="请输入登录账号" />
             )}
@@ -137,6 +168,7 @@ export class LoginForm extends React.Component {
               rules: [
                 { required: true, message: '请输入密码' },
               ],
+              initialValue: this.state.currentPassword,
             })(
               <Input type="password" placeholder="请输入密码" />
             )}
@@ -156,6 +188,14 @@ export class LoginForm extends React.Component {
                 <img className="captcha"  src={this.state.url} onClick={this.getCaptcha}/>
                 <span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
               </div>
+            )}
+          </FormItem>
+          <FormItem  wrapperCol={{ span: 12, offset: 7 }} style={{ marginBottom: 8 }}>
+            {getFieldDecorator('remember', {
+              valuePropName: 'checked',
+              // initialValue: true,
+            })(
+              <Checkbox>记住密码</Checkbox>
             )}
           </FormItem>
           <FormItem wrapperCol={{ span: 12, offset: 7 }}>

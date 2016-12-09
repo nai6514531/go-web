@@ -40,43 +40,94 @@ const columns = [{
   title: '序号',
   dataIndex: 'id',
   key: 'id',
-  width:50,
-}, {
-  title: '编号/楼道信息',
-  dataIndex: 'serialNumber',
-  key: 'serialNumber',
-  width:120,
-  render: (serialNumber,record) => {
-    return <span>{serialNumber}{record.address?' / '+record.address:''}</span>;
-  }
+  width:20,
 },
-//   {
-//   title: '楼道信息',
-//   dataIndex: 'address',
-//   key: 'address',
-// },
   {
-    title: '运营商信息',
+    title: '运营商',
     dataIndex: 'userName',
     key: 'userName',
-    width:100,
-    colSpan:USER.role.id == 5?1:2,
+    width:20,
+    // colSpan:USER.role.id == 5?1:2,
     render: (userName,record) => {
-      if(USER.role.id == 5) {
-        return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
+      return <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>;
+      // if(USER.role.id == 5) {
+      // }
+      // return {
+      //   children: <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>,
+      //   props: {
+      //     colSpan: 2,
+      //   },
+      // };
+    }
+  },
+  {
+    title: '编号',
+    dataIndex: 'serialNumber',
+    key: 'serialNumber',
+    width:20,
+    render: (serialNumber,record) => {
+      return <span>{serialNumber}</span>;
+    }
+  },
+  {
+    title: '楼层',
+    dataIndex: 'address',
+    key: 'address',
+    width:20,
+  },{
+    title: '状态',
+    dataIndex: 'status',
+    key: 'status',
+    width:20,
+    render: (status) => {
+      // 这里如果是普通运营商则不需要展示
+      let statusText = '';
+      if(status == 0){
+        statusText = '空闲';
+      } else if(status == 9) {
+        statusText = '占用';
+      } else if(status == 601 || status == 602 || status == 603 || status == 604) {
+        statusText = '使用中';
       }
-      return {
-        children: <div>{userName}<p>{record.userMobile?'  '+record.userMobile:''}</p></div>,
-        props: {
-          colSpan: 2,
-        },
-      };
+      return statusText;
+    }
+  }, {
+    title: '单脱',
+    dataIndex: 'firstPulsePrice',
+    key: 'firstPulsePrice',
+    width:20,
+    render: (firstPulsePrice) => {
+      return firstPulsePrice/100;
+    }
+  }, {
+    title: '快洗',
+    dataIndex: 'secondPulsePrice',
+    key: 'secondPulsePrice',
+    width:20,
+    render: (secondPulsePrice) => {
+      return secondPulsePrice/100;
+    }
+  }, {
+    title: '标准洗',
+    dataIndex: 'thirdPulsePrice',
+    key: 'thirdPulsePrice',
+    width:20,
+    render: (thirdPulsePrice) => {
+      return thirdPulsePrice/100;
+    }
+  }, {
+    title: '大物洗',
+    dataIndex: 'fourthPulsePrice',
+    key: 'fourthPulsePrice',
+    width:20,
+    render: (fourthPulsePrice) => {
+      return fourthPulsePrice/100;
     }
   },{
-  title: '关联设备类型',
+  title: '类型',
   dataIndex: 'referenceDeviceId',
   key: 'referenceDeviceId',
-    width:40,
+    width:20,
     render: (referenceDeviceId,record) => {
       let referenceDevice = '';
       switch (+referenceDeviceId){
@@ -98,7 +149,7 @@ const columns = [{
     title: '添加时间',
     dataIndex: 'assignedAt',
     key: 'assignedAt',
-    width:100,
+    width:20,
     render: (assignedAt,record) => {
       const time = assignedAt!=''&&assignedAt!='0001-01-01T00:00:00Z'?
         moment(assignedAt).format('YYYY-MM-DD HH:mm:ss'):
@@ -109,7 +160,7 @@ const columns = [{
     title: '返厂设备',
     dataIndex: 'hasRetrofited',
     key: 'hasRetrofited',
-    width: 100,
+    width: 20,
     colSpan:USER.role.id == 5?1:0,
     render: (hasRetrofited,record) => {
       // 这里如果是普通运营商则不需要展示
@@ -122,62 +173,31 @@ const columns = [{
         },
       };
     }
-  }, {
-  title: '状态',
-  dataIndex: 'status',
-  key: 'status',
-    width:20,
-    render: (status) => {
-      // 这里如果是普通运营商则不需要展示
-      let statusText = '';
-      if(status == 0){
-        statusText = '空闲';
-      } else if(status == 9) {
-        statusText = '占用';
-      } else if(status == 601 || status == 602 || status == 603 || status == 604) {
-        statusText = '正常';
-      }
-      return statusText;
-    }
-}, {
-  title: '单脱',
-  dataIndex: 'firstPulsePrice',
-  key: 'firstPulsePrice',
-    width:40,
-    render: (firstPulsePrice) => {
-      return firstPulsePrice/100;
-    }
-}, {
-  title: '快洗',
-  dataIndex: 'secondPulsePrice',
-  key: 'secondPulsePrice',
-    width:40,
-    render: (secondPulsePrice) => {
-      return secondPulsePrice/100;
-    }
-}, {
-  title: '标准洗',
-  dataIndex: 'thirdPulsePrice',
-  key: 'thirdPulsePrice',
-    width:40,
-    render: (thirdPulsePrice) => {
-      return thirdPulsePrice/100;
-    }
-}, {
-  title: '大物洗',
-  dataIndex: 'fourthPulsePrice',
-  key: 'fourthPulsePrice',
-    width:40,
-    render: (fourthPulsePrice) => {
-      return fourthPulsePrice/100;
-    }
-}, {
+  },
+   {
   title: '操作',
   dataIndex: 'action',
   key: 'action',
-  width: 150,
+  width: 40,
   render: (text, record) => {
     let node = '/';
+    let action = '/';
+    const status = record.statusCode;
+    if(status == 9) {
+      action = <Popconfirm title="确认取消锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+        <a href="#">取消锁定</a>
+      </Popconfirm>
+    }
+    else if (status == 0) {
+      action = <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
+        <a href="#">锁定</a>
+      </Popconfirm>
+    }
+    else if (status == 601 || status == 602 || status == 603 || status == 604) {
+      action = <Popconfirm title="确认取消占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
+        <a href="#">取消占用</a>
+      </Popconfirm>
+    }
     if(USER.id == record.userId) {
       node =
         <span>
@@ -194,15 +214,7 @@ const columns = [{
             }
           <span>
             <span className="ant-divider" />
-            {record.statusCode == 9 ?
-              <Popconfirm title="确认解除占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
-                <a href="#">解除占用</a>
-              </Popconfirm>
-              :
-              <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
-                <a href="#">锁定</a>
-              </Popconfirm>
-            }
+            {action}
           </span>
         </span>
     }
@@ -358,6 +370,7 @@ class DeviceList extends React.Component {
   }
   changeStatus(id,start) {
     const self = this;
+    // 解除占用和取消锁定都是将设备状态转换为0
     if(start){
       const status = { status: 0 };
       this.props.patchDeviceStatus(id,status);
@@ -595,6 +608,11 @@ class DeviceList extends React.Component {
         </header>
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          {USER.role.id == 5 ?
+            <Link to="/device/edit" className="ant-btn ant-btn-primary item">
+              添加新设备
+            </Link>:""
+          }
           <div className="search">
             <div className="serial search-input">
               <Input ref="searchSerialInput" onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
@@ -605,15 +623,11 @@ class DeviceList extends React.Component {
             </div>
             <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
           </div>
-          {USER.role.id == 5 ?
-            <Link to="/device/edit" className="ant-btn ant-btn-primary">
-              添加新设备
-            </Link>:""
-          }
+
         </div>
         <article>
           <Table
-            scroll={{ x: 850 }}
+            scroll={{ x: 280 }}
             columns={columns}
             dataSource={dataSource}
             pagination={this.pagination}
