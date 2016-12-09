@@ -7,6 +7,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
 	"github.com/spf13/viper"
+	"github.com/jinzhu/gorm"
 )
 
 type DeviceService struct {
@@ -241,12 +242,13 @@ func (self *DeviceService) Update(device model.Device) bool {
 	}
 	//再次单独更新几个价格避免价格为0的时候不能更新成功
 	var device_zero = make(map[string]interface{})
-	device_zero["firstPulsePrice"] = device.FirstPulsePrice
-	device_zero["secondPulsePrice"] = device.SecondPulsePrice
-	device_zero["thirdPulsePrice"] = device.ThirdPulsePrice
-	device_zero["fourthPulsePrice"] = device.FourthPulsePrice
+	device_zero["first_pulse_price"] = device.FirstPulsePrice
+	device_zero["second_pulse_price"] = device.SecondPulsePrice
+	device_zero["third_pulse_price"] = device.ThirdPulsePrice
+	device_zero["fourth_pulse_price"] = device.FourthPulsePrice
 	//避免schoolId为0时不更新
 	device_zero["school_id"] = device.SchoolId
+	device_zero["province_id"] = device.ProvinceId
 	device_zero["address"] = device.Address
 	r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device_zero).Scan(&device)
 	if r.Error != nil {
@@ -620,6 +622,15 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 	return &list, nil
 }
 
+func (self *DeviceService) BasicByUserId(userId int) (*model.Device, error) {
+	device := &model.Device{}
+	r := common.DB.Model(&model.Device{}).Where("user_id = ?", userId).First(device)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return device, nil
+}
+
 func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.Device, error) {
 	list := []*model.Device{}
 	deviceMap := make(map[string]*model.Device, 0)
@@ -665,5 +676,66 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 
 	transAction.Commit()
 	mnTransAction.Commit()
+	return true, nil
+}
+
+func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
+	var r *gorm.DB
+	timeFormat := "2006-01-02 15:04:05"
+	firstTimedDurationStr := viper.GetString("device.firstTimedDuration")
+	secondTimedDurationStr := viper.GetString("device.secondTimedDuration")
+	thirdTimedDurationStr := viper.GetString("device.thirdTimedDuration")
+	fourthTimedDurationStr := viper.GetString("device.fourthTimedDuration")
+	firstTimedDuration, err := time.ParseDuration(firstTimedDurationStr)
+	if err != nil {
+		return false, err
+	}
+	secondTimedDuration, err := time.ParseDuration(secondTimedDurationStr)
+	if err != nil {
+		return false, err
+	}
+	thirdTimedDuration, err := time.ParseDuration(thirdTimedDurationStr)
+	if err != nil {
+		return false, err
+	}
+	fourthTimedDuration, err := time.ParseDuration(fourthTimedDurationStr)
+	if err != nil {
+		return false, err
+	}
+
+	switch status {
+	case 601:
+		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '601' and UPDATETIME < ?", time.Now().Add(firstTimedDuration).Format(timeFormat)).Update("STATUS", '0')
+		if r.Error != nil {
+			common.Logger.Warningln("Timed Update 601 BoxInfo-STATUS:", r.Error.Error())
+			return false, r.Error
+		}
+		break
+	case 602:
+		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '602' and UPDATETIME < ?", time.Now().Add(secondTimedDuration).Format(timeFormat)).Update("STATUS", '0')
+		if r.Error != nil {
+			common.Logger.Warningln("Timed Update 602 BoxInfo-STATUS:", r.Error.Error())
+			return false, r.Error
+		}
+		break
+	case 603:
+		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '603' and UPDATETIME < ?", time.Now().Add(thirdTimedDuration).Format(timeFormat)).Update("STATUS", '0')
+		if r.Error != nil {
+			common.Logger.Warningln("Timed Update 603 BoxInfo-STATUS:", r.Error.Error())
+			return false, r.Error
+		}
+		break
+	case 604:
+		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '604' and UPDATETIME < ?", time.Now().Add(fourthTimedDuration).Format(timeFormat)).Update("STATUS", '0')
+		if r.Error != nil {
+			common.Logger.Warningln("Timed Update 604 BoxInfo-STATUS:", r.Error.Error())
+			return false, r.Error
+		}
+		break
+	default:
+		return false, r.Error
+	}
+
+
 	return true, nil
 }

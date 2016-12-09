@@ -85,7 +85,7 @@ const columns = [{
       if(status == 0){
         statusText = '空闲';
       } else if(status == 9) {
-        statusText = '占用';
+        statusText = '锁定';
       } else if(status == 601 || status == 602 || status == 603 || status == 604) {
         statusText = '使用中';
       }
@@ -290,7 +290,7 @@ class DeviceList extends React.Component {
           this.props.getDeviceList(pager);
           message.success('操作成功!',3);
         } else {
-          message.error('操作失败!',3);
+          message.error(nextProps.status.result.msg, 3);
           console.log(nextProps.status.result.msg);
         }
         self.theStatus = -1;

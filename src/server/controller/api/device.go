@@ -29,6 +29,8 @@ var (
 		"01030201": "更新设备状态失败!",
 		"01030202": "设备id不能小于0!",
 		"01030203": "设备状态不能小于0!",
+		"01030204": "所传设备状态有误!",
+		"01030205": "该设备不属于当前登录用户",
 
 		"01030300": "更新设备成功!",
 		"01030301": "更新设备失败!",
@@ -114,6 +116,7 @@ var (
 		"01031301": "获取操作次数失败",
 		"01031302": "设置操作次数失败",
 		"01031303": "该操作每日只能进行10次",
+		"01031304": "时间格式转换错误",
 	}
 )
 
@@ -329,6 +332,7 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
+	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	var device model.Device
 	ctx.ReadJSON(&device)
 	if id <= 0 {
@@ -341,6 +345,23 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if device.Status != 0 && device.Status != 9 {
+		result = &enity.Result{"01030204", nil, device_msg["01030204"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	_device, err := deviceService.BasicByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01030205", nil, device_msg["01030205"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if _device == nil {
+		result = &enity.Result{"01030205", nil, device_msg["01030205"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	device.Id = id
 	success := deviceService.UpdateStatus(device)
 	if !success {
@@ -360,28 +381,35 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 	prefix := viper.GetString("device.rateLimiter.prefix")
 	maxRetry := viper.GetInt("device.rateLimiter.maxRetry")
 	key := prefix + strconv.Itoa(id)
-	common.Logger.Debug(id, "=======", prefix, "=======", maxRetry, "=======", key)
 	count, err := common.Redis.Get(key).Int64()
 	if err != nil {
 		result = &enity.Result{"01031301", err.Error(), device_msg["01031301"]}
-		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
-		return
 	}
+	common.Logger.Debug("count=====", count)
 	if int(count) >= maxRetry {
 		result = &enity.Result{"01031303", nil, device_msg["01031303"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
 	}
-	expirationAtStr := time.Now().AddDate(0, 0, 1).Format("2016-01-02 00:00:00")
-	expirationAt, err := time.Parse("2016-01-02 00:00:00", expirationAtStr)
+	expirationAtStr := time.Now().AddDate(0, 0, 1).Format("2006-01-02 00:00:00")
+	expirationAt, err := time.Parse("2006-01-02 00:00:00", expirationAtStr)
 	if err != nil {
-
+		result = &enity.Result{"01031304", err.Error(), device_msg["01031304"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
 	}
-
-	duration := time.Now().Sub(expirationAt)
-	common.Logger.Debug(duration, "==============11111")
+	now := time.Now().Format("2006-01-02 15:04:05")
+	nowAt, err := time.Parse("2006-01-02 15:04:05", now)
+	if err != nil {
+		result = &enity.Result{"01031304", err.Error(), device_msg["01031304"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	duration := expirationAt.Sub(nowAt)
 	_, err = common.Redis.Set(key, count+1, duration).Result()
 	if err != nil {
 		result = &enity.Result{"01031302", err.Error(), device_msg["01031302"]}
@@ -390,7 +418,6 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 		return
 	}
 	ctx.Next()
-	return
 }
 
 func (self *DeviceController) UnLock(ctx *iris.Context) {
@@ -488,7 +515,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.ProvinceId <= 0 {
+	/*if device.ProvinceId <= 0 {
 		result = &enity.Result{"01030304", nil, device_msg["01030304"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -497,7 +524,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		result = &enity.Result{"01030305", nil, device_msg["01030305"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 	// if device.Label == "" {
 	// 	result = &enity.Result{"01030306", nil, device_msg["01030306"]}
 	// 	ctx.JSON(iris.StatusOK, result)
@@ -782,7 +809,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		}
 	}
 
-	if device.ProvinceId <= 0 {
+	/*if device.ProvinceId <= 0 {
 		result = &enity.Result{"01030704", nil, device_msg["01030704"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -791,7 +818,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		result = &enity.Result{"01030705", nil, device_msg["01030705"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030707", nil, device_msg["01030707"]}
