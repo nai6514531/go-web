@@ -133,7 +133,7 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	if user.Id == 1 {
 		sql += " order by case when user_id=? then 1 else 2 end asc, serial_number desc limit ? offset ?"
 	}else{//其它用户按楼层排序
-		sql += " order by case when user_id=? then 1 else 2 end asc, address desc limit ? offset ?"
+		sql += " order by case when user_id=? then 1 else 2 end asc, address desc, id desc limit ? offset ?"
 	}
 	params = append(params, user.Id, perPage, (page - 1) * perPage)
 	rows, err := common.DB.Raw(sql, params...).Rows()
