@@ -686,7 +686,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 
 func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 	var r *gorm.DB
-	timeFormat := "2006-01-02 15:04:05"
+	var err error
 	firstTimedDurationStr := viper.GetString("device.firstTimedDuration")
 	secondTimedDurationStr := viper.GetString("device.secondTimedDuration")
 	thirdTimedDurationStr := viper.GetString("device.thirdTimedDuration")
@@ -710,37 +710,38 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 
 	switch status {
 	case 601:
-		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '601' and UPDATETIME < ?", time.Now().Add(firstTimedDuration).Format(timeFormat)).Update("STATUS", '0')
-		if r.Error != nil {
-			common.Logger.Warningln("Timed Update 601 BoxInfo-STATUS:", r.Error.Error())
-			return false, r.Error
-		}
+		_, err = timedUpdateStatus("601", firstTimedDuration)
 		break
 	case 602:
-		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '602' and UPDATETIME < ?", time.Now().Add(secondTimedDuration).Format(timeFormat)).Update("STATUS", '0')
-		if r.Error != nil {
-			common.Logger.Warningln("Timed Update 602 BoxInfo-STATUS:", r.Error.Error())
-			return false, r.Error
-		}
+		_, err = timedUpdateStatus("602", secondTimedDuration)
 		break
 	case 603:
-		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '603' and UPDATETIME < ?", time.Now().Add(thirdTimedDuration).Format(timeFormat)).Update("STATUS", '0')
-		if r.Error != nil {
-			common.Logger.Warningln("Timed Update 603 BoxInfo-STATUS:", r.Error.Error())
-			return false, r.Error
-		}
+		_, err = timedUpdateStatus("603", thirdTimedDuration)
 		break
 	case 604:
-		r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '604' and UPDATETIME < ?", time.Now().Add(fourthTimedDuration).Format(timeFormat)).Update("STATUS", '0')
-		if r.Error != nil {
-			common.Logger.Warningln("Timed Update 604 BoxInfo-STATUS:", r.Error.Error())
-			return false, r.Error
-		}
+		_, err = timedUpdateStatus("604", fourthTimedDuration)
 		break
 	default:
 		return false, r.Error
 	}
+	if err != nil {
+		return false, err
+	}
 
+	return true, nil
+}
 
+func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error) {
+	timeFormat := "2006-01-02 15:04:05"
+	r := common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '" + status + "' and UPDATETIME <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("STATUS", '0')
+	if r.Error != nil {
+		common.Logger.Warningln("Timed Update " + status + " BoxInfo-STATUS:", r.Error.Error())
+		return false, r.Error
+	}
+	r = common.DB.Model(&model.Device{}).Where("reference_device_id = 1 and status = " + status + " and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	if r.Error != nil {
+		common.Logger.Warningln("Timed Update " + status + " Device-STATUS:", r.Error.Error())
+		return false, r.Error
+	}
 	return true, nil
 }

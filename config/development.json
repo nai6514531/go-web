@@ -7,16 +7,16 @@
   "cron": {
     "syncDailyBillDetailSpec": "0 0 4 * * ?",
     "syncDailyBillSpec": "0 30 4 * * ?",
-    "syncDeviceSpec": "0 0/5 * * * ?",
+    "syncDeviceSpec": "0 0/10 * * * ?",
     "syncUserSpec": "0 10 5 * * ?",
     "syncUserCashSpec": "0 20 5 * * ?",
     "syncUserRoleSpec": "0 30 5 * * ?",
     "updateSpec": "0 40 6 * * ?",
     "applySpec": "0 50 6 * * ?",
-    "updateFirstDeviceSpec": "0 0/4 * * * ?",
-    "updateSecondDeviceSpec": "0 0/20 * * * ?",
-    "updateThirdDeviceSpec": "0 0/30 * * * ?",
-    "updateFourthDeviceSpec": "0 0/40 * * * ?"
+    "updateFirstDeviceSpec": "0 0/1 * * * ?",
+    "updateSecondDeviceSpec": "0 0/1 * * * ?",
+    "updateThirdDeviceSpec": "0 0/1 * * * ?",
+    "updateFourthDeviceSpec": "0 0/1 * * * ?"
   },
   "server": {
     "rateLimiter": {
