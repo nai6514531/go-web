@@ -16,7 +16,7 @@ var (
 func SetUpCron() {
 
 	isDevelopment := viper.GetBool("isDevelopment")
-	if isDevelopment == true {
+	if isDevelopment == false {
 		c := cron.New()
 
 		syncDailyBillDetailSpec := viper.GetString("cron.syncDailyBillDetailSpec")
