@@ -678,7 +678,6 @@ const App = React.createClass({
     // </Modal>
   },
 	render(){
-    console.log(this.state.billAt);
     let defaultValue = {
       cashAccountType: this.state.cashAccountType,
       status: this.state.status,
@@ -807,31 +806,33 @@ const App = React.createClass({
     	<Table scroll={{ x: 900  }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
 		return (<section className="view-settlement-list">
-			<header>
-				<Breadcrumb>
-					<Breadcrumb.Item>结算管理</Breadcrumb.Item>
-				</Breadcrumb>
-			</header>
-			<div className="filter">
-				<Select className="item filter-select"
-                defaultValue={defaultValue.cashAccountType}
-						style={{width: 120 }}
-						onChange={this.handleCashAccountTypeChange}>
-					<Option value="0">请选择收款方式</Option>
-					<Option value="1">支付宝</Option>
-					<Option value="2">微信</Option>
-					<Option value="3">银行</Option>
-				</Select>
-				{orderSelectOption}
-				<DatePicker
-          {...defaultDate}
-          locale={zhCN}
-          onChange={this.handleBillAtChange} className="item"/>
-        <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
-        <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
-        {USER.role.id == 3 ?
-          <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
-          :""}
+			<div className="top-fix">
+        <header>
+          <Breadcrumb>
+            <Breadcrumb.Item>结算管理</Breadcrumb.Item>
+          </Breadcrumb>
+        </header>
+        <div className="filter">
+          <Select className="item filter-select"
+                  defaultValue={defaultValue.cashAccountType}
+                  style={{width: 120 }}
+                  onChange={this.handleCashAccountTypeChange}>
+            <Option value="0">请选择收款方式</Option>
+            <Option value="1">支付宝</Option>
+            <Option value="2">微信</Option>
+            <Option value="3">银行</Option>
+          </Select>
+          {orderSelectOption}
+          <DatePicker
+            {...defaultDate}
+            locale={zhCN}
+            onChange={this.handleBillAtChange} className="item"/>
+          <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
+          <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
+          {USER.role.id == 3 ?
+            <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
+            :""}
+        </div>
       </div>
 			{tableDiv}
 			<Modal
