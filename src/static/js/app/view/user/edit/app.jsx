@@ -368,7 +368,7 @@ class UserForm extends React.Component {
         </FormItem>
         <FormItem
           {...formItemLayout}
-          label="支付宝姓名">
+          label="真实姓名">
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
@@ -377,7 +377,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.alipayName,
 
           })(
-            <Input placeholder="请输入支付宝姓名"/>
+            <Input placeholder="请输入真实姓名"/>
           )}
         </FormItem>
       </div>
