@@ -6,6 +6,7 @@ import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
 import moment from 'moment';
+import zhCN from 'antd/lib/date-picker/locale/zh_CN';
 const confirm = Modal.confirm;
 import {hashHistory} from 'react-router';
 const App = React.createClass({
@@ -113,7 +114,6 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				width: 100,
-				// fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -246,7 +246,7 @@ const App = React.createClass({
 			list: [],
 			total: 0,
 			loading: false,
-			cashAccountType: 0,             //搜索收款方式
+			cashAccountType: "0",             //搜索收款方式
 			status: "",                     //搜索账单状态
 			hasApplied: 0,                  //
 			billAt: '',                     //搜索结账时间
@@ -540,30 +540,20 @@ const App = React.createClass({
 		this.list({
 			cashAccountType: cashAccountType,
 			status: status,
-			hasApplied: hasApplied,
+			// hasApplied: hasApplied,
 			billAt: billAt,
       perPage: this.perPage,
       page:1,
       userOrBank: userOrBank,
     });
-    // this.props.location.query = {
-    //   cashAccountType: cashAccountType,
-    //   status: status,
-    //   billAt: billAt,
-    //   userOrBank: userOrBank,
-    // };
-    // hashHistory.replace(this.props.location);
-	},
-  textHandleFilter() {
-    // 单独文本搜搜
-    const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
-    this.setState({currentPage: 1});
-    this.list({
-      page:1,
-      perPage: this.perPage,
+    this.props.location.query = {
+      cashAccountType: cashAccountType,
+      status: status,
+      billAt: billAt,
       userOrBank: userOrBank,
-    });
-  },
+    };
+    hashHistory.replace(this.props.location);
+	},
   textChange(e) {
     this.setState({
       userOrBank: e.target.value,
@@ -577,16 +567,16 @@ const App = React.createClass({
       	hasApplied: hasApplied,
       	billAt: billAt
     }
-    // const query = this.props.location.query;
-    // if(!_.isEmpty(query)) {
-    //   search = {
-    //     cashAccountType: query.cashAccountType,
-    //     status: query.status,
-    //     billAt: query.billAt,
-    //     userOrBank: query.userOrBank
-    //   }
-    //   this.setState(search);
-    // }
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      search = {
+        cashAccountType: query.cashAccountType,
+        status: query.status,
+        billAt: query.billAt,
+        userOrBank: query.userOrBank
+      }
+      this.setState(search);
+    }
     this.list(search);
   },
 	handleCashAccountTypeChange(value){
@@ -688,21 +678,23 @@ const App = React.createClass({
     // </Modal>
   },
 	render(){
-    // let defaultValue = {
-    //   cashAccountType: this.state.cashAccountType,
-    //   status: this.state.status,
-    //   billAt: this.state.billAt,
-    //   userOrBank:this.state.userOrBank,
-    // };
-    // const query = this.props.location.query;
-    // if(!_.isEmpty(query)) {
-    //   defaultValue = {
-    //     cashAccountType: query.cashAccountType,
-    //     status: query.status,
-    //     billAt: query.billAt,
-    //     userOrBank:query.userOrBank,
-    //   };
-    // }
+    console.log(this.state.billAt);
+    let defaultValue = {
+      cashAccountType: this.state.cashAccountType,
+      status: this.state.status,
+      billAt: this.state.billAt,
+      userOrBank:this.state.userOrBank,
+    };
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      defaultValue = {
+        cashAccountType: query.cashAccountType,
+        status: query.status,
+        billAt: query.billAt,
+        userOrBank:query.userOrBank,
+      };
+    }
+    // console.log(defaultValue);
 		const self = this;
 		const {list, columns} = this.state;
 		const pagination = this.initializePagination();
@@ -780,7 +772,7 @@ const App = React.createClass({
     	orderSelectOption = (
     		<Select
 					className="item"
-					defaultValue=""
+					defaultValue={defaultValue.status}
 					style={{width: 120 }}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择结账状态</Option>
@@ -794,8 +786,8 @@ const App = React.createClass({
     	orderSelectOption = (
     		<Select
 					className="item"
-					defaultValue=""
-					style={{width: 120 }}
+          defaultValue={defaultValue.status}
+          style={{width: 120 }}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择结账状态</Option>
 					<Option value="1">未结账</Option>
@@ -806,7 +798,7 @@ const App = React.createClass({
 				</Select>
     	)
     }
-
+    const defaultDate = defaultValue.billAt?{defaultValue: moment(defaultValue.billAt, 'YYYY-MM-DD')}:{}
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
@@ -814,7 +806,6 @@ const App = React.createClass({
     ):(
     	<Table scroll={{ x: 900  }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
-
 		return (<section className="view-settlement-list">
 			<header>
 				<Breadcrumb>
@@ -823,7 +814,7 @@ const App = React.createClass({
 			</header>
 			<div className="filter">
 				<Select className="item filter-select"
-						defaultValue="0"
+                defaultValue={defaultValue.cashAccountType}
 						style={{width: 120 }}
 						onChange={this.handleCashAccountTypeChange}>
 					<Option value="0">请选择收款方式</Option>
@@ -832,8 +823,11 @@ const App = React.createClass({
 					<Option value="3">银行</Option>
 				</Select>
 				{orderSelectOption}
-				<DatePicker onChange={this.handleBillAtChange} className="item"/>
-        <Input style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
+				<DatePicker
+          {...defaultDate}
+          locale={zhCN}
+          onChange={this.handleBillAtChange} className="item"/>
+        <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
         <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
         {USER.role.id == 3 ?
           <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
