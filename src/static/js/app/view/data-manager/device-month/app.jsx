@@ -109,15 +109,36 @@ const App = React.createClass({
         }
       })
   },
+  initializePagination() {
+    const self = this;
+    return {
+      total: self.state.total,
+      showSizeChanger: true,
+      size:'small',
+      onShowSizeChange(current, pageSize) {
+        const pager = { page : current, perPage: pageSize};
+        self.setState(pager);
+        self.list();
+      },
+      onChange(current) {
+        const pager = { page : current, perPage: self.state.perPage};
+        self.setState(pager);
+        self.list();
+      },
+    }
+  },
   render() {
+    var self = this;
     const {list, total, columns} = this.state;
+    const pagination = this.initializePagination();
+    pagination.current = this.state.page;
     return (<section className="view-statis-device-month">
       <header>
         <Breadcrumb>
           <Breadcrumb.Item>模块统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 650 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 650 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
     </section>);
   }
 });
