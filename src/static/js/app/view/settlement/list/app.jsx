@@ -822,7 +822,7 @@ const App = React.createClass({
           <DatePicker
             {...defaultStartDate}
             disabledDate={this.disabledStartDate}
-            placeholder="起始日期"
+            placeholder="开始日期"
             onChange={this.onStartChange}
             onOpenChange={this.handleStartOpenChange}
             className="item"
