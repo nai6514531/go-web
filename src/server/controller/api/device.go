@@ -115,8 +115,10 @@ var (
 
 		"01031301": "获取操作次数失败",
 		"01031302": "设置操作次数失败",
-		"01031303": "该操作每日只能进行10次",
-		"01031304": "时间格式转换错误",
+		"01031303": "时间格式转换错误",
+		"01031304": "该操作每日只能进行3次",
+		"01031305": "无该设备信息",
+
 	}
 )
 
@@ -377,18 +379,35 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 
 func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 	result := &enity.Result{}
+	deviceService := &service.DeviceService{}
 	id, _ := ctx.ParamInt("id")
 	prefix := viper.GetString("device.rateLimiter.prefix")
 	maxRetry := viper.GetInt("device.rateLimiter.maxRetry")
-	key := prefix + strconv.Itoa(id)
-	count, err := common.Redis.Get(key).Int64()
+	var count int64 = 0
+	key := ""
+	device, err := deviceService.Basic(id)
 	if err != nil {
-		result = &enity.Result{"01031301", err.Error(), device_msg["01031301"]}
+		result = &enity.Result{"01031305", nil, device_msg["01031305"]}
+		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
+		return
 	}
-	common.Logger.Debug("count=====", count)
+	switch device.Status {
+	case 0:		//如果为0，对应锁定操作
+		key = prefix + "lock:" + strconv.Itoa(id)
+		count, _ = common.Redis.Get(key).Int64()
+		break
+	case 9:		//如果为9，对应取消锁定操作
+		key = prefix + "unlock:" + strconv.Itoa(id)
+		count, _ = common.Redis.Get(key).Int64()
+		break
+	default:	//如果为60x，对应取消占用操作
+		key = prefix + "unoccupation:" + strconv.Itoa(id)
+		count, _ = common.Redis.Get(key).Int64()
+		break
+	}
 	if int(count) >= maxRetry {
-		result = &enity.Result{"01031303", nil, device_msg["01031303"]}
+		result = &enity.Result{"01031304", nil, device_msg["01031304"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
@@ -396,7 +415,7 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 	expirationAtStr := time.Now().AddDate(0, 0, 1).Format("2006-01-02 00:00:00")
 	expirationAt, err := time.Parse("2006-01-02 00:00:00", expirationAtStr)
 	if err != nil {
-		result = &enity.Result{"01031304", err.Error(), device_msg["01031304"]}
+		result = &enity.Result{"01031303", err.Error(), device_msg["01031303"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
@@ -404,7 +423,7 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 	nowAt, err := time.Parse("2006-01-02 15:04:05", now)
 	if err != nil {
-		result = &enity.Result{"01031304", err.Error(), device_msg["01031304"]}
+		result = &enity.Result{"01031303", err.Error(), device_msg["01031303"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
@@ -417,6 +436,7 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
+	common.Logger.Debug("count=====", count)
 	ctx.Next()
 }
 
