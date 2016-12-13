@@ -92,7 +92,6 @@ const App = React.createClass({
         self.setState({
           loading: false,
         });
-        //console.log(data);
         if (data && data.status == '00') {
           const total = data.data.length;
           this.setState({

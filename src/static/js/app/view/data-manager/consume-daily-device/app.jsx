@@ -99,7 +99,6 @@ const App = React.createClass({
       loading: true,
     });
     const {id} = this.props.params;
-    console.log('params',id,billAt);
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
     StatisConsumeService.dateList(billAt,{})
       .then((data) => {
