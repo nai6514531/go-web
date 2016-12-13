@@ -40,8 +40,8 @@ const App = React.createClass({
           width:60
 			}, {
 				title: '账期',
-				dataIndex: 'startAt',
-				key: 'startAt',
+				dataIndex: 'billAt',
+				key: 'billAt',
           width:95,
 				render: (bill_at) => {
 					return moment(bill_at).format('YYYY-MM-DD')
@@ -121,7 +121,7 @@ const App = React.createClass({
 					let data = {
 						id: record.id,
 						userId: record.userId,
-						startAt: moment(record.startAt).format('YYYY-MM-DD'),
+						billAt: moment(record.billAt).format('YYYY-MM-DD'),
 						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
@@ -130,7 +130,7 @@ const App = React.createClass({
 						case 1:
 							spanDiv = (
                 <div>
-                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                 </div>
               )
 							break;
@@ -139,7 +139,7 @@ const App = React.createClass({
 							if(accountType == 1){
 								spanDiv = (
 									<span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                   </span>
 								)
 							}else{
@@ -150,13 +150,13 @@ const App = React.createClass({
 					              <a>申请结账</a>
 					            </Popconfirm>
 					            <span> | </span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else if(status == 2 || status == 3){
 									spanDiv = (
 										<span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else if(status == 4){
@@ -166,7 +166,7 @@ const App = React.createClass({
 					              <a>重新申请</a>
 					            </Popconfirm>
 					            <span> | </span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else{
@@ -176,7 +176,7 @@ const App = React.createClass({
 					              {/*<a>取消申请</a>*/}
 					            {/*</Popconfirm>*/}
 					            {/*<span> | </span>*/}
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}
@@ -186,7 +186,7 @@ const App = React.createClass({
 							if( status==2){
 								spanDiv = (
                   <div>
-                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
                   </div>
@@ -194,7 +194,7 @@ const App = React.createClass({
 							}else if (status == 3) {
                 spanDiv = (
                   <div>
-                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
                   </div>
@@ -206,7 +206,7 @@ const App = React.createClass({
 				              <a>重新结账</a>
 				            </Popconfirm>
 				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                      <span> | </span>
                     {mark}
 	          			</span>
@@ -218,24 +218,24 @@ const App = React.createClass({
 				              <a>结账</a>
 				            </Popconfirm>
 				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
 	          			</span>
 								)
 							}
 							/*spanDiv = (accountType == 1&&status!=4)? (
-								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
 									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
 			              <a>结账</a>
 			            </Popconfirm>
 			            <span> | </span>
-									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
           			</span>
 							):(
-								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							)*/
 							break;
 
@@ -249,7 +249,7 @@ const App = React.createClass({
 			cashAccountType: "0",           //搜索收款方式
 			status: "",                     //搜索账单状态
 			hasApplied: 0,                  //
-			startAt: '',                     //搜索结账开始时间
+      startAt: '',                     //搜索结账开始时间
       endAt: '',                  //搜索结账结束时间
       endOpen: false,
       userOrBank: '',                 //搜索代理商或银行名
@@ -453,7 +453,7 @@ const App = React.createClass({
 		let paramsObj = {
 			"idArr": idArr,
 			"userId": data.userId+"",
-			"startAt": data.startAt,
+			"billAt": data.billAt,
 		};
 		params.push(paramsObj);
 		this.settleAjax(params);
@@ -467,24 +467,24 @@ const App = React.createClass({
 		let params = [];
 		let paramsObj = {};
 
-		let startAtObj = {};
+		let billAtObj = {};
 		let userIdArr = [];
 		let idArr = [];
 		this.state.selectedList.map((item, i)=>{
-			let startAt = moment(item.startAt).format('YYYY-MM-DD')
+			let billAt = moment(item.billAt).format('YYYY-MM-DD')
       // 按照日期来存储当天所有需要结算的单
-			if(!startAtObj[startAt]){
-				startAtObj[startAt] = [];
+			if(!billAtObj[billAt]){
+				billAtObj[billAt] = [];
 			}
-			startAtObj[startAt].push(item);
+			billAtObj[billAt].push(item);
 		})
-		for(var i in startAtObj){
+		for(var i in billAtObj){
 			paramsObj = {};
-			paramsObj.startAt = i;
+			paramsObj.billAt = i;
 			userIdArr = [];
-			for(var j=0; j<startAtObj[i].length; j++){
-				userIdArr.push(startAtObj[i][j].userId);
-				idArr.push(startAtObj[i][j].id)
+			for(var j=0; j<billAtObj[i].length; j++){
+				userIdArr.push(billAtObj[i][j].userId);
+				idArr.push(billAtObj[i][j].id)
 			}
       // 具体某日的所有结算的用户的ID
 			paramsObj.userId = userIdArr.join(',');
