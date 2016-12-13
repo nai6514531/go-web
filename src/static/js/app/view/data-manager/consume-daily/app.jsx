@@ -117,18 +117,20 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(date, pager);
+        // self.list(date, pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(date, pager);
+        // self.list(date, pager);
       },
     }
   },
   render() {
     const {list, total, columns} = this.state;
     const {id} = this.props.params;
+    const pagination = this.initializePagination();
+    pagination.current = this.state.page;
     return (<section className="view-statis-consume-daily">
       <header>
         <Breadcrumb>
@@ -136,7 +138,7 @@ const App = React.createClass({
           <Breadcrumb.Item>{id}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 450 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 450 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
     </section>);
   }
 });
