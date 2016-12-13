@@ -29,7 +29,7 @@ const App = React.createClass({
         render: (serialNumber,record)=>{
           if(record.amount>0){
             return <div>
-              <Link to={"/data/consume/month/"+record.id+"/"+record.billAt+"/"+serialNumber+""}>{serialNumber}</Link>
+              <Link to={record.url}>{serialNumber}</Link>
               {record.address?' / '+record.address:""}
             </div>
           }else{
@@ -106,37 +106,19 @@ const App = React.createClass({
           loading: false,
         });
         if (data && data.status == '00') {
-          const list = data.data;
-          const firstPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.firstPulseAmount},0)*100)/100;
-          const secondPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.secondPulseAmount},0)*100)/100;
-          const thirdPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.thirdPulseAmount},0)*100)/100;
-          const fourthPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.fourthPulseAmount},0)*100)/100;
-          const amount = Math.round(list.reduce((total,item)=>{return total+item.amount},0)*100)/100;
-          const total = {
-            "firstPulseAmount": firstPulseAmount,
-            "secondPulseAmount": secondPulseAmount,
-            "thirdPulseAmount": thirdPulseAmount,
-            "fourthPulseAmount": fourthPulseAmount,
-            "amount": amount,
-          };
-          let theList = list.map((item, key) => {
-            item.id=id;
-            item.billAt=billAt;
-            item.url = baseUrl+item.serialNumber;
-            item.key = key +1;
-            return item;
-          });
-          theList.push(total);
           this.setState({
-            total: theList.length,
-            list: theList,
+            total: data.data.length,
+            list: data.data.map((item,key) => {
+              item.url = baseUrl+item.serialNumber;
+              item.key = key + 1;
+              return item;
+            })
           });
         } else {
           message.info(data.msg);
         }
       });
     // return
-
     // const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
     /*DailyBillDetailService.list(userId, billAt, '', pager)
       .then((data) => {
@@ -168,18 +150,20 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(USER.id,date,'', pager);
+        // self.list(USER.id,date,'', pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(USER.id,date,'',pager);
+        // self.list(USER.id,date,'',pager);
       },
     }
   },
   render() {
     const {list, total, columns} = this.state;
     const { id, date } = this.props.params;
+    const pagination = this.initializePagination();
+    pagination.current = this.state.page;
     return (<section className="view-consume-daily-device">
       <header>
         <Breadcrumb>
@@ -188,7 +172,7 @@ const App = React.createClass({
           <Breadcrumb.Item>{date}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
     </section>);
   }
 });

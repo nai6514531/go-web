@@ -1,4 +1,35 @@
 .view-settlement-list {
+  .top-fix {
+      //border: 1px solid black;
+      position: fixed;
+      width: 100%;
+      padding-left: 0px;
+      background: white;
+      z-index: 100;
+      top: 50px;
+    header {
+      border-bottom: 1px solid #ddd;
+      height: 50px;
+      line-height: 50px;
+      padding-left: 15px;
+      margin-bottom: 15px;
+    }
+  }
+  //header {
+  //  border: 1px solid black;
+  //  position: fixed;
+  //  width: 100%;
+  //  padding-left: 0px;
+  //  background: white;
+  //  z-index: 100;
+  //  top: 65px;
+  //}
+  .table {
+    margin-top: 102px;
+      @media (max-width: 768px) {
+        margin-top: 200px;
+      }
+  }
   .ant-checkbox-inner{
     height: 18px;
     width: 18px;
@@ -16,7 +47,12 @@
   }
   .filter {
 		margin-bottom: 15px;
-		.item {
+    //border: 1px solid black;
+    //position: fixed;
+    //width: 100%;
+    //background: white;
+    //top: 102px;
+    .item {
 		  margin: 5px 10px;
 		}
     .filter-select {
@@ -51,15 +87,15 @@
   .done {
     color: green;
   }
-  .calculate {
-    position: fixed;
-    z-index: 100;
-    top: 138px;
-    @media (max-width: 768px) {
-      top: 78px;
-      right: 20px;
-    }
-  }
+  //.calculate {
+  //  position: fixed;
+  //  z-index: 100;
+  //  top: 138px;
+  //  @media (max-width: 768px) {
+  //    top: 78px;
+  //    right: 20px;
+  //  }
+  //}
 
 }
 

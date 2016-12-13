@@ -6,6 +6,7 @@ import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
 import moment from 'moment';
+import zhCN from 'antd/lib/date-picker/locale/zh_CN';
 const confirm = Modal.confirm;
 import {hashHistory} from 'react-router';
 const App = React.createClass({
@@ -39,8 +40,8 @@ const App = React.createClass({
           width:60
 			}, {
 				title: '账期',
-				dataIndex: 'billAt',
-				key: 'billAt',
+				dataIndex: 'startAt',
+				key: 'startAt',
           width:95,
 				render: (bill_at) => {
 					return moment(bill_at).format('YYYY-MM-DD')
@@ -113,7 +114,6 @@ const App = React.createClass({
 				dataIndex: 'id',
 				key: 'method',
 				width: 100,
-				// fixed: 'right',
 				render: (id, record) => {
 					const roleId = this.state.roleId;
 					const status = record.status;
@@ -121,7 +121,7 @@ const App = React.createClass({
 					let data = {
 						id: record.id,
 						userId: record.userId,
-						billAt: moment(record.billAt).format('YYYY-MM-DD'),
+						startAt: moment(record.startAt).format('YYYY-MM-DD'),
 						willApplyStatus: status == 0 ? 1: 0 //即将结账改变的状态
 					}
 					let spanDiv = "";
@@ -130,7 +130,7 @@ const App = React.createClass({
 						case 1:
 							spanDiv = (
                 <div>
-                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                 </div>
               )
 							break;
@@ -139,7 +139,7 @@ const App = React.createClass({
 							if(accountType == 1){
 								spanDiv = (
 									<span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                   </span>
 								)
 							}else{
@@ -150,13 +150,13 @@ const App = React.createClass({
 					              <a>申请结账</a>
 					            </Popconfirm>
 					            <span> | </span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else if(status == 2 || status == 3){
 									spanDiv = (
 										<span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else if(status == 4){
@@ -166,7 +166,7 @@ const App = React.createClass({
 					              <a>重新申请</a>
 					            </Popconfirm>
 					            <span> | </span>
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}else{
@@ -176,7 +176,7 @@ const App = React.createClass({
 					              {/*<a>取消申请</a>*/}
 					            {/*</Popconfirm>*/}
 					            {/*<span> | </span>*/}
-											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     </span>
 									)
 								}
@@ -186,7 +186,7 @@ const App = React.createClass({
 							if( status==2){
 								spanDiv = (
                   <div>
-                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
                   </div>
@@ -194,7 +194,7 @@ const App = React.createClass({
 							}else if (status == 3) {
                 spanDiv = (
                   <div>
-                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+                    <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
                   </div>
@@ -206,7 +206,7 @@ const App = React.createClass({
 				              <a>重新结账</a>
 				            </Popconfirm>
 				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                      <span> | </span>
                     {mark}
 	          			</span>
@@ -218,24 +218,24 @@ const App = React.createClass({
 				              <a>结账</a>
 				            </Popconfirm>
 				            <span> | </span>
-										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+										<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
                     <span> | </span>
                     {mark}
 	          			</span>
 								)
 							}
 							/*spanDiv = (accountType == 1&&status!=4)? (
-								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
 									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
 			              <a>结账</a>
 			            </Popconfirm>
 			            <span> | </span>
-									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+									<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
           			</span>
 							):(
-								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.startAt).format('YYYY-MM-DD')}`}>明细</a>
 							)*/
 							break;
 
@@ -246,11 +246,13 @@ const App = React.createClass({
 			list: [],
 			total: 0,
 			loading: false,
-			cashAccountType: 0,             //搜索收款方式
+			cashAccountType: "0",           //搜索收款方式
 			status: "",                     //搜索账单状态
 			hasApplied: 0,                  //
-			billAt: '',                     //搜索结账时间
-      userOrBank: '',                  //搜索代理商或银行名
+			startAt: '',                     //搜索结账开始时间
+      endAt: '',                  //搜索结账结束时间
+      endOpen: false,
+      userOrBank: '',                 //搜索代理商或银行名
       selectedList: [],   						//勾选的账单
       amount:0,                       //选中项的金额合计
       // amountVisible: false,
@@ -259,19 +261,33 @@ const App = React.createClass({
 			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
 			nowAjaxStatus: {},  						//保存ajax请求字段状态
-			currentPage: 1,									//当前页码
 			payModalVisible: false,  				//支付modal的状态 false:hide true:show
 			payList: {},  									//支付宝数据
 			nowSettlement: {}, 							//只在结账的数据
 			selectedRowKeys: [], 						//已勾选的列表[key1, key2...]
+      page: 1,									      //当前页码
       perPage: 10,
 		};
 	},
+  componentWillMount() {
+    let search = this.getSearchCondition();
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      search = {
+        cashAccountType: query.cashAccountType,
+        status: query.status,
+        startAt: query.startAt,
+        endAt: query.endAt,
+        userOrBank: query.userOrBank
+      }
+      this.setState(search);
+    }
+    this.list(search);
+  },
 	list(data) {
 		var self = this;
 		this.setState({
 			loading: true,
-			nowAjaxStatus: data
 		});
 		DailyBillService.list(data)
 			.then((data) => {
@@ -303,9 +319,31 @@ const App = React.createClass({
 				});
 			})
 	},
+  mark(id) {
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    DailyBillService.mark(id)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        if (data && data.status == '00') {
+          message.success(data.msg,3);
+          // 成功则需要重新拉数据,做保持搜索条件功能时此处需要再加上搜索的条件
+          let search = this.getSearchCondition();
+          this.setState({page: 1});
+          search.page = 1;
+          this.list(search);
+        } else {
+          message.error(data.msg,3);
+        }
+      })
+  },
   markRow(id) {
     this.mark(id);
-    this.setState({currentPage: 1})
+    this.setState({page: 1})
   },
   checkedRow(ids) {
     // 无论什么情况,先把所有的灰色置空,然后再把 ids 里的 ID 放进去
@@ -322,25 +360,6 @@ const App = React.createClass({
       }
     }
     this.setState({rowColor: rowColor});
-  },
-  mark(id) {
-    var self = this;
-    this.setState({
-      loading: true,
-    });
-    DailyBillService.mark(id)
-      .then((data) => {
-        self.setState({
-          loading: false,
-        });
-        if (data && data.status == '00') {
-          message.success(data.msg,3);
-          // 成功则需要重新拉数据,做保持搜索条件功能时此处需要再加上搜索的条件
-          this.list({perPage: this.perPage, page:1,});
-        } else {
-          message.error(data.msg,3);
-        }
-      })
   },
 	setPayModalVisible(status) {
     this.setState({ payModalVisible: status });
@@ -371,13 +390,10 @@ const App = React.createClass({
 		})
 		this.setState({list: newList});
 	},
-
 	deposit(data) {
 		const self = this;
 		if(this.state.clickLock){ return; } //是否存在点击锁
-
 		this.setState({clickLock: true});
-
 		DailyBillService.apply(data).then((res)=>{
 			this.setState({clickLock: false});
 			if(res.status == "00"){
@@ -410,8 +426,6 @@ const App = React.createClass({
 	changeSettlementStatus(data, resStatus) { //resStatus 0:成功  2：银行OK，支付宝失败
 		let aliPayNum = 0;
 		let list = this.state.list;
-		// //console.log(data)
-		// //console.log(list)
 		for(var i=0; i<data.length; i++){
 			for(var j=0; j<list.length; j++){
 				if(data[i].idArr.indexOf(list[j].id) >= 0){
@@ -424,7 +438,6 @@ const App = React.createClass({
 				}
 			}
 		}
-		//console.log(aliPayNum)
 		this.setState({
 			list: list,
 			getAliPayOrderNum: aliPayNum
@@ -439,17 +452,11 @@ const App = React.createClass({
 		let paramsObj = {
 			"idArr": idArr,
 			"userId": data.userId+"",
-			"billAt": data.billAt,
+			"startAt": data.startAt,
 		};
 		params.push(paramsObj);
 		this.settleAjax(params);
 	},
-  cancelSettle(data) {
-    // 取消结算
-    // <Popconfirm title="确认取消结账吗?" onConfirm={this.cancelSettle.bind(this, data)}>
-    //  <a>取消结账</a>
-    //  </Popconfirm>
-  },
 	multiSettle() {
 
 		if(this.state.selectedList.length == 0){
@@ -459,24 +466,24 @@ const App = React.createClass({
 		let params = [];
 		let paramsObj = {};
 
-		let billAtObj = {};
+		let startAtObj = {};
 		let userIdArr = [];
 		let idArr = [];
 		this.state.selectedList.map((item, i)=>{
-			let billAt = moment(item.billAt).format('YYYY-MM-DD')
+			let startAt = moment(item.startAt).format('YYYY-MM-DD')
       // 按照日期来存储当天所有需要结算的单
-			if(!billAtObj[billAt]){
-				billAtObj[billAt] = [];
+			if(!startAtObj[startAt]){
+				startAtObj[startAt] = [];
 			}
-			billAtObj[billAt].push(item);
+			startAtObj[startAt].push(item);
 		})
-		for(var i in billAtObj){
+		for(var i in startAtObj){
 			paramsObj = {};
-			paramsObj.billAt = i;
+			paramsObj.startAt = i;
 			userIdArr = [];
-			for(var j=0; j<billAtObj[i].length; j++){
-				userIdArr.push(billAtObj[i][j].userId);
-				idArr.push(billAtObj[i][j].id)
+			for(var j=0; j<startAtObj[i].length; j++){
+				userIdArr.push(startAtObj[i][j].userId);
+				idArr.push(startAtObj[i][j].id)
 			}
       // 具体某日的所有结算的用户的ID
 			paramsObj.userId = userIdArr.join(',');
@@ -533,103 +540,119 @@ const App = React.createClass({
 			message.info(err)
 		})
 	},
-	handleFilter(){
-		const {cashAccountType, status, hasApplied, billAt}=this.state;
-    const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
-    this.setState({currentPage: 1})
-		this.list({
-			cashAccountType: cashAccountType,
-			status: status,
-			hasApplied: hasApplied,
-			billAt: billAt,
-      perPage: this.perPage,
-      page:1,
-      userOrBank: userOrBank,
-    });
-    // this.props.location.query = {
-    //   cashAccountType: cashAccountType,
-    //   status: status,
-    //   billAt: billAt,
-    //   userOrBank: userOrBank,
-    // };
-    // hashHistory.replace(this.props.location);
-	},
-  textHandleFilter() {
-    // 单独文本搜搜
-    const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
-    this.setState({currentPage: 1});
-    this.list({
-      page:1,
-      perPage: this.perPage,
-      userOrBank: userOrBank,
-    });
-  },
-  textChange(e) {
-    this.setState({
-      userOrBank: e.target.value,
-    });
-  },
-	componentWillMount() {
-		const {cashAccountType, status, hasApplied, billAt}=this.state;
-    let search = {
-      	cashAccountType: cashAccountType,
-      	status: status,
-      	hasApplied: hasApplied,
-      	billAt: billAt
+  CalculateAmount() {
+    const self = this;
+    if(this.state.amount >0 && this.state.selectedList.length>0) {
+      confirm({
+        title:'确认结算?',
+        content: '选中账单总笔数为'+this.state.selectedList.length+'笔，总金额为:'+this.state.amount +'元',
+        onOk() {
+          self.multiSettle();
+        },
+        onCancel() {
+        },
+      });
+    } else if (this.state.selectedList.length<=0) {
+      message.info('请勾选您需要计算金额的账单',3);
+    } else if(this.state.amount <= 0 ){
+      message.info('勾选项金额合计为0或者账单状态不是未结账',3);
     }
-    // const query = this.props.location.query;
-    // if(!_.isEmpty(query)) {
-    //   search = {
-    //     cashAccountType: query.cashAccountType,
-    //     status: query.status,
-    //     billAt: query.billAt,
-    //     userOrBank: query.userOrBank
-    //   }
-    //   this.setState(search);
-    // }
-    this.list(search);
+
   },
-	handleCashAccountTypeChange(value){
-		this.setState({
-			cashAccountType: value
-		})
+  // 筛选相关
+	handleFilter(){
+    this.setState({page: 1});
+    let search = this.getSearchCondition();
+    search.page = 1;
+    this.list(search);
+    this.props.location.query = search;
+    hashHistory.replace(this.props.location);
 	},
-	handleStatusChange(value){
-		this.setState({
-			status: value
-		})
-	},
-	handleBillAtChange(date, dateString){
-		this.setState({
-			billAt: dateString
-		})
-	},
+  handleCashAccountTypeChange(value){
+    this.setState({
+      cashAccountType: value
+    })
+  },
+  handleStatusChange(value){
+    this.setState({
+      status: value
+    })
+  },
+  handleBillAtChange (field, value) {
+    // 此处需要对时间进行统一处理
+    this.setState({
+      [field]: value?moment(value).format('YYYY-MM-DD'):"",
+    });
+  },
+  onStartChange (value) {
+    this.handleBillAtChange('startAt', value);
+  },
+  onEndChange (value) {
+    this.handleBillAtChange('endAt', value);
+  },
+  handleUserOrBankChange(e) {
+    const userOrBank = e.target.value.replace(/[\r\n\s]/g,"");
+    this.setState({
+      userOrBank: userOrBank,
+    });
+  },
+  disabledStartDate (startAt) {
+    const endAt = this.state.endAt;
+    if (!startAt || !endAt) {
+      return false;
+    }
+    return startAt.valueOf() > endAt.valueOf();
+  },
+  disabledEndDate (endAt){
+    const startAt = this.state.startAt;
+    if (!endAt || !startAt) {
+      return false;
+    }
+    return endAt.valueOf() <= startAt.valueOf();
+  },
+  handleStartOpenChange (open) {
+    if (!open) {
+      this.setState({ endOpen: true });
+    }
+  },
+  handleEndOpenChange (open) {
+    this.setState({ endOpen: open });
+  },
+  getSearchCondition() {
+    const {cashAccountType, status, startAt, endAt, userOrBank, page, perPage}=this.state;
+    const searchCondition = {
+      cashAccountType: cashAccountType,
+      status: status,
+      startAt: startAt,
+      endAt: endAt,
+      userOrBank: userOrBank,
+      page: page,
+      perPage: perPage,
+    }
+    return searchCondition;
+  },
 	initializePagination(){
 		var self = this;
-
-		const {cashAccountType, status, hasApplied, billAt,total}=this.state;
+    let search = this.getSearchCondition();
 		return {
 			size: "small",
-			total: total,
+			total: self.state.total,
 			showSizeChanger: true,
       pageSizeOptions: ['10','20','30','40','300'],
       showTotal (total) {
         return <span>总计 {total} 条</span>
       },
 			onShowSizeChange(page, perPage) {
-				let listObj = self.state.nowAjaxStatus;
-        self.perPage = perPage;
-        // self.setState({perPage:perPage});
-				listObj.page = page;
-				listObj.perPage = perPage;
-				self.list(listObj);
+        self.setState({page: page, perPage: perPage});
+        search.page = page;
+        search.perPage = perPage;
+				self.list(search);
 			},
 			onChange(page) {
-				self.setState({currentPage: this.current})
-				let listObj = self.state.nowAjaxStatus;
-				listObj.page = this.current;
-				listObj.perPage = this.pageSize;
-				self.list(listObj);
+				self.setState({page: page});
+        search.page = page;
+        search.perPage = self.state.perPage;
+				self.list(search);
 			},
 		};
 	},
@@ -652,62 +675,23 @@ const App = React.createClass({
       amountVisible: false,
     });
   },
-  CalculateAmount() {
-    const self = this;
-    if(this.state.amount >0 && this.state.selectedList.length>0) {
-      confirm({
-        title:'确认结算?',
-        content: '选中账单总笔数为'+this.state.selectedList.length+'笔，总金额为:'+this.state.amount +'元',
-        onOk() {
-          self.multiSettle();
-        },
-        onCancel() {
-        },
-      });
-      // 备选方案
-      // self.multiSettle();
-    } else if (this.state.selectedList.length<=0) {
-      message.info('请勾选您需要计算金额的账单',3);
-    } else if(this.state.amount <= 0 ){
-      message.info('勾选项金额合计为0或者账单状态不是未结账',3);
+  render(){
+    let defaultValue = this.getSearchCondition();
+    const query = this.props.location.query;
+    if(!_.isEmpty(query)) {
+      defaultValue = {
+        cashAccountType: query.cashAccountType,
+        status: query.status,
+        startAt: query.startAt,
+        endAt: query.endAt,
+        userOrBank:query.userOrBank,
+      };
     }
-    // 备选方案
-    // this.setState({
-    //   amountVisible: true,
-    // });
-  },
-  confirmPay() {
-    // 备选方案
-    // if(this.state.amount >0) {
-    //   this.multiSettle();
-    // }
-    // <Modal title='确认支付？' visible={this.state.amountVisible}
-    //        onOk={this.confirmPay} onCancel={this.closeAmountVisible}
-    // >
-    //   <p>选中的账单金额总额为: <span style={{fontSize:16,color:'red'}}>{this.state.amount}</span>元</p>
-    // </Modal>
-  },
-	render(){
-    // let defaultValue = {
-    //   cashAccountType: this.state.cashAccountType,
-    //   status: this.state.status,
-    //   billAt: this.state.billAt,
-    //   userOrBank:this.state.userOrBank,
-    // };
-    // const query = this.props.location.query;
-    // if(!_.isEmpty(query)) {
-    //   defaultValue = {
-    //     cashAccountType: query.cashAccountType,
-    //     status: query.status,
-    //     billAt: query.billAt,
-    //     userOrBank:query.userOrBank,
-    //   };
-    // }
 		const self = this;
-		const {list, columns} = this.state;
+		const {list, columns, endOpen, selectedRowKeys} = this.state;
 		const pagination = this.initializePagination();
-		pagination.current = this.state.currentPage;
-		const selectedRowKeys = this.state.selectedRowKeys;
+		pagination.current = this.state.page;
+		// const selectedRowKeys = this.state.selectedRowKeys;
 		const rowSelection = {
 			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
@@ -780,7 +764,7 @@ const App = React.createClass({
     	orderSelectOption = (
     		<Select
 					className="item"
-					defaultValue=""
+					defaultValue={defaultValue.status}
 					style={{width: 120 }}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择结账状态</Option>
@@ -794,8 +778,8 @@ const App = React.createClass({
     	orderSelectOption = (
     		<Select
 					className="item"
-					defaultValue=""
-					style={{width: 120 }}
+          defaultValue={defaultValue.status}
+          style={{width: 120 }}
 					onChange={this.handleStatusChange}>
 					<Option value="">请选择结账状态</Option>
 					<Option value="1">未结账</Option>
@@ -806,7 +790,8 @@ const App = React.createClass({
 				</Select>
     	)
     }
-
+    const defaultStartDate = defaultValue.startAt?{defaultValue: moment(defaultValue.startAt, 'YYYY-MM-DD')}:{}
+    const defaultEndDate = defaultValue.endAt?{defaultValue: moment(defaultValue.endAt, 'YYYY-MM-DD')}:{}
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
@@ -814,30 +799,50 @@ const App = React.createClass({
     ):(
     	<Table scroll={{ x: 900  }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
-
 		return (<section className="view-settlement-list">
-			<header>
-				<Breadcrumb>
-					<Breadcrumb.Item>结算管理</Breadcrumb.Item>
-				</Breadcrumb>
-			</header>
-			<div className="filter">
-				<Select className="item filter-select"
-						defaultValue="0"
-						style={{width: 120 }}
-						onChange={this.handleCashAccountTypeChange}>
-					<Option value="0">请选择收款方式</Option>
-					<Option value="1">支付宝</Option>
-					<Option value="2">微信</Option>
-					<Option value="3">银行</Option>
-				</Select>
-				{orderSelectOption}
-				<DatePicker onChange={this.handleBillAtChange} className="item"/>
-        <Input style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
-        <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
-        {USER.role.id == 3 ?
-          <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
-          :""}
+			<div className="top-fix">
+        <header>
+          <Breadcrumb>
+            <Breadcrumb.Item>结算管理</Breadcrumb.Item>
+          </Breadcrumb>
+        </header>
+        <div className="filter">
+          <Select className="item filter-select"
+                  defaultValue={defaultValue.cashAccountType}
+                  style={{width: 120 }}
+                  onChange={this.handleCashAccountTypeChange}>
+            <Option value="0">请选择收款方式</Option>
+            <Option value="1">支付宝</Option>
+            <Option value="2">微信</Option>
+            <Option value="3">银行</Option>
+          </Select>
+          {orderSelectOption}
+          <DatePicker
+            {...defaultStartDate}
+            disabledDate={this.disabledStartDate}
+            placeholder="起始日期"
+            onChange={this.onStartChange}
+            onOpenChange={this.handleStartOpenChange}
+            className="item"
+            locale={zhCN}
+          />
+          -
+          <DatePicker
+            {...defaultEndDate}
+            disabledDate={this.disabledEndDate}
+            placeholder="结束日期"
+            onChange={this.onEndChange}
+            open={endOpen}
+            onOpenChange={this.handleEndOpenChange}
+            className="item"
+            locale={zhCN}
+          />
+          <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.handleUserOrBankChange}/>
+          <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
+          {USER.role.id == 3 ?
+            <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
+            :""}
+        </div>
       </div>
 			{tableDiv}
 			<Modal
