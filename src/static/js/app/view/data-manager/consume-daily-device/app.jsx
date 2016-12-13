@@ -151,12 +151,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.list(USER.id,date,'', pager);
+        // self.list(USER.id,date,'', pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        self.list(USER.id,date,'',pager);
+        // self.list(USER.id,date,'',pager);
       },
     }
   },
