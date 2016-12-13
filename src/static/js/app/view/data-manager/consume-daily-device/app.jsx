@@ -29,7 +29,7 @@ const App = React.createClass({
         render: (serialNumber,record)=>{
           if(record.amount>0){
             return <div>
-              <Link to={"/data/consume/month/"+record.id+"/"+record.billAt+"/"+serialNumber+""}>{serialNumber}</Link>
+              <Link to={record.url}>{serialNumber}</Link>
               {record.address?' / '+record.address:""}
             </div>
           }else{
@@ -99,6 +99,7 @@ const App = React.createClass({
       loading: true,
     });
     const {id} = this.props.params;
+    console.log('params',id,billAt);
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
     StatisConsumeService.dateList(billAt,{})
       .then((data) => {
