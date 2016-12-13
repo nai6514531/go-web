@@ -352,6 +352,7 @@ class DeviceList extends React.Component {
       showTotal (total) {
         return <span>总计 {total} 条</span>
       },
+      defaultPageSize: this.state.perPage,
       onShowSizeChange(current, pageSize) {
         const pager = { page : +current, perPage: +pageSize, serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
         self.setState(pager);
