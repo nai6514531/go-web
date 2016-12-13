@@ -56,7 +56,8 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 		sql += " and bill.user_id !=1 "
 	}
 	if startAt != "" && endAt != "" {
-		sql += " and bill.bill_at between " + startAt + " and " + endAt
+		sql += " and bill.bill_at between ? and ? "
+		params = append(params, startAt, endAt)
 	}
 	common.Logger.Debugln("params===========", params)
 	r := common.DB.Raw(sql, params...).Scan(result)
@@ -106,7 +107,8 @@ func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []
 		sql += " and bill.user_id !=1 "
 	}
 	if startAt != "" && endAt != "" {
-		sql += " and bill.bill_at between " + startAt + " and " + endAt
+		sql += " and bill.bill_at between ? and ? "
+		params = append(params, startAt, endAt)
 	}
 	sql += " order by bill.has_marked, case " +
 		"when bill.status=4 then 1 " +
