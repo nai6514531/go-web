@@ -377,7 +377,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.alipayName,
 
           })(
-            <Input placeholder="请输入真实姓名"/>
+            <Input placeholder="请输入支付宝账号对应的真实姓名"/>
           )}
         </FormItem>
       </div>
