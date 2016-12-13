@@ -278,7 +278,7 @@ const App = React.createClass({
         status: query.status,
         startAt: query.startAt,
         endAt: query.endAt,
-        userOrBank: query.userOrBank
+        userOrBank: query.userOrBank,
       }
       this.setState(search);
     }
@@ -335,6 +335,7 @@ const App = React.createClass({
           let search = this.getSearchCondition();
           this.setState({page: 1});
           search.page = 1;
+          search.perPage = self.state.perPage;
           this.list(search);
         } else {
           message.error(data.msg,3);
@@ -564,6 +565,7 @@ const App = React.createClass({
     this.setState({page: 1});
     let search = this.getSearchCondition();
     search.page = 1;
+    search.perPage = this.state.perPage;
     this.list(search);
     this.props.location.query = search;
     hashHistory.replace(this.props.location);
@@ -626,8 +628,8 @@ const App = React.createClass({
       startAt: startAt,
       endAt: endAt,
       userOrBank: userOrBank,
-      page: page,
-      perPage: perPage,
+      // page: page,
+      // perPage: perPage,
     }
     return searchCondition;
   },
