@@ -249,7 +249,9 @@ const App = React.createClass({
 			cashAccountType: "0",             //搜索收款方式
 			status: "",                     //搜索账单状态
 			hasApplied: 0,                  //
-			billAt: '',                     //搜索结账时间
+			billAt: '',                    //搜索结账开始时间
+      billEndAt: '',                //搜索结账结束时间
+      endOpen: false,
       userOrBank: '',                  //搜索代理商或银行名
       selectedList: [],   						//勾选的账单
       amount:0,                       //选中项的金额合计
@@ -534,14 +536,15 @@ const App = React.createClass({
 		})
 	},
 	handleFilter(){
-		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		const {cashAccountType, status, hasApplied, billAt, billEndAt}=this.state;
     const userOrBank = this.state.userOrBank.replace(/[\r\n\s]/g,"");
     this.setState({currentPage: 1})
-		this.list({
+    this.list({
 			cashAccountType: cashAccountType,
 			status: status,
 			// hasApplied: hasApplied,
-			billAt: billAt,
+			billAt: billAt?moment(billAt).format('YYYY-MM-DD'):"",
+      billEndAt: billEndAt?moment(billEndAt).format('YYYY-MM-DD'):"",
       perPage: this.perPage,
       page:1,
       userOrBank: userOrBank,
@@ -549,7 +552,8 @@ const App = React.createClass({
     this.props.location.query = {
       cashAccountType: cashAccountType,
       status: status,
-      billAt: billAt,
+      billAt: billAt?moment(billAt).format('YYYY-MM-DD'):"",
+      billEndAt: billEndAt?moment(billEndAt).format('YYYY-MM-DD'):"",
       userOrBank: userOrBank,
     };
     hashHistory.replace(this.props.location);
@@ -560,12 +564,13 @@ const App = React.createClass({
     });
   },
 	componentWillMount() {
-		const {cashAccountType, status, hasApplied, billAt}=this.state;
+		const {cashAccountType, status, hasApplied, billAt, billEndAt}=this.state;
     let search = {
       	cashAccountType: cashAccountType,
       	status: status,
       	hasApplied: hasApplied,
-      	billAt: billAt
+      	billAt: billAt,
+        billEndAt: billEndAt,
     }
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
@@ -573,6 +578,7 @@ const App = React.createClass({
         cashAccountType: query.cashAccountType,
         status: query.status,
         billAt: query.billAt,
+        billEndAt: query.billEndAt,
         userOrBank: query.userOrBank
       }
       this.setState(search);
@@ -589,11 +595,11 @@ const App = React.createClass({
 			status: value
 		})
 	},
-	handleBillAtChange(date, dateString){
-		this.setState({
-			billAt: dateString
-		})
-	},
+	// handleBillAtChange(date, dateString){
+	// 	this.setState({
+	// 		billAt: dateString
+	// 	})
+	// },
 	initializePagination(){
 		var self = this;
 
@@ -607,6 +613,7 @@ const App = React.createClass({
         return <span>总计 {total} 条</span>
       },
 			onShowSizeChange(page, perPage) {
+        // nowAjaxStatus 是筛选条件
 				let listObj = self.state.nowAjaxStatus;
         self.perPage = perPage;
         // self.setState({perPage:perPage});
@@ -677,11 +684,47 @@ const App = React.createClass({
     //   <p>选中的账单金额总额为: <span style={{fontSize:16,color:'red'}}>{this.state.amount}</span>元</p>
     // </Modal>
   },
-	render(){
+  disabledStartDate (billAt) {
+    const billEndAt = this.state.billEndAt;
+    if (!billAt || !billEndAt) {
+      return false;
+    }
+    return billAt.valueOf() > billEndAt.valueOf();
+  },
+  disabledEndDate (billEndAt){
+    const billAt = this.state.billAt;
+    if (!billEndAt || !billAt) {
+      return false;
+    }
+    return billEndAt.valueOf() <= billAt.valueOf();
+  },
+  handleBillAtChange (field, value) {
+    this.setState({
+      [field]: value,
+    });
+  },
+  onStartChange (value) {
+    this.handleBillAtChange('billAt', value);
+  },
+  onEndChange (value) {
+    this.handleBillAtChange('billEndAt', value);
+  },
+  handleStartOpenChange (open) {
+    console.log(open);
+    if (!open) {
+      this.setState({ endOpen: true });
+    }
+  },
+  handleEndOpenChange (open) {
+    console.log(open);
+    this.setState({ endOpen: open });
+  },
+  render(){
     let defaultValue = {
       cashAccountType: this.state.cashAccountType,
       status: this.state.status,
       billAt: this.state.billAt,
+      billEndAt: this.state.billEndAt,
       userOrBank:this.state.userOrBank,
     };
     const query = this.props.location.query;
@@ -690,15 +733,15 @@ const App = React.createClass({
         cashAccountType: query.cashAccountType,
         status: query.status,
         billAt: query.billAt,
+        billEndAt: query.billEndAt,
         userOrBank:query.userOrBank,
       };
     }
-    // console.log(defaultValue);
 		const self = this;
-		const {list, columns} = this.state;
+		const {list, columns, endOpen, selectedRowKeys} = this.state;
 		const pagination = this.initializePagination();
 		pagination.current = this.state.currentPage;
-		const selectedRowKeys = this.state.selectedRowKeys;
+		// const selectedRowKeys = this.state.selectedRowKeys;
 		const rowSelection = {
 			selectedRowKeys: selectedRowKeys,
 		  onChange(selectedRowKeys, selectedRows) {
@@ -797,7 +840,8 @@ const App = React.createClass({
 				</Select>
     	)
     }
-    const defaultDate = defaultValue.billAt?{defaultValue: moment(defaultValue.billAt, 'YYYY-MM-DD')}:{}
+    const defaultStartDate = defaultValue.billAt?{defaultValue: moment(defaultValue.billAt, 'YYYY-MM-DD')}:{}
+    const defaultEndDate = defaultValue.billEndAt?{defaultValue: moment(defaultValue.billEndAt, 'YYYY-MM-DD')}:{}
     const payList = this.state.payList;
 
     const tableDiv = this.state.roleId == 3?(
@@ -805,6 +849,10 @@ const App = React.createClass({
     ):(
     	<Table scroll={{ x: 900  }} className="table"rowClassName={this.rowClassName} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading} />
     )
+    // <DatePicker
+    // {...defaultDate}
+    // locale={zhCN}
+    // onChange={this.handleBillAtChange} className="item"/>
 		return (<section className="view-settlement-list">
 			<div className="top-fix">
         <header>
@@ -824,9 +872,25 @@ const App = React.createClass({
           </Select>
           {orderSelectOption}
           <DatePicker
-            {...defaultDate}
+            {...defaultStartDate}
+            disabledDate={this.disabledStartDate}
+            placeholder="起始日期"
+            onChange={this.onStartChange}
+            onOpenChange={this.handleStartOpenChange}
+            className="item"
             locale={zhCN}
-            onChange={this.handleBillAtChange} className="item"/>
+          />
+          -
+          <DatePicker
+            {...defaultEndDate}
+            disabledDate={this.disabledEndDate}
+            placeholder="结束日期"
+            onChange={this.onEndChange}
+            open={endOpen}
+            onOpenChange={this.handleEndOpenChange}
+            className="item"
+            locale={zhCN}
+          />
           <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.textChange}/>
           <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
           {USER.role.id == 3 ?

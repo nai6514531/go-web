@@ -7,6 +7,7 @@ const Service = {
         cashAccountType: data.cashAccountType,
         status: data.status,
         billAt: data.billAt,
+        billEndAt: data.billEndAt,
         searchStr: data.userOrBank,
         page: data.page || 1,
         perPage: data.perPage || 10
