@@ -272,12 +272,21 @@ class DeviceList extends React.Component {
     if(!_.isEmpty(query)) {
       const serialNumber = query.serialNumber;
       const userQuery = query.userQuery;
+      const page = +query.page || 1;
+      const perPage = +query.perPage || 10;
       pager.serialNumber = serialNumber;
       pager.userQuery = userQuery;
-      this.setState({serialNumber: serialNumber})
-      this.setState({userQuery: userQuery})
+      pager.page = page;
+      pager.perPage = perPage;
+      this.setState({
+        serialNumber: serialNumber,
+        userQuery: userQuery,
+        page: page,
+        perPage: perPage,
+      })
     }
     this.props.getDeviceList(pager);
+    this.setSearchValues(pager);
   }
   componentWillReceiveProps(nextProps) {
     const self = this;
@@ -288,6 +297,7 @@ class DeviceList extends React.Component {
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true){
           this.props.getDeviceList(pager);
+          this.setSearchValues(pager);
           message.success('操作成功!',3);
         } else {
           message.error(nextProps.status.result.msg, 3);
@@ -301,6 +311,7 @@ class DeviceList extends React.Component {
       if(remove){
         if(remove.fetch == true){
           this.props.getDeviceList(pager);
+          this.setSearchValues(pager);
           self.loading = true;
           message.success('删除成功!',3);
         } else {
@@ -314,6 +325,7 @@ class DeviceList extends React.Component {
       if(resultReset){
         if(resultReset.fetch == true){
           this.props.getDeviceList(pager);
+          this.setSearchValues(pager);
           self.loading = true;
           message.success('删除成功',3);
         } else {
@@ -340,17 +352,21 @@ class DeviceList extends React.Component {
       showTotal (total) {
         return <span>总计 {total} 条</span>
       },
+      defaultPageSize: this.state.perPage,
       onShowSizeChange(current, pageSize) {
-        const pager = { page : current, perPage: pageSize,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = { page : +current, perPage: +pageSize, serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
+        self.setSearchValues(pager);
       },
       onChange(current) {
-        const pager = { page : current, perPage: self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = { page : +current, perPage: +self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        // 此处需要设置
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
+        self.setSearchValues(pager);
       },
     }
   }
@@ -435,6 +451,7 @@ class DeviceList extends React.Component {
         const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
         self.setState({selectedRowKeys:[]});
         self.props.getDeviceList(pager);
+        self.setSearchValues(pager);
         self.loading = true;
       },(error)=>{
         this.setState({lockButton: false});
@@ -510,6 +527,7 @@ class DeviceList extends React.Component {
     hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
+    this.setSearchValues(pager);
     this.loading = true;
   }
   handleUserSearch(){
@@ -531,22 +549,31 @@ class DeviceList extends React.Component {
     hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
+    this.setSearchValues(pager);
     this.loading = true;
+  }
+  setSearchValues(items) {
+    console.log(items);
+    this.props.location.query = items;
+    hashHistory.replace(this.props.location);
   }
   render() {
     const query = this.props.location.query;
     let serialNumber = '';
     let userQuery = '';
+    let current = this.state.page;
+    let pageSize = this.state.pageSize;
     if(!_.isEmpty(query)) {
       serialNumber = query.serialNumber;
-    }
-    if(!_.isEmpty(query)) {
       userQuery = query.userQuery;
+      current = +query.page;
+      pageSize = +query.pageSize;
     }
+
     const self = this;
-    const { current } = this.state;
+    // const { current } = this.state;
     this.pagination = this.initializePagination();
-    this.pagination.current = this.state.page;
+    this.pagination.current = current;
     // 勾选项,需要限制只能勾选自己的设备
     const selectedRowKeys = this.state.selectedRowKeys;
     const rowSelection = {
