@@ -78,7 +78,7 @@
     "fourthTimedDuration": "-40m",
     "rateLimiter": {
       "prefix": "soda-manager-update-device-limiter:",
-      "maxRetry": 10
+      "maxRetry": 3
     }
   }
 }

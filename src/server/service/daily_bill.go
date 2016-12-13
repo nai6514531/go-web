@@ -24,7 +24,7 @@ func (self *DailyBillService) Total() (int, error) {
 	return int(total), nil
 }
 
-func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string, roleId int) (int, error) {
+func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, userId int, searchStr string, roleId int, startAt string, endAt string) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -45,10 +45,6 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 		sql += " and bill.status in (?) "
 		params = append(params, status)
 	}
-	if billAt != "" {
-		sql += " and bill.bill_at = ? "
-		params = append(params, billAt)
-	}
 	if searchStr != "" {
 		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
 		params = append(params, "%" + searchStr + "%")
@@ -58,6 +54,9 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 	if roleId == 3 {
 		//财务角色过滤掉测试账号的账单
 		sql += " and bill.user_id !=1 "
+	}
+	if startAt != "" && endAt != "" {
+		sql += " and bill.bill_at between " + startAt + " and " + endAt
 	}
 	common.Logger.Debugln("params===========", params)
 	r := common.DB.Raw(sql, params...).Scan(result)
@@ -76,7 +75,7 @@ func (self *DailyBillService) List(page int, perPage int) (*[]*model.DailyBill, 
 	return list, nil
 }
 
-func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []string, billAt string, userId int, searchStr string, page int, perPage int, roleId int) (*[]*model.DailyBill, error) {
+func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []string, userId int, searchStr string, page int, perPage int, roleId int, startAt string, endAt string) (*[]*model.DailyBill, error) {
 	list := []*model.DailyBill{}
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
@@ -88,17 +87,13 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		sql += " and bill.user_id = ? "
 		params = append(params, userId)
 	}
-	if cashAccounType > 0 {
+	if cashAccountType > 0 {
 		sql += " and bill.account_type = ? "
-		params = append(params, cashAccounType)
+		params = append(params, cashAccountType)
 	}
 	if len(status) > 0 {
 		sql += " and bill.status in (?) "
 		params = append(params, status)
-	}
-	if billAt != "" {
-		sql += " and bill.bill_at = ? "
-		params = append(params, billAt)
 	}
 	if searchStr != "" {
 		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
@@ -110,7 +105,14 @@ func (self *DailyBillService) ListWithAccountType(cashAccounType int, status []s
 		//财务角色过滤掉测试账号的账单
 		sql += " and bill.user_id !=1 "
 	}
-	sql += " order by bill.has_marked, bill.status, bill.user_id, bill.bill_at DESC, bill.id DESC limit ? offset ? "
+	if startAt != "" && endAt != "" {
+		sql += " and bill.bill_at between " + startAt + " and " + endAt
+	}
+	sql += " order by bill.has_marked, case " +
+		"when bill.status=4 then 1 " +
+		"when bill.status=3 then 2 " +
+		"when bill.status=1 then 3 " +
+		"else 4 end asc, bill.user_id, bill.bill_at DESC, bill.id DESC limit ? offset ? "
 	params = append(params, _perPage)
 	params = append(params, _offset)
 	common.Logger.Debugln("params===========", params)
