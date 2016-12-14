@@ -599,14 +599,14 @@ const App = React.createClass({
     });
   },
   disabledStartDate (startAt) {
-    const endAt = this.state.endAt;
+    const endAt = new Date(this.state.endAt?this.state.endAt:null).getTime();
     if (!startAt || !endAt) {
       return false;
     }
     return startAt.valueOf() > endAt.valueOf();
   },
   disabledEndDate (endAt){
-    const startAt = this.state.startAt;
+    const startAt = new Date(this.state.startAt?this.state.startAt:null).getTime();
     if (!endAt || !startAt) {
       return false;
     }
