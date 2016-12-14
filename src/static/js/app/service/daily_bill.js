@@ -37,7 +37,20 @@ const Service = {
         id: id
       }
     })
-  }
+  },
+  export: (data) => {
+    return api.get('/api/daily-bill/export', {
+      params: {
+        cashAccountType: data.cashAccountType,
+        status: data.status,
+        startAt: data.startAt,
+        endAt: data.endAt,
+        searchStr: data.userOrBank,
+        page: data.page || 1,
+        perPage: data.perPage || 10
+      }
+    })
+  },
 };
 
 export default Service;
