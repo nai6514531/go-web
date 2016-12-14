@@ -94,6 +94,7 @@ func Api() {
 	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
 	api.Get("/daily-bill/mark", dailyBill.Mark)
 	api.Get("/daily-bill/device/:serialNumber", device.DailyBill)
+	api.Get("/daily-bill/export", dailyBill.Export)
 
 	api.Get("/statis/consume", statis.Consume)
 	api.Get("/statis/operate", statis.Operate)

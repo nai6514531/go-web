@@ -13,6 +13,7 @@ import (
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/alipay"
 	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/export"
 )
 
 type DailyBillController struct {
@@ -70,6 +71,56 @@ var (
 		"01060703":"请选择需要标记的账单",
 	}
 )
+
+func Permission(s string, signinUserId int) ([]string, int, int, error) {
+	userRoleRelService := &service.UserRoleRelService{}
+	var status []string
+	var _status []string
+	userId := -1
+	if s != "" {
+		_status = strings.Split(s, ",")  //结算状态和提现状态
+	}
+	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
+	roleId := userRoleRel.RoleId
+	if err != nil {
+
+	}
+	if len(_status) <= 0 {
+		switch roleId {
+		case 1:
+			status = _status
+			break
+		case 3:
+			status = append(status, []string{"1", "2", "3", "4"}...)
+			break
+		default:
+			userId = signinUserId
+			break
+		}
+	} else {
+		for _, s := range _status {
+			switch roleId {
+			case 1:
+				status = append(status, s)
+				break
+			case 3:
+				if s == "1" || s == "2" || s == "3" || s == "4" {
+					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
+					status = append(status, s)
+				}
+				break
+			default:
+				status = append(status, s)
+				userId = signinUserId
+				break
+			}
+		}
+	}
+	if roleId == 3 && len(status) <= 0 {
+		status = append(status, []string{"1", "2", "3", "4"}...)
+	}
+	return status, userId, roleId, nil
+}
 
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
@@ -900,4 +951,22 @@ func (self *DailyBillController) Mark(ctx *iris.Context) {
 		result = &enity.Result{"01060701", err.Error(), daily_bill_msg["01060701"]}
 	}
 	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *DailyBillController) Export(ctx *iris.Context) {
+	dailyBillExport := &export.DailyBillExport{}
+	dailyBillService := &service.DailyBillService{}
+	s := ctx.URLParam("status")
+	searchStr := ctx.URLParam("searchStr")
+	startAt := ctx.URLParam("startAt")
+	endAt := ctx.URLParam("endAt")
+	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
+	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	status, userId, roleId, err := Permission(s, signinUserId)
+	if err != nil {
+
+	}
+	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, userId, searchStr, 0, 0, roleId, startAt, endAt)
+	dailyBillExport.Excel(list)
+	ctx.JSON(iris.StatusOK, &enity.Result{"1", nil, "1"})
 }

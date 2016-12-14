@@ -114,9 +114,12 @@ func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []
 		"when bill.status=4 then 1 " +
 		"when bill.status=3 then 2 " +
 		"when bill.status=1 then 3 " +
-		"else 4 end asc, bill.user_id, bill.bill_at DESC, bill.id DESC limit ? offset ? "
-	params = append(params, _perPage)
-	params = append(params, _offset)
+		"else 4 end asc, bill.user_id, bill.bill_at DESC, bill.id DESC "
+	if perPage > 0 && page > 0 {
+		sql += " limit ? offset ? "
+		params = append(params, _perPage)
+		params = append(params, _offset)
+	}
 	common.Logger.Debugln("params===========", params)
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()

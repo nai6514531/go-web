@@ -80,5 +80,8 @@
       "prefix": "soda-manager-update-device-limiter:",
       "maxRetry": 3
     }
+  },
+  "export": {
+    "path": "/Users/ferry"
   }
 }
