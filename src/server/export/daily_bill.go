@@ -7,20 +7,22 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"time"
 	"strings"
+	"os"
 )
 
 type DailyBillExport struct {
 }
 
-func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) error {
+func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string, error) {
 	var row *xlsx.Row
 	type values []interface{}
-	path := viper.GetString("export.path")
+	root, _ := os.Getwd()
+	path := root + viper.GetString("export.path")
 	name := path + "/" + time.Now().Format("20060102150405") + ".xlsx"
 	file := xlsx.NewFile()
 	sheet, err := file.AddSheet("结算管理列表")
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	s := values{"账单号", "运营商", "金额", "收款方式", "账期", "账户信息", "订单量", "状态"}
@@ -81,11 +83,10 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) error {
 		_timeStr := _time.Format("2006-01-02")
 		s := values{_bill.Id, _bill.UserName, float64(_bill.TotalAmount)/100, _bill.AccountName, _timeStr, accountStr, _bill.OrderCount, statusStr}
 		row.WriteSlice(&s, -1)
-
 	}
 	err = file.Save(name)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return name, nil
 }

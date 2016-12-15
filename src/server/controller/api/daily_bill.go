@@ -888,6 +888,7 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
 	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, userId, searchStr, 0, 0, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060803", err.Error(), daily_bill_msg["01060803"]}
@@ -895,7 +896,7 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	err = dailyBillExport.Excel(roleId, list)
+	file, err := dailyBillExport.Excel(roleId, list)
 	if err != nil {
 		result = &enity.Result{"01060801", err.Error(), daily_bill_msg["01060801"]}
 		common.Log(ctx, result)
@@ -903,5 +904,5 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 		return
 	}
 	common.Log(ctx, nil)
-	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", nil, daily_bill_msg["01060800"]})
+	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", file, daily_bill_msg["01060800"]})
 }
