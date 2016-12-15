@@ -565,3 +565,53 @@ func (self *DailyBillService) DailyBillByAccountType(accountType int) (*[]*muniu
 	}
 	return &list, nil
 }
+
+func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, int, int, error) {
+	userRoleRelService := &UserRoleRelService{}
+	var status []string
+	var _status []string
+	userId := -1
+	if s != "" {
+		_status = strings.Split(s, ",")  //结算状态和提现状态
+	}
+	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
+	roleId := userRoleRel.RoleId
+	if err != nil {
+		return nil, -1, -1, err
+	}
+	if len(_status) <= 0 {
+		switch roleId {
+		case 1:
+			status = _status
+			break
+		case 3:
+			status = append(status, []string{"1", "2", "3", "4"}...)
+			break
+		default:
+			userId = signinUserId
+			break
+		}
+	} else {
+		for _, s := range _status {
+			switch roleId {
+			case 1:
+				status = append(status, s)
+				break
+			case 3:
+				if s == "1" || s == "2" || s == "3" || s == "4" {
+					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
+					status = append(status, s)
+				}
+				break
+			default:
+				status = append(status, s)
+				userId = signinUserId
+				break
+			}
+		}
+	}
+	if roleId == 3 && len(status) <= 0 {
+		status = append(status, []string{"1", "2", "3", "4"}...)
+	}
+	return status, userId, roleId, nil
+}

@@ -69,62 +69,19 @@ var (
 		"01060700":"标记账单成功",
 		"01060701":"标记账单失败",
 		"01060703":"请选择需要标记的账单",
+
+		"01060800":"导出结算列表成功",
+		"01060801":"导出结算列表失败",
+		"01060802":"无当前登陆用户角色信息",
+		"01060803":"拉取日账单列表失败",
 	}
 )
 
-func Permission(s string, signinUserId int) ([]string, int, int, error) {
-	userRoleRelService := &service.UserRoleRelService{}
-	var status []string
-	var _status []string
-	userId := -1
-	if s != "" {
-		_status = strings.Split(s, ",")  //结算状态和提现状态
-	}
-	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
-	roleId := userRoleRel.RoleId
-	if err != nil {
 
-	}
-	if len(_status) <= 0 {
-		switch roleId {
-		case 1:
-			status = _status
-			break
-		case 3:
-			status = append(status, []string{"1", "2", "3", "4"}...)
-			break
-		default:
-			userId = signinUserId
-			break
-		}
-	} else {
-		for _, s := range _status {
-			switch roleId {
-			case 1:
-				status = append(status, s)
-				break
-			case 3:
-				if s == "1" || s == "2" || s == "3" || s == "4" {
-					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
-					status = append(status, s)
-				}
-				break
-			default:
-				status = append(status, s)
-				userId = signinUserId
-				break
-			}
-		}
-	}
-	if roleId == 3 && len(status) <= 0 {
-		status = append(status, []string{"1", "2", "3", "4"}...)
-	}
-	return status, userId, roleId, nil
-}
 
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
-	userRoleRelService := &service.UserRoleRelService{}
+	//userRoleRelService := &service.UserRoleRelService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
 	page := functions.StringToInt(params["page"])
@@ -134,53 +91,14 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	startAt := params["startAt"]
 	endAt := params["endAt"]
 	var status []string
-	var _status []string
 	userId := -1
-	if params["status"] != "" {
-		_status = strings.Split(params["status"], ",")  //结算状态和提现状态
-	}
 	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
-	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
-	roleId := userRoleRel.RoleId
+	status, userId, roleId, err := dailyBillService.Permission(params["status"], signinUserId)
 	if err != nil {
 		result = &enity.Result{"01060103", err.Error(), daily_bill_msg["01060103"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
-	if len(_status) <= 0 {
-		switch roleId {
-		case 1:
-			status = _status
-			break
-		case 3:
-			status = append(status, []string{"1", "2", "3", "4"}...)
-			break
-		default:
-			userId = signinUserId
-			break
-		}
-	} else {
-		for _, s := range _status {
-			switch roleId {
-			case 1:
-				status = append(status, s)
-				break
-			case 3:
-				if s == "1" || s == "2" || s == "3" || s == "4" {
-					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
-					status = append(status, s)
-				}
-				break
-			default:
-				status = append(status, s)
-				userId = signinUserId
-				break
-			}
-		}
-	}
-	if roleId == 3 && len(status) <= 0 {
-		status = append(status, []string{"1", "2", "3", "4"}...)
 	}
 	if page <= 0 || perPage <= 0 {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
@@ -956,17 +874,34 @@ func (self *DailyBillController) Mark(ctx *iris.Context) {
 func (self *DailyBillController) Export(ctx *iris.Context) {
 	dailyBillExport := &export.DailyBillExport{}
 	dailyBillService := &service.DailyBillService{}
+	result := &enity.Result{}
 	s := ctx.URLParam("status")
 	searchStr := ctx.URLParam("searchStr")
 	startAt := ctx.URLParam("startAt")
 	endAt := ctx.URLParam("endAt")
 	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
 	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	status, userId, roleId, err := Permission(s, signinUserId)
+	status, userId, roleId, err := dailyBillService.Permission(s, signinUserId)
 	if err != nil {
-
+		result = &enity.Result{"01060802", err.Error(), daily_bill_msg["01060802"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, userId, searchStr, 0, 0, roleId, startAt, endAt)
-	dailyBillExport.Excel(list)
-	ctx.JSON(iris.StatusOK, &enity.Result{"1", nil, "1"})
+	if err != nil {
+		result = &enity.Result{"01060803", err.Error(), daily_bill_msg["01060803"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	err = dailyBillExport.Excel(roleId, list)
+	if err != nil {
+		result = &enity.Result{"01060801", err.Error(), daily_bill_msg["01060801"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", nil, daily_bill_msg["01060800"]})
 }
