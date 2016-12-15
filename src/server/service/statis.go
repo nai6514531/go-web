@@ -66,7 +66,7 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=? and companyid!=0) b on b.deviceno=i.deviceno " +
 			"left join box_admin a on i.companyid=a.localid " +
 			"where i.companyid=? " +
-			"group by i.deviceno order by a.localid,i.deviceno"
+			"group by i.deviceno order by a.localid, i.address, i.deviceno"
 	}
 	/**
 	else {
