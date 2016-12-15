@@ -641,7 +641,7 @@ const App = React.createClass({
     const search = this.getSearchCondition();
     DailyBillService.export(search).then((data)=>{
       if(data.status == "00"){
-        message.info(data.msg,3);
+        // message.info(data.msg,3);
         this.setState({exportUrl: data.data});
         this.openExportModal();
       }else{
