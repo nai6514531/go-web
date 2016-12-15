@@ -390,7 +390,7 @@ class DeviceForm extends React.Component {
     }
 		const serialNumberHelp = this.state.serialNumberHelp?{'help':this.state.serialNumberHelp,'className':'has-error'}:{};
 		return (
-			<section className="view-user-list" >
+			<section className="view-device-list" >
 				<header>
 					<Breadcrumb>
             <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
