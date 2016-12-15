@@ -18,7 +18,7 @@ const DeviceService = {
     return apiPut(`/api/device/${id}`, device);
   },
   reset: (id) => {
-    return apiPatch(`/api/device/${id}/reset`);
+    return apiPost(`/api/device/${id}/reset`);
   },
   remove: (id) => {
     return apiDelete(`/api/device/${id}`);
