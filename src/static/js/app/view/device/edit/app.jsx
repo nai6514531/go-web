@@ -437,7 +437,8 @@ class DeviceForm extends React.Component {
                 <Select
                   showSearch
                   optionFilterProp="children"
-                  placeholder="请选择省份" 
+                  placeholder="请选择省份"
+                  notFoundContent="搜索无结果"
                   onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}
                 </Select>
@@ -458,7 +459,8 @@ class DeviceForm extends React.Component {
                 <Select
                   showSearch
                   optionFilterProp="children"
-                  placeholder="请选择学校" 
+                  placeholder="请选择学校"
+                  notFoundContent="搜索无结果"
                   onChange={this.schoolChange.bind(this)}>
                   {schoolNode}
                 </Select>
