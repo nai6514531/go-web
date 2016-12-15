@@ -14,10 +14,10 @@ const FormList = React.createClass({
 	render(){
 		const exportUrl = this.props.exportUrl;
 		return (
-			<form name="exportbill" action={exportUrl} method="post" target="_blank">
+			<form name="exportbill" >
         <span className="form-text">确认导出这批账单吗？</span>
         <button onClick={this.cancel} type="button" id="cancel">取消</button>
-        <button onClick={this.submit} type="submit" id="submit">确认</button>
+        <a href={exportUrl} target="_blank" id="submit" download onClick={this.cancel}>确认</a>
       </form>
 		);
 	}
