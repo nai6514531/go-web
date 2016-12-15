@@ -11,6 +11,7 @@ import DeviceService from "../../../service/device";
 import './app.less';
 import _ from 'lodash';
 import moment from 'moment';
+import AllocateModal from './allocate-modal.jsx';
 const InputGroup = Input.Group;
 function mapStateToProps(state) {
   const { device: { list, status, resultRemove,resultReset }, user: {schoolDevice} } = state;
@@ -242,7 +243,7 @@ class DeviceList extends React.Component {
       perPage: 10,
       changeState: 0,
       visible: false,
-      current: 0,
+      resetCurrent: false,
       userAccount:'',
       userInfo:{
         account:'',
@@ -362,7 +363,6 @@ class DeviceList extends React.Component {
       },
       onChange(current) {
         const pager = { page : +current, perPage: +self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
-        // 此处需要设置
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
@@ -400,12 +400,18 @@ class DeviceList extends React.Component {
   handleAllocate() {
     if(this.state.selectedRowKeys.length > 0) {
       this.setState({
-        current:0,
+        // 分配完成后,首次打开分配页面,需要重置current
+        resetCurrent: true,
       });
       this.showModal();
     } else {
       message.info('请至少选择一个设备',3);
     }
+  }
+  changeResetCurrent() {
+    this.setState({
+      resetCurrent: false,
+    });
   }
   showModal() {
     this.setState({
@@ -418,81 +424,16 @@ class DeviceList extends React.Component {
       // userAccount:'',
     });
   }
-  detail(account) {
-    var self = this;
-    this.setState({lockButton: true}); // 给 Next Button 加锁
-    UserService.detailByAccount(account)
-      .then((data) => {
-        const current = this.state.current + 1;
-        this.setState({
-          current,
-          userInfo:data.data
-        });
-        this.setState({lockButton: false});
-        // message.success(data.msg,3);
-        // 成功以后重新拉取设备列表
-      },(error)=>{
-        message.error(error.msg,3);
-        this.setState({lockButton: false});
-      })
-  }
-  deviceAssign(data) {
-    var self = this;
-    this.setState({lockButton: true});
-    DeviceService.deviceAssign(data)
-      .then((data) => {
-        const current = this.state.current + 1;
-        this.setState({
-          current,
-          bindResult:'分配成功'
-        });
-        this.setState({lockButton: false});
-        message.success(data.msg,3);
-        const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
-        self.setState({selectedRowKeys:[]});
-        self.props.getDeviceList(pager);
-        self.setSearchValues(pager);
-        self.loading = true;
-      },(error)=>{
-        this.setState({lockButton: false});
-        message.error(error.msg,3);
-      })
-  }
   resetHashHistory() {
     this.props.location.query.serialNumber = "";
     hashHistory.replace(this.props.location);
     this.setState({serialNumber:""})
   }
-  next() {
-    if(this.state.current == 0) {
-      // 第一步,提交账号信息,确认是否存在该用户
-      if(this.state.userAccount) {
-        const account = this.state.userAccount.replace(/[\r\n\s]/g,"");
-        this.detail(account);
-      } else {
-        message.info('请填写账号信息',3);
-      }
-    } else if(this.state.current == 1) {
-      // 第二步,如果账号信息存在,则提交账号信息和设备编号,否则不能进入到下一步
-      const serialNumbers = this.state.selectedRowKeys.join(",");
-      const { account }= this.state.userInfo;
-      const data = {
-        userAccount: account,
-        serialNumbers: serialNumbers
-      }
-      this.deviceAssign(data);
-    }
-  }
-  prev() {
-    const current = this.state.current - 1;
-    this.setState({ current });
-  }
-  getUserAccount(e) {
-    this.setState({userAccount:e.target.value})
-  }
-  comAllocate() {
-    // 完成绑定,也有可能绑定失败,关闭 modal,重置提交栏
-    this.handleCancel();
+  resetList() {
+    const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    this.setState({selectedRowKeys:[]});
+    this.props.getDeviceList(pager);
+    this.setSearchValues(pager);
   }
   rowClassName(record, index) {
     // 改变表格颜色
@@ -553,7 +494,6 @@ class DeviceList extends React.Component {
     this.loading = true;
   }
   setSearchValues(items) {
-    console.log(items);
     this.props.location.query = items;
     hashHistory.replace(this.props.location);
   }
@@ -571,7 +511,6 @@ class DeviceList extends React.Component {
     }
 
     const self = this;
-    // const { current } = this.state;
     this.pagination = this.initializePagination();
     this.pagination.current = current;
     // 勾选项,需要限制只能勾选自己的设备
@@ -611,20 +550,6 @@ class DeviceList extends React.Component {
         })
       }
     }
-    let show = '';
-    const userInfo = this.state.userInfo;
-    // console.log(userInfo);
-    if (this.state.current == 0){
-      show = <div>
-        <p className="device-tips">您已选择{this.state.selectedRowKeys.length}个设备进行分配,请输入被分配运营商的登录账号</p>
-        <Input type="text" style={{width:200}} value={this.state.userAccount}  onChange={this.getUserAccount.bind(this)}/>
-      </div>
-    } else if(this.state.current == 1){
-      show = <div>你将把设备分配给：{userInfo.name}|{userInfo.contact}|{userInfo.mobile}，是否继续？</div>
-    } else if(this.state.current == 2){
-      show = <p className="result-text"><Icon type="check-circle" /> {this.state.bindResult}</p>
-    };
-    const lockButton = this.state.lockButton?{disabled:"disabled"}:{};
     return (
       <section className="view-device-list">
         <header>
@@ -664,30 +589,15 @@ class DeviceList extends React.Component {
             rowClassName={this.rowClassName.bind(this)}
             bordered
             />
-          <Modal title="批量分配" visible={this.state.visible}
-                 wrapClassName="allocateModal"
-                 onCancel={this.handleCancel.bind(this)}
-          >
-            <Steps current={current}>
-              {steps.map(item => <Step key={item.title} title={item.title} />)}
-            </Steps>
-            <div className="steps-content">
-              {show}
-            </div>
-            <div className="steps-action">
-              {this.state.current < steps.length - 1 &&
-                <Button type="primary" {...lockButton} onClick={() => this.next()}>下一步</Button>
-              }
-              {this.state.current === steps.length - 1 &&
-                <Button type="primary" onClick={this.comAllocate.bind(this)}>完成</Button>
-              }
-              {this.state.current == 1 &&
-                <Button style={{ marginLeft: 8 }} type="ghost" onClick={() => this.prev()}>
-                  上一步
-                </Button>
-              }
-            </div>
-          </Modal>
+          <AllocateModal
+            visible={this.state.visible}
+            selectedRowKeys={this.state.selectedRowKeys}
+            showModal={this.showModal.bind(this)}
+            handleCancel={this.handleCancel.bind(this)}
+            resetList={this.resetList.bind(this)}
+            resetCurrent={this.state.resetCurrent}
+            changeResetCurrent={this.changeResetCurrent.bind(this)}
+          />
         </article>
       </section>
     );
