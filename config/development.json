@@ -84,7 +84,7 @@
     }
   },
   "export": {
-    "path": "/resource/loads"
+    "path": "/src/build/static/loads/"
   }
 
 }
