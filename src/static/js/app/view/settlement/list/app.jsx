@@ -641,7 +641,7 @@ const App = React.createClass({
     const search = this.getSearchCondition();
     DailyBillService.export(search).then((data)=>{
       if(data.status == "00"){
-        // message.info(data.msg,3);
+        message.info(data.msg,3);
         this.setState({exportUrl: data.data});
         this.openExportModal();
       }else{
@@ -866,8 +866,9 @@ const App = React.createClass({
             locale={zhCN}
           />
           <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.handleUserOrBankChange}/>
+          <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
           {USER.role.id == 3 ?
-            <Button className="item" type="primary" icon="download" onClick={this.exportBill}>导出</Button>
+          <Button className="item" type="primary" icon="download" onClick={this.exportBill}>导出</Button>
           :""}
             {USER.role.id == 3 ?
             <Button className="calculate item" onClick={this.CalculateAmount} type="primary">计算金额</Button>
