@@ -434,7 +434,11 @@ class DeviceForm extends React.Component {
                 initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
                 // initialValue: initialValue.provinceId == "0"?'':initialValue.provinceId,
               })(
-                <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
+                <Select
+                  showSearch
+                  optionFilterProp="children"
+                  placeholder="请选择省份" 
+                  onChange={this.provinceChange.bind(this)}>
                   {ProvinceNode}
                 </Select>
               )}
@@ -451,7 +455,11 @@ class DeviceForm extends React.Component {
                 initialValue: +initialValue.schoolId !==0?initialValue.schoolId:'请选择学校',
                 // initialValue: initialValue.schoolId,
               })(
-                <Select placeholder="请选择学校" onChange={this.schoolChange.bind(this)}>
+                <Select
+                  showSearch
+                  optionFilterProp="children"
+                  placeholder="请选择学校" 
+                  onChange={this.schoolChange.bind(this)}>
                   {schoolNode}
                 </Select>
               )}
