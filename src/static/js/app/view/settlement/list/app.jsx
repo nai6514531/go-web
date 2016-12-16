@@ -5,7 +5,6 @@ const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
-import ExportBillForm from './export-bill.jsx'
 import moment from 'moment';
 import zhCN from 'antd/lib/date-picker/locale/zh_CN';
 const confirm = Modal.confirm;
