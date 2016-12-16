@@ -2,6 +2,9 @@
 	"ImportPath": "maizuo.com/soda-manager",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
@@ -243,6 +246,18 @@
 		{
 			"ImportPath": "github.com/square/go-jose",
 			"Rev": "50df5ca198e569d06795909c091ac0cea62e925a"
+		},
+		{
+			"ImportPath": "github.com/square/go-jose/cipher",
+			"Rev": "50df5ca198e569d06795909c091ac0cea62e925a"
+		},
+		{
+			"ImportPath": "github.com/square/go-jose/json",
+			"Rev": "50df5ca198e569d06795909c091ac0cea62e925a"
+		},
+		{
+			"ImportPath": "github.com/tealeg/xlsx",
+			"Rev": "a8490cf686defe538b45b05af838d9eeb7d8fe64"
 		},
 		{
 			"ImportPath": "github.com/ulule/limiter",
