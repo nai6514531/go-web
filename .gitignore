@@ -88,5 +88,5 @@ fabric.properties
 /Dockerfile
 /kubernetes
 
-/loads/*
-!/loads/.gitkeep
+/temp/*
+!/temp/.gitkeep

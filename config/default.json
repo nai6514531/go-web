@@ -30,9 +30,14 @@
     "syncUserCashSpec": "",
     "syncUserRoleSpec": "",
     "updateSpec": "",
-    "applySpec": ""
+    "applySpec": "",
+    "updateFirstDeviceSpec": "",
+    "updateSecondDeviceSpec": "",
+    "updateThirdDeviceSpec": "",
+    "updateFourthDeviceSpec": ""
   },
   "server": {
+    "domain": "mng.huacetech.dev",
     "host": "0.0.0.0",
     "port": 8080,
     "captcha": {
@@ -95,6 +100,20 @@
       "maxIdle": 20,
       "maxActive": 50,
       "idleTimeout": 60
+    },
+    "device": {
+      "step": 13,
+      "firstTimedDuration": "-4m",
+      "secondTimedDuration": "-20m",
+      "thirdTimedDuration": "-30m",
+      "fourthTimedDuration": "-40m",
+      "rateLimiter": {
+        "prefix": "soda-manager-update-device-limiter:",
+        "maxRetry": 3
+      }
+    },
+    "export": {
+      "loadsPath": "/temp"
     }
   }
 }
