@@ -5,6 +5,7 @@ const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import FormDiv from './form.jsx';
+import ExportBillForm from './export-bill.jsx'
 import moment from 'moment';
 import zhCN from 'antd/lib/date-picker/locale/zh_CN';
 const confirm = Modal.confirm;
@@ -267,6 +268,8 @@ const App = React.createClass({
 			selectedRowKeys: [], 						//已勾选的列表[key1, key2...]
       page: 1,									      //当前页码
       perPage: 10,
+      exportModalVisible: false,
+      exportUrl:'',
 		};
 	},
   componentWillMount() {
@@ -636,7 +639,23 @@ const App = React.createClass({
   // 导出 excel
   exportBill(){
     const search = this.getSearchCondition();
-    DailyBillService.export(search);
+    DailyBillService.export(search).then((data)=>{
+      if(data.status == "00"){
+        message.info(data.msg,3);
+        this.setState({exportUrl: data.data});
+        this.openExportModal();
+      }else{
+        message.info(data.msg)
+      }
+    }).catch((err)=>{
+      message.info(err,3);
+    })
+  },
+  openExportModal() {
+    this.setState({exportModalVisible: true});
+  },
+  closeExportModal() {
+    this.setState({exportModalVisible: false});
   },
 	initializePagination(){
 		var self = this;
@@ -825,6 +844,7 @@ const App = React.createClass({
           </Select>
           {orderSelectOption}
           <DatePicker
+            style={{width:120,marginLeft:4}}
             {...defaultStartDate}
             disabledDate={this.disabledStartDate}
             placeholder="开始日期"
@@ -835,6 +855,7 @@ const App = React.createClass({
           />
           -
           <DatePicker
+            style={{width:120,marginRight:4}}
             {...defaultEndDate}
             disabledDate={this.disabledEndDate}
             placeholder="结束日期"
@@ -846,9 +867,9 @@ const App = React.createClass({
           />
           <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.handleUserOrBankChange}/>
           <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
-          <Bmakmautton className="item" type="primary" icon="download" onClick={this.exportBill}>导出</Bmakmautton>
+          <Button className="item" type="primary" icon="download" onClick={this.exportBill}>导出</Button>
           {USER.role.id == 3 ?
-            <Button className="calculate" onClick={this.CalculateAmount} type="primary">计算金额</Button>
+            <Button className="calculate item" onClick={this.CalculateAmount} type="primary">计算金额</Button>
             :""}
         </div>
       </div>
@@ -862,6 +883,14 @@ const App = React.createClass({
         onCancel={() => this.closePayModalVisible()}
       >
         <FormDiv closePayModalVisible={this.closePayModalVisible} setPayModalVisible={_.bind(self.setPayModalVisible, self, false)} payList={payList} />
+      </Modal>
+      <Modal title="账单导出"
+             wrapClassName="playModal"
+             visible={this.state.exportModalVisible}
+             onOk={this.openExportModal}
+             onCancel={this.closeExportModal}
+      >
+        <ExportBillForm closeExportModal={this.closeExportModal} openExportModal={_.bind(self.openExportModal, self, false)} exportUrl={this.state.exportUrl} />
       </Modal>
 		</section>);
 	}
