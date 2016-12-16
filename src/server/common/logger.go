@@ -59,29 +59,33 @@ var (
 		}
 
 		alarmID := "0"
-		handle := strings.Split(ctx.GetHandlerName(), "/")
-		var _api []string
-		var _f []string
-		var _c string = ""
-		var _system string = ""
-		var _controller string = ""
-		var _func string = ""
 		var _interface string = ""
-		if len(handle) >= 2 {
-			_api = strings.Split(handle[len(handle) - 1], ".")
-			if len(_api) >= 2 {
-				_f = strings.Split(_api[len(_api) - 1], "-")
-				_c = _api[len(_api) - 2]
+		if result.Status == "-3" {
+			_interface = ctx.URI().String()
+		}else {
+			handle := strings.Split(ctx.GetHandlerName(), "/")
+			var _api []string
+			var _f []string
+			var _c string = ""
+			var _system string = ""
+			var _controller string = ""
+			var _func string = ""
+			if len(handle) >= 2 {
+				_api = strings.Split(handle[len(handle) - 1], ".")
+				if len(_api) >= 2 {
+					_f = strings.Split(_api[len(_api) - 1], "-")
+					_c = _api[len(_api) - 2]
+				}
+				if len(_c) >= 3 {
+					_controller = _c[2 : len(_c)-1]
+				}
+				_system = strings.Replace(handle[1], "-", "_", -1)
+				if len(_f) >= 1 {
+					_func = _f[0]
+				}
 			}
-			if len(_c) >= 3 {
-				_controller = _c[2 : len(_c)-1]
-			}
-			_system = strings.Replace(handle[1], "-", "_", -1)
-			if len(_f) >= 1 {
-				_func = _f[0]
-			}
+			_interface = _system + "_" + _controller + "_" + _func
 		}
-		_interface = _system + "_" + _controller + "_" + _func
 		_status, _ := strconv.Atoi(result.Status[len(result.Status) - 2 : len(result.Status)])
 		if _status != 0 {
 			_interface = "error_" + _interface

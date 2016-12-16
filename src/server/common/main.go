@@ -47,8 +47,7 @@ func SetUpCommon() {
 
 	iris.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
 		result := &enity.Result{"-3", nil, common_msg["-3"]}
-		Logger.Warning("soda_manager_api_not_found:", ctx.URI())
-		//Log(ctx, result)
+		Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 	})
 

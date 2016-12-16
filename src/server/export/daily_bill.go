@@ -17,9 +17,9 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string
 	var row *xlsx.Row
 	type values []interface{}
 	root, _ := os.Getwd()
-	path := root + viper.GetString("export.path")
+	path := root + viper.GetString("export.path.loads")
 	name := time.Now().Format("20060102150405") + ".xlsx"
-	_file := path + "/" + name
+	url := path + "/" + name
 	file := xlsx.NewFile()
 	sheet, err := file.AddSheet("结算管理列表")
 	if err != nil {
@@ -85,7 +85,7 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string
 		s := values{_bill.Id, _bill.UserName, float64(_bill.TotalAmount)/100, _bill.AccountName, _timeStr, accountStr, _bill.OrderCount, statusStr}
 		row.WriteSlice(&s, -1)
 	}
-	err = file.Save(_file)
+	err = file.Save(url)
 	if err != nil {
 		return "", err
 	}
