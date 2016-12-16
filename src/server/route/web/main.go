@@ -5,6 +5,7 @@ import (
 	"maizuo.com/soda-manager/src/server/controller/web"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/kit/common"
+	"github.com/spf13/viper"
 )
 
 func Web() {
@@ -21,6 +22,8 @@ func Web() {
 		panic(500)
 		ctx.EmitError(iris.StatusInternalServerError)
 	})
+
+	iris.StaticFS("/loads", "." + viper.GetString("export.loadsPath"), 1)
 
 	iris.Get("/ip-test", func(ctx *iris.Context) {
 

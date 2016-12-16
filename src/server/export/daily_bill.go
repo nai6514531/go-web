@@ -17,7 +17,7 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string
 	var row *xlsx.Row
 	type values []interface{}
 	root, _ := os.Getwd()
-	path := root + viper.GetString("export.path.loads")
+	path := root + viper.GetString("export.loadsPath")
 	name := time.Now().Format("20060102150405") + ".xlsx"
 	url := path + "/" + name
 	file := xlsx.NewFile()

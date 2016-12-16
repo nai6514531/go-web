@@ -87,10 +87,7 @@
     }
   },
   "export": {
-    "path": {
-      "send": "/static/loads",
-      "loads": "/src/build/static/loads"
-    }
+    "loadsPath": "/loads"
   }
 
 }

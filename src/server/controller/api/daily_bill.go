@@ -904,6 +904,6 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 		return
 	}
 	common.Log(ctx, nil)
-	sendFile := "//" + viper.GetString("server.host") + ":" + viper.GetString("server.port") + viper.GetString("export.path.send") + "/" + file
+	sendFile := "//" + viper.GetString("server.host") + ":" + viper.GetString("server.port") + viper.GetString("export.loadsPath") + "/" + file
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", sendFile, daily_bill_msg["01060800"]})
 }
