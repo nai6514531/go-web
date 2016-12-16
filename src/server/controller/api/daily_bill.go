@@ -92,7 +92,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	endAt := params["endAt"]
 	var status []string
 	userId := -1
-	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
+	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
 	status, userId, roleId, err := dailyBillService.Permission(params["status"], signinUserId)
 	if err != nil {
 		result = &enity.Result{"01060103", err.Error(), daily_bill_msg["01060103"]}
@@ -880,7 +880,7 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	startAt := ctx.URLParam("startAt")
 	endAt := ctx.URLParam("endAt")
 	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
-	signinUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	status, userId, roleId, err := dailyBillService.Permission(s, signinUserId)
 	if err != nil {
 		result = &enity.Result{"01060802", err.Error(), daily_bill_msg["01060802"]}
