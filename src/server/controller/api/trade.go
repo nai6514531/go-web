@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/common"
@@ -81,7 +81,7 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 	tradeService := &service.TradeService{}
 	userRoleRelService := service.UserRoleRelService{}
 
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	role, err := userRoleRelService.BasicByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01080203", err.Error(), trade_msg["01080203"]}

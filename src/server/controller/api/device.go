@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
@@ -126,7 +126,7 @@ var (
 func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //要操作的设备id
 	result := &enity.Result{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	deviceService := &service.DeviceService{}
 	userService := &service.UserService{}
@@ -255,7 +255,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	//_list := make([]*model.Device, 0)
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
 	user, err:= userService.Basic(userId)
 	if err != nil {
@@ -334,7 +334,7 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	var device model.Device
 	ctx.ReadJSON(&device)
 	if id <= 0 {
@@ -656,7 +656,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		return
 	}
 	//修改设备的用户为当前用户id
-	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	sessionUserId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, err := userService.Basic(device.UserId)
 	if err != nil {
 		result = &enity.Result{"01030514", err.Error(), device_msg["01030514"]}
@@ -724,7 +724,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		return
 	}
 	userService := &service.UserService{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, _ := userService.Basic(userId)
 	success := deviceService.Reset(id, user)
 	if !success {
@@ -946,7 +946,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	serialNumberList := strings.Split(assignData.SerialNumbers, ",")
 	//serialNumbers := assignData.SerialNumbers
-	sessionUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	sessionUserId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
 	devices, err := deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumberList)
 	if err != nil {

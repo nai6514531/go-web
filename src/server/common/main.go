@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/kataras/iris"
 	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/enity"
 	"time"
 	"fmt"
@@ -60,7 +60,7 @@ func SetUpCommon() {
 
 var (
 	RequireSignin = func(ctx *iris.Context) {
-		userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+		userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 		if userId > 0 {
 			ctx.Next()
 		} else {

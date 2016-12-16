@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/iris-contrib/middleware/secure"
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
+	"gopkg.in/iris-contrib/middleware.v4/secure"
 )
 
 func SetUpSecure() {

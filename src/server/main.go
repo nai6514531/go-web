@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/iris-contrib/template/html"
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/route/api"
 	"maizuo.com/soda-manager/src/server/route/web"
+	"gopkg.in/kataras/go-template.v0/html"
 )
 
 func SetUpServer() {

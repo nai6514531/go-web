@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/spf13/viper"
 	"time"
 	"github.com/kataras/go-sessions/sessiondb/redis"

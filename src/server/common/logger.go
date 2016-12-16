@@ -4,7 +4,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/enity"
 	"time"
 	"strconv"
@@ -92,7 +92,7 @@ var (
 			alarmID = "1"
 		}
 
-		userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+		userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
 		Logger := logrus.WithFields(logrus.Fields{
 			"@source":ctx.LocalAddr().String(),
@@ -105,7 +105,7 @@ var (
 				"method":ctx.MethodString(),
 				"ip":ctx.RemoteAddr(),
 				"query":ctx.URLParams(),
-				"param":ctx.Params.String(),
+				"param":ctx.ParamsSentence(),
 				"body":body,
 				"alarmID":alarmID,
 				"path":ctx.PathString(),

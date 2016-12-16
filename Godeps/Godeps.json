@@ -2,9 +2,6 @@
 	"ImportPath": "maizuo.com/soda-manager",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v75",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
@@ -132,29 +129,9 @@
 			"Rev": "50d4dbd4eb0e84778abe37cefef140271d96fade"
 		},
 		{
-			"ImportPath": "github.com/iris-contrib/formBinder",
-			"Rev": "32009bbc76eda475a6d1eb24787d1fdcdaf80e71"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/letsencrypt",
-			"Rev": "2a9ed749d24d8d2a8ece891b7b6242f0b3192d62"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/middleware/cors",
-			"Rev": "e051726149192566c626ff399e057d95667a9998"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/middleware/secure",
-			"Rev": "e051726149192566c626ff399e057d95667a9998"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/template/html",
-			"Rev": "1130d33ae375e4305f27f62f6793db587bcb6f83"
-		},
-		{
-			"ImportPath": "github.com/iris-contrib/websocket",
-			"Comment": "v1.0.0-8-gcc9f171",
-			"Rev": "cc9f1712095295a828e9a2efaef388d30b9c7760"
+			"ImportPath": "github.com/iris-contrib/lego/acme",
+			"Comment": "v0.3.1-87-g095d7f6",
+			"Rev": "095d7f6459c501cb15319aa2754afa221b81a3ec"
 		},
 		{
 			"ImportPath": "github.com/jinzhu/gorm",
@@ -166,94 +143,16 @@
 			"Rev": "8f4d3a0d04ce0b7c0cf3126fb98524246d00d102"
 		},
 		{
-			"ImportPath": "github.com/kardianos/osext",
-			"Rev": "c2c54e542fb797ad986b31721e1baedf214ca413"
-		},
-		{
-			"ImportPath": "github.com/kardianos/service",
-			"Rev": "7a88211485df5d3da6ec68f4f8a5ff9bec297327"
-		},
-		{
 			"ImportPath": "github.com/kataras/go-errors",
-			"Comment": "v0.0.3-1-g0f977b8",
 			"Rev": "0f977b82cc78d5d31bb75fb6f903ad9e852c8bbd"
 		},
 		{
-			"ImportPath": "github.com/kataras/go-fs",
-			"Comment": "v0.0.5",
-			"Rev": "4aa4a72b7801e6a9486568dfd21d812354d27899"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-options",
-			"Rev": "23b556c1b935c594ec6d71ff81ead4dbeec3aa8d"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/data",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/json",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/jsonp",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/markdown",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/text",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-serializer/xml",
-			"Rev": "959c7b8c27718d5a7a3d83ad05d677ae234e1152"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-sessions",
-			"Comment": "v0.0.5-5-gd9481ab",
-			"Rev": "d9481ab1082f680c1a64b3f6f85223ba5d07a1c3"
-		},
-		{
 			"ImportPath": "github.com/kataras/go-sessions/sessiondb/redis",
-			"Comment": "v0.0.5-5-gd9481ab",
 			"Rev": "d9481ab1082f680c1a64b3f6f85223ba5d07a1c3"
 		},
 		{
 			"ImportPath": "github.com/kataras/go-sessions/sessiondb/redis/service",
-			"Comment": "v0.0.5-5-gd9481ab",
 			"Rev": "d9481ab1082f680c1a64b3f6f85223ba5d07a1c3"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-template",
-			"Comment": "v0.0.3",
-			"Rev": "b99158ff1faa4a4857d17c3bb9bf2a1e7beab3be"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-template/html",
-			"Comment": "v0.0.3",
-			"Rev": "b99158ff1faa4a4857d17c3bb9bf2a1e7beab3be"
-		},
-		{
-			"ImportPath": "github.com/kataras/go-websocket",
-			"Comment": "v0.0.2-2-gc346839",
-			"Rev": "c3468392e495c2b16febcd572f2c273b4989f6a2"
-		},
-		{
-			"ImportPath": "github.com/kataras/iris",
-			"Comment": "v4.1.1-95-g0f096b4",
-			"Rev": "0f096b49a5c7d1e233881d724a21400ab9bc330f"
-		},
-		{
-			"ImportPath": "github.com/kataras/iris/utils",
-			"Comment": "v4.1.1-95-g0f096b4",
-			"Rev": "0f096b49a5c7d1e233881d724a21400ab9bc330f"
 		},
 		{
 			"ImportPath": "github.com/klauspost/compress/flate",
@@ -277,7 +176,7 @@
 		},
 		{
 			"ImportPath": "github.com/klauspost/crc32",
-			"Comment": "v1.0-2-gcb6bfca",
+			"Comment": "v1.1",
 			"Rev": "cb6bfca970f6908083f26f39a79009d608efd5cd"
 		},
 		{
@@ -342,6 +241,10 @@
 			"Rev": "110492b3001269a0777997fcbe68a60828fac4cb"
 		},
 		{
+			"ImportPath": "github.com/square/go-jose",
+			"Rev": "50df5ca198e569d06795909c091ac0cea62e925a"
+		},
+		{
 			"ImportPath": "github.com/ulule/limiter",
 			"Rev": "d87df2f750b0b6ce227e7016b3548f4316d67b44"
 		},
@@ -365,85 +268,52 @@
 			"Rev": "204fed91879e3476bedd4d9ce79e765a824a9b31"
 		},
 		{
-			"ImportPath": "github.com/xenolf/lego/acme",
-			"Comment": "v0.3.1-83-ge953bbc",
-			"Rev": "e953bbc8b95ad7d2f7172ae6732e71069be48957"
+			"ImportPath": "golang.org/x/crypto/acme",
+			"Rev": "9a6f0a01987842989747adff311d80750ba25530"
 		},
 		{
-			"ImportPath": "golang.org/x/crypto/curve25519",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
-		},
-		{
-			"ImportPath": "golang.org/x/crypto/ed25519",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
-		},
-		{
-			"ImportPath": "golang.org/x/crypto/ed25519/internal/edwards25519",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"ImportPath": "golang.org/x/crypto/acme/autocert",
+			"Rev": "9a6f0a01987842989747adff311d80750ba25530"
 		},
 		{
 			"ImportPath": "golang.org/x/crypto/ocsp",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
-		},
-		{
-			"ImportPath": "golang.org/x/crypto/ssh",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
-		},
-		{
-			"ImportPath": "golang.org/x/crypto/ssh/terminal",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "9a6f0a01987842989747adff311d80750ba25530"
 		},
 		{
 			"ImportPath": "golang.org/x/image/font",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "88b013251f75f7c43fdc42017751c3493cc3b8f7"
 		},
 		{
 			"ImportPath": "golang.org/x/image/math/fixed",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "88b013251f75f7c43fdc42017751c3493cc3b8f7"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
 		},
 		{
 			"ImportPath": "golang.org/x/net/html",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
 		},
 		{
 			"ImportPath": "golang.org/x/net/html/atom",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
 		},
 		{
 			"ImportPath": "golang.org/x/net/publicsuffix",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
 		},
 		{
-			"ImportPath": "golang.org/x/sys/windows",
-			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
-		},
-		{
-			"ImportPath": "golang.org/x/sys/windows/registry",
-			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
-		},
-		{
-			"ImportPath": "golang.org/x/sys/windows/svc",
-			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
-		},
-		{
-			"ImportPath": "golang.org/x/sys/windows/svc/eventlog",
-			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
-		},
-		{
-			"ImportPath": "golang.org/x/sys/windows/svc/mgr",
-			"Rev": "002cbb5f952456d0c50e0d2aff17ea5eca716979"
-		},
-		{
 			"ImportPath": "golang.org/x/time/rate",
-			"Rev": "82efaa11a00cceb61179ac1cffb2103d8f959309"
+			"Rev": "f51c12702a4d776e4c1fa9b0fabab841babae631"
 		},
 		{
 			"ImportPath": "gopkg.in/bsm/ratelimit.v1",
@@ -453,6 +323,116 @@
 			"ImportPath": "gopkg.in/fsnotify.v1",
 			"Comment": "v1.2.10",
 			"Rev": "875cf421b32f8f1b31bd43776297876d01542279"
+		},
+		{
+			"ImportPath": "gopkg.in/geekypanda/httpcache.v0",
+			"Comment": "v0.0.1",
+			"Rev": "76cace3b49b4d5d13592f13e4e7024d7107a4043"
+		},
+		{
+			"ImportPath": "gopkg.in/iris-contrib/formBinder.v4",
+			"Comment": "v4",
+			"Rev": "39c8cd740c8f5a6831bec11c534a850e02c342a3"
+		},
+		{
+			"ImportPath": "gopkg.in/iris-contrib/letsencrypt.v4",
+			"Comment": "v4",
+			"Rev": "1a3e5c619a13b307df3b1b4da7cb7e57d2e156dd"
+		},
+		{
+			"ImportPath": "gopkg.in/iris-contrib/middleware.v4/cors",
+			"Comment": "v4",
+			"Rev": "d918054efd6f421666f2e23da1e0c11629e98126"
+		},
+		{
+			"ImportPath": "gopkg.in/iris-contrib/middleware.v4/secure",
+			"Comment": "v4",
+			"Rev": "d918054efd6f421666f2e23da1e0c11629e98126"
+		},
+		{
+			"ImportPath": "gopkg.in/iris-contrib/websocket.v4",
+			"Comment": "v4",
+			"Rev": "655e781f648acd8b35a698e949b972ad8d9cbf53"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-errors.v0",
+			"Comment": "v0.0.3",
+			"Rev": "d2aaffdebcb40c69c4cb6a95e436430cde192435"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-fs.v0",
+			"Comment": "v0.0.5",
+			"Rev": "ecf3587588f7218a21a991a1c0a9f4bdebd20cc1"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-options.v0",
+			"Comment": "v0.0.1",
+			"Rev": "23b556c1b935c594ec6d71ff81ead4dbeec3aa8d"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/data",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/json",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/jsonp",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/markdown",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/text",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-serializer.v0/xml",
+			"Comment": "v0.0.4",
+			"Rev": "58326973780f8eb63f576033dca215707a05a51a"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-sessions.v0",
+			"Comment": "v0.0.6",
+			"Rev": "d66895d7f2802f7109185621459ae26521ac6ecf"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-template.v0",
+			"Comment": "v0.0.3",
+			"Rev": "ad601fbfa7744aba4bfa592d781b2cc8f6db6539"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-template.v0/html",
+			"Comment": "v0.0.3",
+			"Rev": "ad601fbfa7744aba4bfa592d781b2cc8f6db6539"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/go-websocket.v0",
+			"Comment": "v0.0.2",
+			"Rev": "c77a562c4403defbb12a5a495be4d636691c0bf9"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/iris.v4",
+			"Comment": "v4",
+			"Rev": "c1f22b9545617914995c0decc7f54f65336c12e4"
+		},
+		{
+			"ImportPath": "gopkg.in/kataras/iris.v4/utils",
+			"Comment": "v4",
+			"Rev": "c1f22b9545617914995c0decc7f54f65336c12e4"
 		},
 		{
 			"ImportPath": "gopkg.in/redis.v4",
@@ -488,11 +468,6 @@
 			"ImportPath": "gopkg.in/redis.v4/internal/proto",
 			"Comment": "v4.1.10",
 			"Rev": "938235994ea88a05678f8060741d5f34ed6a5ff3"
-		},
-		{
-			"ImportPath": "gopkg.in/square/go-jose.v1",
-			"Comment": "v1.1.0",
-			"Rev": "aa2e30fdd1fe9dd3394119af66451ae790d50e0d"
 		},
 		{
 			"ImportPath": "gopkg.in/square/go-jose.v1/cipher",

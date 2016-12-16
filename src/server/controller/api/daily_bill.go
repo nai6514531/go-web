@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/kit/functions"
@@ -266,7 +266,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	var result *enity.Result
 	var aliPayReqParam map[string]string
 	aliPayDetailDataStr := ""
-	siginUserId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	siginUserId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
 	userRoleRel, err := userRoleRelService.BasicByUserId(siginUserId)
 	if err != nil {

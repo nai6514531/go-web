@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/ulule/limiter"
 	"strconv"
 )

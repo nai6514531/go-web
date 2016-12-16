@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/bitly/go-simplejson"
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
@@ -429,7 +429,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	// }
 
 	//插入user到user表
-	user.ParentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
+	user.ParentId ,_= ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	_, err := userService.Create(&user)
 	if err != nil {
 		result = &enity.Result{"01010410", err.Error(), user_msg["01010410"]}
@@ -725,7 +725,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
 	searchStr := ctx.URLParam("searchStr")
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
@@ -1228,7 +1228,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 	var err error
 	current := ctx.URLParam("current")
 	newer := ctx.URLParam("newer")
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, err := userService.Basic(userId)
 	if err != nil {
 		result = &enity.Result{"01011402", err.Error(), user_msg["01011402"]}
@@ -1265,7 +1265,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 func (self *UserController) IsMeOrSub(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //前端传的id
 	result := &enity.Result{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	userService := &service.UserService{}
 	user, err := userService.Basic(id)

@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/iris-contrib/middleware/cors"
+	"gopkg.in/iris-contrib/middleware.v4/cors"
 )
 
 func SetUpCors() {

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/enity"
@@ -38,7 +38,7 @@ type StatisController struct {
 func (self *StatisController) Consume(ctx *iris.Context) {
 	result := &enity.Result{}
 	statisService := &service.StatisService{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
 	common.Logger.Debugln("date============", date)
 	list, err := statisService.Consume(userId, date)
@@ -81,7 +81,7 @@ func (self *StatisController) Operate(ctx *iris.Context) {
 func (self *StatisController) Device(ctx *iris.Context) {
 	result := &enity.Result{}
 	statisService := &service.StatisService{}
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
 	serialNumber := ctx.URLParam("serialNumber")
 	if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {

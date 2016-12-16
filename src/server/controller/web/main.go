@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/afocus/captcha"
-	"github.com/kataras/iris"
+	"gopkg.in/kataras/iris.v4"
 	"github.com/spf13/viper"
 	"image/color"
 	"image/png"
@@ -14,7 +14,7 @@ type WebController struct {
 }
 
 func (self *WebController) Index(ctx *iris.Context) {
-	userId := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	if userId >= 0 {
 		userMap := make(map[string]interface{})
 		userService := &service.UserService{}

@@ -2,10 +2,10 @@ package common
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"github.com/kataras/iris"
 	"github.com/spf13/viper"
 	"github.com/ulule/limiter"
 	"maizuo.com/soda-manager/src/server/middleware"
+	"gopkg.in/kataras/iris.v4"
 )
 
 func SetUpRateLimiter() {
