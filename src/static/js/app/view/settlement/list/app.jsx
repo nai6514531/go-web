@@ -270,6 +270,7 @@ const App = React.createClass({
       perPage: 10,
       exportModalVisible: false,
       exportUrl:'',
+      exportLoading: false,
 		};
 	},
   componentWillMount() {
@@ -638,17 +639,21 @@ const App = React.createClass({
   },
   // 导出 excel
   exportBill(){
+    this.setState({ exportLoading: true });
     const search = this.getSearchCondition();
     DailyBillService.export(search).then((data)=>{
       if(data.status == "00"){
-        message.info(data.msg,3);
+        // message.info(data.msg,3);
+        this.setState({ exportLoading: false });
         this.setState({exportUrl: data.data});
         this.openExportModal();
       }else{
         message.info(data.msg)
+        this.setState({ exportLoading: false });
       }
     }).catch((err)=>{
       message.info(err,3);
+      this.setState({ exportLoading: false });
     })
   },
   openExportModal() {
@@ -868,7 +873,7 @@ const App = React.createClass({
           <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.handleUserOrBankChange}/>
           <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
           {USER.role.id == 3 ?
-          <Button className="item" type="primary" icon="download" onClick={this.exportBill}>导出</Button>
+          <Button className="item" type="primary" icon="download" onClick={this.exportBill} loading={this.state.exportLoading}>导出</Button>
           :""}
             {USER.role.id == 3 ?
             <Button className="calculate item" onClick={this.CalculateAmount} type="primary">计算金额</Button>
@@ -892,7 +897,11 @@ const App = React.createClass({
              onOk={this.openExportModal}
              onCancel={this.closeExportModal}
       >
-        <ExportBillForm closeExportModal={this.closeExportModal} openExportModal={_.bind(self.openExportModal, self, false)} exportUrl={this.state.exportUrl} />
+        <form name="exportbill" >
+          <span className="form-text">确认导出这批账单吗？</span>
+          <button onClick={this.closeExportModal} type="button" id="cancel">取消</button>
+          <a href={this.state.exportUrl} target="_blank" id="submit" download onClick={this.closeExportModal}>确认</a>
+        </form>
       </Modal>
 		</section>);
 	}
