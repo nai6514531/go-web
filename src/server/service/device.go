@@ -669,6 +669,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 	_data := map[string]interface{}{
 		"COMPANYID": (toUser.Id - 1),
 		"UPDATETIME": assignedAt,
+		"INSERTTIME": assignedAt,
 		"STATUS":     "0",
 	}
 	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)

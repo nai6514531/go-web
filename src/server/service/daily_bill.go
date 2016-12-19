@@ -226,12 +226,12 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 				settledAt = _billMap["settledAt"].(string)
 			}
 			common.Logger.Warningln("_billMap===================", _billMap)
-			param := map[string]interface{}{
-				"Status":   strconv.Itoa(status),
-				"BillDate": settledAt,
+			mnParam := map[string]interface{}{
+				"STATUS":   strconv.Itoa(status),
+				"BILLDATE": settledAt,
 			}
-			common.Logger.Warningln("param---------------------------", param)
-			r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID = ? and PERIOD_START = ? ", userId, billAt).Updates(param)
+			common.Logger.Warningln("mnParam---------------------------", mnParam)
+			r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID = ? and PERIOD_START = ? AND STATUS != '2' ", userId, billAt).Updates(mnParam)
 			if r.Error != nil {
 				common.Logger.Warningln(r.Error.Error())
 				txmn.Rollback()
@@ -242,7 +242,12 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 
 	tx := common.DB.Begin()
 	for _, _bill := range *list {
-		r = tx.Model(&model.DailyBill{}).Update(&_bill)
+		param := map[string]interface{}{
+			"id": _bill.Id,
+			"status":   _bill.Status,
+			"settled_at": _bill.SettledAt,
+		}
+		r = tx.Model(&model.DailyBill{}).Where(" id = ? and status != 2 ", _bill.Id).Updates(param)
 		if r.Error != nil {
 			common.Logger.Warningln(r.Error.Error())
 			tx.Rollback()

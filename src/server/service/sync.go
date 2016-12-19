@@ -1,12 +1,12 @@
 package service
 
 import (
+	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
 	"strconv"
 	"time"
-	"github.com/jinzhu/gorm"
 )
 
 type SyncService struct {
@@ -708,7 +708,7 @@ func (self *SyncService) SyncUpdateBillStatusFromSodaToMnzn() (bool, error) {
 			billAt := _time.Format("2006-01-02")
 			if _map[billAt] == "" {
 				_map[billAt] = strconv.Itoa(_dailyBill.UserId - 1)
-			}else {
+			} else {
 				_map[billAt] = _map[billAt] + "," + strconv.Itoa(_dailyBill.UserId - 1)
 			}
 		} else {
@@ -716,11 +716,11 @@ func (self *SyncService) SyncUpdateBillStatusFromSodaToMnzn() (bool, error) {
 		}
 	}
 
-	for _billAt, _companyIds  := range _map {
-		r = common.MNDB.Model(&muniu.BoxStatBill{}).Where("COMPANYID in ("+_companyIds+") and PERIOD_START = date(?)", _billAt).Update("STATUS", "2")
+	for _billAt, _companyIds := range _map {
+		r = common.MNDB.Model(&muniu.BoxStatBill{}).Where("COMPANYID in (" + _companyIds + ") and PERIOD_START = date(?)", _billAt).Update("STATUS", "2")
 		if r.Error != nil {
 			common.Logger.Debug("false count=========", count)
-			return  false, r.Error
+			return false, r.Error
 		}
 		count++
 
