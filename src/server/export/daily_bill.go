@@ -8,6 +8,7 @@ import (
 	"time"
 	"strings"
 	"os"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type DailyBillExport struct {
@@ -18,8 +19,13 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string
 	type values []interface{}
 	root, _ := os.Getwd()
 	path := root + viper.GetString("export.loadsPath")
+	_, err := functions.CreatePathIfNotExists(path)
+	if err != nil {
+		return "", err
+	}
 	name := time.Now().Format("20060102150405") + ".xlsx"
 	url := path + "/" + name
+	common.Logger.Debug("url========", url)
 	file := xlsx.NewFile()
 	sheet, err := file.AddSheet("结算管理列表")
 	if err != nil {
@@ -91,3 +97,5 @@ func (self *DailyBillExport) Excel(roleId int, list *[]*model.DailyBill) (string
 	}
 	return name, nil
 }
+
+

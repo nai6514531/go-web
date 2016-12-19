@@ -1,6 +1,9 @@
 package functions
 
-import "strconv"
+import (
+	"strconv"
+	"os"
+)
 
 //int数组去重
 func Uniq(ls []int) []int {
@@ -50,4 +53,19 @@ func FormatFloat(num float64, prec int) float64 {
 		return float64(-1)
 	}
 	return f
+}
+
+func CreatePathIfNotExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		err = os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, err
 }

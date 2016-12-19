@@ -23,7 +23,7 @@ func Web() {
 		ctx.EmitError(iris.StatusInternalServerError)
 	})
 
-	iris.StaticFS("/temp", "." + viper.GetString("export.loadsPath"), 1)
+	iris.StaticFS(viper.GetString("export.loadsPath"), "." + viper.GetString("export.loadsPath"), 1)
 
 	iris.Get("/ip-test", func(ctx *iris.Context) {
 
