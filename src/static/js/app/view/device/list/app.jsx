@@ -553,6 +553,7 @@ class DeviceList extends React.Component {
         })
       }
     }
+    const serialNumbers = this.state.selectedRowKeys.join(",");
     return (
       <section className="view-device-list">
         <header>
@@ -563,7 +564,7 @@ class DeviceList extends React.Component {
         </header>
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-          <Link to="/device/batch-edit?serialNumbers=">批量修改</Link>
+          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}>批量修改</Link>
           {USER.role.id == 5 ?
             <Link to="/device/edit" className="ant-btn ant-btn-primary item">
               添加新设备

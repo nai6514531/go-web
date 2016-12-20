@@ -1,16 +1,19 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Row, Col, Input, Radio, Select, Cascader, Modal, Breadcrumb, message, Tooltip, Icon, Checkbox,Table } from 'antd';
+import { Button, Form, Row, Col, Input, Radio, Select, Cascader, Modal, Breadcrumb, message, Tooltip, Icon, Checkbox,Table} from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const confirm = Modal.confirm;
 
+import AllocateModal from '../list/allocate-modal.jsx';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
+import DeviceService from "../../../service/device";
+import SchoolService from "../../../service/school";
 import { Link } from 'react-router';
 import _ from 'lodash';
 
@@ -56,13 +59,6 @@ class DeviceForm extends React.Component {
       provinceId: '',
       schoolId: '',
       refDeviceType: 1,
-      addNew: false,
-      currentPulse: 1,
-      firstPulseName: '',
-      secondPulseName: '',
-      thirdPulseName: '',
-      fourthPulseName: '',
-      visible: false,
       unsaved: true,
       tips:'',
       serialNumberHelp:'',
@@ -74,84 +70,65 @@ class DeviceForm extends React.Component {
       // 修改后的值以及是否需要修改
       changeTable: false,
       values: {},
-
+      // 从设备列表页面传来的 serialNumbers
+      serialNumbers: '',
+      serialNumberSum: 0,
+      // 设备分配列表
+      visible: false,
+      resetCurrent: false,
+      //样式标红
+      className: {
+        index: 'gray',
+        serialNumber: 'red',
+        school: 'gray',
+        address: 'gray',
+        firstPulseName: 'gray',
+        secondPulseName: 'gray',
+        thirdPulseName: 'gray',
+        fourthPulseName: 'gray',
+        firstPulsePrice: 'gray',
+        secondPulsePrice: 'gray',
+        thirdPulsePrice: 'gray',
+        fourthPulsePrice: 'gray',
+      },
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
-    this.hideModal = this.hideModal.bind(this);
-    this.handleSelect = this.handleSelect.bind(this);
-    this.changePulseName = this.changePulseName.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
     this.checkPrice = this.checkPrice.bind(this);
     this.provinceChange = this.provinceChange.bind(this);
+    this.editSuccess = this.editSuccess.bind(this);
+    this.handleAllocate = this.handleAllocate.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
   }
   componentWillMount() {
-    const deviceId = this.props.params.id;
-    if(deviceId) {
-      this.props.getDeviceDetail(deviceId);
-    } else {
-      this.setState({addNew: true});
-    }
-    this.props.getRefDevice();
     // 默认北京市所有学校
     this.props.getProvinceList();
     this.props.getProvinceSchoolList(110000);
+    // 将 query 的内容放到 state 里
+    const serialNumbers = this.props.location.query.serialNumbers;
+    this.setState({
+      serialNumbers: serialNumbers,
+      serialNumberSum: this.state.serialNumbers.split(",").length});
   }
   componentWillReceiveProps(nextProps) {
-    const self = this;
-    const pulseName = nextProps.pulseName;
-    if(this.theName == 1 && this.state.addNew == false){
-      if(pulseName && pulseName.fetch == true) {
-        message.success('服务名修改成功',3);
-        const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
-        this[pulseNameKey] = self.pulseName;
-      } else if (pulseName && pulseName.fetch == false) {
-        message.error('服务名修改失败,请重试.',3);
-      }
-      self.theName = 0;
-    }
-    // 修改详情时 设置初始省市 ID
-    const deviceId = this.props.params.id;
-    if(deviceId) {
-      if(this.props.provinceList !== nextProps.provinceList) {
-        if(nextProps.detail) {
-          if(nextProps.provinceList.fetch == true) {
-            const provinceId = nextProps.detail.result.data.provinceId;
-            if(provinceId!==0){
-              this.props.getProvinceSchoolList(provinceId);
-            } else {
-              // message.error('无省份信息',3);
-            }
-          } else if(nextProps.provinceList.fetch == false) {
-            message.error('获取省份列表失败,请重试',3);
-          }
-        }
-      }
-      if(self.saveDetail == 1){
-        const resultPutDetail = this.props.resultPutDetail;
-        if(resultPutDetail !== nextProps.resultPutDetail) {
-          if(nextProps.resultPutDetail.fetch == true) {
-            message.success('修改设备成功',3);
-            self.context.router.goBack();
-          } else {
-            message.error(nextProps.resultPutDetail.result.msg,3);
-          }
-          self.saveDetail = -1;
-        }
-      }
-    }
-
-		if(this.props.detail !== nextProps.detail && nextProps.detail.fetch == true){
-			const device = nextProps.detail.result.data;
-			self.firstPulseName = device.firstPulseName;
-			self.secondPulseName = device.secondPulseName;
-			self.thirdPulseName = device.thirdPulseName;
-			self.fourthPulseName = device.fourthPulseName;
-		}
 	}
+  editSuccess() {
+    confirm({
+      title: '修改成功',
+      content: '是否要将这'+this.state.serialNumberSum+'个设备分配给他人',
+      onOk() {
+        // 调用批量分配的 modal
+        this.handleAllocate();
+      },
+      onCancel() {
+        // 返回设备列表页面
+      },
+    });
+  }
   // 选择需要修改的项目
   onSchoolCheck(e) {
     this.setState({changeSchool: e.target.checked});
@@ -187,36 +164,26 @@ class DeviceForm extends React.Component {
       });
     }
   }
-
-  removeDuplicates(arr) {
-    var obj = {};
-    var ret_arr = [];
-    for (var i = 0; i < arr.length; i++) {
-      obj[arr[i]] = true;
-    }
-    for (var key in obj) {
-      ret_arr.push(key);
-    }
-    return ret_arr;
-  }
-  removeNull(arr){
-    var pattern=new RegExp(/^\s*$/);
-    for(var i = 0 ;i<arr.length;i++) {
-      if(arr[i] == "" || typeof(arr[i]) == "undefined"
-        || pattern.test(arr[i]) || arr[i].length !== 10) {
-        arr.splice(i,1);
-        i= i-1;
-      }
-    }
-    return arr;
-  }
+  // 预览
   preview() {
     this.props.form.validateFields((errors, values) => {
-      console.log(values);
       if (errors) {
         return;
       }
-      this.setState({values: values, changeTable: true});
+      // 此处需要设置样式
+      const className = {
+        address: values.address?'red':'gray',
+        firstPulseName: values.firstPulseName?'red':'gray',
+        secondPulseName: values.secondPulseName?'red':'gray',
+        thirdPulseName: values.thirdPulseName?'red':'gray',
+        fourthPulseName: values.fourthPulseName?'red':'gray',
+        firstPulsePrice: values.firstPulsePrice?'red':'gray',
+        secondPulsePrice: values.secondPulsePrice?'red':'gray',
+        thirdPulsePrice: values.thirdPulsePrice?'red':'gray',
+        fourthPulsePrice: values.fourthPulsePrice?'red':'gray',
+      }
+      console.log(className);
+      this.setState({values: values, changeTable: true, className: className});
     });
   }
   hasChangedTable() {
@@ -240,21 +207,13 @@ class DeviceForm extends React.Component {
 			if (errors) {
 				return;
 			}
-      // 根据换行切割字符串
-      // const splitted = values.serialNumber.split("\n");
-      // // 移除重复,空白,长度不为10,并且内部全为空格的字符串
-      // const numbers = self.removeNull(self.removeDuplicates(splitted));
-      // // 拼接成字符串
-      // const serialNumber = numbers.join(",");
-
+      const serialNumber = this.state.serialNumbers;
 			// const deviceValue = {
 			// 	"serialNumber": serialNumber,
         // "provinceId": parseInt(provinceId),
         // "schoolId": parseInt(schoolId),
-			// 	// 'label': values.label,
 			// 	"address": values.address,
 			// 	"referenceDeviceId": values.referenceDevice,
-        // // 乘 1000 在除以 10 是为了解决19.99出现的精度问题
         // "firstPulsePrice": parseInt((+values.firstPulsePrice)*1000/10),
 			// 	"secondPulsePrice": parseInt((+values.secondPulsePrice)*1000/10),
 			// 	"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*1000/10),
@@ -264,54 +223,35 @@ class DeviceForm extends React.Component {
 			// 	"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
 			// 	"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
 			// }
-			// const deviceId = this.props.params.id;
-			// // 新增设备
-			// if(deviceId) {
-			// 	this.props.putDeviceDetail(deviceId,deviceValue);
-			// } else {
-			// 	this.props.postDeviceDetail(deviceValue);
-			// }
+			// this.props.putDeviceDetail(deviceId,deviceValue);
 			// self.saveDetail = 1;
 		});
 	}
-	handleSelect(provinceId, schoolId) {
-		this.provinceId = provinceId;
-		this.schoolId = schoolId;
-		this.setState({tips:''});
-	}
-	changeName(currentPulse,e) {
-		e.preventDefault();
-		this.setState({
-			currentPulse: currentPulse,
-		});
-		this.showModal();
-	}
-	changePulseName(pulseName) {
-		const deviceId = this.props.params.id;
-		// 被修改脉冲的 key
-		const pulseNameKey = key[this.state.currentPulse-1] + 'PulseName';
-		const thePulseName = {};
-		// 被修改的脉冲 key-value
-		thePulseName[pulseNameKey] = pulseName;
-		const addNew = this.state.addNew;
-		this.pulseName = pulseName;
-		if(addNew) {
-			this[pulseNameKey] = pulseName;
-		} else {
-			const device = { deviceId: deviceId };
-			let data = Object.assign({}, device, thePulseName);
-      // 当不是新增设备时,则直接发请求修改服务名
-			this.props.patchPulseName(deviceId, data);
-      this.theName = 1;
-    }
-	}
-	showModal() {
+	// Modal 相关
+  showModal() {
 		this.setState({ visible: true });
 	}
-	hideModal() {
-		this.setState({ visible: false });
-	}
-	checkNumber(rule, value, callback) {
+  handleCancel(e) {
+    this.setState({visible: false,});
+  }
+  resetList() {}
+  changeResetCurrent() {
+    this.setState({
+      resetCurrent: false,
+    });
+  }
+  handleAllocate() {
+    if(this.state.serialNumberSum > 0) {
+      this.setState({
+        // 分配完成后,首次打开分配页面,需要重置current
+        resetCurrent: true,
+      });
+      this.showModal();
+    } else {
+      message.info('请至少选择一个设备',3);
+    }
+  }
+  checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
 		if(value && !pattern.test(value)){
 			callback('只能为数字');
@@ -330,7 +270,6 @@ class DeviceForm extends React.Component {
 			callback();
 		}
 	}
-	// 待优化
 	checkOnePluse(rule,value,callback) {
 		this.checkPrice(rule,value,callback);
 	}
@@ -343,7 +282,6 @@ class DeviceForm extends React.Component {
 	checkFourPluse(rule,value,callback) {
 		this.checkPrice(rule,value,callback);
 	}
-
 	goBack() {
 		const self = this;
 		if(this.state.unsaved) {
@@ -364,8 +302,6 @@ class DeviceForm extends React.Component {
     this.schoolIdHelp = {};
   }
 	render() {
-    const query = this.props.location.query;
-    // console.log(query);
     // 省份列表
     let ProvinceNode = [];
     if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -388,45 +324,8 @@ class DeviceForm extends React.Component {
       const lastItem = <Option key="0" value="0">其它</Option>;
       schoolNode.push(lastItem);
     }
-		// 关联设备列表
-		const refDevice = this.props.refDevice;
-		let refDeviceNode = [];
-		if(refDevice) {
-			if(refDevice.fetch == true){
-				refDeviceNode = refDevice.result.data.map(function (item, key) {
-					return (
-						<Radio key={key} value={item.id}>{item.name}</Radio>
-					)
-				})
-			}
-		}
 		// 初始化参数
-		const self = this;
 		const detail = this.props.detail;
-		const { id } = this.props.params;
-		let initialValue = {};
-		if(detail && id) {
-			if(detail.fetch == true){
-				const device = detail.result.data;
-				initialValue = {
-					'serialNumber': device.serialNumber,
-					'schoolId': device.schoolId.toString(),
-					'provinceId': device.provinceId.toString(),
-					// 'label': device.label,
-					'address': device.address,
-					'referenceDevice': device.referenceDeviceId,
-					'firstPulsePrice': (device.firstPulsePrice/100).toString(),
-					'secondPulsePrice': (device.secondPulsePrice/100).toString(),
-					'thirdPulsePrice': (device.thirdPulsePrice/100).toString(),
-					'fourthPulsePrice': (device.fourthPulsePrice/100).toString(),
-					'firstPulseName': device.firstPulseName,
-					'secondPulseName': device.secondPulseName,
-					'thirdPulseName': device.thirdPulseName,
-					'fourthPulseName': device.fourthPulseName,
-
-				}
-			}
-		}
 		const { getFieldDecorator } = this.props.form;
 		const formItemLayout = {
       labelCol: { span: 5 },
@@ -436,8 +335,20 @@ class DeviceForm extends React.Component {
     if(!this.cityIdHelp){
       this.cityIdHelp = {};
     }
+    let initialValue = {};
+    // 这里的默认值要重置
+    if(detail) {
+      if(detail.fetch == true){
+        const device = detail.result.data;
+        initialValue = {
+          'schoolId': device.schoolId.toString(),
+          'provinceId': device.provinceId.toString(),
+        }
+      }
+    }
 		const serialNumberHelp = this.state.serialNumberHelp?{'help':this.state.serialNumberHelp,'className':'has-error'}:{};
-		return (
+		const serialNumberSum = this.state.serialNumberSum;
+    return (
 			<section className="view-device-list" >
 				<header>
 					<Breadcrumb>
@@ -447,7 +358,7 @@ class DeviceForm extends React.Component {
 					</Breadcrumb>
 				</header>
         <div>
-          <p>你将对XX个设备进行修改,请选择需要修改的项目:</p>
+          <p>你将对<span style={{color:'red'}}>{serialNumberSum}</span>个设备进行修改,请选择需要修改的项目:</p>
           <Checkbox onChange={this.onSchoolCheck.bind(this)}>学校</Checkbox>
           <Checkbox onChange={this.onAddressCheck.bind(this)}>楼层信息</Checkbox>
           <Checkbox onChange={this.onPriceCheck.bind(this)}>洗衣价格</Checkbox>
@@ -456,31 +367,6 @@ class DeviceForm extends React.Component {
 				<section className="view-content">
           <h1>修改</h1>
 					<Form horizontal>
-            {1==2?
-						<FormItem
-							{...formItemLayout}
-							{...serialNumberHelp}
-              label={(
-                <span>
-                  设备编号
-                </span>
-              )}
-						>
-							{getFieldDecorator('serialNumber', {
-								rules: [
-									{ required: true, message: '必填' },
-								],
-								initialValue: initialValue.serialNumber,
-							})( id ?
-								<Input disabled placeholder="请输入10位设备编号" />
-								:
-                <div>
-                  <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
-                  <span>可直接复制 excel 表中设备编号列的数据来批量添加设备</span>
-                </div>
-              )}
-						</FormItem>
-              :""}
             {this.state.changeSchool?
             <Row>
               <Col span={4}>
@@ -541,7 +427,6 @@ class DeviceForm extends React.Component {
                       { required: true, message: '必填' },
                       { max:30, message: '不超过三十个字' },
                     ],
-                    initialValue: initialValue.address,
                   })(
                     <Input placeholder="请输入楼道信息" />
                   )}
@@ -560,7 +445,6 @@ class DeviceForm extends React.Component {
                       { required: true, message: '必填' },
                       { validator: this.checkOnePluse.bind(this) },
                     ],
-                    initialValue: initialValue.firstPulsePrice,
                   })(
                     <Input placeholder="单脱（元）" />
                   )}
@@ -573,7 +457,6 @@ class DeviceForm extends React.Component {
                       { required: true, message: '必填' },
                       { validator: this.checkTwoPluse.bind(this) },
                     ],
-                    initialValue: initialValue.secondPulsePrice,
                   })(
                     <Input placeholder="快洗（元）"/>
                   )}
@@ -586,7 +469,6 @@ class DeviceForm extends React.Component {
                       {  required: true, message: '必填'},
                       { validator: this.checkThreePluse.bind(this) },
                     ],
-                    initialValue: initialValue.thirdPulsePrice,
                   })(
                     <Input placeholder="标准洗（元）"/>
                   )}
@@ -599,7 +481,6 @@ class DeviceForm extends React.Component {
                       {  required: true, message: '必填'},
                       { validator: this.checkFourPluse.bind(this) },
                     ],
-                    initialValue: initialValue.fourthPulsePrice,
                   })(
                     <Input placeholder="大物洗（元）"/>
                   )}
@@ -675,6 +556,17 @@ class DeviceForm extends React.Component {
             values={this.state.values}
             changeTable={this.state.changeTable}
             hasChangedTable={this.hasChangedTable.bind(this)}
+            serialNumbers={this.state.serialNumbers}
+            className={this.state.className}
+          />
+          <AllocateModal
+            visible={this.state.visible}
+            selectedRowKeys={this.state.serialNumbers.split(",")}
+            showModal={this.showModal.bind(this)}
+            handleCancel={this.handleCancel.bind(this)}
+            resetList={this.resetList.bind(this)}
+            resetCurrent={this.state.resetCurrent}
+            changeResetCurrent={this.changeResetCurrent.bind(this)}
           />
         </section>
 			</section>
@@ -691,6 +583,7 @@ DeviceForm.propTypes = {
 class DeviceTable extends React.Component {
   constructor(props) {
     super(props);
+    console.log('the className',props.className);
     this.state = {
       loading: false,
       columns: [{
@@ -698,98 +591,130 @@ class DeviceTable extends React.Component {
         dataIndex: 'index',
         key: 'index',
         width: 10,
+        className: '',
       },{
         title: '设备编号',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
         width:100,
+        className: '',
       }, {
         title: '学校',
         dataIndex: 'school',
         key: 'school',
         width:55,
+        className: '',
       },{
         title: '楼层',
         dataIndex: 'address',
         key: 'address',
         width:55,
+        className: '',
       }, {
         title: '服务名称1',
         dataIndex: 'firstPulseName',
         key: 'firstPulseName',
         width:50,
+        className: '',
       },
         {
           title: '价格',
           dataIndex: 'firstPulsePrice',
           key: 'firstPulsePrice',
           width:50,
+          className: '',
           render: (firstPulsePrice) => {
             return Math.round(firstPulsePrice*100)/10000 + "元";
           }
         },{
-        title: '服务名称2',
-        dataIndex: 'secondPulseName',
-        key: 'secondPulseName',
-        width:50,
-      }, {
+          title: '服务名称2',
+          dataIndex: 'secondPulseName',
+          key: 'secondPulseName',
+          width:50,
+          className: '',
+        }, {
           title: '价格',
           dataIndex: 'secondPulsePrice',
           key: 'secondPulsePrice',
           width:50,
+          className: '',
           render: (secondPulsePrice) => {
             return Math.round(secondPulsePrice*100)/10000 + "元";
           }
         },{
-        title: '服务名称3',
-        dataIndex: 'thirdPulseName',
-        key: 'thirdPulseName',
-        width:50,
-      },
+          title: '服务名称3',
+          dataIndex: 'thirdPulseName',
+          key: 'thirdPulseName',
+          width:50,
+          className: '',
+        },
         {
           title: '价格',
           dataIndex: 'thirdPulsePrice',
           key: 'thirdPulsePrice',
           width:50,
+          className: '',
           render: (thirdPulsePrice) => {
             return Math.round(thirdPulsePrice*100)/10000 + "元"
           }
         },{
-        title: '服务名称4',
-        dataIndex: 'fourthPulseName',
-        key: 'fourthPulseName',
-        width:50,
+          title: '服务名称4',
+          dataIndex: 'fourthPulseName',
+          key: 'fourthPulseName',
+          className: props.className.fourthPulseName,
+          width:50,
       }, {
           title: '价格',
           dataIndex: 'fourthPulsePrice',
           key: 'fourthPulsePrice',
           width:50,
+          className: props.className.fourthPulsePrice,
           render: (fourthPulsePrice) => {
             return Math.round(fourthPulsePrice*100)/10000 + "元"
           }
         }],
       dataSource: [],
       baseDataSource: [],
+      schools: [],
     }
   }
   componentWillMount() {
-    this.props.getDeviceList({page:1,perPage:10});
+    const serialNumbers = this.props.serialNumbers;
+    const pager = {page:0,perPage:0,serialNumber:serialNumbers,isEqual:1};
+    this.list(pager);
   }
   componentWillReceiveProps(nextProps) {
-    // 换了接口以后,这边就不再需要了,直接在回调里设置 baseDataSource
-    if(!this.props.list && nextProps.list) {
-      const baseDataSource = this.baseDataSource(nextProps.list);
-      console.log('baseDataSource',baseDataSource);
-      this.setState({baseDataSource: baseDataSource});
-    }
     // 检查是否需要重新渲染 table
     if(!this.props.changeTable && nextProps.changeTable) {
       this.changeDataSource(nextProps.values);
-      console.log('changevalues');
     }
-    // if(_.isEmpty(this.props.values) && !_.isEmpty(nextProps.values)) {
-    // }
-
+    if(this.props.className !== nextProps.className) {}
+  }
+  list(pager) {
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    DeviceService.list(pager)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        if (data && data.status == '00') {
+          console.log(data);
+          const total = data.data.length;
+          this.setState({
+            total: total,
+            baseDataSource: data.data.map((item, key) => {
+              item.index = key + 1;
+              item.key = item.serialNumber;
+              return item;
+            })
+          });
+        } else {
+          message.info(data.msg);
+        }
+      })
   }
   changeDataSource(values) {
     console.log('base',this.state.baseDataSource);
@@ -817,32 +742,12 @@ class DeviceTable extends React.Component {
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
   }
-  baseDataSource(list) {
-    const theList = list?list:this.props.list;
-    let baseDataSource = [];
-    if(theList) {
-      if(theList.fetch == true){
-        const data = theList.result.data.list;
-        // self.dataLen = data.length;
-        // let rowColor = {};
-        baseDataSource = data.map(function (item, key) {
-          // rowColor[item.serialNumber] = item.hasAssigned?'lock':'';
-          // self.rowColor = rowColor;
-          item.index = key + 1;
-          item.key = item.serialNumber;
-          return item;
-        })
-      }
-    }
-    return baseDataSource;
-  }
   render() {
-    const dataSource = this.baseDataSource();
       return (
       <div>
         <Table
           scroll={{ x: 450 }}
-          dataSource={this.state.dataSource.length==0?dataSource:this.state.dataSource}
+          dataSource={this.state.dataSource.length==0?this.state.baseDataSource:this.state.dataSource}
           columns={this.state.columns}
           pagination={false}
           bordered
