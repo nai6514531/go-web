@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"encoding/json"
 )
 
 type DeviceController struct {
@@ -21,7 +22,7 @@ var (
 
 		"01030001": "该设备id不存在",
 		"01030002": "请操作你自身、下级或Test账号下的设备",
-		"01020003": "无该设备用户信息",
+		"01030003": "无该设备用户信息",
 
 		"01030100": "拉取设备详情成功!",
 		"01030101": "拉取设备详情失败!",
@@ -51,6 +52,7 @@ var (
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
 		"01030402": "拉取设备学校信息失败!",
+		"01030403": "拉取设备用户信息失败!",
 
 		"01030500": "更新设备成功!",
 		"01030501": "批量更新设备失败!",
@@ -120,6 +122,15 @@ var (
 		"01031304": "锁定/取消锁定/取消占用操作每日只能进行3次。",
 		"01031305": "无该设备信息",
 
+		"01031401": "无设备信息",
+		"01031402": "所选设备部分无信息",
+		"01031403": "请操作你自身或下级的设备",
+		"01031404": "无所选设备用户信息",
+
+		"01031500": "批量更新设备号成功",
+		"01031501": "批量更新设备号失败",
+		"01031502": "设备号不能为空",
+
 	}
 )
 
@@ -134,18 +145,19 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	device, err := deviceService.Basic(id)
 	if err != nil {
 		//如果没有找到条目不做处理
-		result = &enity.Result{"01030001", err, device_msg["01030001"]}
+		result = &enity.Result{"01030001", err.Error(), device_msg["01030001"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	user, err := userService.Basic(device.UserId)
 	if err != nil {
-		result = &enity.Result{"01030003", nil, device_msg["01030003"]}
+		result = &enity.Result{"01030003", err.Error(), device_msg["01030003"]}
+		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || device.UserId == 1 || user.ParentId == userId {
+	if device.UserId == userId || user.ParentId == userId {
 		ctx.Next()
 		return
 	} else {
@@ -153,6 +165,52 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+}
+
+func (self *DeviceController) OwnToMeOrTestBySerialNumbers(ctx *iris.Context) {
+	deviceService := &service.DeviceService{}
+	userService := &service.UserService{}
+	result := &enity.Result{}
+	userIds := make([]int, 0)
+	param := make(map[string]string, 0)
+	err := json.Unmarshal(ctx.PostBody(), &param)
+	serialNumber := param["serialNumber"]
+	common.Logger.Debug("serialNumber=====", serialNumber)
+	s := strings.Split(serialNumber, ",")
+	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	list, err := deviceService.ListBySerialNumbers(s...)
+	if err != nil {
+		result = &enity.Result{"01031401", err.Error(), device_msg["01031401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if len(*list) != len(s) {
+		result = &enity.Result{"01031402", err.Error(), device_msg["01031402"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	for _, _device := range *list {
+		userIds = append(userIds, _device.UserId)
+	}
+	users, err := userService.BasicMapById(userIds...)
+	if err != nil {
+		result = &enity.Result{"01031404", err.Error(), device_msg["01031404"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	for _, _device := range *list {
+		_user := users[_device.UserId]
+		if _device.UserId != userId && _user != nil && _user.ParentId != userId {
+			result = &enity.Result{"01031403", nil, device_msg["01031403"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+	ctx.Next()
+	return
+
 }
 
 /**
@@ -262,6 +320,9 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	result := &enity.Result{}
 	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
+	schoolService := &service.SchoolService{}
+	userIds := make([]int, 0)
+	schoolIds := make([]int, 0)
 	user, err:= userService.Basic(userId)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
@@ -280,7 +341,6 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	common.Logger.Debug("----------", list)
 	if page > 0 && perPage > 0 {
 		total, err = deviceService.TotalByUserAndNextLevel(user, serialNumber, userQuery, isEqual)
 		if err != nil {
@@ -290,7 +350,40 @@ func (self *DeviceController) List(ctx *iris.Context) {
 			return
 		}
 	}
+	_user := make(map[int]interface{}, 0)
+	_school := make(map[int]interface{}, 0)
+	for _, _device := range *list {
+		if _user[_device.UserId] == nil {
+			userIds = append(userIds, _device.UserId)
+			_user[_device.UserId] = _device.UserId
+		}
+		if _user[_device.FromUserId] == nil {
+			userIds = append(userIds, _device.FromUserId)
+			_user[_device.FromUserId] = _device.FromUserId
+		}
+		if _school[_device.SchoolId] == nil {
+			schoolIds = append(schoolIds, _device.SchoolId)
+			_school[_device.SchoolId] = _device.SchoolId
+		}
+	}
+	userMap, err := userService.BasicMapById(userIds...)
+	if err != nil {
+		result = &enity.Result{"01030403", err.Error(), device_msg["01030403"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	schoolMap, err := schoolService.BasicMap(schoolIds...)
+	if err != nil {
+		result = &enity.Result{"01030402", err.Error(), device_msg["01030402"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	for _, device := range *list {
+		if schoolMap[device.SchoolId] != nil {
+			device.SchoolName = schoolMap[device.SchoolId].Name
+		}
 		// 每个登录账户只拉取属于自己和由自己分配出去的设备，即user_id & from_user_id为当前登录的用户id的设备
 		// 如果设备的userId等于当前登录的用户id，则表明此设备未分配，还属于当前账户
 		if user.Id == device.UserId {
@@ -300,7 +393,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 				device.UserName = user.Name
 				device.UserMobile = user.Mobile
 			}
-			fromUser, _ := userService.Basic(device.FromUserId)
+			fromUser := userMap[device.FromUserId]
 			if fromUser != nil {
 				device.FromUserId = fromUser.Id
 				device.FromUserName = fromUser.Name
@@ -313,7 +406,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 				device.FromUserName = user.Name
 				device.FromUserMobile = user.Mobile
 			}
-			toUser, _ := userService.Basic(device.UserId)
+			toUser := userMap[device.UserId]
 			if toUser != nil {
 				device.UserId = toUser.Id
 				device.UserName = toUser.Name
@@ -550,46 +643,11 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	/*if device.ProvinceId <= 0 {
-		result = &enity.Result{"01030304", nil, device_msg["01030304"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if device.SchoolId < 0 {
-		result = &enity.Result{"01030305", nil, device_msg["01030305"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}*/
-	// if device.Label == "" {
-	// 	result = &enity.Result{"01030306", nil, device_msg["01030306"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 	if device.ReferenceDeviceId <= 0 {
 		result = &enity.Result{"01030307", nil, device_msg["01030307"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// if device.FirstPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030308", nil, device_msg["01030308"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.SecondPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030309", nil, device_msg["01030309"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.ThirdPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030310", nil, device_msg["01030310"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if device.FourthPulsePrice <= 0 {
-	// 	result = &enity.Result{"01030311", nil, device_msg["01030311"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 	//判断序列号名是否已经被使用了
 	currentDevice, _ := deviceService.BasicBySerialNumber(device.SerialNumber)
 	if (currentDevice != nil) && (currentDevice.Id != id) {
@@ -599,7 +657,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		return
 	}
 	device.Id = id
-	success := deviceService.Update(device)
+	success := deviceService.Update(device, false)
 	if !success {
 		result = &enity.Result{"01030301", nil, device_msg["01030301"]}
 		common.Log(ctx, result)
@@ -607,6 +665,29 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01030300", nil, device_msg["01030300"]}
+	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
+}
+
+
+func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
+	deviceService := &service.DeviceService{}
+	result := &enity.Result{}
+	var device model.Device
+	ctx.ReadJSON(&device)
+	if device.SerialNumber == "" {
+		result = &enity.Result{"01031502", nil, device_msg["01031502"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	success := deviceService.Update(device, true)
+	if !success {
+		result = &enity.Result{"01031501", nil, device_msg["01031501"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01031500", nil, device_msg["01031500"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }

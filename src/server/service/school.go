@@ -4,6 +4,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"github.com/jinzhu/gorm"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type SchoolService struct {
@@ -44,6 +45,12 @@ func (self *SchoolService) ListByIdList(idList []int) (*[]*model.School, error) 
 func (self *SchoolService) BasicMap(ids ...int) (map[int]*model.School, error) {
 	schoolService := &SchoolService{}
 	data := make(map[int]*model.School, 0)
+	if len(ids) <= 0 {
+		e := &functions.DefinedError{}
+		e.Msg = "无学校id"
+		err := e
+		return nil, err
+	}
 	list, err := schoolService.List(ids...)
 	if err != nil {
 		return nil, err
