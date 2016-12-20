@@ -2,10 +2,11 @@ import {apiGet, apiPost, apiPut, apiDelete, apiPatch} from '../library/axios/api
 
 const DeviceService = {
   list: (pager) => {
-    let {page, perPage,serialNumber,userQuery} = pager;
+    let {page, perPage,serialNumber,userQuery,isEqual} = pager;
     serialNumber = serialNumber || '';
     userQuery = userQuery || '';
-    let url = `/api/device?page=${page}&perPage=${perPage}&serialNumber=${serialNumber}&userQuery=${userQuery}`;
+    isEqual = isEqual || 0;
+    let url = `/api/device?isEqual=${isEqual}&page=${page}&perPage=${perPage}&serialNumber=${serialNumber}&userQuery=${userQuery}`;
     return apiGet(url);
   },
   detail: (id) => {
@@ -16,6 +17,9 @@ const DeviceService = {
   },
   edit: (id, device) => {
     return apiPut(`/api/device/${id}`, device);
+  },
+  batchEdit: (device) => {
+    return apiPut(`/api/device-batch`, device);
   },
   reset: (id) => {
     return apiPost(`/api/device/${id}/reset`);

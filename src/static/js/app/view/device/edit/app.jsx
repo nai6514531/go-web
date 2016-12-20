@@ -210,10 +210,10 @@ class DeviceForm extends React.Component {
 				"secondPulsePrice": parseInt((+values.secondPulsePrice)*1000/10),
 				"thirdPulsePrice": parseInt((+values.thirdPulsePrice)*1000/10),
 				"fourthPulsePrice": parseInt((+values.fourthPulsePrice)*1000/10),
-				"firstPulseName": self.firstPulseName ? self.firstPulseName : "",
-				"secondPulseName": self.secondPulseName ? self.secondPulseName : "",
-				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : "",
-				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : "",
+				"firstPulseName": self.firstPulseName ? self.firstPulseName : nameList[0],
+				"secondPulseName": self.secondPulseName ? self.secondPulseName : nameList[1],
+				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : nameList[2],
+				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : nameList[3],
 			}
 			const deviceId = this.props.params.id;
 			// 新增设备
