@@ -14,6 +14,9 @@ var (
 	school_msg = map[string]string{
 		"01050100": "拉取学校详情成功",
 		"01050101": "拉取学校详情失败",
+
+		"01050200": "全量拉取学校详情成功",
+		"01050201": "全量拉取学校详情失败",
 	}
 )
 
@@ -46,6 +49,21 @@ func (self *SchoolController) Basic(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01050100", school, school_msg["01050100"]}
+	ctx.JSON(iris.StatusOK, result)
+	common.Log(ctx, nil)
+}
+
+func (self *SchoolController) List(ctx *iris.Context) {
+	schoolService := &service.SchoolService{}
+	result := &enity.Result{}
+	list, err := schoolService.List()
+	if err != nil {
+		result = &enity.Result{"01050201", nil, school_msg["01050201"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	result = &enity.Result{"01050200", list, school_msg["01050200"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }
