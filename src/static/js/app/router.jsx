@@ -79,6 +79,11 @@ const router = (
             callback(null, require('./view/device/edit/app.jsx').default);
           });
         }} />
+        <Route path="/device/batch-edit" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+            callback(null, require('./view/device/batch-edit/app.jsx').default);
+          });
+        }} />
         <Route path="/stat" getComponent={(location, callback) => {
           require.ensure([], (require) => {
             callback(null, require('./view/stat/app.jsx').default);
