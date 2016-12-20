@@ -77,7 +77,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string, userQuery string) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, isEqual bool) (int, error) {
 	var total int
 	params := make([]interface{}, 0)
 
@@ -94,8 +94,12 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	}
 	params = append(params, user.Id, user.Id)
 	if serialNumber != "" {
-		sql += " and d.serial_number like ? "
-		params = append(params, "%" + serialNumber + "%")
+		if isEqual {
+			sql += " and d.serial_number in (" + serialNumber + ") "
+		}else {
+			sql += " and d.serial_number like ? "
+			params = append(params, "%" + serialNumber + "%")
+		}
 	} else if userQuery != "" {
 		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
@@ -107,7 +111,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, isEqual bool, page int, perPage int) (*[]*model.Device, error) {
 	list := make([]*model.Device, 0)
 	params := make([]interface{}, 0)
 	sql := ""
@@ -123,23 +127,30 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	}
 	params = append(params, user.Id, user.Id)
 	if serialNumber != "" {
-		sql += " and d.serial_number like ? "
-		params = append(params, "%" + serialNumber + "%")
+		if isEqual {
+			sql += " and d.serial_number in (" + serialNumber + ") "
+		}else {
+			sql += " and d.serial_number like ? "
+			params = append(params, "%" + serialNumber + "%")
+		}
 	} else if userQuery != "" {
-		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
+		sql += " and ( (u.id=d.user_id ) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
 	//测试按设备编号排序
 	if user.Id == 1 {
-		sql += " order by case when user_id=? then 1 else 2 end asc, serial_number desc limit ? offset ?"
+		sql += " order by case when user_id=? then 1 else 2 end asc, serial_number desc "
 	}else{//其它用户按楼层排序
-		sql += " order by case when user_id=? then 1 else 2 end asc, address desc, id desc limit ? offset ?"
+		sql += " order by case when user_id=? then 1 else 2 end asc, address desc, id desc "
 	}
-	params = append(params, user.Id, perPage, (page - 1) * perPage)
+	params = append(params, user.Id)
+	if perPage > 0 && page > 0 {
+		sql += " limit ? offset ? "
+		params = append(params, perPage, (page - 1) * perPage)
+	}
 	rows, err := common.DB.Raw(sql, params...).Rows()
 	defer rows.Close()
 	if err != nil {
-		common.Logger.Debug("-----------------", err.Error())
 		return nil, err
 	}
 	for rows.Next() {

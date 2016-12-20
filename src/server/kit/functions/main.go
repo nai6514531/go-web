@@ -69,3 +69,10 @@ func CreatePathIfNotExists(path string) (bool, error) {
 	}
 	return false, err
 }
+
+func IntToBool(i int) bool {
+	if i == 1 {
+		return true
+	}
+	return false
+}

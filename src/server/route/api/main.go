@@ -59,8 +59,8 @@ func Api() {
 	api.Get("/user/:id/permission", user.Permission)
 	api.Get("/user-detail/:account", user.DetailByAccount)
 
-	api.Get("/school")
 	api.Get("/school/:id", school.Basic)
+	api.Get("/school", school.List)
 
 	api.Get("/province", region.Province)
 	api.Get("/province/:id", region.ProvinceDetail)

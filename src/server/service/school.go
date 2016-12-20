@@ -3,6 +3,7 @@ package service
 import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"github.com/jinzhu/gorm"
 )
 
 type SchoolService struct {
@@ -19,7 +20,12 @@ func (self *SchoolService) Basic(id int) (*model.School, error) {
 
 func (self *SchoolService) List(ids ...int) (*[]*model.School, error) {
 	list := &[]*model.School{}
-	r := common.DB.Where("id in (?) ", ids).Find(list)
+	var r *gorm.DB
+	if len(ids) <= 0 {
+		r = common.DB.Find(list)
+	}else {
+		r = common.DB.Where("id in (?) ", ids).Find(list)
+	}
 	if r.Error != nil {
 		return nil, r.Error
 	}
