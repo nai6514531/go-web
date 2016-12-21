@@ -77,6 +77,7 @@ func Api() {
 	api.Post("/device/:id/reset", device.OwnToMeOrTest, device.Reset)
 	api.Post("/device", device.Create)
 	api.Put("/device/:id", device.OwnToMeOrTest, device.Update)
+	api.Put("/device-batch", device.OwnToMeOrTestBySerialNumbers, device.BatchUpdate)
 	api.Put("/device/:id/serial-number", device.UpdateBySerialNumber)
 	api.Post("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatusLimiter, device.UpdateStatus)
 	api.Post("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)

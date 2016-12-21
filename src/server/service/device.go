@@ -8,6 +8,7 @@ import (
 	"time"
 	"github.com/spf13/viper"
 	"github.com/jinzhu/gorm"
+	"strings"
 )
 
 type DeviceService struct {
@@ -172,7 +173,7 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 	return list, nil
 }
 
-func (self *DeviceService) ListBySerialNumbers(serialNumbers string) (*[]*model.Device, error) {
+func (self *DeviceService) ListBySerialNumbers(serialNumbers ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	r := common.DB.Where("serial_number in (?) ", serialNumbers).Find(list)
 	if r.Error != nil {
@@ -245,30 +246,36 @@ func (self *DeviceService) Create(device *model.Device) bool {
 	return true
 }
 
-func (self *DeviceService) Update(device model.Device) bool {
+func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool {
+	var r *gorm.DB
 	transAction := common.DB.Begin()
 	mnTransAction := common.MNDB.Begin()
-	//==========================更新到新数据库========================
-	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
+	var deviceMap = make(map[string]interface{})
+	deviceMap["first_pulse_price"] = device.FirstPulsePrice
+	deviceMap["second_pulse_price"] = device.SecondPulsePrice
+	deviceMap["third_pulse_price"] = device.ThirdPulsePrice
+	deviceMap["fourth_pulse_price"] = device.FourthPulsePrice
+	deviceMap["first_pulse_name"] = device.FirstPulseName
+	deviceMap["second_pulse_name"] = device.SecondPulseName
+	deviceMap["third_pulse_name"] = device.ThirdPulseName
+	deviceMap["fourth_pulse_name"] = device.FourthPulseName
+	deviceMap["school_id"] = device.SchoolId
+	deviceMap["province_id"] = device.ProvinceId
+	deviceMap["address"] = device.Address
+	deviceMap["label"] = device.Label
+	deviceMap["city_id"] = device.CityId
+	if !isBatchUpdate {
+		deviceMap["reference_device_id"] = device.ReferenceDeviceId
+	}
+	serialNumber := []string{device.SerialNumber}
+	if isBatchUpdate {
+		serialNumber = strings.Split(device.SerialNumber, ",")
+		r = transAction.Model(&model.Device{}).Where("serial_number in (?)", serialNumber).Updates(deviceMap).Scan(&device)
+	}else {
+		r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(deviceMap).Scan(&device)
+	}
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update Device:", r.Error.Error())
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
-	}
-	//再次单独更新几个价格避免价格为0的时候不能更新成功
-	var device_zero = make(map[string]interface{})
-	device_zero["first_pulse_price"] = device.FirstPulsePrice
-	device_zero["second_pulse_price"] = device.SecondPulsePrice
-	device_zero["third_pulse_price"] = device.ThirdPulsePrice
-	device_zero["fourth_pulse_price"] = device.FourthPulsePrice
-	//避免schoolId为0时不更新
-	device_zero["school_id"] = device.SchoolId
-	device_zero["province_id"] = device.ProvinceId
-	device_zero["address"] = device.Address
-	r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device_zero).Scan(&device)
-	if r.Error != nil {
-		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
 		transAction.Rollback()
 		mnTransAction.Rollback()
 		return false
@@ -276,23 +283,20 @@ func (self *DeviceService) Update(device model.Device) bool {
 	//================更新到木牛数据库======================
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfo)
-	if r.Error != nil {
-		common.Logger.Warningln("MNDB Update BoxInfo:", r.Error.Error())
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
+	var boxInfoMap = make(map[string]interface{})
+	boxInfoMap["PRICE_601"] = boxInfo.Price_601
+	boxInfoMap["PRICE_602"] = boxInfo.Price_602
+	boxInfoMap["PRICE_603"] = boxInfo.Price_603
+	boxInfoMap["PRICE_604"] = boxInfo.Price_604
+	boxInfoMap["ADDRESS"] = boxInfo.Address
+	boxInfoMap["UPDATETIME"] = time.Now().Local().Format("2006-01-02 15:04:05")
+	if !isBatchUpdate {
+		boxInfoMap["DEVICETYPE"] = boxInfo.DeviceType
 	}
-	//再次单独更新几个价格避免价格为0的时候不能更新成功
-	var boxInfoPrice = make(map[string]interface{})
-	boxInfoPrice["PRICE_601"] = boxInfo.Price_601
-	boxInfoPrice["PRICE_602"] = boxInfo.Price_602
-	boxInfoPrice["PRICE_603"] = boxInfo.Price_603
-	boxInfoPrice["PRICE_604"] = boxInfo.Price_604
-	boxInfoPrice["ADDRESS"] = boxInfo.Address
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfoPrice)
+	common.Logger.Debug("UPDATETIME==================", boxInfoMap["UPDATETIME"])
+	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in (?)", serialNumber).Updates(boxInfoMap)
 	if r.Error != nil {
-		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
+		common.Logger.Warningln("MNDB Update Device:", r.Error.Error())
 		transAction.Rollback()
 		mnTransAction.Rollback()
 		return false

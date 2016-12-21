@@ -295,3 +295,16 @@ func (self *UserService) ListById(ids ...int) (*[]*model.User, error) {
 	}
 	return list, nil
 }
+
+func (self *UserService) BasicMapById(ids ...int) (map[int]*model.User, error) {
+	userService := &UserService{}
+	_map := make(map[int]*model.User, 0)
+	list, err := userService.ListById(ids...)
+	if err != nil {
+		return nil, err
+	}
+	for _, _user := range *list {
+		_map[_user.Id] = _user
+	}
+	return _map, nil
+}
