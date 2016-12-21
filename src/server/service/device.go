@@ -251,20 +251,40 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 	transAction := common.DB.Begin()
 	mnTransAction := common.MNDB.Begin()
 	var deviceMap = make(map[string]interface{})
-	deviceMap["first_pulse_price"] = device.FirstPulsePrice
-	deviceMap["second_pulse_price"] = device.SecondPulsePrice
-	deviceMap["third_pulse_price"] = device.ThirdPulsePrice
-	deviceMap["fourth_pulse_price"] = device.FourthPulsePrice
-	deviceMap["first_pulse_name"] = device.FirstPulseName
-	deviceMap["second_pulse_name"] = device.SecondPulseName
-	deviceMap["third_pulse_name"] = device.ThirdPulseName
-	deviceMap["fourth_pulse_name"] = device.FourthPulseName
-	deviceMap["school_id"] = device.SchoolId
-	deviceMap["province_id"] = device.ProvinceId
-	deviceMap["address"] = device.Address
-	deviceMap["label"] = device.Label
-	deviceMap["city_id"] = device.CityId
-	if !isBatchUpdate {
+	if isBatchUpdate {
+		if device.FirstPulsePrice >= 0 && device.SecondPulsePrice >= 0 && device.ThirdPulsePrice >= 0 && device.FourthPulsePrice >= 0 {
+			deviceMap["first_pulse_price"] = device.FirstPulsePrice
+			deviceMap["second_pulse_price"] = device.SecondPulsePrice
+			deviceMap["third_pulse_price"] = device.ThirdPulsePrice
+			deviceMap["fourth_pulse_price"] = device.FourthPulsePrice
+		}
+		if device.FirstPulseName != "" && device.SecondPulseName != "" && device.ThirdPulseName != "" && device.FourthPulseName != "" {
+			deviceMap["first_pulse_name"] = device.FirstPulseName
+			deviceMap["second_pulse_name"] = device.SecondPulseName
+			deviceMap["third_pulse_name"] = device.ThirdPulseName
+			deviceMap["fourth_pulse_name"] = device.FourthPulseName
+		}
+		if device.ProvinceId > 0 && device.SchoolId > 0 {
+			deviceMap["province_id"] = device.ProvinceId
+			deviceMap["school_id"] = device.SchoolId
+		}
+		if device.Address != "" {
+			deviceMap["address"] = device.Address
+		}
+	}else{
+		deviceMap["first_pulse_price"] = device.FirstPulsePrice
+		deviceMap["second_pulse_price"] = device.SecondPulsePrice
+		deviceMap["third_pulse_price"] = device.ThirdPulsePrice
+		deviceMap["fourth_pulse_price"] = device.FourthPulsePrice
+		deviceMap["first_pulse_name"] = device.FirstPulseName
+		deviceMap["second_pulse_name"] = device.SecondPulseName
+		deviceMap["third_pulse_name"] = device.ThirdPulseName
+		deviceMap["fourth_pulse_name"] = device.FourthPulseName
+		deviceMap["city_id"] = device.CityId
+		deviceMap["province_id"] = device.ProvinceId
+		deviceMap["school_id"] = device.SchoolId
+		deviceMap["address"] = device.Address
+		deviceMap["label"] = device.Label
 		deviceMap["reference_device_id"] = device.ReferenceDeviceId
 	}
 	serialNumber := []string{device.SerialNumber}
@@ -284,16 +304,25 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 	boxInfo := &muniu.BoxInfo{}
 	boxInfo.FillByDevice(&device)
 	var boxInfoMap = make(map[string]interface{})
-	boxInfoMap["PRICE_601"] = boxInfo.Price_601
-	boxInfoMap["PRICE_602"] = boxInfo.Price_602
-	boxInfoMap["PRICE_603"] = boxInfo.Price_603
-	boxInfoMap["PRICE_604"] = boxInfo.Price_604
-	boxInfoMap["ADDRESS"] = boxInfo.Address
-	boxInfoMap["UPDATETIME"] = time.Now().Local().Format("2006-01-02 15:04:05")
-	if !isBatchUpdate {
+	if isBatchUpdate {
+		if boxInfo.Price_601 >= float64(0) && boxInfo.Price_602 >= float64(0) && boxInfo.Price_603 >= float64(0) && boxInfo.Price_604 >= float64(0) {
+			boxInfoMap["PRICE_601"] = boxInfo.Price_601
+			boxInfoMap["PRICE_602"] = boxInfo.Price_602
+			boxInfoMap["PRICE_603"] = boxInfo.Price_603
+			boxInfoMap["PRICE_604"] = boxInfo.Price_604
+		}
+		if boxInfo.Address != "" {
+			boxInfoMap["ADDRESS"] = boxInfo.Address
+		}
+	}else {
+		boxInfoMap["PRICE_601"] = boxInfo.Price_601
+		boxInfoMap["PRICE_602"] = boxInfo.Price_602
+		boxInfoMap["PRICE_603"] = boxInfo.Price_603
+		boxInfoMap["PRICE_604"] = boxInfo.Price_604
+		boxInfoMap["ADDRESS"] = boxInfo.Address
 		boxInfoMap["DEVICETYPE"] = boxInfo.DeviceType
 	}
-	common.Logger.Debug("UPDATETIME==================", boxInfoMap["UPDATETIME"])
+	boxInfoMap["UPDATETIME"] = time.Now().Local().Format("2006-01-02 15:04:05")
 	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in (?)", serialNumber).Updates(boxInfoMap)
 	if r.Error != nil {
 		common.Logger.Warningln("MNDB Update Device:", r.Error.Error())

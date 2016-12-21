@@ -101,9 +101,23 @@ func (self *SyncController) SyncDevice(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
-func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
+func (self *SyncController) SyncDailyBillManual(ctx *iris.Context) {
 	syncService := &service.SyncService{}
 	boo, err := syncService.SyncDailyBillManual()
+	result := &enity.Result{}
+	if !boo {
+		result = &enity.Result{"1", err.Error(), "同步账单数据失败!"}
+		common.Log(ctx, result)
+	} else {
+		result = &enity.Result{"0", nil, "同步账单数据成功!"}
+	}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *SyncController) SyncDailyBill(ctx *iris.Context) {
+	syncService := &service.SyncService{}
+	boo, err := syncService.SyncDailyBill()
 	result := &enity.Result{}
 	if !boo {
 		result = &enity.Result{"1", err.Error(), "同步账单数据失败!"}
