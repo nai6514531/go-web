@@ -250,9 +250,13 @@ class DeviceForm extends React.Component {
           return false;
         }
       }
-			if (errors || _.isEmpty(values)) {
+			if (errors) {
 				return;
 			}
+      if(_.isEmpty(values)) {
+        message.info('请勾选需要修改的项目',3);
+        return;
+      }
       const serialNumber = this.state.serialNumbers;
 			const deviceValue = {
 				"serialNumber": serialNumber,
@@ -263,10 +267,10 @@ class DeviceForm extends React.Component {
 				"secondPulsePrice": values.secondPulsePrice?parseInt((+values.secondPulsePrice)*1000/10):-1,
 				"thirdPulsePrice": values.thirdPulsePrice?parseInt((+values.thirdPulsePrice)*1000/10):-1,
 				"fourthPulsePrice": values.fourthPulsePrice?parseInt((+values.fourthPulsePrice)*1000/10):-1,
-				"firstPulseName": self.firstPulseName ? self.firstPulseName : nameList[0],
-				"secondPulseName": self.secondPulseName ? self.secondPulseName : nameList[1],
-				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : nameList[2],
-				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : nameList[3],
+				"firstPulseName": values.firstPulseName ? values.firstPulseName : nameList[0],
+				"secondPulseName": values.secondPulseName ? values.secondPulseName : nameList[1],
+				"thirdPulseName": values.thirdPulseName ? values.thirdPulseName : nameList[2],
+				"fourthPulseName": values.fourthPulseName ? values.fourthPulseName : nameList[3],
 			}
       // 再次确认是否修改
       this.EditConfrim(deviceValue);
@@ -413,10 +417,10 @@ class DeviceForm extends React.Component {
 					<Form horizontal>
             {this.state.changeSchool?
             <Row>
-              <Col span={4}>
+              <Col span={4} offset={1}>
                 <span>省份&学校：</span>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('provinceId', {
                     rules: [
@@ -435,7 +439,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} {...this.schoolIdHelp}>
                   {getFieldDecorator('schoolId', {
                     rules: [
@@ -457,12 +461,12 @@ class DeviceForm extends React.Component {
             </Row>:""}
             {this.state.changeAddress?
             <Row>
-              <Col span={4}>
+              <Col span={4} offset={1}>
                 <span>
                   楼道信息：
                 </span>
               </Col>
-              <Col span={8}>
+              <Col span={9}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('address', {
                     rules: [
@@ -477,10 +481,10 @@ class DeviceForm extends React.Component {
             </Row> :""}
             {this.state.changePrice?
             <Row>
-              <Col span={4}>
+              <Col span={4} offset={1}>
                 <span>洗衣价格（无服务填0）：</span>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('firstPulsePrice', {
                     rules: [
@@ -492,7 +496,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5} >
+              <Col span={4} >
 						    <FormItem {...formItemLayout} >
                   {getFieldDecorator('secondPulsePrice', {
                     rules: [
@@ -504,7 +508,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('thirdPulsePrice', {
                     rules: [
@@ -516,7 +520,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout}>
                   {getFieldDecorator('fourthPulsePrice', {
                     rules: [
@@ -531,10 +535,10 @@ class DeviceForm extends React.Component {
             </Row>:""}
             {this.state.changeWashName?
             <Row>
-              <Col span={4}>
+              <Col span={4} offset={1}>
                 <span>洗衣服务名称：</span>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('firstPulseName', {
                     rules: [
@@ -546,7 +550,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5} >
+              <Col span={4} >
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('secondPulseName', {
                     rules: [
@@ -558,7 +562,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout} >
                   {getFieldDecorator('thirdPulseName', {
                     rules: [
@@ -570,7 +574,7 @@ class DeviceForm extends React.Component {
                   )}
                 </FormItem>
               </Col>
-              <Col span={5}>
+              <Col span={4}>
                 <FormItem {...formItemLayout}>
                   {getFieldDecorator('fourthPulseName', {
                     rules: [
@@ -584,8 +588,8 @@ class DeviceForm extends React.Component {
               </Col>
             </Row>:""}
             <Row>
-              <Col span={10}>
-                <FormItem wrapperCol={{ span: 12 }}>
+              <Col span={10} offset={1}>
+                <FormItem wrapperCol={{ span: 12}}>
                   <Button className="button" type="ghost" onClick={this.preview.bind(this)}>预览</Button>
                   <Button className="button" type="primary" onClick={this.handleSubmit}>确认修改</Button>
                 </FormItem>
@@ -754,6 +758,7 @@ class DeviceTable extends React.Component {
   componentWillReceiveProps(nextProps) {
     // 检查是否需要重新渲染 table
     if(!this.props.changeTable && nextProps.changeTable) {
+      this.setState({loading: true});
       this.changeDataSource(nextProps.values,nextProps.className);
     }
     if(!this.props.getList && nextProps.getList) {
@@ -793,6 +798,7 @@ class DeviceTable extends React.Component {
   changeDataSource(values,className) {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
+    console.log(values);
     for(let i = 0;i < baseDataSource.length;i++) {
       const item = baseDataSource[i];
       newDataSource[i] = {
@@ -800,10 +806,10 @@ class DeviceTable extends React.Component {
         serialNumber: item.serialNumber,
         schoolName: values.schoolId?values.schoolId.label:item.schoolName,
         address: values.address?values.address:item.address,
-        firstPulseName: values.firstPulseName?values.firstPulseName:nameList[0],
-        secondPulseName: values.secondPulseName?values.secondPulseName:nameList[1],
-        thirdPulseName: values.thirdPulseName?values.thirdPulseName:nameList[2],
-        fourthPulseName: values.fourthPulseName?values.fourthPulseName:nameList[3],
+        firstPulseName: values.firstPulseName?values.firstPulseName:item.firstPulseName,
+        secondPulseName: values.secondPulseName?values.secondPulseName:item.secondPulseName,
+        thirdPulseName: values.thirdPulseName?values.thirdPulseName:item.thirdPulseName,
+        fourthPulseName: values.fourthPulseName?values.fourthPulseName:item.fourthPulseName,
         firstPulsePrice: values.firstPulsePrice?values.firstPulsePrice*100:item.firstPulsePrice,
         secondPulsePrice: values.secondPulsePrice?values.secondPulsePrice*100:item.secondPulsePrice,
         thirdPulsePrice: values.thirdPulsePrice?values.thirdPulsePrice*100:item.thirdPulsePrice,
@@ -813,6 +819,7 @@ class DeviceTable extends React.Component {
     }
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
+    setTimeout(function() { this.setState({loading: false}); }.bind(this), 100);
   }
   render() {
     return (
