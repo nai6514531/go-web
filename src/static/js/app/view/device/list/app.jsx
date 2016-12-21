@@ -147,7 +147,7 @@ const columns = [{
       return referenceDevice;
     }
 }, {
-    title: '添加时间',
+    title: '更新时间',
     dataIndex: 'assignedAt',
     key: 'assignedAt',
     width:20,
