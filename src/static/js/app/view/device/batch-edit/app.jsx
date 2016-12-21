@@ -76,20 +76,20 @@ class DeviceForm extends React.Component {
       // 设备分配列表
       visible: false,
       resetCurrent: false,
-      //样式标红
+      //样式标红,默认为空,红色为 red
       className: {
-        index: 'gray',
-        serialNumber: 'red',
-        school: 'gray',
-        address: 'gray',
-        firstPulseName: 'gray',
-        secondPulseName: 'gray',
-        thirdPulseName: 'gray',
-        fourthPulseName: 'gray',
-        firstPulsePrice: 'gray',
-        secondPulsePrice: 'gray',
-        thirdPulsePrice: 'gray',
-        fourthPulsePrice: 'gray',
+        index: '',
+        serialNumber: '',
+        school: '',
+        address: '',
+        firstPulseName: '',
+        secondPulseName: '',
+        thirdPulseName: '',
+        fourthPulseName: '',
+        firstPulsePrice: '',
+        secondPulsePrice: '',
+        thirdPulsePrice: '',
+        fourthPulsePrice: '',
       },
     };
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -172,15 +172,15 @@ class DeviceForm extends React.Component {
       }
       // 此处需要设置样式
       const className = {
-        address: values.address?'red':'gray',
-        firstPulseName: values.firstPulseName?'red':'gray',
-        secondPulseName: values.secondPulseName?'red':'gray',
-        thirdPulseName: values.thirdPulseName?'red':'gray',
-        fourthPulseName: values.fourthPulseName?'red':'gray',
-        firstPulsePrice: values.firstPulsePrice?'red':'gray',
-        secondPulsePrice: values.secondPulsePrice?'red':'gray',
-        thirdPulsePrice: values.thirdPulsePrice?'red':'gray',
-        fourthPulsePrice: values.fourthPulsePrice?'red':'gray',
+        address: values.address?'red':'',
+        firstPulseName: values.firstPulseName?'red':'',
+        secondPulseName: values.secondPulseName?'red':'',
+        thirdPulseName: values.thirdPulseName?'red':'',
+        fourthPulseName: values.fourthPulseName?'red':'',
+        firstPulsePrice: values.firstPulsePrice?'red':'',
+        secondPulsePrice: values.secondPulsePrice?'red':'',
+        thirdPulsePrice: values.thirdPulsePrice?'red':'',
+        fourthPulsePrice: values.fourthPulsePrice?'red':'',
       }
       console.log(className);
       this.setState({values: values, changeTable: true, className: className});
@@ -591,87 +591,99 @@ class DeviceTable extends React.Component {
         dataIndex: 'index',
         key: 'index',
         width: 10,
-        className: '',
+        render(text, record, index) {
+          return <span className={record.className.index}>{text}</span>
+        },
       },{
         title: '设备编号',
         dataIndex: 'serialNumber',
         key: 'serialNumber',
         width:100,
-        className: '',
+        render(text, record, index) {
+          return <span className={record.className.serialNumber}>{text}</span>
+        },
       }, {
         title: '学校',
         dataIndex: 'school',
         key: 'school',
         width:55,
-        className: '',
+        render(text, record, index) {
+          return <span className={record.className.school}>{text}</span>
+        },
       },{
         title: '楼层',
         dataIndex: 'address',
         key: 'address',
         width:55,
-        className: '',
+        render(text, record, index) {
+          return <span className={record.className.address}>{text}</span>
+        },
       }, {
         title: '服务名称1',
         dataIndex: 'firstPulseName',
         key: 'firstPulseName',
         width:50,
-        className: '',
+        render(text, record, index) {
+          return <span className={record.className.firstPulseName}>{text}</span>
+        },
       },
         {
           title: '价格',
           dataIndex: 'firstPulsePrice',
           key: 'firstPulsePrice',
           width:50,
-          className: '',
-          render: (firstPulsePrice) => {
-            return Math.round(firstPulsePrice*100)/10000 + "元";
-          }
+          render(text, record, index) {
+            return <span className={record.className.firstPulsePrice}>{Math.round(text*100)/10000}元</span>
+          },
         },{
           title: '服务名称2',
           dataIndex: 'secondPulseName',
           key: 'secondPulseName',
           width:50,
-          className: '',
+          render(text, record, index) {
+            return <span className={record.className.secondPulseName}>{text}</span>
+          },
         }, {
           title: '价格',
           dataIndex: 'secondPulsePrice',
           key: 'secondPulsePrice',
           width:50,
-          className: '',
-          render: (secondPulsePrice) => {
-            return Math.round(secondPulsePrice*100)/10000 + "元";
-          }
+          render(text, record, index) {
+            return <span className={record.className.secondPulsePrice}>{Math.round(text*100)/10000}元</span>
+          },
         },{
           title: '服务名称3',
           dataIndex: 'thirdPulseName',
           key: 'thirdPulseName',
           width:50,
-          className: '',
+          render(text, record, index) {
+            return <span className={record.className.thirdPulseName}>{text}</span>
+          },
         },
         {
           title: '价格',
           dataIndex: 'thirdPulsePrice',
           key: 'thirdPulsePrice',
           width:50,
-          className: '',
-          render: (thirdPulsePrice) => {
-            return Math.round(thirdPulsePrice*100)/10000 + "元"
-          }
+          render(text, record, index) {
+            return <span className={record.className.thirdPulsePrice}>{Math.round(text*100)/10000}元</span>
+          },
         },{
           title: '服务名称4',
           dataIndex: 'fourthPulseName',
           key: 'fourthPulseName',
-          className: props.className.fourthPulseName,
           width:50,
+          render(text, record, index) {
+            return <span className={record.className.fourthPulseName}>{text}</span>
+          },
       }, {
           title: '价格',
           dataIndex: 'fourthPulsePrice',
           key: 'fourthPulsePrice',
           width:50,
-          className: props.className.fourthPulsePrice,
-          render: (fourthPulsePrice) => {
-            return Math.round(fourthPulsePrice*100)/10000 + "元"
-          }
+          render(text, record, index) {
+            return <span className={record.className.fourthPulsePrice}>{Math.round(text*100)/10000}元</span>
+          },
         }],
       dataSource: [],
       baseDataSource: [],
@@ -686,9 +698,11 @@ class DeviceTable extends React.Component {
   componentWillReceiveProps(nextProps) {
     // 检查是否需要重新渲染 table
     if(!this.props.changeTable && nextProps.changeTable) {
-      this.changeDataSource(nextProps.values);
+      this.changeDataSource(nextProps.values,nextProps.className);
     }
-    if(this.props.className !== nextProps.className) {}
+    if(this.props.className !== nextProps.className) {
+      
+    }
   }
   list(pager) {
     var self = this;
@@ -708,6 +722,7 @@ class DeviceTable extends React.Component {
             baseDataSource: data.data.map((item, key) => {
               item.index = key + 1;
               item.key = item.serialNumber;
+              item.className = this.props.className;
               return item;
             })
           });
@@ -716,8 +731,7 @@ class DeviceTable extends React.Component {
         }
       })
   }
-  changeDataSource(values) {
-    console.log('base',this.state.baseDataSource);
+  changeDataSource(values,className) {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
     for(let i = 0;i < baseDataSource.length;i++) {
@@ -737,13 +751,14 @@ class DeviceTable extends React.Component {
         secondPulsePrice: values.secondPulsePrice?values.secondPulsePrice*100:item.secondPulsePrice,
         thirdPulsePrice: values.thirdPulsePrice?values.thirdPulsePrice*100:item.thirdPulsePrice,
         fourthPulsePrice: values.fourthPulsePrice?values.fourthPulsePrice*100:item.fourthPulsePrice,
+        className: className,
       }
     }
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
   }
   render() {
-      return (
+    return (
       <div>
         <Table
           scroll={{ x: 450 }}
