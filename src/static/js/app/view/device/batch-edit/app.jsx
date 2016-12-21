@@ -105,6 +105,7 @@ class DeviceForm extends React.Component {
     this.editSuccess = this.editSuccess.bind(this);
     this.handleAllocate = this.handleAllocate.bind(this);
     this.EditConfrim = this.EditConfrim.bind(this);
+    this.resetColor = this.resetColor.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
@@ -193,6 +194,21 @@ class DeviceForm extends React.Component {
       this.setState({values: values, changeTable: true, className: className});
     });
   }
+  resetColor() {
+    const className = {
+      address: '',
+      schoolName: '',
+      firstPulseName: '',
+      secondPulseName: '',
+      thirdPulseName: '',
+      fourthPulseName: '',
+      firstPulsePrice: '',
+      secondPulsePrice: '',
+      thirdPulsePrice: '',
+      fourthPulsePrice: '',
+    }
+    this.setState({className:className});
+  }
   batchEdit(device) {
     // 批量修改
   var self = this;
@@ -207,6 +223,8 @@ class DeviceForm extends React.Component {
         this.setState({getList: true});
         // 确认是否要批量分配
         this.editSuccess();
+        // 且将标红样式还原
+        this.resetColor();
       } else {
         message.info(data.msg,3);
       }
@@ -238,8 +256,8 @@ class DeviceForm extends React.Component {
       const serialNumber = this.state.serialNumbers;
 			const deviceValue = {
 				"serialNumber": serialNumber,
-        "provinceId": values.provinceId?parseInt(values.provinceId.key):0,
-        "schoolId": schoolId?parseInt(schoolId.key):0,
+        "provinceId": values.provinceId?parseInt(values.provinceId.key):-1,
+        "schoolId": schoolId?parseInt(schoolId.key):-1,
 				"address": values.address,
         "firstPulsePrice": values.firstPulsePrice?parseInt((+values.firstPulsePrice)*1000/10):-1,
 				"secondPulsePrice": values.secondPulsePrice?parseInt((+values.secondPulsePrice)*1000/10):-1,
@@ -268,7 +286,7 @@ class DeviceForm extends React.Component {
     });
   }
   handleAllocate() {
-    // 先关掉原来的对话框
+    // 修改成功后调用,先关掉原来的对话框
     this.closeSucEditVisible();
     if(this.state.serialNumberSum > 0) {
       this.setState({
