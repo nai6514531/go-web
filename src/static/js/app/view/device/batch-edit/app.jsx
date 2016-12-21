@@ -93,6 +93,9 @@ class DeviceForm extends React.Component {
       successEditVisible: false,
       // 是否需要重新拉表格数据
       getList: false,
+      // 是否直接跳转到设备列表页
+      goBackDirect: false,
+      firstGoBack: false,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
@@ -102,7 +105,7 @@ class DeviceForm extends React.Component {
     this.provinceChange = this.provinceChange.bind(this);
     this.editSuccess = this.editSuccess.bind(this);
     this.handleAllocate = this.handleAllocate.bind(this);
-    this.EditConfrim = this.EditConfrim.bind(this);
+    this.EditConfirm = this.EditConfirm.bind(this);
     this.resetColor = this.resetColor.bind(this);
   }
   static contextTypes = {
@@ -119,10 +122,20 @@ class DeviceForm extends React.Component {
       serialNumberSum: serialNumbers.split(",").length});
   }
   componentWillReceiveProps(nextProps) {
+
 	}
+  componentDidUpdate(prevProps, prevState) {
+    if(!this.state.successEditVisible && prevState.successEditVisible && this.state.firstGoBack) {
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+    }
+
+    if(this.state.visible && prevState.visible && this.state.goBackDirect) {
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+    }
+  }
   closeSucEditVisible() {
-    this.setState({successEditVisible:false});
-    this.goBack();
+    this.setState({successEditVisible:false, firstGoBack:true});
+    // this.goBack();
   }
   editSuccess() {
     this.setState({successEditVisible:true});
@@ -165,7 +178,6 @@ class DeviceForm extends React.Component {
   // 预览
   preview() {
     this.props.form.validateFields((errors, values) => {
-      console.log('values',values);
       // 检查学校是否有值
       let schoolId = values.schoolId;
       if(schoolId) {
@@ -229,7 +241,6 @@ class DeviceForm extends React.Component {
   DeviceService.batchEdit(device)
     .then((data) => {
       if (data && data.status == '00') {
-        console.log(data);
         // 修改成功后要重新拉数据
         this.setState({getList: true});
         // 确认是否要批量分配
@@ -253,7 +264,6 @@ class DeviceForm extends React.Component {
 		e.preventDefault();
 		const self = this;
 		this.props.form.validateFields((errors, values) => {
-      console.log('values',values);
       let schoolId = values.schoolId;
       if(schoolId) {
         if(schoolId.key == -1 || schoolId == "undefined") {
@@ -284,7 +294,7 @@ class DeviceForm extends React.Component {
 				"fourthPulseName": values.fourthPulseName ? values.fourthPulseName : nameList[3],
 			}
       // 再次确认是否修改
-      this.EditConfrim(deviceValue);
+      this.EditConfirm(deviceValue);
 		});
 	}
 	// Modal 相关
@@ -292,6 +302,7 @@ class DeviceForm extends React.Component {
 		this.setState({ visible: true });
 	}
   handleCancel(e) {
+    // 完成,直接跳转回去
     this.setState({visible: false,});
     this.goBack();
   }
@@ -314,7 +325,7 @@ class DeviceForm extends React.Component {
       message.info('请至少选择一个设备',3);
     }
   }
-  EditConfrim(deviceValue) {
+  EditConfirm(deviceValue) {
     const self = this;
     confirm({
       content: '确认要修改吗？',
@@ -324,6 +335,9 @@ class DeviceForm extends React.Component {
       },
       onCancel() {},
     });
+  }
+  setGoBackDirect() {
+    this.setState({goBackDirect: true});
   }
   checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -628,10 +642,14 @@ class DeviceForm extends React.Component {
             resetCurrent={this.state.resetCurrent}
             changeResetCurrent={this.changeResetCurrent.bind(this)}
             goBack={this.goBack.bind(this)}
+            goBackDirect={true}
+            setGoBackDirect={this.setGoBackDirect.bind(this)}
           />
           <Modal visible={this.state.successEditVisible}
                  onOk={this.handleAllocate.bind(this)}
                  onCancel={this.closeSucEditVisible.bind(this)}
+                 okText="是"
+                 cancelText="否,返回设备列表"
           >
             <h2 style={{textAlign: 'center'}}><Icon type="check-circle" style={{color:'green'}}/> 修改成功!</h2>
             <p style={{textAlign: 'center'}}>是否要将这{serialNumberSum}个设备分配给他人？</p>
@@ -790,7 +808,6 @@ class DeviceTable extends React.Component {
           loading: false,
         });
         if (data && data.status == '00') {
-          console.log(data);
           const total = data.data.length;
           this.setState({
             total: total,
@@ -815,7 +832,6 @@ class DeviceTable extends React.Component {
   changeDataSource(values,className) {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
-    console.log(values);
     for(let i = 0;i < baseDataSource.length;i++) {
       const item = baseDataSource[i];
       newDataSource[i] = {
@@ -827,10 +843,10 @@ class DeviceTable extends React.Component {
         secondPulseName: values.secondPulseName?values.secondPulseName:item.secondPulseName,
         thirdPulseName: values.thirdPulseName?values.thirdPulseName:item.thirdPulseName,
         fourthPulseName: values.fourthPulseName?values.fourthPulseName:item.fourthPulseName,
-        firstPulsePrice: values.firstPulsePrice?values.firstPulsePrice/100:item.firstPulsePrice,
-        secondPulsePrice: values.secondPulsePrice?values.secondPulsePrice/100:item.secondPulsePrice,
-        thirdPulsePrice: values.thirdPulsePrice?values.thirdPulsePrice/100:item.thirdPulsePrice,
-        fourthPulsePrice: values.fourthPulsePrice?values.fourthPulsePrice/100:item.fourthPulsePrice,
+        firstPulsePrice: values.firstPulsePrice!==undefined?values.firstPulsePrice/100:item.firstPulsePrice,
+        secondPulsePrice: values.secondPulsePrice!==undefined?values.secondPulsePrice/100:item.secondPulsePrice,
+        thirdPulsePrice: values.thirdPulsePrice!==undefined?values.thirdPulsePrice/100:item.thirdPulsePrice,
+        fourthPulsePrice: values.fourthPulsePrice!==undefined?values.fourthPulsePrice/100:item.fourthPulsePrice,
         className: className,
       }
     }

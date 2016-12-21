@@ -99,7 +99,16 @@ class App extends React.Component {
   comAllocate() {
     // 完成绑定,也有可能绑定失败,关闭 modal
     // 在点开批量分配按钮后重置提交栏
-    this.props.handleCancel();
+    console.log(this.props.goBackDirect);
+    if(this.props.goBackDirect) {
+      // 完成需要直接跳转
+      console.log('111'); 
+      this.props.setGoBackDirect();
+    } else {
+      this.props.handleCancel();
+    }
+    
+    
   }
   render() {
     let show = '';
