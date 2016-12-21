@@ -92,7 +92,7 @@ class DeviceForm extends React.Component {
         fourthPulsePrice: '',
       },
       // 修改成功后展示的 modal
-      successEditVisibel: false,
+      successEditVisible: false,
       // 是否需要重新拉表格数据
       getList: false,
     };
@@ -104,6 +104,7 @@ class DeviceForm extends React.Component {
     this.provinceChange = this.provinceChange.bind(this);
     this.editSuccess = this.editSuccess.bind(this);
     this.handleAllocate = this.handleAllocate.bind(this);
+    this.EditConfrim = this.EditConfrim.bind(this);
   }
   static contextTypes = {
     router: React.PropTypes.object
@@ -121,10 +122,11 @@ class DeviceForm extends React.Component {
   componentWillReceiveProps(nextProps) {
 	}
   closeSucEditVisible() {
-    this.setState({successEditVisibel:false});
+    this.setState({successEditVisible:false});
+    console.log('cancel');
   }
   editSuccess() {
-    this.setState({successEditVisibel:true});
+    this.setState({successEditVisible:true});
   }
   // 选择需要修改的项目
   onSchoolCheck(e) {
@@ -164,6 +166,14 @@ class DeviceForm extends React.Component {
   // 预览
   preview() {
     this.props.form.validateFields((errors, values) => {
+      // 检查学校是否有值
+      let schoolId = values.schoolId;
+      if(schoolId) {
+        if(schoolId.key == -1 || schoolId == "undefined") {
+          this.schoolIdHelp = {'help':'必选','className':'has-error'};
+          return false;
+        }
+      }
       if (errors) {
         return;
       }
@@ -194,8 +204,9 @@ class DeviceForm extends React.Component {
       if (data && data.status == '00') {
         console.log(data);
         // 修改成功后要重新拉数据
-        this.editSuccess();
         this.setState({getList: true});
+        // 确认是否要批量分配
+        this.editSuccess();
       } else {
         message.info(data.msg,3);
       }
@@ -239,7 +250,8 @@ class DeviceForm extends React.Component {
 				"thirdPulseName": self.thirdPulseName ? self.thirdPulseName : nameList[2],
 				"fourthPulseName": self.fourthPulseName ? self.fourthPulseName : nameList[3],
 			}
-      this.batchEdit(deviceValue);
+      // 再次确认是否修改
+      this.EditConfrim(deviceValue);
 		});
 	}
 	// Modal 相关
@@ -267,6 +279,17 @@ class DeviceForm extends React.Component {
     } else {
       message.info('请至少选择一个设备',3);
     }
+  }
+  EditConfrim(deviceValue) {
+    const self = this;
+    confirm({
+      content: '确认要修改吗？',
+      onOk() {
+        // 确认批量修改设备
+        self.batchEdit(deviceValue);
+      },
+      onCancel() {},
+    });
   }
   checkNumber(rule, value, callback) {
 		var pattern=new RegExp(/^\d+$/);
@@ -360,7 +383,7 @@ class DeviceForm extends React.Component {
 						<Breadcrumb.Item>批量修改</Breadcrumb.Item>
 					</Breadcrumb>
 				</header>
-        <div>
+        <div className="select-view">
           <p>你将对<span style={{color:'red'}}>{serialNumberSum}</span>个设备进行修改,请选择需要修改的项目:</p>
           <Checkbox onChange={this.onSchoolCheck.bind(this)}>学校</Checkbox>
           <Checkbox onChange={this.onAddressCheck.bind(this)}>楼层信息</Checkbox>
@@ -368,7 +391,7 @@ class DeviceForm extends React.Component {
           <Checkbox onChange={this.onWashName.bind(this)}>洗衣服务名称</Checkbox>
         </div>
 				<section className="view-content">
-          <h1>修改</h1>
+          <h3>修改</h3>
 					<Form horizontal>
             {this.state.changeSchool?
             <Row>
@@ -544,7 +567,7 @@ class DeviceForm extends React.Component {
             </Row>:""}
             <Row>
               <Col span={10}>
-                <FormItem wrapperCol={{ span: 12, offset: 7 }}>
+                <FormItem wrapperCol={{ span: 12 }}>
                   <Button className="button" type="ghost" onClick={this.preview.bind(this)}>预览</Button>
                   <Button className="button" type="primary" onClick={this.handleSubmit}>确认修改</Button>
                 </FormItem>
@@ -571,12 +594,12 @@ class DeviceForm extends React.Component {
             resetCurrent={this.state.resetCurrent}
             changeResetCurrent={this.changeResetCurrent.bind(this)}
           />
-          <Modal visible={this.state.successEditVisibel}
-                 onOk={this.handleAllocate.bind(this)} 
+          <Modal visible={this.state.successEditVisible}
+                 onOk={this.handleAllocate.bind(this)}
                  onCancel={this.closeSucEditVisible.bind(this)}
           >
-            <h2><Icon type="check-circle" style={{color:'green'}}/> 修改成功!</h2>
-            <p>是否要将这{serialNumberSum}个设备分配给他人？</p>
+            <h2 style={{textAlign: 'center'}}><Icon type="check-circle" style={{color:'green'}}/> 修改成功!</h2>
+            <p style={{textAlign: 'center'}}>是否要将这{serialNumberSum}个设备分配给他人？</p>
           </Modal>
         </section>
 			</section>
@@ -600,7 +623,7 @@ class DeviceTable extends React.Component {
         title: '序号',
         dataIndex: 'index',
         key: 'index',
-        width: 10,
+        width: 30,
         render(text, record, index) {
           return <span className="">{text}</span>
         },
@@ -777,7 +800,7 @@ class DeviceTable extends React.Component {
     return (
       <div>
         <Table
-          scroll={{ x: 450 }}
+          scroll={{ x: 700, y: 300 }}
           dataSource={this.state.dataSource.length==0?this.state.baseDataSource:this.state.dataSource}
           columns={this.state.columns}
           pagination={false}

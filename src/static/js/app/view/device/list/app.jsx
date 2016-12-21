@@ -408,8 +408,12 @@ class DeviceList extends React.Component {
       message.info('请至少选择一个设备',3);
     }
   }
-  batchEdit() {
-
+  handleBatchEdit(e) {
+    if(this.state.selectedRowKeys.length > 0) {
+    } else {
+      message.info('你还没有选择要修改的设备',3);
+      e.preventDefault();
+    }
   }
   changeResetCurrent() {
     this.setState({
@@ -564,7 +568,9 @@ class DeviceList extends React.Component {
         </header>
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}>批量修改</Link>
+          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers} 
+                className="ant-btn ant-btn-primary item" 
+                onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>
           {USER.role.id == 5 ?
             <Link to="/device/edit" className="ant-btn ant-btn-primary item">
               添加新设备
