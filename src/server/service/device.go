@@ -264,7 +264,7 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 			deviceMap["third_pulse_name"] = device.ThirdPulseName
 			deviceMap["fourth_pulse_name"] = device.FourthPulseName
 		}
-		if device.ProvinceId > 0 && device.SchoolId > 0 {
+		if device.ProvinceId >= 0 && device.SchoolId >= 0 {
 			deviceMap["province_id"] = device.ProvinceId
 			deviceMap["school_id"] = device.SchoolId
 		}
