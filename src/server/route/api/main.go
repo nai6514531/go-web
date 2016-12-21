@@ -43,6 +43,7 @@ func Api() {
 	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
 	api.Get("/sync/device", sync.SyncDevice)
 	api.Get("/sync/daily-bill", sync.SyncDailyBill)
+	api.Get("/sync/daily-bill-manual", sync.SyncDailyBillManual)
 	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
 	api.Get("/sync/user-all", sync.SyncAllUserAndRel)
 
