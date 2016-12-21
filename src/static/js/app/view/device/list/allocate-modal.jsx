@@ -59,6 +59,7 @@ class App extends React.Component {
           current,
           bindResult:'分配成功'
         });
+        // 如果父组件提供了该方法,则使用
         this.setState({lockButton: false});
         message.success(data.msg,3);
         this.props.resetList();

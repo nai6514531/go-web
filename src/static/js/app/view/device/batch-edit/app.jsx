@@ -13,7 +13,6 @@ import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
 import DeviceService from "../../../service/device";
-import SchoolService from "../../../service/school";
 import { Link } from 'react-router';
 import _ from 'lodash';
 
@@ -49,7 +48,6 @@ function mapDispatchToProps(dispatch) {
 		getProvinceSchoolList,
 	};
 }
-const key = ['first','second','third','fourth'];
 const nameList = ['单脱','快洗','标准洗','大物洗'];
 
 class DeviceForm extends React.Component {
@@ -124,7 +122,7 @@ class DeviceForm extends React.Component {
 	}
   closeSucEditVisible() {
     this.setState({successEditVisible:false});
-    console.log('cancel');
+    this.goBack();
   }
   editSuccess() {
     this.setState({successEditVisible:true});
@@ -146,17 +144,6 @@ class DeviceForm extends React.Component {
     this.setState({changePrice: e.target.checked});
     if(!e.target.checked) {
       this.props.form.setFieldsValue({
-        firstPulseName: nameList[0],
-        secondPulseName: nameList[1],
-        thirdPulseName: nameList[2],
-        fourthPulseName: nameList[3]
-      });
-    }
-  }
-  onWashName(e) {
-    this.setState({changeWashName: e.target.checked});
-    if(!e.target.checked) {
-      this.props.form.setFieldsValue({
         firstPulsePrice: '',
         secondPulsePrice: '',
         thirdPulsePrice: '',
@@ -164,9 +151,21 @@ class DeviceForm extends React.Component {
       });
     }
   }
+  onWashName(e) {
+    this.setState({changeWashName: e.target.checked});
+    if(!e.target.checked) {
+      this.props.form.setFieldsValue({
+        firstPulseName: nameList[0],
+        secondPulseName: nameList[1],
+        thirdPulseName: nameList[2],
+        fourthPulseName: nameList[3]
+      });
+    }
+  }
   // 预览
   preview() {
     this.props.form.validateFields((errors, values) => {
+      console.log('values',values);
       // 检查学校是否有值
       let schoolId = values.schoolId;
       if(schoolId) {
@@ -190,6 +189,18 @@ class DeviceForm extends React.Component {
         secondPulsePrice: values.secondPulsePrice?'red':'',
         thirdPulsePrice: values.thirdPulsePrice?'red':'',
         fourthPulsePrice: values.fourthPulsePrice?'red':'',
+      }
+      if(values.firstPulsePrice){
+        values.firstPulsePrice = parseInt((+values.firstPulsePrice)*1000/10);
+      }
+      if(values.secondPulsePrice){
+        values.secondPulsePrice = parseInt((+values.secondPulsePrice)*1000/10);
+      }
+      if(values.thirdPulsePrice){
+        values.thirdPulsePrice = parseInt((+values.thirdPulsePrice)*1000/10);
+      }
+      if(values.fourthPulsePrice){
+        values.fourthPulsePrice = parseInt((+values.fourthPulsePrice)*1000/10);
       }
       this.setState({values: values, changeTable: true, className: className});
     });
@@ -282,6 +293,7 @@ class DeviceForm extends React.Component {
 	}
   handleCancel(e) {
     this.setState({visible: false,});
+    this.goBack();
   }
   resetList() {}
   changeResetCurrent() {
@@ -291,7 +303,7 @@ class DeviceForm extends React.Component {
   }
   handleAllocate() {
     // 修改成功后调用,先关掉原来的对话框
-    this.closeSucEditVisible();
+    this.setState({successEditVisible:false});
     if(this.state.serialNumberSum > 0) {
       this.setState({
         // 分配完成后,首次打开分配页面,需要重置current
@@ -348,7 +360,7 @@ class DeviceForm extends React.Component {
 		const self = this;
 		if(this.state.unsaved) {
 			confirm({
-				title: '确定取消?',
+				title: '确认返回设备管理?',
 				onOk() {
 					self.context.router.goBack();
 				},
@@ -615,6 +627,7 @@ class DeviceForm extends React.Component {
             resetList={this.resetList.bind(this)}
             resetCurrent={this.state.resetCurrent}
             changeResetCurrent={this.changeResetCurrent.bind(this)}
+            goBack={this.goBack.bind(this)}
           />
           <Modal visible={this.state.successEditVisible}
                  onOk={this.handleAllocate.bind(this)}
@@ -688,7 +701,7 @@ class DeviceTable extends React.Component {
           key: 'firstPulsePrice',
           width:50,
           render(text, record, index) {
-            return <span className={record.className.firstPulsePrice}>{Math.round(text*100)/10000}元</span>
+            return <span className={record.className.firstPulsePrice}>{Math.round(text*100)/100}元</span>
           },
         },{
           title: '服务名称2',
@@ -704,7 +717,7 @@ class DeviceTable extends React.Component {
           key: 'secondPulsePrice',
           width:50,
           render(text, record, index) {
-            return <span className={record.className.secondPulsePrice}>{Math.round(text*100)/10000}元</span>
+            return <span className={record.className.secondPulsePrice}>{Math.round(text*100)/100}元</span>
           },
         },{
           title: '服务名称3',
@@ -721,7 +734,7 @@ class DeviceTable extends React.Component {
           key: 'thirdPulsePrice',
           width:50,
           render(text, record, index) {
-            return <span className={record.className.thirdPulsePrice}>{Math.round(text*100)/10000}元</span>
+            return <span className={record.className.thirdPulsePrice}>{Math.round(text*100)/100}元</span>
           },
         },{
           title: '服务名称4',
@@ -737,7 +750,7 @@ class DeviceTable extends React.Component {
           key: 'fourthPulsePrice',
           width:50,
           render(text, record, index) {
-            return <span className={record.className.fourthPulsePrice}>{Math.round(text*100)/10000}元</span>
+            return <span className={record.className.fourthPulsePrice}>{Math.round(text*100)/100}元</span>
           },
         }],
       // 预览数据,以原始数据为基础产生不同变化
@@ -785,6 +798,10 @@ class DeviceTable extends React.Component {
               item.index = key + 1;
               item.key = item.serialNumber;
               item.className = this.props.className;
+              item.firstPulsePrice = (+item.firstPulsePrice)/100;
+              item.secondPulsePrice = (+item.secondPulsePrice)/100;
+              item.thirdPulsePrice = (+item.thirdPulsePrice)/100;
+              item.fourthPulsePrice = (+item.fourthPulsePrice)/100;
               return item;
             })
           });
@@ -810,10 +827,10 @@ class DeviceTable extends React.Component {
         secondPulseName: values.secondPulseName?values.secondPulseName:item.secondPulseName,
         thirdPulseName: values.thirdPulseName?values.thirdPulseName:item.thirdPulseName,
         fourthPulseName: values.fourthPulseName?values.fourthPulseName:item.fourthPulseName,
-        firstPulsePrice: values.firstPulsePrice?values.firstPulsePrice*100:item.firstPulsePrice,
-        secondPulsePrice: values.secondPulsePrice?values.secondPulsePrice*100:item.secondPulsePrice,
-        thirdPulsePrice: values.thirdPulsePrice?values.thirdPulsePrice*100:item.thirdPulsePrice,
-        fourthPulsePrice: values.fourthPulsePrice?values.fourthPulsePrice*100:item.fourthPulsePrice,
+        firstPulsePrice: values.firstPulsePrice?values.firstPulsePrice/100:item.firstPulsePrice,
+        secondPulsePrice: values.secondPulsePrice?values.secondPulsePrice/100:item.secondPulsePrice,
+        thirdPulsePrice: values.thirdPulsePrice?values.thirdPulsePrice/100:item.thirdPulsePrice,
+        fourthPulsePrice: values.fourthPulsePrice?values.fourthPulsePrice/100:item.fourthPulsePrice,
         className: className,
       }
     }
