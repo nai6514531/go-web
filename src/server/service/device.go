@@ -641,6 +641,7 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 		" from box_wash bw,box_info b " +
 		"where  b.deviceno='" + serialNumber + "' and date(bw.inserttime)='" + billAt + "' and bw.deviceno=b.DEVICENO"
 	rows, err := common.MNREAD.Raw(sql).Rows()
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
