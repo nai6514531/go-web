@@ -373,14 +373,14 @@ func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 		" where date(UPDATETIME) >'2015-12' " +
 		" and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		recharge := &muniu.Recharge{}
-		common.MNDB.ScanRows(rows, recharge)
+		common.MNREAD.ScanRows(rows, recharge)
 		list = append(list, recharge)
 	}
 	return &list, nil
@@ -392,14 +392,14 @@ func (self *DailyBillService) Consume() (*[]*muniu.Consume, error) {
 		" from box_wash " +
 		" where companyid!=0 " +
 		" group by DATE_FORMAT(inserttime,'%Y-%m')"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		consume := &muniu.Consume{}
-		common.MNDB.ScanRows(rows, consume)
+		common.MNREAD.ScanRows(rows, consume)
 		list = append(list, consume)
 	}
 	return &list, nil
@@ -429,7 +429,7 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	sql +=  " and bsb.COMPANYID!=0 " +
 		" and ba.paytype!=-1 and bsb.companyid=ba.localid " +
 		" group by bsb.PERIOD_START"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		common.Logger.Debugln("err:", err.Error())
@@ -437,7 +437,7 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	}
 	for rows.Next() {
 		sumByDate := &muniu.BillSumByDate{}
-		common.MNDB.ScanRows(rows, sumByDate)
+		common.MNREAD.ScanRows(rows, sumByDate)
 		list = append(list, sumByDate)
 	}
 	return &list, nil
@@ -456,14 +456,14 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 		" and date(UPDATETIME)<'" + end + "'" +
 		" and tradestatus='success'" +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		sumByDate := &muniu.BillSumByDate{}
-		common.MNDB.ScanRows(rows, sumByDate)
+		common.MNREAD.ScanRows(rows, sumByDate)
 		list = append(list, sumByDate)
 	}
 	return &list, nil
@@ -482,14 +482,14 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 		" and date(UPDATETIME)<'" + end + "'" +
 		" and tradestatus='TRADE_SUCCESS' " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
-	rows, err := common.MNDB.Raw(sql).Rows()
+	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		sumByDate := &muniu.BillSumByDate{}
-		common.MNDB.ScanRows(rows, sumByDate)
+		common.MNREAD.ScanRows(rows, sumByDate)
 		list = append(list, sumByDate)
 	}
 	return &list, nil
@@ -498,7 +498,7 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 func (self *DailyBillService) MnznBasicMapByType(payType ...string) (map[string]*muniu.BoxAdmin, error) {
 	list := &[]*muniu.BoxAdmin{}
 	accountMap := make(map[string]*muniu.BoxAdmin, 0)
-	r := common.MNDB.Where("paytype in (?)", payType).Find(list)
+	r := common.MNREAD.Where("paytype in (?)", payType).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

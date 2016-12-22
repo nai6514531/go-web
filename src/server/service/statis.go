@@ -12,7 +12,7 @@ type StatisService struct {
 
 func BoxAdminByLocalId(localId int) (*muniu.BoxAdmin, error) {
 	admin := &muniu.BoxAdmin{}
-	r := common.MNDB.Where("localid = ?", localId).First(admin)
+	r := common.MNREAD.Where("localid = ?", localId).First(admin)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -104,7 +104,7 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 	if companyId == -1 && agencyId != -1 {
 		param = append(param, agencyId)
 	}
-	rows, err := common.MNDB.Raw(sql, param...).Rows()
+	rows, err := common.MNREAD.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (self *StatisService) Operate(date string) (*[]*map[string]interface{}, err
 	if date != "" {
 		param = append(param, date)
 	}
-	rows, err := common.MNDB.Raw(sql, param...).Rows()
+	rows, err := common.MNREAD.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -268,7 +268,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		}
 	}
 
-	rows, err := common.MNDB.Raw(sql, param...).Rows()
+	rows, err := common.MNREAD.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err

@@ -21,7 +21,7 @@ func ListByTimed(isCreated bool) (*[]*muniu.BoxAdmin, error) {
 	} else {
 		_column = "UPDATETIME"
 	}
-	r := common.MNDB.Where(_column + " > ?", _time).Find(list)
+	r := common.MNREAD.Where(_column + " > ?", _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -88,7 +88,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
 	list := &[]*muniu.BoxAdmin{}
 	_time := time.Now().Add(-12 * time.Minute).Format("2006-01-02 15:04:05")
-	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
+	r := common.MNREAD.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -97,7 +97,7 @@ func (self *SyncService) ListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
 
 func (self *SyncService) AllListBySyncBoxAdmin() (*[]*muniu.BoxAdmin, error) {
 	list := &[]*muniu.BoxAdmin{}
-	r := common.MNDB.Find(list)
+	r := common.MNREAD.Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -266,7 +266,7 @@ func (self *SyncService) SyncUserCashAccount(list *[]*muniu.BoxAdmin) (bool, err
 func (self *SyncService) ListBySyncBoxInfo() (*[]*muniu.BoxInfo, error) {
 	list := &[]*muniu.BoxInfo{}
 	_time := time.Now().Add(-12 * time.Minute).Format("2006-01-02 15:04:05")
-	r := common.MNDB.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
+	r := common.MNREAD.Where("INSERTTIME > ? or UPDATETIME > ?", _time, _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -309,12 +309,12 @@ func (self *SyncService) SyncDevice() (bool, error) {
 
 func (self *SyncService) SyncDailyBill() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("status = 0 or status = 1").Find(list)
+	r := common.MNREAD.Where("status = 0 or status = 1").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
 	userCashAccountService := &UserCashAccountService{}
 	if r.Error != nil {
-		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
+		common.Logger.Warningln("Soda_Sync_Error:common.MNREAD.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
 	}
 	boo := true
@@ -341,12 +341,12 @@ func (self *SyncService) SyncDailyBill() (bool, error) {
 
 func (self *SyncService) SyncDailyBillManual() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("status = 0 or status = 1 or status = 2").Find(list)
+	r := common.MNREAD.Where("status = 0 or status = 1 or status = 2").Find(list)
 	syncService := &SyncService{}
 	dailyBillService := &DailyBillService{}
 	userCashAccountService := &UserCashAccountService{}
 	if r.Error != nil {
-		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
+		common.Logger.Warningln("Soda_Sync_Error:common.MNREAD.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
 	}
 	boo := true
@@ -373,11 +373,11 @@ func (self *SyncService) SyncDailyBillManual() (bool, error) {
 
 func (self *SyncService) SyncDailyBillDetail() (bool, error) {
 	list := &[]*muniu.BoxStatBill{}
-	r := common.MNDB.Where("status = 0 or status = 1").Find(list)
+	r := common.MNREAD.Where("status = 0 or status = 1").Find(list)
 	syncService := &SyncService{}
 	dailyBillDetailService := &DailyBillDetailService{}
 	if r.Error != nil {
-		common.Logger.Warningln("Soda_Sync_Error:common.MNDB.Find:BoxStatBill:List:", r.Error.Error())
+		common.Logger.Warningln("Soda_Sync_Error:common.MNREAD.Find:BoxStatBill:List:", r.Error.Error())
 		return false, r.Error
 	}
 	boo := true
@@ -391,7 +391,7 @@ func (self *SyncService) SyncDailyBillDetail() (bool, error) {
 			common.Logger.Warningln("Soda_Sync_Error:DeleteByUserAndBillAt:UserId:periodStart:", userId, periodStart, err.Error())
 			return false, err
 		}
-		_r := common.MNDB.Where("COMPANYID =? and date(INSERTTIME) = ?", companyId, periodStart).Find(boxWashList)
+		_r := common.MNREAD.Where("COMPANYID =? and date(INSERTTIME) = ?", companyId, periodStart).Find(boxWashList)
 		if _r.Error != nil {
 			common.Logger.Warningln("Soda_Sync_Error:Find(boxWashList):CompanyId:PeriodStart:", companyId, periodStart, _r.Error.Error())
 			return false, _r.Error

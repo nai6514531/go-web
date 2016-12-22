@@ -22,7 +22,7 @@ func (self *TradeService) TotalOfDevice(serialNumber string, account string) (in
 		sql += " where w.usermobile=? "
 		param = append(param, account)
 	}
-	r := common.MNDB.Raw(sql, param...).Count(&total)
+	r := common.MNREAD.Raw(sql, param...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -47,7 +47,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string, pag
 
 	sql += "order by w.inserttime desc limit ? offset ? "
 	param = append(param, perPage, (page - 1) * perPage)
-	rows, err := common.MNDB.Raw(sql, param...).Rows()
+	rows, err := common.MNREAD.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, account string, pag
 
 func BasicOfBoxWash(localId int) (*muniu.BoxWash, error) {
 	boxWash := &muniu.BoxWash{}
-	r := common.MNDB.Where(" localid = ?", localId).First(boxWash)
+	r := common.MNREAD.Where(" localid = ?", localId).First(boxWash)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -98,7 +98,7 @@ func BasicOfBoxWash(localId int) (*muniu.BoxWash, error) {
 
 func BasicOfBoxUser(account string) (*muniu.BoxUser, error) {
 	boxUser := &muniu.BoxUser{}
-	r := common.MNDB.Where(" mobile = ? ", account).First(boxUser)
+	r := common.MNREAD.Where(" mobile = ? ", account).First(boxUser)
 	if r.Error != nil {
 		return nil, r.Error
 	}

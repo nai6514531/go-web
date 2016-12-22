@@ -62,7 +62,36 @@ func SetUpMNDB() {
 
 }
 
+func SetUpMNREAD() {
+
+	isDevelopment := viper.GetBool("isDevelopment")
+	dialect := viper.GetString("server.mnread.dialect")
+	user := viper.GetString("server.mnread.user")
+	password := viper.GetString("server.mnread.password")
+	database := viper.GetString("server.mnread.database")
+	host := viper.GetString("server.mnread.host")
+	port := viper.GetString("server.mnread.port")
+	maxIdle := viper.GetInt("server.mnread.maxIdle")
+	maxOpen := viper.GetInt("server.mnread.maxOpen")
+
+	url := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + database + "?charset=utf8&parseTime=True&loc=Local"
+
+	db, err := gorm.Open(dialect, url)
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	db.LogMode(isDevelopment)
+
+	db.DB().SetMaxIdleConns(maxIdle)
+	db.DB().SetMaxOpenConns(maxOpen)
+
+	MNREAD = db
+
+}
+
 var (
 	DB   *gorm.DB
 	MNDB *gorm.DB
+	MNREAD *gorm.DB
 )
