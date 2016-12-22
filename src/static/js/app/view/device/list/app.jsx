@@ -223,13 +223,6 @@ const columns = [{
   },
 }];
 
-const steps = [{
-  title: '填写运营商账号',
-}, {
-  title: '验证运营商信息',
-}, {
-  title: '完成',
-}];
 
 class DeviceList extends React.Component {
   constructor(props) {
@@ -257,33 +250,37 @@ class DeviceList extends React.Component {
       rowColor:{},
       serialNumber:'',
       userQuery:'',
+      userId:'',
+      schoolId:'',
       lockButton: false,
 
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
-
+    this.getNowQuery = this.getNowQuery.bind(this);
   }
   componentWillMount() {
-    let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    let pager = this.getNowQuery();
     // 拉取设备详情
     this.loading = true;
+    // 从列表操作处进入的时候,路由会变化,
+    // 因为使用路由只有 userId 和 schoolId,没有 page 和 perPage
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
-      const serialNumber = query.serialNumber;
-      const userQuery = query.userQuery;
-      const page = +query.page || 1;
-      const perPage = +query.perPage || 10;
-      pager.serialNumber = serialNumber;
-      pager.userQuery = userQuery;
-      pager.page = page;
-      pager.perPage = perPage;
+      pager.serialNumber = query.serialNumber;;
+      pager.userQuery = query.userQuery;
+      pager.userId = query.userId;
+      pager.schoolId = query.schoolId;
+      pager.page = +query.page || 1;
+      pager.perPage = +query.perPage || 10;
       this.setState({
-        serialNumber: serialNumber,
-        userQuery: userQuery,
-        page: page,
-        perPage: perPage,
+        serialNumber: query.serialNumber,
+        userQuery: query.userQuery,
+        userId: query.userId,
+        schoolId: query.schoolId,
+        page: +query.page || 1,
+        perPage: +query.perPage || 10,
       })
     }
     this.props.getDeviceList(pager);
@@ -292,7 +289,7 @@ class DeviceList extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
-    const pager = { page : this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    const pager = this.getNowQuery();
     if(this.theStatus !== -1) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
@@ -307,6 +304,7 @@ class DeviceList extends React.Component {
         self.theStatus = -1;
       }
     }
+    // 可以替换成普通的请求
     if(this.removeDevice !== -1 && this.removeDevice !== undefined) {
       const remove = nextProps.resultRemove;
       if(remove){
@@ -328,7 +326,7 @@ class DeviceList extends React.Component {
           this.props.getDeviceList(pager);
           this.setSearchValues(pager);
           self.loading = true;
-          message.success('删除成功',3);
+          message.success('删除成功!',3);
         } else {
           message.error(resultReset.result.msg,3);
         }
@@ -339,6 +337,17 @@ class DeviceList extends React.Component {
     if(this.props.list !== nextProps.list) {
       self.loading = false;
     }
+  }
+  getNowQuery() {
+    const pager = {
+      page: this.state.page,
+      perPage: this.state.perPage,
+      serialNumber: this.state.serialNumber,
+      userQuery: this.state.userQuery,
+      userId: this.state.userId,
+      schoolId: this.state.schoolId,
+    }
+    return pager;
   }
   initializePagination() {
     let total = 1;
@@ -355,14 +364,17 @@ class DeviceList extends React.Component {
       },
       defaultPageSize: this.state.perPage,
       onShowSizeChange(current, pageSize) {
-        const pager = { page : +current, perPage: +pageSize, serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = self.getNowQuery();
+        pager.page = +current;
+        pager.perPage = +pageSize;
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
         self.setSearchValues(pager);
       },
       onChange(current) {
-        const pager = { page : +current, perPage: +self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = self.getNowQuery();
+        pager.page = +current;
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
@@ -428,7 +440,6 @@ class DeviceList extends React.Component {
   handleCancel(e) {
     this.setState({
       visible: false,
-      // userAccount:'',
     });
   }
   resetHashHistory() {
@@ -506,6 +517,7 @@ class DeviceList extends React.Component {
   }
   render() {
     const query = this.props.location.query;
+    // 给 input 设置初始值
     let serialNumber = '';
     let userQuery = '';
     let current = this.state.page;
@@ -528,11 +540,9 @@ class DeviceList extends React.Component {
         this.setState({
           selectedRowKeys:selectedRowKeys,
         });
-        // console.log('onChange',selectedRows,selectedRowKeys);
       },
       onSelect: (record, selected, selectedRows) => {
         // record 当前被操作的行,selected 是否选中当前被操作的行,selectedRows 所有被选中的行
-        // console.log('onSelect',record,selected,selectedRows);
       },
       getCheckboxProps: record => ({
         disabled: record.hasAssigned,

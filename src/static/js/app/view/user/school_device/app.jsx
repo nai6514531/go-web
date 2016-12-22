@@ -1,5 +1,5 @@
 import React from 'react';
-import '../device_list/app.less';
+import '../../device/school_filter_list/app.less';
 import { Table,Input, Button, Breadcrumb, Popconfirm, message } from 'antd';
 import { Link } from 'react-router';
 
