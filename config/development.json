@@ -71,7 +71,7 @@
       "port": 3306,
       "user": "web",
       "password": "123456",
-      "database": "mnzn",
+      "database": "mnzn_read",
       "maxIdle": 20,
       "maxOpen": 20
     },

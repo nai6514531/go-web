@@ -11,17 +11,17 @@ import (
 var (
 	statis_msg = map[string]string{
 		"01070100": "拉取消费统计数据成功",
-		"01070101": "拉取消费统计数据失败",
+		"01070101": "无消费统计数据",
 
 		"01070200": "拉取经营统计数据成功",
-		"01070201": "拉取经营统计数据失败",
+		"01070201": "无经营统计数据",
 
 		"01070300": "拉取模块统计数据成功",
 		"01070301": "模块统计无数据",
 		"01070302": "参数错误",
 
 		"01070400": "拉取每日结账数据成功",
-		"01070401": "拉取每日结账数据失败",
+		"01070401": "无每日结账数据",
 		"01070402": "支付宝用户为空",
 		"01070403": "银行用户为空",
 		"01070404": "支付宝每日结账为空",
@@ -40,7 +40,6 @@ func (self *StatisController) Consume(ctx *iris.Context) {
 	statisService := &service.StatisService{}
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
-	common.Logger.Debugln("date============", date)
 	list, err := statisService.Consume(userId, date)
 	if err != nil {
 		result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
