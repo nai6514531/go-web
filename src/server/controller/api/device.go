@@ -157,7 +157,10 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || user.ParentId == userId {
+	common.Logger.Debug("=============", device.UserId)
+	common.Logger.Debug("=============", userId)
+	common.Logger.Debug("=============", user.ParentId)
+	if device.UserId == userId || user.ParentId == userId || device.FromUserId == userId {
 		ctx.Next()
 		return
 	} else {
@@ -202,7 +205,7 @@ func (self *DeviceController) OwnToMeOrTestBySerialNumbers(ctx *iris.Context) {
 	}
 	for _, _device := range *list {
 		_user := users[_device.UserId]
-		if _device.UserId != userId && _user != nil && _user.ParentId != userId {
+		if _device.UserId != userId && _user != nil && _user.ParentId != userId && _device.FromUserId != userId{
 			result = &enity.Result{"01031403", nil, device_msg["01031403"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
