@@ -869,7 +869,14 @@ const App = React.createClass({
             className="item"
             locale={zhCN}
           />
-          <Input defaultValue={defaultValue.userOrBank} style={{width: 160}} className="item" placeholder="输入运营商名称或者银行名称或户名" onChange={this.handleUserOrBankChange}/>
+          <Input
+            defaultValue={defaultValue.userOrBank}
+            style={{width: 160}}
+            className="item"
+            placeholder="输入运营商名称或者银行名称或户名"
+            onChange={this.handleUserOrBankChange}
+            onPressEnter={this.handleFilter}
+          />
           <Button className="item" type="primary" icon="search" onClick={this.handleFilter}>筛选</Button>
           {USER.role.id == 3 ?
           <Button className="item" type="primary" icon="download" onClick={this.exportBill} loading={this.state.exportLoading}>导出</Button>
