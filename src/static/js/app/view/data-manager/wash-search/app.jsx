@@ -208,7 +208,11 @@ const App = React.createClass({
         </header>
         <div className="toolbar">
           <span> 手机号：</span>
-          <Input style={{width:120}} placeholder="请输入手机号" onChange={this.handleInputChange}/>
+          <Input style={{width:120}} 
+                 placeholder="请输入手机号" 
+                 onChange={this.handleInputChange}
+                 onPressEnter={this.handleSearch}
+          />
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
         </div>
         <article>
