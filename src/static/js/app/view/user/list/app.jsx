@@ -98,6 +98,9 @@ class AgentTable extends React.Component {
       this.props.getUserList(pager);
     }
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   initializePagination() {
     let total = 1;
     const { id } = this.props.params;
@@ -157,8 +160,11 @@ class AgentTable extends React.Component {
       if(list){
         if(list.fetch == true){
           const data = list.result.data.list;
+          let rowColor = {};
           dataSource = data.map(function (item, key) {
             item.key = item.id;
+            rowColor[item.key] = key%2==0?'white':'gray';
+            self.rowColor = rowColor;
             return item;
           })
         }
@@ -197,6 +203,7 @@ class AgentTable extends React.Component {
             pagination={pagination}
             loading={this.loading ? this.loading : false}
             bordered
+            rowClassName={this.rowClassName.bind(this)}
           />
         </article>
       </section>

@@ -788,9 +788,11 @@ class DeviceTable extends React.Component {
       baseDataSource: [],
     }
   }
-
   componentWillMount() {
     this.getTableList();
+  }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
   }
   getTableList(){
     const serialNumbers = this.props.serialNumbers;
@@ -820,6 +822,7 @@ class DeviceTable extends React.Component {
         });
         if (data && data.status == '00') {
           const total = data.data.length;
+          let rowColor = {};
           this.setState({
             total: total,
             baseDataSource: data.data.map((item, key) => {
@@ -830,6 +833,8 @@ class DeviceTable extends React.Component {
               item.secondPulsePrice = (+item.secondPulsePrice)/100;
               item.thirdPulsePrice = (+item.thirdPulsePrice)/100;
               item.fourthPulsePrice = (+item.fourthPulsePrice)/100;
+              rowColor[item.key] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -843,10 +848,12 @@ class DeviceTable extends React.Component {
   changeDataSource(values,className) {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
+    let rowColor = {};
     for(let i = 0;i < baseDataSource.length;i++) {
       const item = baseDataSource[i];
       newDataSource[i] = {
         index: item.index,
+        key: item.serialNumber,
         serialNumber: item.serialNumber,
         schoolName: values.schoolId?values.schoolId.label:item.schoolName,
         address: values.address?values.address:item.address,
@@ -860,7 +867,9 @@ class DeviceTable extends React.Component {
         fourthPulsePrice: values.fourthPulsePrice!==undefined?values.fourthPulsePrice/100:item.fourthPulsePrice,
         className: className,
       }
+      rowColor[item.serialNumber] = i%2==0?'white':'gray';
     }
+    this.rowColor = rowColor;
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
     setTimeout(function() { this.setState({loading: false}); }.bind(this), 100);
@@ -874,7 +883,9 @@ class DeviceTable extends React.Component {
           columns={this.state.columns}
           pagination={false}
           bordered
-          loading={this.state.loading}/>
+          loading={this.state.loading}
+          rowClassName={this.rowClassName.bind(this)}
+        />
       </div>
     );
   }

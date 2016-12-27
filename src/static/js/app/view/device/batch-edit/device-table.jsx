@@ -136,6 +136,9 @@ class DeviceTable extends React.Component {
       this.getTableList();
     }
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   list(pager) {
     var self = this;
     this.setState({
@@ -147,7 +150,7 @@ class DeviceTable extends React.Component {
           loading: false,
         });
         if (data && data.status == '00') {
-          console.log(data);
+          let rowColor = {};
           const total = data.data.length;
           this.setState({
             total: total,
@@ -159,6 +162,8 @@ class DeviceTable extends React.Component {
               item.secondPulsePrice = (+item.secondPulsePrice)/100;
               item.thirdPulsePrice = (+item.thirdPulsePrice)/100;
               item.fourthPulsePrice = (+item.fourthPulsePrice)/100;
+              rowColor[item.key] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -173,10 +178,12 @@ class DeviceTable extends React.Component {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
     console.log(values);
+    let rowColor = {};
     for(let i = 0;i < baseDataSource.length;i++) {
       const item = baseDataSource[i];
       newDataSource[i] = {
         index: item.index,
+        key: item.serialNumber,
         serialNumber: item.serialNumber,
         schoolName: values.schoolId?values.schoolId.label:item.schoolName,
         address: values.address?values.address:item.address,
@@ -190,7 +197,9 @@ class DeviceTable extends React.Component {
         fourthPulsePrice: values.fourthPulsePrice?values.fourthPulsePrice/100:item.fourthPulsePrice/100,
         className: className,
       }
+      rowColor[item.serialNumber] = i%2==0?'white':'gray';
     }
+    this.rowColor = rowColor;
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
     setTimeout(function() { this.setState({loading: false}); }.bind(this), 100);
@@ -204,7 +213,9 @@ class DeviceTable extends React.Component {
           columns={this.state.columns}
           pagination={false}
           bordered
-          loading={this.state.loading}/>
+          loading={this.state.loading}
+          rowClassName={this.rowClassName.bind(this)}
+        />
       </div>
     );
   }

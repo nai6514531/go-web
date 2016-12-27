@@ -77,6 +77,9 @@ const App = React.createClass({
       loading: false
     };
   },
+  rowClassName(record, index) {
+    return this.rowColor[record.id];
+  },
   list(userId, billAt, serialNumber, pager) {
     var self = this;
     this.setState({
@@ -88,9 +91,12 @@ const App = React.createClass({
           loading: false,
         });
         if (data && data.status == '00') {
+          let rowColor = {};
           this.setState({
             total: data.data.total,
-            list: data.data.list.map((item) => {
+            list: data.data.list.map((item, key) => {
+              rowColor[item.id] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -133,7 +139,11 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list}
+             columns={columns} pagination={pagination}
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

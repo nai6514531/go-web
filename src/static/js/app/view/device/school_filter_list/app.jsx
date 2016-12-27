@@ -81,6 +81,9 @@ class SchoolTable extends React.Component {
       this.getSchool = 0;
     }
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   initializePagination() {
     let total = 1;
     if (this.props.school && this.props.school.fetch == true) {
@@ -137,7 +140,10 @@ class SchoolTable extends React.Component {
     if(school){
       if(school.fetch == true){
         list = school.result.data;
+        let rowColor = {};
         dataSource = list.map(function (item,key) {
+          rowColor[item.id] = key%2==0?'white':'gray';
+          self.rowColor = rowColor;
           return {
             id: item.id,
             key: item.id,
@@ -175,11 +181,13 @@ class SchoolTable extends React.Component {
           <Table
             scroll={{ x:350 }}
             columns={columns}
-               dataSource={dataSource}
-               pagination={pagination}
-               loading={this.loading}
-               onChange={this.handleTableChange}
-               bordered
+            dataSource={dataSource}
+            pagination={pagination}
+            loading={this.loading}
+            onChange={this.handleTableChange}
+            bordered
+            rowClassName={this.rowClassName.bind(this)}
+
           />
         </article>
       </section>
