@@ -74,13 +74,16 @@ const App = React.createClass({
           return Math.round(amount*100)/100 + "元";
         }
       }],
-      loading: false
+      loading: false,
     };
   },
   componentWillMount() {
     const date = this.props.params.id;
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.list(date, pager);
+  },
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
   },
   list(date, pager) {
     var self = this;
@@ -94,10 +97,13 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const total = data.data.length;
+          let rowColor = {};
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
               item.key = key + 1;
+              rowColor[item.key] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -137,7 +143,11 @@ const App = React.createClass({
           <Breadcrumb.Item>{id}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 450 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 450 }} dataSource={list}
+             columns={columns} pagination={pagination}
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

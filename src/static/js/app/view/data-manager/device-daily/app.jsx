@@ -75,6 +75,9 @@ const App = React.createClass({
     const pager = {page:this.state.page, perPage:this.state.perPage};
     this.list(date, serialNumber, pager);
   },
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  },
   list(date, serialNumber, pager) {
     var self = this;
     this.setState({
@@ -87,10 +90,13 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const total = data.data.length;
+          let rowColor = {};
           this.setState({
             total: total,
             list: data.data.map((item, key) => {
               item.key = key + 1;
+              rowColor[item.key] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -128,7 +134,11 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 980 }} dataSource={list} columns={columns} pagination={false} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 980 }} dataSource={list} 
+             columns={columns} pagination={false} 
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

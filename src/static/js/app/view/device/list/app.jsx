@@ -469,6 +469,8 @@ class DeviceList extends React.Component {
   }
   rowClassName(record, index) {
     // 改变表格颜色
+    // record.key 是表格行的 key,
+    // 而 this.rowColor 是以 record.key 为 key 的对象,此处是取对应的 className
     return this.rowColor[record.key];
   }
   handleSerialNumberChange(e){
@@ -567,7 +569,8 @@ class DeviceList extends React.Component {
         self.dataLen = data.length;
         let rowColor = {};
         dataSource = data.map(function (item, key) {
-          rowColor[item.serialNumber] = item.hasAssigned?'lock':'';
+          // 奇数为白,偶数不变
+          rowColor[item.serialNumber] = item.hasAssigned?'lock':key%2==0?'white':'gray';
           self.rowColor = rowColor;
           item.key = item.serialNumber;
           item.statusCode = item.status;
