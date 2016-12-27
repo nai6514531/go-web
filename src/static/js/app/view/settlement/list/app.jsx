@@ -256,7 +256,7 @@ const App = React.createClass({
       selectedList: [],   						//勾选的账单
       amount:0,                       //选中项的金额合计
       // amountVisible: false,
-      rowColor:[],
+      rowColor:{},
 			nowAliPayingOrderNum: 0,        //有多少笔支付宝的账单正在支付
 			clickLock: false,   						//重复点击的锁
 			roleId: window.USER.role.id,
@@ -302,8 +302,9 @@ const App = React.createClass({
           const list = data.data.list;
           let rowColor = {};
           for (let i=0;i < list.length;i++) {
-            rowColor[list[i].id] = list[i].hasMarked?'marked':'';
+            rowColor[list[i].id] = list[i].hasMarked?'marked':i%2==0?'white':'gray';
           }
+          // 这里 key 是数字,导致按照顺序排列了,所以奇偶不对
 					this.setState({
             rowColor: rowColor,
 						total: data.data.total,
@@ -353,13 +354,12 @@ const App = React.createClass({
     // 无论什么情况,先把所有的灰色置空,然后再把 ids 里的 ID 放进去
     const rowColor = this.state.rowColor;
     // 不管什么情况,勾选就变色,取消勾选就变会原来的颜色
-    for (var id in rowColor) {
-      if(rowColor[id] !== 'marked'){
-        rowColor[id]='';
-      }
+    const list = this.state.list;
+    for (let i=0;i < list.length;i++) {
+      rowColor[list[i].id] = list[i].hasMarked?'marked':i%2==0?'white':'gray';
     }
     for (let i=0;i < ids.length;i++) {
-      if(!rowColor[ids[i]]){
+      if(rowColor[ids[i]] == 'white' || rowColor[ids[i]] == 'gray'){
         rowColor[ids[i]] = 'checked';
       }
     }
