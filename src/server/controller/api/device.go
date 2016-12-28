@@ -371,20 +371,20 @@ func (self *DeviceController) List(ctx *iris.Context) {
 			_school[_device.SchoolId] = _device.SchoolId
 		}
 	}
-	userMap, err := userService.BasicMapById(userIds...)
-	if err != nil {
+	userMap, _ := userService.BasicMapById(userIds...)
+	/*if err != nil {
 		result = &enity.Result{"01030403", err.Error(), device_msg["01030403"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
-	schoolMap, err := schoolService.BasicMap(schoolIds...)
-	if err != nil {
+	}*/
+	schoolMap, _ := schoolService.BasicMap(schoolIds...)
+	/*if err != nil {
 		result = &enity.Result{"01030402", err.Error(), device_msg["01030402"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 	for _, device := range *list {
 		if schoolMap[device.SchoolId] != nil {
 			device.SchoolName = schoolMap[device.SchoolId].Name
