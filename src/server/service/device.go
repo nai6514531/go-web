@@ -78,7 +78,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, isEqual bool) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(assignedUserId int, user *model.User, serialNumber string, userQuery string, isEqual bool) (int, error) {
 	var total int
 	params := make([]interface{}, 0)
 
@@ -88,12 +88,27 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	} else {
 		sql = " select count(*) as total from device d where 1=1 "
 	}
-	if user.Id == 1 {
+	/*if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	} else {
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
-	params = append(params, user.Id, user.Id)
+	params = append(params, user.Id, user.Id)*/
+	if assignedUserId > 0 {	//自己的设备
+		if user.Id == 1 {
+			sql += " and ((user_id = ? and from_user_id = ?) or has_retrofited = 1) "
+		} else {
+			sql += " and ((user_id = ? and from_user_id = ?) and has_retrofited = 0) "
+		}
+		params = append(params, assignedUserId, user.Id)
+	}else {
+		if user.Id == 1 {
+			sql += " and (user_id = ? or has_retrofited = 1) "
+		} else {
+			sql += " and (user_id = ? and has_retrofited = 0) "
+		}
+		params = append(params, user.Id)
+	}
 	if serialNumber != "" {
 		if isEqual {
 			sql += " and d.serial_number in (" + serialNumber + ") "
@@ -112,7 +127,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(user *model.User, serialNumbe
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber string, userQuery string, isEqual bool, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(assignedUserId int, user *model.User, serialNumber string, userQuery string, isEqual bool, page int, perPage int) (*[]*model.Device, error) {
 	list := make([]*model.Device, 0)
 	params := make([]interface{}, 0)
 	sql := ""
@@ -121,12 +136,27 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 	} else {
 		sql = " select d.* from device d where 1=1 "
 	}
-	if user.Id == 1 {
+	/*if user.Id == 1 {
 		sql += " and (user_id = ? or from_user_id= ? or has_retrofited = 1) "
 	} else {
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
-	params = append(params, user.Id, user.Id)
+	params = append(params, user.Id, user.Id)*/
+	if assignedUserId > 0 {	//自己的设备
+		if user.Id == 1 {
+			sql += " and ((user_id = ? and from_user_id = ?) or has_retrofited = 1) "
+		} else {
+			sql += " and ((user_id = ? and from_user_id = ?) and has_retrofited = 0) "
+		}
+		params = append(params, assignedUserId, user.Id)
+	}else {
+		if user.Id == 1 {
+			sql += " and (user_id = ? or has_retrofited = 1) "
+		} else {
+			sql += " and (user_id = ? and has_retrofited = 0) "
+		}
+		params = append(params, user.Id)
+	}
 	if serialNumber != "" {
 		if isEqual {
 			sql += " and d.serial_number in (" + serialNumber + ") "
@@ -145,6 +175,66 @@ func (self *DeviceService) ListByUserAndNextLevel(user *model.User, serialNumber
 		sql += " order by case when user_id=? then 1 else 2 end asc, address desc, id desc "
 	}
 	params = append(params, user.Id)
+	if perPage > 0 && page > 0 {
+		sql += " limit ? offset ? "
+		params = append(params, perPage, (page - 1) * perPage)
+	}
+	rows, err := common.DB.Raw(sql, params...).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		device := &model.Device{}
+		common.DB.ScanRows(rows, device)
+		list = append(list, device)
+
+	}
+	return &list, nil
+}
+
+func (self *DeviceService) ListByUserAndNextLevel2(user *model.User, assignedUserId int, serialNumber string, userQuery string, isEqual bool, isAssigned bool, page int, perPage int) (*[]*model.Device, error) {
+	list := make([]*model.Device, 0)
+	params := make([]interface{}, 0)
+	sql := ""
+	if userQuery != "" {
+		sql = " select u.name as user_name, d.* from device d, user u where 1=1 "
+	} else {
+		sql = " select d.* from device d where 1=1 "
+	}
+	if !isAssigned {	//自己的设备
+		if user.Id == 1 {
+			sql += " and (user_id = ? or has_retrofited = 1) "
+		} else {
+			sql += " and (user_id = ? and has_retrofited = 0) "
+		}
+		params = append(params, user.Id)
+	}else {
+		if user.Id == 1 {
+			sql += " and ((user_id = ? and from_user_id = ?) or has_retrofited = 1) "
+		} else {
+			sql += " and ((user_id = ? and from_user_id = ?) and has_retrofited = 0) "
+		}
+		params = append(params, assignedUserId, user.Id)
+	}
+
+	if serialNumber != "" {
+		if isEqual {
+			sql += " and d.serial_number in (" + serialNumber + ") "
+		}else {
+			sql += " and d.serial_number like ? "
+			params = append(params, "%" + serialNumber + "%")
+		}
+	} else if userQuery != "" {
+		sql += " and ( (u.id=d.user_id ) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
+		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
+	}
+	//测试按设备编号排序
+	if user.Id == 1 {
+		sql += " order by serial_number desc "
+	}else{//其它用户按楼层排序
+		sql += " order by address desc, id desc "
+	}
 	if perPage > 0 && page > 0 {
 		sql += " limit ? offset ? "
 		params = append(params, perPage, (page - 1) * perPage)

@@ -316,7 +316,9 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	serialNumber := ctx.URLParam("serialNumber")
 	userQuery := ctx.URLParam("userQuery")
 	equal, _ := ctx.URLParamInt("isEqual")
+	assignedUserId, _ := ctx.URLParamInt("assignedUserId")
 	isEqual := functions.IntToBool(equal)
+	common.Logger.Debug("assignedUserId====", assignedUserId)
 	common.Logger.Debug("isEqual=====", isEqual)
 	//_list := make([]*model.Device, 0)
 	deviceService := &service.DeviceService{}
@@ -337,7 +339,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		serialNumber = strings.Join(strings.Split(serialNumber, ","), "','")
 		serialNumber = "'" + serialNumber + "'"
 	}
-	list, err := deviceService.ListByUserAndNextLevel(user, serialNumber, userQuery, isEqual, page, perPage)
+	list, err := deviceService.ListByUserAndNextLevel(assignedUserId, user, serialNumber, userQuery, isEqual, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
@@ -345,7 +347,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		return
 	}
 	if page > 0 && perPage > 0 {
-		total, err = deviceService.TotalByUserAndNextLevel(user, serialNumber, userQuery, isEqual)
+		total, err = deviceService.TotalByUserAndNextLevel(assignedUserId, user, serialNumber, userQuery, isEqual)
 		if err != nil {
 			result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 			common.Log(ctx, result)
