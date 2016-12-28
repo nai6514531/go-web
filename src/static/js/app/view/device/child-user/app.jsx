@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, Button,Input, Breadcrumb } from 'antd';
-import { Link } from 'react-router';
+import { Link, hashHistory } from 'react-router';
+import SodaTabs from '../tabs/app.jsx';
 
 const columns = [{
   title: '用户编号',
@@ -69,17 +70,25 @@ class App extends React.Component {
   render() {
     const dataSource = [];
     return (
-      <div>
-        <Input style={{width:200}} placeholder="运营商名称/登陆账号/模块编号" onChange={this.handleInputChange.bind(this)}/>
-        <Button type="primary item" onClick={this.handleSearch.bind(this)}>筛选</Button>
-        <Table
-          scroll={{ x: 700 }}
-          columns={columns}
-          dataSource={dataSource}
-          pagination={false}
-          bordered
-        />
-      </div>
+        <section className="view-device-list">
+          <header>
+            <Breadcrumb>
+              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
+              <Breadcrumb.Item>设备管理</Breadcrumb.Item>
+            </Breadcrumb>
+          </header>
+          <div className="toolbar">
+            <Input style={{width:200}} placeholder="运营商名称/登陆账号/模块编号" onChange={this.handleInputChange.bind(this)}/>
+            <Button type="primary item" onClick={this.handleSearch.bind(this)}>筛选</Button>
+            <Table
+              scroll={{ x: 700 }}
+              columns={columns}
+              dataSource={dataSource}
+              pagination={false}
+              bordered
+            />
+          </div>
+        </section>
     );
   }
 }

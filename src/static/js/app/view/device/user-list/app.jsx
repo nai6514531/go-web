@@ -1,16 +1,28 @@
 import React from 'react';
 import './app.less';
-import { Table, Button,Input, Breadcrumb } from 'antd';
-import { Link } from 'react-router';
+import { Table, Button,Input, Breadcrumb,Tabs } from 'antd';
+import { Link,hashHistory } from 'react-router';
 import Device from './self-device.jsx';
-import ChildDevice from './child-device.jsx';
-
+import ChildDevice from '../child-user/app.jsx';
+const TabPane = Tabs.TabPane;
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      defaultActiveKey:'/device',
+    };
   }
-  componentWillMount() {}
+  componentWillMount() {
+    const defaultActiveKey = this.props.location.pathname;
+    this.setState({defaultActiveKey:defaultActiveKey});
+
+  }
+  callback(key) {
+    this.props.location.pathname = key;
+    this.props.location.query='';
+    // console.log(this.props.location);
+    hashHistory.replace(this.props.location);
+  }
   render() {
     return (
       <section className="view-device-user-list">
@@ -20,14 +32,14 @@ class App extends React.Component {
           </Breadcrumb>
         </header>
         <article>
-          <div style={{margin:'20px 0px'}}>
-            <h3>我的设备</h3>
-            <Device/>
-          </div>
-          <div>
-            <h3>已分配设备</h3>
-            <ChildDevice/>
-          </div>
+          <Tabs
+            onTabClick={this.callback.bind(this)}
+            type="card"
+            defaultActiveKey={this.state.defaultActiveKey}
+          >
+            <TabPane tab="我的设备" key="/device">{this.props.children}</TabPane>
+            <TabPane tab="已分配设备" key="/device/child-user">{this.props.children}</TabPane>
+          </Tabs>
         </article>
       </section>
     );

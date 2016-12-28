@@ -1,13 +1,16 @@
 import React from 'react';
-import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row} from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row,Tabs} from 'antd';
 import { Link,hashHistory } from 'react-router';
 const Step = Steps.Step;
+const TabPane = Tabs.TabPane;
+import SodaTabs from '../tabs/app.jsx';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 import UserService from "../../../service/user";
 import DeviceService from "../../../service/device";
+
 import './app.less';
 import _ from 'lodash';
 import moment from 'moment';
@@ -253,7 +256,11 @@ class DeviceList extends React.Component {
       userId:'',
       schoolId:'',
       lockButton: false,
-
+      // 此处是 hardCode,根据后续需求再改
+      // tabs:[{title:'我的设备', url:'0'},
+      //   {title:'已分配设备', url:'1'}],
+      defaultTab: '0',
+      // tabSearch:'?child=0'
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
@@ -274,6 +281,7 @@ class DeviceList extends React.Component {
       pager.schoolId = query.schoolId;
       pager.page = +query.page || 1;
       pager.perPage = +query.perPage || 10;
+      pager.child = +query.child || 0;
       this.setState({
         serialNumber: query.serialNumber,
         userQuery: query.userQuery,
@@ -281,7 +289,11 @@ class DeviceList extends React.Component {
         schoolId: query.schoolId,
         page: +query.page || 1,
         perPage: +query.perPage || 10,
+        child: +query.child || 0,
       })
+      if(pager.child) {
+        this.setState({defaultTab:'1'});
+      }
     }
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -515,6 +527,21 @@ class DeviceList extends React.Component {
     this.props.location.query = items;
     hashHistory.replace(this.props.location);
   }
+  replaceLocation(e) {
+    hashHistory.replace(e);
+  }
+  callback(key) {
+    // 此处 key 的变化将要根据后续需求再改
+    if(+key){
+      this.props.location.query.child = "1";
+      this.setState({defaultTab:"1"});
+    } else {
+      this.props.location.query.child = "0";
+      this.setState({defaultTab:"0"});
+    }
+    // 每次切换需要重新拉取不同的数据
+    hashHistory.replace(this.props.location);
+  }
   render() {
     const query = this.props.location.query;
     // 给 input 设置初始值
@@ -528,7 +555,6 @@ class DeviceList extends React.Component {
       current = +query.page;
       pageSize = +query.pageSize;
     }
-
     const self = this;
     this.pagination = this.initializePagination();
     this.pagination.current = current;
@@ -577,6 +603,14 @@ class DeviceList extends React.Component {
           </Breadcrumb>
         </header>
         <div className="toolbar">
+          <Tabs
+            onTabClick={this.callback.bind(this)}
+            type="card"
+            defaultActiveKey={this.state.defaultTab}
+          >
+              <TabPane tab="我的设备" key="0"></TabPane>
+              <TabPane tab="已分配设备" key="1"></TabPane>
+          </Tabs>
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
           <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"
@@ -597,9 +631,9 @@ class DeviceList extends React.Component {
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
             <div className="user search-input">
-              <Input ref="searchUserInput" 
-                     onChange={this.handleUserChange.bind(this)} 
-                     addonBefore="账户或用户名:" defaultValue={userQuery} 
+              <Input ref="searchUserInput"
+                     onChange={this.handleUserChange.bind(this)}
+                     addonBefore="账户或用户名:" defaultValue={userQuery}
                      placeholder="请输入用户账户或用户名"
                      onPressEnter={this.handleUserSearch.bind(this)}
               />
