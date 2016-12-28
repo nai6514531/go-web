@@ -58,6 +58,7 @@ func Api() {
 	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
+	api.Get("/user-sms", user.SendSMS)
 	api.Get("/user-detail/:account", user.DetailByAccount)
 
 	api.Get("/school/:id", school.Basic)

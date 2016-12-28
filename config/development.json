@@ -71,7 +71,7 @@
       "port": 3306,
       "user": "web",
       "password": "123456",
-      "database": "mnzn_read",
+      "database": "mnzn",
       "maxIdle": 20,
       "maxOpen": 20
     },
@@ -98,6 +98,13 @@
   },
   "export": {
     "loadsPath": "/temp"
+  },
+  "sms": {
+    "method": "alibaba.aliqin.fc.sms.num.send",
+    "requestUrl": "http://gw.api.taobao.com/router/rest",
+    "mng": {
+      "appKey": "",
+      "appSecret": ""
+    }
   }
-
 }

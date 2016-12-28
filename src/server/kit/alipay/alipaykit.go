@@ -73,7 +73,7 @@ func CreateSign(mReq interface{}) string {
 	cipherStr := md5Ctx.Sum(nil)
 	sign := hex.EncodeToString(cipherStr)
 	//upperSign := strings.ToUpper(hex.EncodeToString(cipherStr))
-	common.Logger.Warningln("sign====================================", sign)
+	common.Logger.Debug("sign====================================", sign)
 	return sign
 }
 

@@ -3,6 +3,8 @@ package functions
 import (
 	"strconv"
 	"os"
+	"time"
+	"math/rand"
 )
 
 //int数组去重
@@ -46,6 +48,11 @@ func Float64ToString(num float64, prec int) string {
 	return strconv.FormatFloat(num, 'f', prec, 64)
 }
 
+func Int64ToString(num int64) string {
+	//10为十进制
+	return strconv.FormatInt(num, 10)
+}
+
 func FormatFloat(num float64, prec int) float64 {
 	s := strconv.FormatFloat(num, 'f', prec, 64)
 	f, err := strconv.ParseFloat(s, 64)
@@ -75,4 +82,12 @@ func IntToBool(i int) bool {
 		return true
 	}
 	return false
+}
+
+func RandInt64(min, max int64) int64 {
+	if min >= max || min == 0 || max == 0 {
+		return max
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return r.Int63n(max-min) + min
 }

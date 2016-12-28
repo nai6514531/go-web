@@ -237,7 +237,7 @@ func BatchAliPay(batchNum int, batchFee int, aliPayDetailDataStr string) map[str
 	}
 	common.Logger.Debugln("aliPayDetailDataStr====================", aliPayDetailDataStr)
 	param["service"] = "batch_trans_notify"
-	param["partner"] = viper.GetString("pay.aliPay.id")//os.Getenv("ALIPAYID")
+	param["partner"] = viper.GetString("pay.aliPay.id")
 	param["_input_charset"] = "utf-8"
 	param["notify_url"] = viper.GetString("pay.aliPay.notifyUrl")
 	param["account_name"] = viper.GetString("pay.aliPay.accountName")
