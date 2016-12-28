@@ -568,8 +568,8 @@ class DeviceList extends React.Component {
         </header>
         <div className="toolbar">
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers} 
-                className="ant-btn ant-btn-primary item" 
+          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
+                className="ant-btn ant-btn-primary item"
                 onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>
           {USER.role.id == 5 ?
             <Link to="/device/edit" className="ant-btn ant-btn-primary item">
@@ -578,11 +578,21 @@ class DeviceList extends React.Component {
           }
           <div className="search">
             <div className="serial search-input">
-              <Input ref="searchSerialInput" onChange={this.handleSerialNumberChange.bind(this)} addonBefore="设备编号:" defaultValue={serialNumber} placeholder="请输入设备编号"/>
+              <Input ref="searchSerialInput"
+                     onChange={this.handleSerialNumberChange.bind(this)}
+                     addonBefore="设备编号:" defaultValue={serialNumber}
+                     placeholder="请输入设备编号"
+                     onPressEnter={this.handleSearch.bind(this)}
+              />
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
             <div className="user search-input">
-              <Input ref="searchUserInput" onChange={this.handleUserChange.bind(this)} addonBefore="账户或用户名:" defaultValue={userQuery} placeholder="请输入用户账户或用户名"/>
+              <Input ref="searchUserInput" 
+                     onChange={this.handleUserChange.bind(this)} 
+                     addonBefore="账户或用户名:" defaultValue={userQuery} 
+                     placeholder="请输入用户账户或用户名"
+                     onPressEnter={this.handleUserSearch.bind(this)}
+              />
             </div>
             <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
           </div>

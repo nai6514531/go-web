@@ -179,7 +179,12 @@ class AgentTable extends React.Component {
           <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
             添加新运营商
           </Link>
-          <Input defaultValue={user} style={{width:160}} placeholder="请输入运营商或者联系人" onChange={this.handleInputChange.bind(this)}/>
+          <Input defaultValue={user} 
+                 style={{width:160}} 
+                 placeholder="请输入运营商或者联系人" 
+                 onChange={this.handleInputChange.bind(this)}
+                 onPressEnter={this.handleSearch.bind(this)}
+          />
           <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
         </div>
         <article>
