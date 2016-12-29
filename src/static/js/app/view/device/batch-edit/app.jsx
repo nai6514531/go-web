@@ -131,11 +131,11 @@ class DeviceForm extends React.Component {
 	}
   componentDidUpdate(prevProps, prevState) {
     if(!this.state.successEditVisible && prevState.successEditVisible && this.state.firstGoBack) {
-      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
     }
 
     if(this.state.visible && prevState.visible && this.state.goBackDirect) {
-      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
     }
   }
   closeSucEditVisible() {
@@ -252,7 +252,7 @@ class DeviceForm extends React.Component {
         if(+this.state.isAssigned) {
           message.success(data.msg,3);
           // 直接返回
-          setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+          setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
         } else {
           this.editSuccess();
         }
