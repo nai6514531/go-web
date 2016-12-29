@@ -74,6 +74,7 @@ var (
 		"01030601": "重置设备失败!",
 		"01030602": "设备id不能小于0!",
 		"01030603": "该设备已被重置或不存在!",
+		"01030604": "不支持删除测试员名下设备!",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
@@ -127,8 +128,8 @@ var (
 		"01031403": "请操作你自身或下级的设备",
 		"01031404": "无所选设备用户信息",
 
-		"01031500": "批量更新设备号成功",
-		"01031501": "批量更新设备号失败",
+		"01031500": "批量更新设备成功",
+		"01031501": "批量更新设备失败",
 		"01031502": "设备号不能为空",
 
 	}
@@ -818,9 +819,14 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
-	if currentDevice == nil || currentDevice.UserId == 1 {
+	if currentDevice == nil {
 		//设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if currentDevice.UserId == 1 {
+		result = &enity.Result{"01030604", nil, device_msg["01030604"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
