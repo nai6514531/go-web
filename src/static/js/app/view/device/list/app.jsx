@@ -202,7 +202,7 @@ const columns = [{
         <a href="#">取消占用</a>
       </Popconfirm>
     }
-    if(USER.id == record.userId) {
+    // if(USER.id == record.userId) {
       node =
         <span>
           <Link to={"/device/edit/" + record.id}>修改</Link>
@@ -221,7 +221,7 @@ const columns = [{
             {action}
           </span>
         </span>
-    }
+    // }
     return node;
   },
 }];
@@ -525,18 +525,6 @@ class DeviceList extends React.Component {
   replaceLocation(e) {
     this.props.replaceLocation(e);
   }
-  // callback(key) {
-  //   // 此处 key 的变化将要根据后续需求再改
-  //   if(+key){
-  //     this.props.location.query.isAssigned = "1";
-  //     this.setState({defaultTab:"1"});
-  //   } else {
-  //     this.props.location.query.isAssigned = "0";
-  //     this.setState({defaultTab:"0"});
-  //   }
-  //   // 每次切换需要重新拉取不同的数据
-  //   hashHistory.replace(this.props.location);
-  // }
   render() {
     const query = this.props.location.query;
     // 给 input 设置初始值
@@ -565,9 +553,9 @@ class DeviceList extends React.Component {
       onSelect: (record, selected, selectedRows) => {
         // record 当前被操作的行,selected 是否选中当前被操作的行,selectedRows 所有被选中的行
       },
-      getCheckboxProps: record => ({
-        disabled: record.hasAssigned,
-      }),
+      // getCheckboxProps: record => ({
+      //   disabled: record.hasAssigned,
+      // }),
     };
     const list = this.props.list;
     let dataSource = [];
@@ -601,8 +589,11 @@ class DeviceList extends React.Component {
          <SodaTabs tabs={this.props.tabs}
                    defaultTab={this.props.defaultTab}
                    replaceLocation={this.replaceLocation.bind(this)}
+                   location={this.props.location}
          />
-          <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          {this.props.isAssigned?"":
+            <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          }
           <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"
                 onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>

@@ -71,6 +71,7 @@ class App extends React.Component {
     hashHistory.replace(location);
   }
   render() {
+    // console.log('child',this.props.location);
     return (
       <DeviceList location={this.props.location}
                   replaceLocation={this.replaceLocation.bind(this)}
@@ -83,8 +84,6 @@ class App extends React.Component {
 }
 
 
-App.propTypes = {
-  handleTableChange: React.PropTypes.func,
-};
+App.propTypes = {};
 
 export default App;

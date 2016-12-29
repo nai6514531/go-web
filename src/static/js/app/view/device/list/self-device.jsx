@@ -83,8 +83,6 @@ class App extends React.Component {
 }
 
 
-App.propTypes = {
-  handleTableChange: React.PropTypes.func,
-};
+App.propTypes = {};
 
 export default App;

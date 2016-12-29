@@ -13,10 +13,13 @@ class App extends React.Component {
   }
   callback(key) {
     // 此处 key 的变化将要根据后续需求再改
-    this.props.location.pathname = key;
-    this.props.location.query='';
     console.log(this.props.location);
-    this.props.replaceLocation(this.props.location);
+    this.props.location.pathname = key;
+    // this.props.location.query='';
+    // console.log(this.props.location);
+    // this.props.replaceLocation(this.props.location);
+    // const search = this.props.location.search;
+    window.location.href = '#'+key;
   }
   render() {
     const tabs = this.props.tabs;
