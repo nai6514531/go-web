@@ -257,16 +257,17 @@ class DeviceList extends React.Component {
       schoolId:'',
       lockButton: false,
       // 此处是 hardCode,根据后续需求再改
-      isAssigned: '0',
+      isAssigned: props.isAssigned,
       // tabs:[{title:'我的设备', url:'0'},
       //   {title:'已分配设备', url:'1'}],
-      defaultTab: '0',
+      // defaultTab: '0',
       // tabSearch:'?child=0'
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
     this.getNowQuery = this.getNowQuery.bind(this);
+    this.replaceLocation = this.replaceLocation.bind(this);
   }
   componentWillMount() {
     let pager = this.getNowQuery();
@@ -276,13 +277,13 @@ class DeviceList extends React.Component {
     // 因为使用路由只有 userId 和 schoolId,没有 page 和 perPage
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
-      pager.serialNumber = query.serialNumber;;
+      pager.serialNumber = query.serialNumber;
       pager.userQuery = query.userQuery;
       pager.userId = query.userId;
       pager.schoolId = query.schoolId;
       pager.page = +query.page || 1;
       pager.perPage = +query.perPage || 10;
-      pager.child = +query.child || 0;
+      pager.isAssigned = +query.isAssigned || 0;
       this.setState({
         serialNumber: query.serialNumber,
         userQuery: query.userQuery,
@@ -290,9 +291,9 @@ class DeviceList extends React.Component {
         schoolId: query.schoolId,
         page: +query.page || 1,
         perPage: +query.perPage || 10,
-        child: +query.child || 0,
+        isAssigned: +query.isAssigned || 0,
       })
-      if(pager.child) {
+      if(pager.isAssigned) {
         this.setState({defaultTab:'1'});
       }
     }
@@ -357,8 +358,7 @@ class DeviceList extends React.Component {
       perPage: this.state.perPage,
       serialNumber: this.state.serialNumber,
       userQuery: this.state.userQuery,
-      userId: this.state.userId,
-      schoolId: this.state.schoolId,
+      isAssigned: this.state.isAssigned,
     }
     return pager;
   }
@@ -457,11 +457,12 @@ class DeviceList extends React.Component {
   }
   resetHashHistory() {
     this.props.location.query.serialNumber = "";
-    hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
+    // hashHistory.replace(this.props.location);
     this.setState({serialNumber:""})
   }
   resetList() {
-    const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    const pager = this.getNowQuery();
     this.setState({selectedRowKeys:[]});
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -482,21 +483,17 @@ class DeviceList extends React.Component {
   }
   handleSearch(){
     const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g,"");
-    const pager = {
-      page: 1,
-      perPage: this.state.perPage,
-      serialNumber:serialNumber,
-      userQuery:''
-    };
-    this.setState({
-      page:1,
-      userQuery:''
-    });
+    let pager = this.getNowQuery();
+    pager.page = 1;
+    pager.serialNumber = serialNumber;
+    pager.userQuery = '';
+    this.setState({page:1, userQuery:''});
     this.refs.searchUserInput.refs.input.value=''
     // 重置 URL 参数
     this.props.location.query.serialNumber = this.state.serialNumber;
     this.props.location.query.userQuery = '';
-    hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
+    // hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -504,21 +501,17 @@ class DeviceList extends React.Component {
   }
   handleUserSearch(){
     const userQuery = this.state.userQuery.replace(/[\r\n\s]/g,"");
-    const pager = {
-      page: 1,
-      perPage: this.state.perPage,
-      userQuery:userQuery,
-      serialNumber:''
-    };
-    this.setState({
-      page:1,
-      serialNumber:''
-    });
+    let pager = this.getNowQuery();
+    pager.page = 1;
+    pager.serialNumber = '';
+    pager.userQuery = userQuery;
+    this.setState({page:1, serialNumber:''});
     this.refs.searchSerialInput.refs.input.value=''
     // 重置 URL 参数
     this.props.location.query.userQuery = this.state.userQuery;
     this.props.location.query.serialNumber = '';
-    hashHistory.replace(this.props.location);
+    // hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location)
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -526,23 +519,24 @@ class DeviceList extends React.Component {
   }
   setSearchValues(items) {
     this.props.location.query = items;
-    hashHistory.replace(this.props.location);
+    // hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
   }
   replaceLocation(e) {
-    hashHistory.replace(e);
+    this.props.replaceLocation(e);
   }
-  callback(key) {
-    // 此处 key 的变化将要根据后续需求再改
-    if(+key){
-      this.props.location.query.child = "1";
-      this.setState({defaultTab:"1"});
-    } else {
-      this.props.location.query.child = "0";
-      this.setState({defaultTab:"0"});
-    }
-    // 每次切换需要重新拉取不同的数据
-    hashHistory.replace(this.props.location);
-  }
+  // callback(key) {
+  //   // 此处 key 的变化将要根据后续需求再改
+  //   if(+key){
+  //     this.props.location.query.isAssigned = "1";
+  //     this.setState({defaultTab:"1"});
+  //   } else {
+  //     this.props.location.query.isAssigned = "0";
+  //     this.setState({defaultTab:"0"});
+  //   }
+  //   // 每次切换需要重新拉取不同的数据
+  //   hashHistory.replace(this.props.location);
+  // }
   render() {
     const query = this.props.location.query;
     // 给 input 设置初始值
@@ -604,14 +598,10 @@ class DeviceList extends React.Component {
           </Breadcrumb>
         </header>
         <div className="toolbar">
-          <Tabs
-            onTabClick={this.callback.bind(this)}
-            type="card"
-            defaultActiveKey={this.state.defaultTab}
-          >
-              <TabPane tab="我的设备" key="0"></TabPane>
-              <TabPane tab="已分配设备" key="1"></TabPane>
-          </Tabs>
+         <SodaTabs tabs={this.props.tabs}
+                   defaultTab={this.props.defaultTab}
+                   replaceLocation={this.replaceLocation.bind(this)}
+         />
           <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
           <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"

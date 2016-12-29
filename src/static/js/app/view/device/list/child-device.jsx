@@ -15,7 +15,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import AllocateModal from './allocate-modal.jsx';
 const InputGroup = Input.Group;
-import DeviceList from './test.jsx';
+import DeviceList from './app.jsx';
 
 class App extends React.Component {
   constructor(props) {
@@ -46,12 +46,11 @@ class App extends React.Component {
       userId:'',
       schoolId:'',
       lockButton: false,
-      // 此处是 hardCode,根据后续需求再改
-      isAssigned: '0',
-      // tabs:[{title:'我的设备', url:'0'},
-      //   {title:'已分配设备', url:'1'}],
-      defaultTab: '0',
-      // tabSearch:'?child=0'
+      // 请求自己的设备
+      isAssigned: '1',
+      tabs:[{title:'我的设备', url:'/device'},
+        {title:'已分配设备', url:'/device/child'}],
+      defaultTab: '/device/child',
     };
     this.getNowQuery = this.getNowQuery.bind(this);
   }
@@ -68,13 +67,16 @@ class App extends React.Component {
     }
     return pager;
   }
-  setLocation(location) {
+  replaceLocation(location) {
     hashHistory.replace(location);
   }
   render() {
     return (
       <DeviceList location={this.props.location}
-                  setLocation={this.setLocation.bind(this)}
+                  replaceLocation={this.replaceLocation.bind(this)}
+                  tabs={this.state.tabs}
+                  defaultTab={this.state.defaultTab}
+                  isAssigned={this.state.isAssigned}
       />
     );
   }
