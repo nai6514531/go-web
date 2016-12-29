@@ -393,7 +393,6 @@ class DeviceForm extends React.Component {
 			<section className="view-device-list" >
 				<header>
 					<Breadcrumb>
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
 					</Breadcrumb>

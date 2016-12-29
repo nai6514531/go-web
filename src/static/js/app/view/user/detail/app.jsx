@@ -99,6 +99,11 @@ class AgentTable extends React.Component {
     // <Link to={"/user/"+ USER.id +"/device/list"} className="ant-btn ant-btn-primary item">
     //   设备管理
     // </Link>
+    // {USER.role.id == 1?"":
+    //   <Link to={"/device"} className="ant-btn ant-btn-primary item">
+    //     设备管理
+    //   </Link>
+    // }
     return (
       <section className="view-user-detail">
         <header>
@@ -110,11 +115,6 @@ class AgentTable extends React.Component {
           <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">
             下级运营商
           </Link>
-          {USER.role.id == 1?"":
-            <Link to={"/device"} className="ant-btn ant-btn-primary item">
-              设备管理
-            </Link>
-          }
         </div>
         <article>
           <Table

@@ -96,6 +96,8 @@ class DeviceForm extends React.Component {
       // 是否直接跳转到设备列表页
       goBackDirect: false,
       firstGoBack: false,
+      // 是否是分配出去的设备,默认为自己的设备
+      isAssigned:"0",
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
@@ -117,9 +119,12 @@ class DeviceForm extends React.Component {
     this.props.getProvinceSchoolList(110000);
     // 将 query 的内容放到 state 里
     const serialNumbers = this.props.location.query.serialNumbers;
+    const isAssigned = this.props.location.query.isAssigned;
     this.setState({
       serialNumbers: serialNumbers,
-      serialNumberSum: serialNumbers.split(",").length});
+      serialNumberSum: serialNumbers.split(",").length,
+      isAssigned: isAssigned,
+    });
   }
   componentWillReceiveProps(nextProps) {
 
@@ -243,8 +248,13 @@ class DeviceForm extends React.Component {
       if (data && data.status == '00') {
         // 修改成功后要重新拉数据
         this.setState({getList: true});
-        // 确认是否要批量分配
-        this.editSuccess();
+        // 如果是用户自己的设备,需要确认是否要批量分配,如果是已经分配出去的设备,需要提示,并且跳转回去
+        if(+this.state.isAssigned) {
+          message.success(data.msg,3);
+          this.goBack();
+        } else {
+          this.editSuccess();
+        }
         // 且将标红样式还原
         this.resetColor();
       } else {
@@ -426,7 +436,6 @@ class DeviceForm extends React.Component {
 			<section className="view-device-list" >
 				<header>
 					<Breadcrumb>
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>批量修改</Breadcrumb.Item>
 					</Breadcrumb>
@@ -632,6 +641,7 @@ class DeviceForm extends React.Component {
             className={this.state.className}
             getList={this.state.getList}
             hasGetList={this.hasGetList.bind(this)}
+            isAssigned={this.state.isAssigned}
           />
           <AllocateModal
             visible={this.state.visible}
@@ -783,7 +793,7 @@ class DeviceTable extends React.Component {
   }
   getTableList(){
     const serialNumbers = this.props.serialNumbers;
-    const pager = {page:0,perPage:0,serialNumber:serialNumbers,isEqual:1};
+    const pager = {page:0,perPage:0,serialNumber:serialNumbers,isEqual:1,isAssigned:this.props.isAssigned};
     this.list(pager);
   }
   componentWillReceiveProps(nextProps) {

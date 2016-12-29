@@ -581,7 +581,6 @@ class DeviceList extends React.Component {
       <section className="view-device-list">
         <header>
           <Breadcrumb>
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item>设备管理</Breadcrumb.Item>
           </Breadcrumb>
         </header>
@@ -591,10 +590,10 @@ class DeviceList extends React.Component {
                    replaceLocation={this.replaceLocation.bind(this)}
                    location={this.props.location}
          />
-          {this.props.isAssigned?"":
+          {+this.props.isAssigned?"":
             <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
           }
-          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
+          <Link to={"/device/batch-edit?isAssigned="+this.props.isAssigned+"&serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"
                 onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>
           {USER.role.id == 5 ?
