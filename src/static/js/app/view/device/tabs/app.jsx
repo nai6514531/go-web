@@ -9,14 +9,9 @@ class App extends React.Component {
     super(props);
     this.state = {};
   }
-  componentWillMount() {
-  }
   callback(key) {
-    // 此处 key 的变化将要根据后续需求再改
-    console.log(this.props.location);
-    this.props.location.pathname = key;
+    // this.props.location.pathname = key;
     // this.props.location.query='';
-    // console.log(this.props.location);
     // this.props.replaceLocation(this.props.location);
     // const search = this.props.location.search;
     window.location.href = '#'+key;

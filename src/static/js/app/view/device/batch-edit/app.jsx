@@ -251,7 +251,8 @@ class DeviceForm extends React.Component {
         // 如果是用户自己的设备,需要确认是否要批量分配,如果是已经分配出去的设备,需要提示,并且跳转回去
         if(+this.state.isAssigned) {
           message.success(data.msg,3);
-          this.goBack();
+          // 直接返回
+          setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
         } else {
           this.editSuccess();
         }

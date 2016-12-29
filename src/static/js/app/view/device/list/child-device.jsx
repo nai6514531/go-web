@@ -1,20 +1,8 @@
 import React from 'react';
 import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row,Tabs} from 'antd';
 import { Link, hashHistory } from 'react-router';
-const Step = Steps.Step;
-const TabPane = Tabs.TabPane;
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import * as DeviceActions from '../../../actions/device';
-import * as UserActions from '../../../actions/user';
-import UserService from "../../../service/user";
-import DeviceService from "../../../service/device";
 
 import './app.less';
-import _ from 'lodash';
-import moment from 'moment';
-import AllocateModal from './allocate-modal.jsx';
-const InputGroup = Input.Group;
 import DeviceList from './app.jsx';
 
 class App extends React.Component {
@@ -71,7 +59,6 @@ class App extends React.Component {
     hashHistory.replace(location);
   }
   render() {
-    // console.log('child',this.props.location);
     return (
       <DeviceList location={this.props.location}
                   replaceLocation={this.replaceLocation.bind(this)}
