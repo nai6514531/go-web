@@ -69,13 +69,13 @@ const router = (
         <Route path="/device" getComponent={(location, callback) => {
           require.ensure([], (require) => {
           // 设备管理列表(按用户分类)
-            callback(null, require('./view/device/list/app.jsx').default);
+            callback(null, require('./view/device/list/self-device.jsx').default);
           });
         }} />
-        <Route path="/device/child-user" getComponent={(location, callback) => {
+        <Route path="/device/child" getComponent={(location, callback) => {
           require.ensure([], (require) => {
           // 设备管理列表(按用户分类)
-            callback(null, require('./view/device/child-user/app.jsx').default);
+            callback(null, require('./view/device/list/child-device.jsx').default);
           });
         }} />
         <Route path="/device/user/:id/list" getComponent={(location, callback) => {

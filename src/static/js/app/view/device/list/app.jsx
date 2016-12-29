@@ -257,6 +257,7 @@ class DeviceList extends React.Component {
       schoolId:'',
       lockButton: false,
       // 此处是 hardCode,根据后续需求再改
+      isAssigned: '0',
       // tabs:[{title:'我的设备', url:'0'},
       //   {title:'已分配设备', url:'1'}],
       defaultTab: '0',
