@@ -78,7 +78,7 @@ func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *DeviceService) TotalByUserAndNextLevel(assignedUserId int, user *model.User, serialNumber string, userQuery string, isEqual bool) (int, error) {
+func (self *DeviceService) TotalByUserAndNextLevel(isAssigned bool, user *model.User, serialNumber string, userQuery string, isEqual bool) (int, error) {
 	var total int
 	params := make([]interface{}, 0)
 
@@ -94,14 +94,14 @@ func (self *DeviceService) TotalByUserAndNextLevel(assignedUserId int, user *mod
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)*/
-	if assignedUserId > 0 {	//自己的设备
+	if isAssigned {	//分配出去的设备
 		if user.Id == 1 {
-			sql += " and ((user_id = ? and from_user_id = ?) or has_retrofited = 1) "
+			sql += " and (from_user_id = ? or has_retrofited = 1) "
 		} else {
-			sql += " and ((user_id = ? and from_user_id = ?) and has_retrofited = 0) "
+			sql += " and (from_user_id = ? and has_retrofited = 0) "
 		}
-		params = append(params, assignedUserId, user.Id)
-	}else {
+		params = append(params, user.Id)
+	}else {	//自己的设备
 		if user.Id == 1 {
 			sql += " and (user_id = ? or has_retrofited = 1) "
 		} else {
@@ -127,7 +127,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(assignedUserId int, user *mod
 	return total, nil
 }
 
-func (self *DeviceService) ListByUserAndNextLevel(assignedUserId int, user *model.User, serialNumber string, userQuery string, isEqual bool, page int, perPage int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.User, serialNumber string, userQuery string, isEqual bool, page int, perPage int) (*[]*model.Device, error) {
 	list := make([]*model.Device, 0)
 	params := make([]interface{}, 0)
 	sql := ""
@@ -142,14 +142,14 @@ func (self *DeviceService) ListByUserAndNextLevel(assignedUserId int, user *mode
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)*/
-	if assignedUserId > 0 {	//自己的设备
+	if isAssigned {	//分配出去的设备
 		if user.Id == 1 {
-			sql += " and ((user_id = ? and from_user_id = ?) or has_retrofited = 1) "
+			sql += " and (from_user_id = ? or has_retrofited = 1) "
 		} else {
-			sql += " and ((user_id = ? and from_user_id = ?) and has_retrofited = 0) "
+			sql += " and (from_user_id = ? and has_retrofited = 0) "
 		}
-		params = append(params, assignedUserId, user.Id)
-	}else {	//分配出去的设备
+		params = append(params, user.Id)
+	}else {	//自己的设备
 		if user.Id == 1 {
 			sql += " and (user_id = ? or has_retrofited = 1) "
 		} else {
