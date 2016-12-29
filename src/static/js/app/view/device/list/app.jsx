@@ -207,7 +207,7 @@ const columns = [{
         <span>
           <Link to={"/device/edit/" + record.id}>修改</Link>
           <span className="ant-divider" />
-            {USER.role.id == 5 && USER.id == record.userId?
+            {USER.role.id == 5 && USER.id == record.userId && +record.isAssigned == 0?
               <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
                 <a href="#">删除</a>
               </Popconfirm>
@@ -310,7 +310,7 @@ class DeviceList extends React.Component {
         if(status.fetch == true){
           this.props.getDeviceList(pager);
           this.setSearchValues(pager);
-          message.success('操作成功!',3);
+          message.success(nextProps.status.result.msg,3);
         } else {
           message.error(nextProps.status.result.msg, 3);
           console.log(nextProps.status.result.msg);
@@ -488,7 +488,9 @@ class DeviceList extends React.Component {
     pager.serialNumber = serialNumber;
     pager.userQuery = '';
     this.setState({page:1, userQuery:''});
-    this.refs.searchUserInput.refs.input.value=''
+    if(+this.props.isAssigned) {
+      this.refs.searchUserInput.refs.input.value=''
+    }
     // 重置 URL 参数
     this.props.location.query.serialNumber = this.state.serialNumber;
     this.props.location.query.userQuery = '';
@@ -572,6 +574,7 @@ class DeviceList extends React.Component {
           item.remove = self.remove;
           item.reset = self.reset;
           item.changeStatus = self.changeStatus;
+          item.isAssigned = self.state.isAssigned;
           return item;
         })
       }
@@ -596,7 +599,7 @@ class DeviceList extends React.Component {
           <Link to={"/device/batch-edit?isAssigned="+this.props.isAssigned+"&serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"
                 onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>
-          {USER.role.id == 5 ?
+          {USER.role.id == 5 && +this.props.isAssigned == 0?
             <Link to="/device/edit" className="ant-btn ant-btn-primary item">
               添加新设备
             </Link>:""
@@ -611,17 +614,20 @@ class DeviceList extends React.Component {
               />
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
-            <div className="user search-input">
-              <Input ref="searchUserInput"
-                     onChange={this.handleUserChange.bind(this)}
-                     addonBefore="账户或用户名:" defaultValue={userQuery}
-                     placeholder="请输入用户账户或用户名"
-                     onPressEnter={this.handleUserSearch.bind(this)}
-              />
-            </div>
-            <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
+            {+this.props.isAssigned ?
+              <div className="search-div">
+                <div className="user search-input">
+                  <Input ref="searchUserInput"
+                         onChange={this.handleUserChange.bind(this)}
+                         addonBefore="账户或用户名:" defaultValue={userQuery}
+                         placeholder="请输入用户账户或用户名"
+                         onPressEnter={this.handleUserSearch.bind(this)}
+                  />
+                </div>
+                <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
+              </div>:""
+            }
           </div>
-
         </div>
         <article>
           <Table
