@@ -32,6 +32,19 @@ func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Devi
 	return device, nil
 }
 
+func (self *DeviceService) BasicMapBySerialNumber(serialNumber ...string) (map[string]*model.Device, error) {
+	list := &[]*model.Device{}
+	data := make(map[string]*model.Device, 0)
+	r := common.DB.Where("serial_number in (?)", serialNumber).Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	for _, _device := range *list {
+		data[_device.SerialNumber] = _device
+	}
+	return data, nil
+}
+
 func (self *DeviceService) ListBySerialNumber(userId int, schoolId int, serialNumber ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	params := make([]interface{}, 0)
@@ -94,14 +107,16 @@ func (self *DeviceService) TotalByUserAndNextLevel(isAssigned bool, user *model.
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)*/
-	if isAssigned {	//分配出去的设备
+	if isAssigned {
+		//分配出去的设备
 		if user.Id == 1 {
 			sql += " and (from_user_id = ? or has_retrofited = 1) "
 		} else {
 			sql += " and (from_user_id = ? and has_retrofited = 0) "
 		}
 		params = append(params, user.Id)
-	}else {	//自己的设备
+	} else {
+		//自己的设备
 		if user.Id == 1 {
 			sql += " and (user_id = ? or has_retrofited = 1) "
 		} else {
@@ -112,7 +127,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(isAssigned bool, user *model.
 	if serialNumber != "" {
 		if isEqual {
 			sql += " and d.serial_number in (" + serialNumber + ") "
-		}else {
+		} else {
 			sql += " and d.serial_number like ? "
 			params = append(params, "%" + serialNumber + "%")
 		}
@@ -142,14 +157,16 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 		sql += " and (user_id = ? or from_user_id= ? and has_retrofited = 0) "
 	}
 	params = append(params, user.Id, user.Id)*/
-	if isAssigned {	//分配出去的设备
+	if isAssigned {
+		//分配出去的设备
 		if user.Id == 1 {
 			sql += " and (from_user_id = ? or has_retrofited = 1) "
 		} else {
 			sql += " and (from_user_id = ? and has_retrofited = 0) "
 		}
 		params = append(params, user.Id)
-	}else {	//自己的设备
+	} else {
+		//自己的设备
 		if user.Id == 1 {
 			sql += " and (user_id = ? or has_retrofited = 1) "
 		} else {
@@ -160,7 +177,7 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 	if serialNumber != "" {
 		if isEqual {
 			sql += " and d.serial_number in (" + serialNumber + ") "
-		}else {
+		} else {
 			sql += " and d.serial_number like ? "
 			params = append(params, "%" + serialNumber + "%")
 		}
@@ -171,7 +188,8 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 	//测试按设备编号排序
 	if user.Id == 1 {
 		sql += " order by case when user_id=? then 1 else 2 end asc, serial_number desc "
-	}else{//其它用户按楼层排序
+	} else {
+		//其它用户按楼层排序
 		sql += " order by case when user_id=? then 1 else 2 end asc, address desc, id desc "
 	}
 	params = append(params, user.Id)
@@ -301,7 +319,7 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 		if device.Address != "" {
 			deviceMap["address"] = device.Address
 		}
-	}else{
+	} else {
 		deviceMap["first_pulse_price"] = device.FirstPulsePrice
 		deviceMap["second_pulse_price"] = device.SecondPulsePrice
 		deviceMap["third_pulse_price"] = device.ThirdPulsePrice
@@ -321,7 +339,7 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 	if isBatchUpdate {
 		serialNumber = strings.Split(device.SerialNumber, ",")
 		r = transAction.Model(&model.Device{}).Where("serial_number in (?)", serialNumber).Updates(deviceMap).Scan(&device)
-	}else {
+	} else {
 		r = transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(deviceMap).Scan(&device)
 	}
 	if r.Error != nil {
@@ -344,7 +362,7 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 		if boxInfo.Address != "" {
 			boxInfoMap["ADDRESS"] = boxInfo.Address
 		}
-	}else {
+	} else {
 		boxInfoMap["PRICE_601"] = boxInfo.Price_601
 		boxInfoMap["PRICE_602"] = boxInfo.Price_602
 		boxInfoMap["PRICE_603"] = boxInfo.Price_603

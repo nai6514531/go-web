@@ -48,6 +48,7 @@ var (
 		"01030311": "请填写大件洗价格!",
 		"01030312": "设备id不能小于0!",
 		"01030313": "该设备序列号已经存在!",
+		"01030314": "记录更新设备操作记录失败",
 
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
@@ -75,6 +76,7 @@ var (
 		"01030602": "设备id不能小于0!",
 		"01030603": "该设备已被重置或不存在!",
 		"01030604": "不支持删除测试员名下设备!",
+		"01030605": "记录重置设备操作记录失败",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
@@ -131,6 +133,7 @@ var (
 		"01031500": "批量更新设备成功",
 		"01031501": "批量更新设备失败",
 		"01031502": "设备号不能为空",
+		"01031503": "记录批量更新设备操作记录失败",
 
 	}
 )
@@ -631,8 +634,10 @@ func (self *DeviceController) DailyBill(ctx *iris.Context) {
 func (self *DeviceController) Update(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	ctx.ReadJSON(&device)
 	if id <= 0 {
 		result = &enity.Result{"01030312", nil, device_msg["01030312"]}
@@ -670,6 +675,18 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	deviceOperate := &model.DeviceOperate{
+		OperatorId: operatorId,
+		OperatorType: 2,
+		SerialNumber:currentDevice.SerialNumber,
+		UserId: currentDevice.UserId,
+		FromUserId: currentDevice.FromUserId,
+	}
+	_, err := deviceOperateService.Create(deviceOperate)
+	if err != nil {
+		result = &enity.Result{"01030314", err.Error(), device_msg["01030314"]}
+		common.Log(ctx, result)
+	}
 	result = &enity.Result{"01030300", nil, device_msg["01030300"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
@@ -678,6 +695,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 
 func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
@@ -686,12 +704,34 @@ func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	serialNumbers := strings.Split(device.SerialNumber, ",")
+	_map, _ := deviceService.BasicMapBySerialNumber(serialNumbers...)
+	common.Logger.Debug("===========", _map)
 	success := deviceService.Update(device, true)
 	if !success {
 		result = &enity.Result{"01031501", nil, device_msg["01031501"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
+	}
+	for _, s := range serialNumbers {
+		_device := &model.Device{}
+		if _map[s] != nil {
+			_device = _map[s]
+		}
+		deviceOperate := &model.DeviceOperate{
+			OperatorId: operatorId,
+			OperatorType: 2,
+			SerialNumber: s,
+			UserId: _device.UserId,
+			FromUserId: _device.FromUserId,
+		}
+		_, err := deviceOperateService.Create(deviceOperate)
+		if err != nil {
+			result = &enity.Result{"01031503", err.Error(), device_msg["01031503"]+":"+s}
+			common.Log(ctx, result)
+		}
 	}
 	result = &enity.Result{"01031500", nil, device_msg["01031500"]}
 	ctx.JSON(iris.StatusOK, result)
@@ -804,8 +844,10 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 */
 //事实上是重置设备，将userid变回1
 func (self *DeviceController) Reset(ctx *iris.Context) {
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
+	deviceOperatorService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	if id <= 0 {
 		result = &enity.Result{"01030602", nil, device_msg["01030602"]}
@@ -839,6 +881,18 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
+	}
+	deviceOperator := &model.DeviceOperate{
+		OperatorId: operatorId,
+		OperatorType: 1,
+		SerialNumber:currentDevice.SerialNumber,
+		UserId: currentDevice.UserId,
+		FromUserId: currentDevice.FromUserId,
+	}
+	_, err = deviceOperatorService.Create(deviceOperator)
+	if err != nil {
+		result = &enity.Result{"01030605", err.Error(), device_msg["01030605"]}
+		common.Log(ctx, result)
 	}
 	result = &enity.Result{"01030600", nil, device_msg["01030600"]}
 	ctx.JSON(iris.StatusOK, result)
