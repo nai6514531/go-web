@@ -1,29 +1,10 @@
 import React from 'react';
 import './app.less';
-import { Table, Button,Input, Breadcrumb } from 'antd';
+import { Table, Button,Input, Breadcrumb, message } from 'antd';
 import { Link, hashHistory } from 'react-router';
 const _ = require('lodash');
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
-
-
-function mapStateToProps(state) {
-  const { user: { list, detail, detailTotal } } = state;
-  return { list, detail, detailTotal };
-}
-
-function mapDispatchToProps(dispatch) {
-  const {
-    getUserList,
-    getDetailTotal,
-  } = bindActionCreators(UserActions, dispatch);
-  return {
-    getUserList,
-    getDetailTotal,
-  };
-}
+import UserService from '../../../service/user';
 
 const columns = [{
   title: '用户编号',
@@ -66,7 +47,6 @@ const columns = [{
   dataIndex: 'action',
   key: 'action',
   width: 100,
-  // fixed: 'right',
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
@@ -74,45 +54,64 @@ const columns = [{
   ),
 }];
 
-class AgentTable extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       page: 1,
       perPage: 10,
-      pager: {},
       total: 1,
       searchValue: '',
+      list:[],
+      loading: false,
     };
+    this.list = this.list.bind(this);
+  }
+  list(pager,searchValue) {
+    var self = this;
+    this.setState({
+      loading: true,
+    });
+    UserService.list(pager,searchValue)
+      .then((data) => {
+        self.setState({
+          loading: false,
+        });
+        const total = data.data.total;
+        this.setState({
+          total: total,
+          list: data.data.list.map((item, key) => {
+            item.key = item.id;
+            return item;
+          })
+        });
+      },(error)=>{
+        self.setState({
+          loading: false,
+        });
+        message.error(error.msg,3);
+      })
   }
   componentWillMount() {
     const pager = { page : this.state.page, perPage: this.state.perPage};
-    this.loading = true;
       // 页面刷新的时候需要按照 URL 参数加载搜索结果,有参则传参
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
       const user = query.user;
       this.setState({searchValue:user})
-      this.props.getUserList(pager,user);
+      this.list(pager,user);
     } else {
-      this.props.getUserList(pager);
+      this.list(pager);
     }
   }
   rowClassName(record, index) {
     return this.rowColor[record.key];
   }
   initializePagination() {
-    let total = 1;
-    const { id } = this.props.params;
-    if(id){
-      if (this.props.list && this.props.list.fetch == true) {
-        total = this.props.list.result.data.total;
-      }
-    }
     const self = this;
     const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
     return {
-      total: total,
+      total: this.state.total,
       showSizeChanger: true,
       size:'small',
       showTotal (total) {
@@ -121,14 +120,12 @@ class AgentTable extends React.Component {
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        self.loading = true;
-        self.props.getUserList(pager,user);
+        self.list(pager,user);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
-        self.loading = true;
         self.setState(pager);
-        self.props.getUserList(pager,user);
+        self.list(pager,user);
       },
     }
   }
@@ -145,7 +142,7 @@ class AgentTable extends React.Component {
     this.props.location.query.user = user;
     hashHistory.replace(this.props.location);
     // 发 AJAX
-    this.props.getUserList(pager,user);
+    this.list(pager,user);
   }
   render() {
     const query = this.props.location.query;
@@ -153,24 +150,7 @@ class AgentTable extends React.Component {
     if(!_.isEmpty(query)) {
       user = query.user;
     }
-    const { list, detailTotal, params: {id} } = this.props;
-    let dataSource = [];
-    const self = this;
-    if(id) {
-      if(list){
-        if(list.fetch == true){
-          const data = list.result.data.list;
-          let rowColor = {};
-          dataSource = data.map(function (item, key) {
-            item.key = item.id;
-            rowColor[item.key] = key%2==0?'white':'gray';
-            self.rowColor = rowColor;
-            return item;
-          })
-        }
-        self.loading = false;
-      }
-    }
+    const dataSource = this.state.list;
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
     return (
@@ -185,9 +165,9 @@ class AgentTable extends React.Component {
           <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
             添加新运营商
           </Link>
-          <Input defaultValue={user} 
-                 style={{width:160}} 
-                 placeholder="请输入运营商或者联系人" 
+          <Input defaultValue={user}
+                 style={{width:160}}
+                 placeholder="请输入运营商或者联系人"
                  onChange={this.handleInputChange.bind(this)}
                  onPressEnter={this.handleSearch.bind(this)}
           />
@@ -201,7 +181,7 @@ class AgentTable extends React.Component {
             rowKey={record => record.key}
             dataSource={dataSource}
             pagination={pagination}
-            loading={this.loading ? this.loading : false}
+            loading={this.state.loading}
             bordered
             rowClassName={this.rowClassName.bind(this)}
           />
@@ -212,8 +192,6 @@ class AgentTable extends React.Component {
 }
 
 
-AgentTable.propTypes = {
-  handleTableChange: React.PropTypes.func,
-};
+App.propTypes = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(AgentTable);
+export default App;
