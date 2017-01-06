@@ -309,29 +309,52 @@ func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
 	//end := time.Now().Format("2006-01-02")
 	start := "2016-03-04"
 	end := "2016-03-11"
-	sql := "select `INSERTTIME` as insertTime, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
+	sql := "select `INSERTTIME` as date, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
 		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
-		common.Logger.Debugln("err:", err.Error())
 		return nil, err
 	}
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
-		var insertTime string
+		var date string
 		var recharge float64
 		var consumption float64
 		var balance float64
 
-		err := rows.Scan(&insertTime, &recharge, &consumption, &balance)
+		err := rows.Scan(&date, &recharge, &consumption, &balance)
 		if err != nil {
 			return nil, err
 		}
-		m["insertTime"] = insertTime
+		m["insertTime"] = date
 		m["recharge"] = recharge
 		m["consumption"] = consumption
 		m["balance"] = balance
+		list = append(list, &m)
+	}
+	return &list, nil
+}
+
+func (self *StatisService) FailedTrade() (*[]*map[string]interface{}, error) {
+	list := make([]*map[string]interface{}, 0)
+	sql := "select date(inserttime) as 'date',count(*) as 'count' from trade_info where tradestatus='' and date(inserttime)>='2016-01-01' group by date(inserttime)"
+	rows, err := common.MNREAD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		m := make(map[string]interface{}, 0)
+		var date string
+		var count int
+
+		err := rows.Scan(&date, &count)
+		if err != nil {
+			return nil, err
+		}
+		m["date"] = date
+		m["count"] = count
 		list = append(list, &m)
 	}
 	return &list, nil
