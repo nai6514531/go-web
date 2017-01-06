@@ -304,37 +304,120 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 	return &list, nil
 }
 
-func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
-	list := make([]*map[string]interface{}, 0)
+func (self *StatisService) Balance() (map[string]float64, error) {
+	data := make(map[string]float64, 0)
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	//start := "2016-03-04"
-	//end := "2016-03-11"
-	sql := "select `INSERTTIME` as date, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
-		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`) order by date(`INSERTTIME`) desc"
+	sql := "select `INSERTTIME` as date, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
-		m := make(map[string]interface{}, 0)
 		var date string
-		var recharge float64
-		var consumption float64
 		var balance float64
 
-		err := rows.Scan(&date, &recharge, &consumption, &balance)
+		err := rows.Scan(&date, &balance)
 		if err != nil {
 			return nil, err
 		}
-		m["date"] = date
-		m["recharge"] = recharge
-		m["consumption"] = consumption
-		m["balance"] = balance
-		list = append(list, &m)
+		_date, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			return nil, err
+		}
+		dateStr := _date.Format("2006-01-02")
+		data[dateStr] = balance
 	}
-	return &list, nil
+	return data, nil
+}
+
+func (self *StatisService) BalanceSum() (float64, error) {
+	var s float64
+	sql := "SELECT sum(RECHARGE-CONSUMPTION) as s FROM box_user"
+	err := common.MNREAD.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
+}
+
+func (self *StatisService) Recharge() (map[string]float64, error) {
+	data := make(map[string]float64, 0)
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := "select `INSERTTIME` as date, sum(`money`) as recharge from `recharge` where status = 0 and date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
+	rows, err := common.MNREAD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var date string
+		var recharge float64
+
+		err := rows.Scan(&date, &recharge)
+		if err != nil {
+			return nil, err
+		}
+		_date, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			return nil, err
+		}
+		dateStr := _date.Format("2006-01-02")
+		data[dateStr] = recharge
+	}
+	common.Logger.Debug("recharge=========", data)
+	return data, nil
+}
+
+func (self *StatisService) RechargeSum() (float64, error) {
+	var s float64
+	sql := "SELECT sum(money) as s FROM recharge where status = 0"
+	err := common.MNREAD.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
+}
+
+func (self *StatisService) Consumption() (map[string]float64, error) {
+	data := make(map[string]float64, 0)
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	sql := "select `INSERTTIME` as date, sum(`price`) as consumption from `box_wash` where status = 0 and date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
+	rows, err := common.MNREAD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var date string
+		var consumption float64
+
+		err := rows.Scan(&date, &consumption)
+		if err != nil {
+			return nil, err
+		}
+		_date, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			return nil, err
+		}
+		dateStr := _date.Format("2006-01-02")
+		data[dateStr] = consumption
+	}
+	common.Logger.Debug("consumption=========", data)
+	return data, nil
+}
+
+func (self *StatisService) ConsumptionSum() (float64, error) {
+	var s float64
+	sql := "SELECT sum(price) as s FROM box_wash where status = 0"
+	err := common.MNREAD.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
 }
 
 func (self *StatisService) FailedTrade() (*[]*map[string]interface{}, error) {
