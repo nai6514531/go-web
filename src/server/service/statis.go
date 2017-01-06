@@ -311,7 +311,7 @@ func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
 	//start := "2016-03-04"
 	//end := "2016-03-11"
 	sql := "select `INSERTTIME` as date, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
-		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
+		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`) order by date(`INSERTTIME`) desc"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
