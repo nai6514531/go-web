@@ -26,6 +26,9 @@ var (
 		"01070403": "银行用户为空",
 		"01070404": "支付宝每日结账为空",
 		"01070405": "银行每日结账为空",
+
+		"01070500": "拉取'充值/消费/余额统计'成功",
+		"01070501": "拉取'充值/消费/余额统计'失败",
 	}
 )
 
@@ -171,4 +174,19 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	result = &enity.Result{"01070400", &data, statis_msg["01070400"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)*/
+}
+
+func (self *StatisController) Balance(ctx *iris.Context) {
+	statisService := &service.StatisService{}
+	result := &enity.Result{}
+	list, err := statisService.Balance()
+	if err != nil {
+		result = &enity.Result{"01070501", err.Error(), statis_msg["01070501"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01070500", &list, statis_msg["01070500"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
 }

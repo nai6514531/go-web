@@ -102,6 +102,7 @@ func Api() {
 	api.Get("/statis/operate", statis.Operate)
 	api.Get("/statis/device", statis.Device)
 	api.Get("/stat/daily-pay", statis.DailyPay)
+	api.Get("/stat/balance", statis.Balance)
 	api.Get("/trade", trade.Basic)
 	api.Get("/trade/refund", trade.Refund)
 }

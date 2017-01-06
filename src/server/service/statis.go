@@ -302,3 +302,37 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 	}
 	return &list, nil
 }
+
+func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
+	list := make([]*map[string]interface{}, 0)
+	//start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	//end := time.Now().Format("2006-01-02")
+	start := "2016-03-04"
+	end := "2016-03-11"
+	sql := "select `INSERTTIME` as insertTime, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
+		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
+	rows, err := common.MNREAD.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		common.Logger.Debugln("err:", err.Error())
+		return nil, err
+	}
+	for rows.Next() {
+		m := make(map[string]interface{}, 0)
+		var insertTime string
+		var recharge float64
+		var consumption float64
+		var balance float64
+
+		err := rows.Scan(&insertTime, &recharge, &consumption, &balance)
+		if err != nil {
+			return nil, err
+		}
+		m["insertTime"] = insertTime
+		m["recharge"] = recharge
+		m["consumption"] = consumption
+		m["balance"] = balance
+		list = append(list, &m)
+	}
+	return &list, nil
+}
