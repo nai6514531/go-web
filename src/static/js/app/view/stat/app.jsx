@@ -4,6 +4,8 @@ import keymirror from 'keymirror';
 import StatService from "../../service/stat";
 import "./app.less";
 
+import SevenBill from './seven_bill.jsx';
+
 const _ = require('lodash');
 const Highcharts = require('highcharts');
 const Highstock = require('highcharts/highstock');
@@ -16,6 +18,8 @@ const PANEL_KEY = keymirror({
   RECHARGE: null,
   CONSUME: null,
   USER: null,
+  SEVEN_BILL: null,
+  ORDER_FAIL: null,
 })
 
 const App = React.createClass({
@@ -23,6 +27,7 @@ const App = React.createClass({
   getInitialState() {
     return {
       loading: false,
+      renderSevenBill:'',
     };
   },
   renderBarChart(id, categories, _data){
@@ -301,6 +306,66 @@ const App = React.createClass({
       });
 
   },
+  renderSevenBill(){
+    return <SevenBill/>;
+  },
+  renderOrderFailChart(){
+    var self = this;
+    StatService.OrderFail()
+      .then((body) => {
+        if (body && body.status == 0) {
+          const _data = [];
+          _.each(body.data || [], function (v) {
+            _data.push([moment(v.date).toDate().getTime(), v.count])
+          });
+          // console.info(_data)
+          Highstock.stockChart('order_fail', {
+            chart: {
+              height: 400
+            },
+            title: {
+              text: ''
+            },
+            subtitle: {
+              text: ''
+            },
+            rangeSelector: {
+              selected: 1
+            },
+            series: [{
+              name: '下单失败统计',
+              data: _data,
+              type: 'area',
+              threshold: null,
+              tooltip: {
+                valueDecimals: 0
+              }
+            }],
+            responsive: {
+              rules: [{
+                condition: {
+                  maxWidth: 500
+                },
+                chartOptions: {
+                  chart: {
+                    height: 300
+                  },
+                  subtitle: {
+                    text: null
+                  },
+                  navigator: {
+                    enabled: false
+                  }
+                }
+              }]
+            }
+          });
+        } else {
+          alert(body.msg);
+        }
+      });
+
+  },
   componentDidMount(){
     this.renderDailyPayChart()
   },
@@ -323,6 +388,13 @@ const App = React.createClass({
     }
     if (key == PANEL_KEY.USER) {
       return this.renderUserChart();
+    }
+    if (key == PANEL_KEY.SEVEN_BILL) {
+      this.setState({renderSevenBill: this.renderSevenBill()});
+      // return this.renderSevenBill();
+    }
+    if (key == PANEL_KEY.ORDER_FAIL) {
+      return this.renderOrderFailChart();
     }
   },
   render(){
@@ -360,6 +432,17 @@ const App = React.createClass({
         </Panel>
         <Panel header="注册用户" key={PANEL_KEY.USER}>
           <div id="user" className="spin-loading">
+            <Spin tip="正在计算中，请稍后...">
+            </Spin>
+          </div>
+        </Panel>
+        <Panel header="充值/消费/余额统计" key={PANEL_KEY.SEVEN_BILL}>
+          <div id="seven_bill" className="spin-loading">
+            {this.state.renderSevenBill}
+          </div>
+        </Panel>
+        <Panel header="下单失败统计" key={PANEL_KEY.ORDER_FAIL}>
+          <div id="order_fail" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
           </div>
