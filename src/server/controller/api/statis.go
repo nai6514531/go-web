@@ -32,6 +32,9 @@ var (
 
 		"01070600": "拉取'下单失败统计'数据成功",
 		"01070601": "拉取'下单失败统计'数据失败",
+
+		"01070700": "拉取用户总数成功",
+		"01070701": "拉取用户总数失败",
 	}
 )
 
@@ -205,6 +208,21 @@ func (self *StatisController) FailedTrade(ctx *iris.Context) {
 		return
 	}
 	result = &enity.Result{"01070600", &list, statis_msg["01070600"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *StatisController) Count(ctx *iris.Context) {
+	userService := &service.UserService{}
+	result := &enity.Result{}
+	count, err := userService.Count()
+	if err != nil {
+		result = &enity.Result{"01070701", err.Error(), statis_msg["01070701"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01070700", &count, statis_msg["01070700"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }

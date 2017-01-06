@@ -71,10 +71,16 @@ func (self *UserService) TotalOfDevice(userId int) (int, error) {
 	return total, nil
 }
 
-func (self *UserService) ListOfSignIn() (*[]*muniu.SignInUser, error) {
+func (self *UserService) ListOfSignIn(format string) (*[]*muniu.SignInUser, error) {
 	list := []*muniu.SignInUser{}
-	sql := "select date(inserttime) as 'date',count(*) as 'count' from box_user " +
-		"where date(inserttime)>='2016-01-01' and companyid!=0 group by date(inserttime)"
+	sql := ""
+	if format == "month" {
+		sql = "select substring(inserttime,1,7) as 'date',count(*) as 'count' from box_user " +
+			"where date(inserttime)>='2016-01-01' and companyid!=0 group by substring(inserttime,1,7);"
+	}else {
+		sql = "select date(inserttime) as 'date',count(*) as 'count' from box_user " +
+			"where date(inserttime)>='2016-01-01' and companyid!=0 group by date(inserttime)"
+	}
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -307,4 +313,13 @@ func (self *UserService) BasicMapById(ids ...int) (map[int]*model.User, error) {
 		_map[_user.Id] = _user
 	}
 	return _map, nil
+}
+
+func (self *UserService) Count() (int, error) {
+	var count int64
+	r := common.MNREAD.Model(&muniu.BoxUser{}).Count(&count)
+	if r.Error != nil {
+		return 0, r.Error
+	}
+	return int(count), nil
 }

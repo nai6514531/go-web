@@ -327,7 +327,7 @@ func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		m["insertTime"] = date
+		m["date"] = date
 		m["recharge"] = recharge
 		m["consumption"] = consumption
 		m["balance"] = balance

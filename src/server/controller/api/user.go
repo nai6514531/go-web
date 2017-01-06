@@ -181,7 +181,9 @@ var (
 func (self *UserController) SignInUser(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
-	list, err := userService.ListOfSignIn()
+	format := ctx.URLParam("format")
+	common.Logger.Debug("format========", format)
+	list, err := userService.ListOfSignIn(format)
 	if err != nil {
 		result = &enity.Result{"1", err, "拉取注册用户数据异常"}
 		common.Log(ctx, result)
