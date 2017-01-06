@@ -371,7 +371,7 @@ func (self *DailyBillService) Recharge() (*[]*muniu.Recharge, error) {
 	sql := "select DATE_FORMAT(UPDATETIME,'%Y-%m') as 'month',count(distinct usermobile) as 'count' " +
 		" from trade_info " +
 		" where date(UPDATETIME) >'2015-12' " +
-		" and (tradestatus='success' or tradestatus='TRADE_SUCCESS') " +
+		" and tradestatus!='' " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m')"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
@@ -480,7 +480,7 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 		" from trade_info " +
 		" where date(UPDATETIME) >='" + start + "'" +
 		" and date(UPDATETIME)<'" + end + "'" +
-		" and tradestatus='TRADE_SUCCESS' " +
+		" and ( tradestatus='TRADE_SUCCESS' or tradestatus='TRADE_FINISHED') " +
 		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()

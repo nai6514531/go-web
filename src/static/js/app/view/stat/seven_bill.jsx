@@ -75,7 +75,7 @@ const App = React.createClass({
             item.key = key;
             return item;
           });
-          theList.push(total);
+          //theList.push(total);
           this.setState({
             list: theList,
           });
