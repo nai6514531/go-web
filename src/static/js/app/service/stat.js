@@ -16,11 +16,14 @@ const Service = {
   signInUser: () => {
     return api.get(`/api/stat/signin-user`)
   },
+  signInUserMonth: () => {
+    return api.get(`/api/stat/signin-user?format=month`)
+  },
   SevenBill: () => {
     return api.get(`/api/stat/balance`)
   },
   OrderFail: () => {
-    // return api.get(`/api/stat/balance`)
+    return api.get(`/api/stat/failed-trade`)
   },
 };
 

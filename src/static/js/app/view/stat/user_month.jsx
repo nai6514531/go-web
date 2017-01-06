@@ -11,39 +11,25 @@ const App = React.createClass({
       total: 0,
       list:[],
       columns: [{
-        title: '日期',
+        title: '月份',
         dataIndex: 'date',
         key: 'date',
         render: (date) => {
           if(date !== "total") {
             console.log(date);
-            return moment(date).format('YYYY-MM-DD')
+            return moment(date).format('YYYY-MM')
           } else {
-            return "平台总计";
+            return "总计";
           }
         }
       },{
-        title: '充值金额',
-        dataIndex: 'recharge',
-        key: 'recharge',
+        title: '人数',
+        dataIndex: 'count',
+        key: 'count',
         render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
+          return amount + "人";
         }
-      }, {
-        title: '消费金额',
-        dataIndex: 'consumption',
-        key: 'consumption',
-        render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
-        }
-      }, {
-        title: '余额',
-        dataIndex: 'balance',
-        key: 'balance',
-        render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
-        }
-      }],
+      },],
       loading: false
     };
   },
@@ -55,21 +41,17 @@ const App = React.createClass({
     this.setState({
       loading: true,
     });
-    StatService.SevenBill()
+    StatService.signInUserMonth()
       .then((data) => {
         self.setState({
           loading: false,
         });
         if (data && data.status == '00') {
           const list = data.data;
-          const recharge = Math.round(list.reduce((total,item)=>{return total+item.recharge},0)*100)/100;
-          const consumption = Math.round(list.reduce((total,item)=>{return total+item.consumption},0)*100)/100;
-          const balance = Math.round(list.reduce((total,item)=>{return total+item.balance},0)*100)/100;
+          const count = Math.round(list.reduce((total,item)=>{return total+item.count},0));
           const total = {
             "date": "total",
-            "recharge": recharge,
-            "consumption": consumption,
-            "balance": balance,
+            "count": count,
           };
           let theList = list.map((item, key) => {
             item.key = key;

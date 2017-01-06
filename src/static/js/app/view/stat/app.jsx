@@ -5,6 +5,7 @@ import StatService from "../../service/stat";
 import "./app.less";
 
 import SevenBill from './seven_bill.jsx';
+import UserMonth from './user_month.jsx';
 
 const _ = require('lodash');
 const Highcharts = require('highcharts');
@@ -18,6 +19,7 @@ const PANEL_KEY = keymirror({
   RECHARGE: null,
   CONSUME: null,
   USER: null,
+  USER_MONTH: null,
   SEVEN_BILL: null,
   ORDER_FAIL: null,
 })
@@ -28,6 +30,7 @@ const App = React.createClass({
     return {
       loading: false,
       renderSevenBill:'',
+      renderUserMonthChart:'',
     };
   },
   renderBarChart(id, categories, _data){
@@ -256,9 +259,13 @@ const App = React.createClass({
         if (body && body.status == 0) {
           const _data = [];
           _.each(body.data || [], function (v) {
+            // console.log(v.date);
+            // console.log(moment(v.date).toDate());
+            // console.log(moment(v.date).toDate().getTime());
             _data.push([moment(v.date).toDate().getTime(), v.count])
           });
           //console.info(_data)
+          // console.log('2016-12-24',moment(1482508800000).format('YYYY-MM-DD'));
           Highstock.stockChart('user', {
             chart: {
               height: 400
@@ -304,7 +311,10 @@ const App = React.createClass({
           alert(body.msg);
         }
       });
-
+    this.renderUserMonthChart();
+  },
+  renderUserMonthChart(){
+    return <UserMonth/>;
   },
   renderSevenBill(){
     return <SevenBill/>;
@@ -387,11 +397,11 @@ const App = React.createClass({
       return this.renderConsumeChart();
     }
     if (key == PANEL_KEY.USER) {
+      this.setState({renderUserMonthChart: this.renderUserMonthChart()});
       return this.renderUserChart();
     }
     if (key == PANEL_KEY.SEVEN_BILL) {
       this.setState({renderSevenBill: this.renderSevenBill()});
-      // return this.renderSevenBill();
     }
     if (key == PANEL_KEY.ORDER_FAIL) {
       return this.renderOrderFailChart();
@@ -434,6 +444,9 @@ const App = React.createClass({
           <div id="user" className="spin-loading">
             <Spin tip="正在计算中，请稍后...">
             </Spin>
+          </div>
+          <div id="user_month" className="spin-loading">
+            {this.state.renderUserMonthChart}
           </div>
         </Panel>
         <Panel header="充值/消费/余额统计" key={PANEL_KEY.SEVEN_BILL}>

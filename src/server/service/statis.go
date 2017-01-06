@@ -5,6 +5,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"strings"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"time"
 )
 
 type StatisService struct {
@@ -305,10 +306,10 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 
 func (self *StatisService) Balance() (*[]*map[string]interface{}, error) {
 	list := make([]*map[string]interface{}, 0)
-	//start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
-	//end := time.Now().Format("2006-01-02")
-	start := "2016-03-04"
-	end := "2016-03-11"
+	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	end := time.Now().Format("2006-01-02")
+	//start := "2016-03-04"
+	//end := "2016-03-11"
 	sql := "select `INSERTTIME` as date, sum(`RECHARGE`) as recharge, sum(`CONSUMPTION`) as consumption, sum(`RECHARGE`-`CONSUMPTION`) as balance from `box_user` " +
 		"where date(`INSERTTIME`) >= '" + start + "' and date(`INSERTTIME`) < '" + end + "' GROUP BY date(`INSERTTIME`)"
 	rows, err := common.MNREAD.Raw(sql).Rows()
