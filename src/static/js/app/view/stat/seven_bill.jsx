@@ -62,20 +62,13 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const list = data.data;
-          const recharge = Math.round(list.reduce((total,item)=>{return total+item.recharge},0)*100)/100;
-          const consumption = Math.round(list.reduce((total,item)=>{return total+item.consumption},0)*100)/100;
-          const balance = Math.round(list.reduce((total,item)=>{return total+item.balance},0)*100)/100;
-          const total = {
-            "date": "total",
-            "recharge": recharge,
-            "consumption": consumption,
-            "balance": balance,
-          };
           let theList = list.map((item, key) => {
             item.key = key;
+            if(key !== list.length-1) {
+              item.balance = item.recharge - item.consumption;
+            }
             return item;
           });
-          //theList.push(total);
           this.setState({
             list: theList,
           });
