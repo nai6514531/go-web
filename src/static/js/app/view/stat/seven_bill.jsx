@@ -15,12 +15,7 @@ const App = React.createClass({
         dataIndex: 'date',
         key: 'date',
         render: (date) => {
-          if(date !== "total") {
-            console.log(date);
-            return moment(date).format('YYYY-MM-DD')
-          } else {
-            return "平台总计";
-          }
+          return date !== "total"?moment(date).format('YYYY-MM-DD'): "平台总计";
         }
       },{
         title: '充值金额',
