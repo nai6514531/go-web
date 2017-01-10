@@ -1,29 +1,10 @@
 import React from 'react';
 // import './app.less';
-import { Table, Button,Input, Breadcrumb } from 'antd';
+import { Table, Button,Input, Breadcrumb,message } from 'antd';
 import { Link } from 'react-router';
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import * as UserActions from '../../../actions/user';
-
+import UserService from '../../../service/user';
 import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
-
-function mapStateToProps(state) {
-  const { user: { list, detail, detailTotal } } = state;
-  return { list, detail, detailTotal };
-}
-
-function mapDispatchToProps(dispatch) {
-  const {
-    getUserList,
-    getDetailTotal,
-  } = bindActionCreators(UserActions, dispatch);
-  return {
-    getUserList,
-    getDetailTotal,
-  };
-}
 
 const columns = [{
   title: '用户编号',
@@ -66,7 +47,6 @@ const columns = [{
   dataIndex: 'action',
   key: 'action',
   width: 120,
-  // fixed: 'right',
   render: (text, record) => (
     <div>
       <p><Link to={'/user/edit/' + record.id}>修改</Link></p>
@@ -74,40 +54,45 @@ const columns = [{
   ),
 }];
 
-class AgentTable extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      loading: false,
+      list: [],
+    };
+    this.detail = this.detail.bind(this);
   }
   componentWillMount() {
-    this.loading = true;
-    this.props.getDetailTotal(USER.id);
+    this.detail(USER.id);
+  }
+  detail(id) {
+      var self = this;
+      this.setState({
+        loading: true,
+      });
+      UserService.detail(id)
+        .then((data) => {
+          self.setState({
+            loading: false,
+          });
+          let list = data.data;
+          list.key = data.data.id;
+          this.setState({
+            list: [list]
+          });
+        },(error)=>{
+          self.setState({
+            loading: false,
+          });
+          message.error(error.msg,3);
+        })
   }
   render() {
-    const { detailTotal}  = this.props;
-    let dataSource = [];
-    const self = this;
-    if(detailTotal) {
-      if(detailTotal.fetch == true) {
-        const data = detailTotal.result.data;
-        data.key = data.id;
-        data.showAction = true;
-        dataSource = [data];
-      }
-      self.loading = false;
-    }
-    // 原设备管理
-    // <Link to={"/user/"+ USER.id +"/device/list"} className="ant-btn ant-btn-primary item">
-    //   设备管理
-    // </Link>
-    // {USER.role.id == 1?"":
-    //   <Link to={"/device"} className="ant-btn ant-btn-primary item">
-    //     设备管理
-    //   </Link>
-    // }
     const items = [
       {title:'运营商管理',url:''},
     ]
+    const dataSource = this.state.list;
     return (
       <section className="view-user-detail">
         <header>
@@ -134,9 +119,6 @@ class AgentTable extends React.Component {
   }
 }
 
+App.propTypes = {};
 
-AgentTable.propTypes = {
-  handleTableChange: React.PropTypes.func,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(AgentTable);
+export default App;
