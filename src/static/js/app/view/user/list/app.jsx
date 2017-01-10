@@ -10,35 +10,29 @@ import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
 const columns = [{
   title: '用户编号',
   dataIndex: 'id',
-  key: 'id',
   width: 50,
 }, {
   title: '运营商名称',
   dataIndex: 'name',
-  key: 'name',
   width: 100,
   className: 'table-col',
 }, {
   title: '联系人',
   dataIndex: 'contact',
-  key: 'contact',
   width:100,
   className: 'table-col',
 }, {
   title: '登录账号',
   dataIndex: 'account',
-  key: 'account',
   width:120,
 }, {
   title: '地址',
   dataIndex: 'address',
-  key: 'address',
   width:200,
   className: 'table-col',
 }, {
   title: '模块数量',
   dataIndex: 'deviceTotal',
-  key: 'deviceTotal',
   width:60,
   render: (deviceTotal) => {
     return deviceTotal || '0';
@@ -46,7 +40,6 @@ const columns = [{
 }, {
   title: '操作',
   dataIndex: 'action',
-  key: 'action',
   width: 100,
   render: (text, record) => (
     <div>
@@ -65,29 +58,25 @@ class App extends React.Component {
       searchValue: '',
       list:[],
       loading: false,
+      breadItems : [
+      {title:'运营商管理',url:'/user'},
+      {title:'下级运营商',url:''}]
     };
     this.list = this.list.bind(this);
   }
   list(pager,searchValue) {
-    var self = this;
     this.setState({
       loading: true,
     });
     UserService.list(pager,searchValue)
       .then((data) => {
-        self.setState({
-          loading: false,
-        });
-        const total = data.data.total;
         this.setState({
-          total: total,
-          list: data.data.list.map((item, key) => {
-            item.key = item.id;
-            return item;
-          })
+          loading: false,
+          total: data.data.total,
+          list: data.data.list
         });
       },(error)=>{
-        self.setState({
+        this.setState({
           loading: false,
         });
         message.error(error.msg,3);
@@ -151,17 +140,12 @@ class App extends React.Component {
     if(!_.isEmpty(query)) {
       user = query.user;
     }
-    const dataSource = this.state.list;
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
-    const items = [
-      {title:'运营商管理',url:'/user'},
-      {title:'下级运营商',url:''}
-    ]
     return (
       <section className="view-user-list">
         <header>
-          <SodaBreadcrumb items={items}/>
+          <SodaBreadcrumb items={this.state.breadItems}/>
         </header>
         <Toolbar handleSearch={this.handleSearch.bind(this)}
                  handleInputChange={this.handleInputChange.bind(this)}
@@ -172,8 +156,8 @@ class App extends React.Component {
             scroll={{ x: 980 }}
             className="table"
             columns={columns}
-            rowKey={record => record.key}
-            dataSource={dataSource}
+            rowKey={record => record.id}
+            dataSource={this.state.list}
             pagination={pagination}
             loading={this.state.loading}
             bordered
