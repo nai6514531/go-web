@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as UserActions from '../../../actions/user';
 
+import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
 
 function mapStateToProps(state) {
   const { user: { list, detail, detailTotal } } = state;
@@ -104,12 +105,13 @@ class AgentTable extends React.Component {
     //     设备管理
     //   </Link>
     // }
+    const items = [
+      {title:'运营商管理',url:''},
+    ]
     return (
       <section className="view-user-detail">
         <header>
-            <Breadcrumb>
-              <Breadcrumb.Item>运营商管理</Breadcrumb.Item>
-            </Breadcrumb>
+          <SodaBreadcrumb items={items}/>
         </header>
         <div className="toolbar">
           <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">

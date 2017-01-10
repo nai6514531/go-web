@@ -1,11 +1,12 @@
 import React from 'react';
 import './app.less';
-import { Table, Button,Input, Breadcrumb, message } from 'antd';
+import { Table, Button,Input, message } from 'antd';
 import { Link, hashHistory } from 'react-router';
 const _ = require('lodash');
 
 import UserService from '../../../service/user';
-
+import Toolbar from './subview/toolbar.jsx';
+import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
 const columns = [{
   title: '用户编号',
   dataIndex: 'id',
@@ -153,26 +154,19 @@ class App extends React.Component {
     const dataSource = this.state.list;
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
+    const items = [
+      {title:'运营商管理',url:'/user'},
+      {title:'下级运营商',url:''}
+    ]
     return (
       <section className="view-user-list">
         <header>
-            <Breadcrumb>
-              <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
-              <Breadcrumb.Item>下级运营商</Breadcrumb.Item>
-            </Breadcrumb>
+          <SodaBreadcrumb items={items}/>
         </header>
-        <div className="toolbar">
-          <Link to='/user/edit/new' className="ant-btn ant-btn-primary item">
-            添加新运营商
-          </Link>
-          <Input defaultValue={user}
-                 style={{width:160}}
-                 placeholder="请输入运营商或者联系人"
-                 onChange={this.handleInputChange.bind(this)}
-                 onPressEnter={this.handleSearch.bind(this)}
-          />
-          <Button type="primary item" onClick={this.handleSearch.bind(this)}>查询</Button>
-        </div>
+        <Toolbar handleSearch={this.handleSearch.bind(this)}
+                 handleInputChange={this.handleInputChange.bind(this)}
+                 user={user}
+        />
         <article>
           <Table
             scroll={{ x: 980 }}
@@ -190,7 +184,6 @@ class App extends React.Component {
     );
   }
 }
-
 
 App.propTypes = {};
 
