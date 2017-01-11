@@ -108,9 +108,6 @@ class App extends React.Component {
     }
     return {user:'', page: this.state.page, perPage: this.state.perPage};
   }
-  rowClassName(record, index) {
-    return this.rowColor[record.key];
-  }
   initializePagination() {
     const self = this;
     return {
@@ -177,7 +174,6 @@ class App extends React.Component {
             pagination={pagination}
             loading={this.state.loading}
             bordered
-            rowClassName={this.rowClassName.bind(this)}
           />
         </article>
       </section>
