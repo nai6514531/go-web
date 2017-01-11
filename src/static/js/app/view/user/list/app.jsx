@@ -63,6 +63,9 @@ class App extends React.Component {
       {title:'下级运营商',url:''}]
     };
     this.list = this.list.bind(this);
+    this.changeHashHistory = this.changeHashHistory.bind(this);
+    this.getQueryItem = this.getQueryItem.bind(this);
+    this.getList = this.getList.bind(this);
   }
   list(pager,searchValue) {
     this.setState({
@@ -83,63 +86,76 @@ class App extends React.Component {
       })
   }
   componentWillMount() {
-    const pager = { page : this.state.page, perPage: this.state.perPage};
       // 页面刷新的时候需要按照 URL 参数加载搜索结果,有参则传参
+    const queryItem = this.getQueryItem();
+    // 将 query 的值转换到 state
+    this.setState({
+      searchValue: queryItem.user,
+      page: queryItem.page,
+      perPage: queryItem.perPage
+    });
+    const pager = { page : queryItem.page, perPage: queryItem.perPage};
+    this.list(pager, queryItem.user);
+  }
+  getQueryItem() {
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
-      const user = query.user;
-      this.setState({searchValue:user})
-      this.list(pager,user);
-    } else {
-      this.list(pager);
+      return {
+        user: query.user || '',
+        page: +query.page || 1,
+        perPage: +query.perPage || 10
+      };
     }
+    return {user:'', page: this.state.page, perPage: this.state.perPage};
   }
   rowClassName(record, index) {
     return this.rowColor[record.key];
   }
   initializePagination() {
     const self = this;
-    const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
     return {
       total: this.state.total,
       showSizeChanger: true,
       size:'small',
+      defaultPageSize: this.state.perPage,
       showTotal (total) {
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
-        self.setState(pager);
-        self.list(pager,user);
+        self.getList(pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
-        self.setState(pager);
-        self.list(pager,user);
+        self.getList(pager);
       },
     }
+  }
+  getList(pager) {
+    const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
+    const query = Object.assign({}, pager, {user: user});
+    this.setState(pager);
+    this.changeHashHistory(query);
+    this.list(pager,user);
   }
   handleInputChange(e) {
     this.setState({
       searchValue: e.target.value,
     });
   }
-  handleSearch() {
-    const user = this.state.searchValue.replace(/[\r\n\s]/g,"");
-    const pager = { page: 1, perPage: this.state.perPage};
-    this.setState({ page: 1 });
-    // 重置 URL 参数
-    this.props.location.query.user = user;
+  changeHashHistory(query) {
+    const newQuery = query;
+    for (let obj in newQuery){
+      this.props.location.query[obj]=newQuery[obj];
+    }
     hashHistory.replace(this.props.location);
-    // 发 AJAX
-    this.list(pager,user);
+  }
+  handleSearch() {
+    const pager = { page: 1, perPage: this.state.perPage};
+    this.getList(pager);
   }
   render() {
-    const query = this.props.location.query;
-    let user = '';
-    if(!_.isEmpty(query)) {
-      user = query.user;
-    }
+    const user = this.getQueryItem().user;
     const pagination = this.initializePagination();
     pagination.current = this.state.page;
     return (
