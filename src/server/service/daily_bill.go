@@ -225,12 +225,12 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 			if _billMap["settledAt"] != nil {
 				settledAt = _billMap["settledAt"].(string)
 			}
-			common.Logger.Warningln("_billMap===================", _billMap)
+			common.Logger.Debugln("_billMap===================", _billMap)
 			mnParam := map[string]interface{}{
 				"STATUS":   strconv.Itoa(status),
 				"BILLDATE": settledAt,
 			}
-			common.Logger.Warningln("mnParam---------------------------", mnParam)
+			common.Logger.Debugln("mnParam---------------------------", mnParam)
 			r = txmn.Model(&muniu.BoxStatBill{}).Where(" COMPANYID = ? and PERIOD_START = ? AND STATUS != '2' ", userId, billAt).Updates(mnParam)
 			if r.Error != nil {
 				common.Logger.Warningln(r.Error.Error())
