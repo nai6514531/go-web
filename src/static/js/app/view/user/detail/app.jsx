@@ -54,12 +54,12 @@ class App extends React.Component {
       list: [],
       breadItems: [{title:'运营商管理',url:''},]
     };
-    this.detail = this.detail.bind(this);
+    this.detailTotal = this.detailTotal.bind(this);
   }
   componentWillMount() {
-    this.detail(USER.id);
+    this.detailTotal(USER.id);
   }
-  detail(id) {
+  detailTotal(id) {
     this.setState({
       loading: true,
     });
@@ -79,7 +79,7 @@ class App extends React.Component {
   }
   render() {
     return (
-      <section className="view-user-detail">
+      <section className="view-user-detailTotal">
         <header>
           <SodaBreadcrumb items={this.state.breadItems}/>
         </header>
