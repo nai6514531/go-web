@@ -63,7 +63,7 @@ class App extends React.Component {
     this.setState({
       loading: true,
     });
-    UserService.detail(id)
+    UserService.detailTotal(id)
       .then((data) => {
         let list = data.data;
         this.setState({
