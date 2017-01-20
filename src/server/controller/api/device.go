@@ -648,7 +648,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if len(device.SerialNumber) != 10 || len(device.SerialNumber) != 6 {
+	if len(device.SerialNumber) != 10 && len(device.SerialNumber) != 6 {
 		result = &enity.Result{"01030303", nil, device_msg["01030303"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -772,7 +772,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 || len(v) != 6 {
+		if len(v) != 10 && len(v) != 6 {
 			result = &enity.Result{"01030503", nil, device_msg["01030503"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -979,7 +979,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 || len(v) != 6 {
+		if len(v) != 10 && len(v) != 6 {
 			result = &enity.Result{"01030703", nil, device_msg["01030703"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
