@@ -167,12 +167,18 @@ class DeviceForm extends React.Component {
     var pattern=new RegExp(/^\s*$/);
     for(var i = 0 ;i<arr.length;i++) {
       if(arr[i] == "" || typeof(arr[i]) == "undefined"
-        || pattern.test(arr[i]) || arr[i].length !== 10) {
+        || pattern.test(arr[i]) || (arr[i].length !== 10 && arr[i].length !== 6)) {
         arr.splice(i,1);
         i= i-1;
       }
     }
     return arr;
+  }
+  trim(arr){
+    const newArr = arr.map(function (item,key) {
+      return item.replace(/[\r\n\s]/g,"");
+    })
+    return newArr;
   }
 	handleSubmit(e) {
 		e.preventDefault();
@@ -193,11 +199,11 @@ class DeviceForm extends React.Component {
 			}
       // 根据换行切割字符串
       const splitted = values.serialNumber.split("\n");
-      // 移除重复,空白,长度不为10,并且内部全为空格的字符串
-      const numbers = self.removeNull(self.removeDuplicates(splitted));
+      const trimed = self.trim(splitted);
+      // 移除重复,空白,长度不为10或者6,并且内部全为空格的字符串
+      const numbers = self.removeNull(self.removeDuplicates(trimed));
       // 拼接成字符串
       const serialNumber = numbers.join(",");
-
 			const deviceValue = {
 				"serialNumber": serialNumber,
         "provinceId": parseInt(provinceId),
