@@ -47,9 +47,9 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 	}
 	if searchStr != "" {
 		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
-		params = append(params, "%" + searchStr + "%")
-		params = append(params, "%" + searchStr + "%")
-		params = append(params, "%" + searchStr + "%")
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
 	}
 	if roleId == 3 {
 		//财务角色过滤掉测试账号的账单
@@ -98,9 +98,9 @@ func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []
 	}
 	if searchStr != "" {
 		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
-		params = append(params, "%" + searchStr + "%")
-		params = append(params, "%" + searchStr + "%")
-		params = append(params, "%" + searchStr + "%")
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
 	}
 	if roleId == 3 {
 		//财务角色过滤掉测试账号的账单
@@ -243,8 +243,8 @@ func (self *DailyBillService) Updates(list *[]*model.DailyBill, mnznList interfa
 	tx := common.DB.Begin()
 	for _, _bill := range *list {
 		param := map[string]interface{}{
-			"id": _bill.Id,
-			"status":   _bill.Status,
+			"id":         _bill.Id,
+			"status":     _bill.Status,
 			"settled_at": _bill.SettledAt,
 		}
 		r = tx.Model(&model.DailyBill{}).Where(" id = ? and status != 2 ", _bill.Id).Updates(param)
@@ -413,9 +413,9 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 	IdStr := ""
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	/*
-	select bsb.PERIOD_START as 'date', sum(bsb.MONEY) as 'amount'  from box_stat_bill bsb, box_admin ba where
-	bsb.PERIOD_START>='2016-11-29'  and bsb.PERIOD_START<'2016-12-06' and bsb.COMPANYID!=0 and ba.paytype!=-1
-	and bsb.companyid=ba.localid group by bsb.PERIOD_START;
+		select bsb.PERIOD_START as 'date', sum(bsb.MONEY) as 'amount'  from box_stat_bill bsb, box_admin ba where
+		bsb.PERIOD_START>='2016-11-29'  and bsb.PERIOD_START<'2016-12-06' and bsb.COMPANYID!=0 and ba.paytype!=-1
+		and bsb.companyid=ba.localid group by bsb.PERIOD_START;
 	*/
 	end := time.Now().Format("2006-01-02")
 	sql := " select bsb.PERIOD_START as 'date', sum(bsb.MONEY) as 'amount' " +
@@ -426,7 +426,7 @@ func (self *DailyBillService) SumByDate(companyIds ...string) (*[]*muniu.BillSum
 		IdStr = strings.Join(companyIds, ",")
 		sql += " and COMPANYID in (" + IdStr + ") "
 	}
-	sql +=  " and bsb.COMPANYID!=0 " +
+	sql += " and bsb.COMPANYID!=0 " +
 		" and ba.paytype!=-1 and bsb.companyid=ba.localid " +
 		" group by bsb.PERIOD_START"
 	rows, err := common.MNREAD.Raw(sql).Rows()
@@ -450,12 +450,12 @@ func (self *DailyBillService) WechatBillByDate() (*[]*muniu.BillSumByDate, error
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
+	sql := " select DATE_FORMAT(INSERTTIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
 		" from trade_info " +
-		" where date(UPDATETIME) >='" + start + "' " +
-		" and date(UPDATETIME)<'" + end + "'" +
+		" where date(INSERTTIME) >='" + start + "' " +
+		" and date(INSERTTIME)<'" + end + "'" +
 		" and tradestatus='success'" +
-		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
+		" group by DATE_FORMAT(INSERTTIME,'%Y-%m-%d')"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -476,12 +476,12 @@ func (self *DailyBillService) AlipayBillByDate() (*[]*muniu.BillSumByDate, error
 	list := []*muniu.BillSumByDate{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	sql := " select DATE_FORMAT(UPDATETIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
+	sql := " select DATE_FORMAT(INSERTTIME,'%Y-%m-%d') as 'date',sum(price) as 'amount' " +
 		" from trade_info " +
-		" where date(UPDATETIME) >='" + start + "'" +
-		" and date(UPDATETIME)<'" + end + "'" +
+		" where date(INSERTTIME) >='" + start + "'" +
+		" and date(INSERTTIME)<'" + end + "'" +
 		" and ( tradestatus='TRADE_SUCCESS' or tradestatus='TRADE_FINISHED') " +
-		" group by DATE_FORMAT(UPDATETIME,'%Y-%m-%d')"
+		" group by DATE_FORMAT(INSERTTIME,'%Y-%m-%d')"
 	rows, err := common.MNREAD.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
@@ -564,8 +564,8 @@ func (self *DailyBillService) DailyBillByAccountType(accountType int) (*[]*muniu
 		sumByDate := &muniu.BillSumByDate{}
 		common.DB.ScanRows(rows, sumByDate)
 		sumByDate.Amount = sumByDate.Amount / 100
-		d,_:=time.Parse(time.RFC3339,sumByDate.Date)
-		sumByDate.Date=d.Format("2006-01-02")
+		d, _ := time.Parse(time.RFC3339, sumByDate.Date)
+		sumByDate.Date = d.Format("2006-01-02")
 		list = append(list, sumByDate)
 	}
 	return &list, nil
@@ -577,7 +577,7 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 	var _status []string
 	userId := -1
 	if s != "" {
-		_status = strings.Split(s, ",")  //结算状态和提现状态
+		_status = strings.Split(s, ",") //结算状态和提现状态
 	}
 	userRoleRel, err := userRoleRelService.BasicByUserId(signinUserId)
 	roleId := userRoleRel.RoleId
