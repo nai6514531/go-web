@@ -214,8 +214,8 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 		return
 	}
 	for _, _detail := range *list {
-		if deviceMap[_detail.SerialNumber] != nil {
-			_detail.Address = deviceMap[_detail.SerialNumber].Address
+		if deviceMap[_detail.DeviceSerial] != nil {
+			_detail.Address = deviceMap[_detail.DeviceSerial].Address
 		}
 
 	}

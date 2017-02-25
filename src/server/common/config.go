@@ -8,7 +8,7 @@ import (
 
 func SetUpConfig() {
 	var (
-		conf = flag.String("conf", "", "config file path")
+		conf = flag.String("conf", "./runtime.config", "config file path")
 	)
 
 	flag.Parse()

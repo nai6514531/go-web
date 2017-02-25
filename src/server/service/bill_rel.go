@@ -15,7 +15,7 @@ func (self *BillRelService) Create(billRelList ...*model.BillRel) (int, error) {
 	var r *gorm.DB
 	var isTrue bool
 	rows := 0
-	tx := common.DB.Begin()
+	tx := common.SodaMngDB_WR.Begin()
 	for _, billRel := range billRelList {
 		isTrue = tx.NewRecord(&billRel)
 		if !isTrue {

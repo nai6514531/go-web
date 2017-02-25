@@ -36,7 +36,7 @@ const App = React.createClass({
   renderBarChart(id, categories, _data){
     Highcharts.chart(id, {
       chart: {
-        type: 'bar'
+        type: 'column'
       },
       title: {
         text: ''

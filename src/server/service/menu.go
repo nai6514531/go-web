@@ -15,7 +15,7 @@ func (self *MenuService) ListByPermissionIds(permissionIds []int) (*[]*model.Men
 	//关联查询菜单id
 	permissionMenuRelList := &[]*model.PermissionMenuRel{}
 	var menuIds []int
-	r := common.DB.Where("permission_id IN (?)", permissionIds).Find(permissionMenuRelList)
+	r := common.SodaMngDB_R.Where("permission_id IN (?)", permissionIds).Find(permissionMenuRelList)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -25,7 +25,7 @@ func (self *MenuService) ListByPermissionIds(permissionIds []int) (*[]*model.Men
 	menuIdsUniq := functions.Uniq(menuIds) //数组去重
 	//菜单id列表查详情
 	menuList := &[]*model.Menu{}
-	r = common.DB.Where("id IN (?)", menuIdsUniq).Find(menuList)
+	r = common.SodaMngDB_R.Where("id IN (?)", menuIdsUniq).Find(menuList)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -40,14 +40,14 @@ func (self *MenuService) ListByUserId(userId int) (*[]*model.Menu, error) {
 		"select r.id from role r,user_role_rel urr where urr.user_id =" + _userId + " and r.id=urr.role_id" +
 		") " +
 		"and rpr.permission_id =pmr.permission_id and pmr.menu_id = m.id"
-	rows, err := common.DB.Raw(sql).Rows()
+	rows, err := common.SodaMngDB_R.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		menu := &model.Menu{}
-		common.DB.ScanRows(rows, menu)
+		common.SodaMngDB_R.ScanRows(rows, menu)
 		list = append(list, menu)
 	}
 	return &list, nil

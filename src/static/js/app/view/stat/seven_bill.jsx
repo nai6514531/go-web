@@ -26,17 +26,17 @@ const App = React.createClass({
         }
       }, {
         title: '消费金额',
-        dataIndex: 'consumption',
-        key: 'consumption',
-        render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
+        dataIndex: 'consume',
+        key: 'consume',
+        render: (consume) => {
+          return Math.round(consume*100)/100 + "元";
         }
       }, {
         title: '余额',
         dataIndex: 'balance',
         key: 'balance',
-        render: (amount) => {
-          return Math.round(amount*100)/100 + "元";
+        render: (balance) => {
+          return Math.round(balance*100)/100 + "元";
         }
       }],
       loading: false
@@ -59,9 +59,6 @@ const App = React.createClass({
           const list = data.data;
           let theList = list.map((item, key) => {
             item.key = key;
-            if(key !== list.length-1) {
-              item.balance = item.recharge - item.consumption;
-            }
             return item;
           });
           this.setState({

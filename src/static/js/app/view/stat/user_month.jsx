@@ -16,7 +16,6 @@ const App = React.createClass({
         key: 'date',
         render: (date) => {
           if(date !== "total") {
-            console.log(date);
             return moment(date).format('YYYY-MM')
           } else {
             return "总计";
@@ -57,7 +56,7 @@ const App = React.createClass({
             item.key = key;
             return item;
           });
-          theList.push(total);
+          theList.unshift(total);
           this.setState({
             list: theList,
           });

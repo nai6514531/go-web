@@ -21,7 +21,7 @@ const App = React.createClass({
         title: '序号',
         dataIndex: 'key',
         key: 'key',
-        width:10,
+        width:40,
       }, {
         title: '日期',
         dataIndex: 'date',
@@ -38,35 +38,60 @@ const App = React.createClass({
           };
         },
       }, {
+        title: '用户数',
+        dataIndex: 'totalUser',
+        key: 'totalUser',
+      }, {
         title: '新增用户数',
-        dataIndex: 'increaseUserCount',
-        key: 'increaseUserCount',
-        width:60,
+        dataIndex: 'totalNewUser',
+        key: 'totalNewUser',
+      },{
+        title: '模块总数',
+        dataIndex: 'totalDevice',
+        key: 'totalDevice',
+      }, {
+        title: '已售模块数',
+        dataIndex: 'totalSoldDevice',
+        key: 'totalSoldDevice',
       }, {
         title: '空闲模块',
-        dataIndex: 'enabledDeviceCount',
-        key: 'enabledDeviceCount',
-        width:60,
-      },{
-        title: '新增模块',
-        dataIndex: 'increaseDeviceCount',
-        key: 'increaseDeviceCount',
-        width:50,
+        dataIndex: 'totalUnusedDevice',
+        key: 'totalUnusedDevice',
+      }, {
+        title: '独立充值用户数',
+        dataIndex: 'totalRechargeUser',
+        key: 'totalRechargeUser',
+      }, {
+        title: '独立消费用户数',
+        dataIndex: 'totalConsumeUser',
+        key: 'totalConsumeUser',
       },{
         title: '充值金额',
-        dataIndex: 'rechargeAmount',
-        key: 'rechargeAmount',
-        width:100,
-        render: (recharge_amount) => {
-          return Math.round(recharge_amount*100)/100 + "元";
+        dataIndex: 'totalRecharge',
+        key: 'totalRecharge',
+        render: (totalRecharge) => {
+          return Math.round(totalRecharge)/100 + "元";
         }
       },{
         title: '消费金额',
-        dataIndex: 'consumeAmount',
-        key: 'consumeAmount',
-        width:100,
-        render: (consume_amount) => {
-          return Math.round(consume_amount*100)/100 + "元";
+        dataIndex: 'totalConsume',
+        key: 'totalConsume',
+        render: (totalConsume) => {
+          return Math.round(totalConsume)/100 + "元";
+        }
+      },{
+        title: '微信充值金额',
+        dataIndex: 'totalWechatRecharge',
+        key: 'totalWechatRecharge',
+        render: (totalWechatRecharge) => {
+          return Math.round(totalWechatRecharge)/100 + "元";
+        }
+      },{
+        title: '支付宝充值金额',
+        dataIndex: 'totalAlipayRecharge',
+        key: 'totalAlipayRecharge',
+        render: (totalAlipayRecharge) => {
+          return Math.round(totalAlipayRecharge)/100 + "元";
         }
       }],
       loading: false
@@ -136,8 +161,8 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} 
-             columns={columns} pagination={false} 
+      <Table scroll={{ x: 500 }} dataSource={list}
+             columns={columns} pagination={false}
              bordered loading={this.state.loading}
              rowClassName={this.rowClassName}
       />

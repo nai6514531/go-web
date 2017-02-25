@@ -11,7 +11,7 @@ type CashAccountTypeService struct {
 
 func (self *CashAccountTypeService) List() (*[]*model.CashAccountType, error) {
 	list := &[]*model.CashAccountType{}
-	r := common.DB.Model(&model.CashAccountType{}).Find(list)
+	r := common.SodaMngDB_R.Model(&model.CashAccountType{}).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

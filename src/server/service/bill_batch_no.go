@@ -11,7 +11,7 @@ type BillBatchNoService struct {
 
 func (self *BillBatchNoService) Baisc(billIds ...interface{}) (*[]*model.BillBatchNo, error) {
 	list := &[]*model.BillBatchNo{}
-	r := common.DB.Where("bill_id in (?)", billIds...).Find(&list)
+	r := common.SodaMngDB_R.Where("bill_id in (?)", billIds...).Find(&list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -22,7 +22,7 @@ func (self *BillBatchNoService) BatchCreate(list *[]*model.BillBatchNo) (int, er
 	var err error
 	var rows int64
 	rows = int64(0)
-	tx := common.DB.Begin()
+	tx := common.SodaMngDB_WR.Begin()
 	for _, _billBatchNo := range *list {
 		isTure := tx.NewRecord(_billBatchNo)
 		if !isTure {
@@ -45,14 +45,14 @@ func (self *BillBatchNoService) BatchCreate(list *[]*model.BillBatchNo) (int, er
 
 func (self *BillBatchNoService) Create(billBatchNo *model.BillBatchNo) (int, error) {
 	var err error
-	isTrue := common.DB.NewRecord(billBatchNo)
+	isTrue := common.SodaMngDB_WR.NewRecord(billBatchNo)
 	if !isTrue {
 		e := &functions.DefinedError{}
 		e.Msg = "can not create a new record!"
 		err = e
 		return 0, err
 	}
-	r := common.DB.Create(&billBatchNo)
+	r := common.SodaMngDB_WR.Create(&billBatchNo)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -60,7 +60,7 @@ func (self *BillBatchNoService) Create(billBatchNo *model.BillBatchNo) (int, err
 }
 
 func (self *BillBatchNoService) Delete(billIds ...interface{}) (int, error){
-	r := common.DB.Where("bill_id in (?)", billIds...).Delete(&model.BillBatchNo{})
+	r := common.SodaMngDB_R.Where("bill_id in (?)", billIds...).Delete(&model.BillBatchNo{})
 	if r.Error != nil {
 		return 0, r.Error
 	}

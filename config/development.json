@@ -21,69 +21,7 @@
   "server": {
     "domain": "0.0.0.0:8080",
     "host": "0.0.0.0",
-    "port": 8080,
-    "rateLimiter": {
-      "redis": {
-        "addr": "192.168.1.204:6379",
-        "password": "123456",
-        "database": 10,
-        "prefix": "soda-manager-rate-limiter:",
-        "maxRetry": 3
-      }
-    },
-    "session": {
-      "cookie": "sess",
-      "expires": 86400,
-      "redis": {
-        "addr": "192.168.1.204:6379",
-        "password": "123456",
-        "database": 10,
-        "prefix": "soda-manager-session:",
-        "maxIdle": 20,
-        "maxActive": 50,
-        "maxAgeSeconds": 86400,
-        "idleTimeout": 60
-      }
-    },
-    "db": {
-      "dialect": "mysql",
-      "host": "192.168.1.204",
-      "port": 3306,
-      "user": "web",
-      "password": "123456",
-      "database": "soda-manager",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
-    "mndb": {
-      "dialect": "mysql",
-      "host": "192.168.1.204",
-      "port": 3306,
-      "user": "web",
-      "password": "123456",
-      "database": "mnzn",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
-    "mnread": {
-      "dialect": "mysql",
-      "host": "192.168.1.204",
-      "port": 3306,
-      "user": "web",
-      "password": "123456",
-      "database": "mnzn",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
-    "redis": {
-      "addr": "192.168.1.204:6379",
-      "password": "123456",
-      "database": 10,
-      "prefix": "soda-manager:",
-      "maxIdle": 20,
-      "maxActive": 50,
-      "idleTimeout": 60
-    }
+    "port": 8080
   },
   "device": {
     "step": 13,

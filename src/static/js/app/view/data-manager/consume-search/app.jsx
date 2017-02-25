@@ -87,31 +87,34 @@ const App = React.createClass({
         },
       },{
         title: '下单时间',
-        dataIndex: 'time',
-        key: 'time',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
           width:80,
-        render: (time) => {
-          return moment(time).format('YYYY-MM-DD HH:mm:ss')
+        render: (createdAt) => {
+          return moment(createdAt).format('YYYY-MM-DD HH:mm:ss')
         },
       },{
         title: '操作',
-        dataIndex: 'washId',
-        key: 'washId',
+        dataIndex: 'ticketId',
+        key: 'ticketId',
         width: 40,
-        render: (text, record) => (
-          <div>
-            { USER.role.id == 4 ?
-              record.status == 0 ?
-              <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
-                <p><a href="#">退款</a></p>
-              </Popconfirm>
-              :
-              <span>已退款</span>
-              :'/'
+        render: (text, record) => {
+          if(USER.role.id == 4){
+            if ( record.status == 7){
+              return <div>
+                <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
+                  <p><a href="#">退款</a></p>
+                </Popconfirm>
+              </div>
+            }else if(record.status==4){
+              return <span>已退款</span>
+            }else{
+              return '/'
             }
-
-          </div>
-        ),
+          }else{
+            return '/'
+          }
+        },
       }],
       loading: false
     };

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
-	"maizuo.com/soda-manager/src/server/model/muniu"
 	"time"
 	"github.com/spf13/viper"
 	"github.com/jinzhu/gorm"
@@ -16,7 +15,7 @@ type DeviceService struct {
 
 func (self *DeviceService) Basic(id int) (*model.Device, error) {
 	device := &model.Device{}
-	r := common.DB.Where("id = ?", id).First(device)
+	r := common.SodaMngDB_R.Where("id = ?", id).First(device)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -25,7 +24,7 @@ func (self *DeviceService) Basic(id int) (*model.Device, error) {
 
 func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Device, error) {
 	device := &model.Device{}
-	r := common.DB.Where("serial_number = ?", serialNumber).First(device)
+	r := common.SodaMngDB_R.Where("serial_number = ?", serialNumber).First(device)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -35,7 +34,7 @@ func (self *DeviceService) BasicBySerialNumber(serialNumber string) (*model.Devi
 func (self *DeviceService) BasicMapBySerialNumber(serialNumber ...string) (map[string]*model.Device, error) {
 	list := &[]*model.Device{}
 	data := make(map[string]*model.Device, 0)
-	r := common.DB.Where("serial_number in (?)", serialNumber).Find(list)
+	r := common.SodaMngDB_R.Where("serial_number in (?)", serialNumber).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -56,7 +55,7 @@ func (self *DeviceService) ListBySerialNumber(userId int, schoolId int, serialNu
 	}
 	sql += " serial_number in (?)"
 	params = append(params, serialNumber)
-	r := common.DB.Where(sql, params...).Find(list)
+	r := common.SodaMngDB_R.Where(sql, params...).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -65,7 +64,7 @@ func (self *DeviceService) ListBySerialNumber(userId int, schoolId int, serialNu
 
 func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Order("id desc").Find(list)
+	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -74,7 +73,7 @@ func (self *DeviceService) List(page int, perPage int) (*[]*model.Device, error)
 
 func (self *DeviceService) Total() (int, error) {
 	var total int
-	r := common.DB.Model(&model.Device{}).Count(&total)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -84,7 +83,7 @@ func (self *DeviceService) Total() (int, error) {
 func (self *DeviceService) TotalByUser(userId int) (int, error) {
 	device := &model.Device{}
 	var total int
-	r := common.DB.Model(device).Where("user_id = ?", userId).Count(&total)
+	r := common.SodaMngDB_R.Model(device).Where("user_id = ?", userId).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -135,7 +134,7 @@ func (self *DeviceService) TotalByUserAndNextLevel(isAssigned bool, user *model.
 		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
 		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
 	}
-	r := common.DB.Raw(sql, params...).Count(&total)
+	r := common.SodaMngDB_R.Raw(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -197,14 +196,14 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 		sql += " limit ? offset ? "
 		params = append(params, perPage, (page - 1) * perPage)
 	}
-	rows, err := common.DB.Raw(sql, params...).Rows()
+	rows, err := common.SodaMngDB_R.Raw(sql, params...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
 		device := &model.Device{}
-		common.DB.ScanRows(rows, device)
+		common.SodaMngDB_R.ScanRows(rows, device)
 		list = append(list, device)
 
 	}
@@ -214,7 +213,7 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
+	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -223,7 +222,7 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 
 func (self *DeviceService) ListBySerialNumbers(serialNumbers ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Where("serial_number in (?) ", serialNumbers).Find(list)
+	r := common.SodaMngDB_R.Where("serial_number in (?) ", serialNumbers).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -232,7 +231,7 @@ func (self *DeviceService) ListBySerialNumbers(serialNumbers ...string) (*[]*mod
 
 func (self *DeviceService) ListByUserAndSerialNumbers(userId int, serialNumbers []string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
-	r := common.DB.Where("user_id = ? and serial_number in (?) ", userId, serialNumbers).Find(list)
+	r := common.SodaMngDB_R.Where("user_id = ? and serial_number in (?) ", userId, serialNumbers).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -248,7 +247,7 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
+	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -266,7 +265,7 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, seri
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
-	r := common.DB.Model(device).Where(sql, params...).Count(&total)
+	r := common.SodaMngDB_R.Model(device).Where(sql, params...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -274,19 +273,10 @@ func (self *DeviceService) TotalByByUserAndSchool(userId int, schoolId int, seri
 }
 
 func (self *DeviceService) Create(device *model.Device) bool {
-	transAction := common.DB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	r := transAction.Create(device).Scan(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Create BoxInfo:", r.Error.Error())
-		transAction.Rollback()
-		return false
-	}
-	//更新到木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	r = common.MNDB.Create(boxInfo)
-	if r.Error != nil {
-		common.Logger.Warningln("MNDB Create BoxInfo:", r.Error.Error())
 		transAction.Rollback()
 		return false
 	}
@@ -296,8 +286,7 @@ func (self *DeviceService) Create(device *model.Device) bool {
 
 func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool {
 	var r *gorm.DB
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	var deviceMap = make(map[string]interface{})
 	if isBatchUpdate {
 		if device.FirstPulsePrice >= 0 && device.SecondPulsePrice >= 0 && device.ThirdPulsePrice >= 0 && device.FourthPulsePrice >= 0 {
@@ -345,86 +334,29 @@ func (self *DeviceService) Update(device model.Device, isBatchUpdate bool) bool 
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update Device:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
 		return false
 	}
-	//================更新到木牛数据库======================
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(&device)
-	var boxInfoMap = make(map[string]interface{})
-	if isBatchUpdate {
-		if boxInfo.Price_601 >= float64(0) && boxInfo.Price_602 >= float64(0) && boxInfo.Price_603 >= float64(0) && boxInfo.Price_604 >= float64(0) {
-			boxInfoMap["PRICE_601"] = boxInfo.Price_601
-			boxInfoMap["PRICE_602"] = boxInfo.Price_602
-			boxInfoMap["PRICE_603"] = boxInfo.Price_603
-			boxInfoMap["PRICE_604"] = boxInfo.Price_604
-		}
-		if boxInfo.Address != "" {
-			boxInfoMap["ADDRESS"] = boxInfo.Address
-		}
-	} else {
-		boxInfoMap["PRICE_601"] = boxInfo.Price_601
-		boxInfoMap["PRICE_602"] = boxInfo.Price_602
-		boxInfoMap["PRICE_603"] = boxInfo.Price_603
-		boxInfoMap["PRICE_604"] = boxInfo.Price_604
-		boxInfoMap["ADDRESS"] = boxInfo.Address
-		boxInfoMap["DEVICETYPE"] = boxInfo.DeviceType
-	}
-	boxInfoMap["UPDATETIME"] = time.Now().Local().Format("2006-01-02 15:04:05")
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in (?)", serialNumber).Updates(boxInfoMap)
-	if r.Error != nil {
-		common.Logger.Warningln("MNDB Update Device:", r.Error.Error())
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
-	}
-	//======================================================
 	transAction.Commit()
-	mnTransAction.Commit()
 	return true
 }
 
 func (self *DeviceService) UpdatePulseName(device model.Device) bool {
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
-	//==========================更新到新数据库========================
+	transAction := common.SodaMngDB_WR.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Updates(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB UpdatePulseName Device:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
 		return false
 	}
-	//================更新到木牛数据库======================
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(&device)
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(boxInfo)
-	if r.Error != nil {
-		common.Logger.Warningln("MNDB Update BoxInfo:", r.Error.Error())
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
-	}
-	//======================================================
 	transAction.Commit()
-	mnTransAction.Commit()
 	return true
 }
 
 func (self *DeviceService) UpdateStatus(device model.Device) bool {
-	transAction := common.DB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	r := transAction.Model(&model.Device{}).Where("id = ?", device.Id).Update("status", device.Status).Scan(&device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-STATUS:", r.Error.Error())
-		transAction.Rollback()
-		return false
-	}
-	//更新到木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(&device)
-	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update("STATUS", boxInfo.Status)
-	if r.Error != nil {
-		common.Logger.Warningln("MNDB Update BoxInfo-STATUS:", r.Error.Error())
 		transAction.Rollback()
 		return false
 	}
@@ -433,13 +365,11 @@ func (self *DeviceService) UpdateStatus(device model.Device) bool {
 }
 
 func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	r := transAction.Model(&model.Device{}).Where("serial_number = ?", device.SerialNumber).Updates(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
 		return false
 	}
 	//再单独更新一次学校id因为传入的学校id可以为0
@@ -447,34 +377,20 @@ func (self *DeviceService) UpdateBySerialNumber(device *model.Device) bool {
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
-	}
-	//更新到木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Update(boxInfo)
-	if r.Error != nil {
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		return false
 	}
 	//单独更新一次学校id
 	transAction.Commit()
-	mnTransAction.Commit()
 	return true
 }
 
 func (self *DeviceService) BatchUpdateBySerialNumber(device *model.Device, serialList []string) bool {
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	device.SerialNumber = "" //不更新这个字段
 	r := transAction.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Updates(device)
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
 		return false
 	}
 	//再单独更新一次可能为0的值，学校id，4个单洗价格
@@ -488,41 +404,15 @@ func (self *DeviceService) BatchUpdateBySerialNumber(device *model.Device, seria
 	if r.Error != nil {
 		common.Logger.Warningln("DB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
 		transAction.Rollback()
-		mnTransAction.Rollback()
-		return false
-	}
-	device.SerialNumber = "" //不更新这个字段
-	//更新到木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO IN (?)", serialList).Update(boxInfo)
-	if r.Error != nil {
-		transAction.Rollback()
-		mnTransAction.Rollback()
-		common.Logger.Warningln("MNDB Update BoxInfo-BY-DEVICENO:", r.Error.Error())
-		return false
-	}
-	//再次单独更新几个价格避免价格为0的时候不能更新成功
-	var boxInfoPrice = make(map[string]interface{})
-	boxInfoPrice["PRICE_601"] = boxInfo.Price_601
-	boxInfoPrice["PRICE_602"] = boxInfo.Price_602
-	boxInfoPrice["PRICE_603"] = boxInfo.Price_603
-	boxInfoPrice["PRICE_604"] = boxInfo.Price_604
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO IN (?)", serialList).Updates(boxInfoPrice)
-	if r.Error != nil {
-		common.Logger.Warningln("DB Update DevicePrice:", r.Error.Error())
-		transAction.Rollback()
-		mnTransAction.Rollback()
 		return false
 	}
 	transAction.Commit()
-	mnTransAction.Commit()
 	return true
 }
 
 func (self *DeviceService) Reset(id int, user *model.User) bool {
 	device := &model.Device{}
-	transAction := common.DB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	data := map[string]interface{}{
 		"user_id":          1,
 		"from_user_id":     user.Id,
@@ -535,36 +425,18 @@ func (self *DeviceService) Reset(id int, user *model.User) bool {
 		transAction.Rollback()
 		return false
 	}
-	//重置，在木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	r = common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICENO = ?", boxInfo.DeviceNo).Updates(map[string]interface{}{"COMPANYID": "0", "STATUS": "9"})
-	if r.Error != nil {
-		transAction.Rollback()
-		common.Logger.Warningln("MNDB Update BoxInfo-Reset:", r.Error.Error())
-		return false
-	}
 	transAction.Commit()
 	return true
 }
 
 func (self *DeviceService) Delete(id int) bool {
 	device := &model.Device{}
-	transAction := common.DB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	//硬删除记录
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Scan(device).Unscoped().Delete(&model.Device{})
 	if r.Error != nil {
 		common.Logger.Warningln("DB Delete BoxInfo:", r.Error.Error())
 		transAction.Rollback()
-		return false
-	}
-	//重置，在木牛数据库
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	r = common.MNDB.Where("DEVICENO = ?", boxInfo.DeviceNo).Delete(&muniu.BoxInfo{})
-	if r.Error != nil {
-		transAction.Rollback()
-		common.Logger.Warningln("MNDB Delete BoxInfo:", r.Error.Error())
 		return false
 	}
 	transAction.Commit()
@@ -578,7 +450,7 @@ func (self *DeviceService) ListSchoolIdByUser(userId int) (*[]int, error) {
 	}
 	lists := &[]*MyDevice{}
 	//带去重
-	r := common.DB.Raw("SELECT DISTINCT school_id FROM device WHERE user_id = ? AND deleted_at IS NULL", userId).Scan(lists)
+	r := common.SodaMngDB_R.Raw("SELECT DISTINCT school_id FROM device WHERE user_id = ? AND deleted_at IS NULL", userId).Scan(lists)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -593,7 +465,7 @@ func (self *DeviceService) ListSchoolIdByUser(userId int) (*[]int, error) {
 func (self *DeviceService) TotalByUserIds(userIds []int) (int, error) {
 	//list := &[]*model.Device{}
 	var total int64
-	r := common.DB.Model(&model.Device{}).Where("user_id IN (?)", userIds).Count(&total)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id IN (?)", userIds).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
@@ -603,7 +475,7 @@ func (self *DeviceService) TotalByUserIds(userIds []int) (int, error) {
 //判断这批设备序列号是否都是属于test用户或者自身用户的
 func (self *DeviceService) IsOwntoMeOrTest(userId int, serialList []string) bool {
 	var total int64
-	r := common.DB.Model(&model.Device{}).Where("user_id IN (1,?) AND serial_number IN (?)", userId, serialList).Count(&total)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id IN (1,?) AND serial_number IN (?)", userId, serialList).Count(&total)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error)
 		return false
@@ -618,7 +490,7 @@ func (self *DeviceService) IsOwntoMeOrTest(userId int, serialList []string) bool
 //判断这一批序列号要不还没注册要不还没录入
 func (self *DeviceService) IsNoExist(serialList []string) bool {
 	var total int64
-	r := common.DB.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Count(&total)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("serial_number IN (?)", serialList).Count(&total)
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error)
 		return false
@@ -631,8 +503,7 @@ func (self *DeviceService) IsNoExist(serialList []string) bool {
 }
 
 func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialList []string) error {
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	device.UserId = 1 //添加的设备userid为1
 	device.CreatedAt = time.Now()
 	step := viper.GetInt("device.step")
@@ -649,46 +520,44 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	if r.Error != nil {
 		common.Logger.Warningln(r.Error)
 		transAction.Rollback()
-		mnTransAction.Rollback()
-		return r.Error
-	}
-	//更新到木牛
-	boxInfo := &muniu.BoxInfo{}
-	boxInfo.FillByDevice(device)
-	mnsql := "INSERT INTO box_info (DEVICENO,COMPANYID,STATUS,PASSWORD,LOCATION,INSERTTIME,UPDATETIME,ADDRESS,PRICE_601,PRICE_602,PRICE_603,PRICE_604,DEVICETYPE) VALUES "
-	for k, serial := range serialList {
-		val := fmt.Sprintf("('%s',%d,'%s','%s',%d,'%s','%s','%s',%f,%f,%f,%f,'%s')", serial, boxInfo.CompanyId, boxInfo.Status, boxInfo.Password, boxInfo.Location, boxInfo.InsertTime, boxInfo.UpdateTime, boxInfo.Address, boxInfo.Price_601, boxInfo.Price_602, boxInfo.Price_603, boxInfo.Price_604, boxInfo.DeviceType)
-		mnsql = mnsql + val
-		if k != len(serialList) - 1 {
-			mnsql = mnsql + ","
-		}
-	}
-	r = mnTransAction.Exec(mnsql)
-	if r.Error != nil {
-		common.Logger.Warningln(r.Error)
-		transAction.Rollback()
-		mnTransAction.Rollback()
 		return r.Error
 	}
 	transAction.Commit()
-	mnTransAction.Commit()
 	return nil
 }
 
-func (self *DeviceService) ListByUserId(userId ...int) (*[]*model.Device, error) {
+func (self *DeviceService) ListByUserIds(userId ...int) (*[]*model.Device, error) {
 	list := []*model.Device{}
-	r := common.DB.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	return &list, nil
 }
-
+func (self *DeviceService) ListByUserId(userId int) (*[]*model.Device, error) {
+	list := []*model.Device{}
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id = ?", userId).Find(&list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return &list, nil
+}
 func (self *DeviceService) DailyBill(serialNumber string, billAt string, page int, perPage int) (*[]*map[string]interface{}, error) {
-	sql := "select b.address,bw.price,bw.usermobile mobile,bw.washtype,bw.INSERTTIME createdAt " +
-		" from box_wash bw,box_info b " +
-		"where  b.deviceno='" + serialNumber + "' and date(bw.inserttime)='" + billAt + "' and bw.deviceno=b.DEVICENO"
-	rows, err := common.MNREAD.Raw(sql).Rows()
+	sql:=`
+	select value,mobile,
+	(case
+		when device_mode=1 then 601
+		when device_mode=2 then 602
+		when device_mode=3 then 603
+		when device_mode=4 then 604
+		else 0
+	end),
+	created_at
+	from ticket
+	where device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
+	order by created_timestamp desc
+	`
+	rows, err := common.SodaDB_R.Raw(sql,serialNumber,billAt).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -697,19 +566,19 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 	list := make([]*map[string]interface{}, 0)
 	for rows.Next() {
 		var address string
-		var price float64
+		var price int
 		var mobile string
 		var washtype int
 		var createdAt string
 
-		err := rows.Scan(&address, &price, &mobile, &washtype, &createdAt)
+		err := rows.Scan(&price, &mobile, &washtype, &createdAt)
 		if err != nil {
 			return nil, err
 		}
 		m := map[string]interface{}{
 			"serialNumber": serialNumber,
 			"address":      address,
-			"price":        price,
+			"price":        price/100,
 			"mobile":       mobile,
 			"washType":     washtype,
 			"createdAt":    createdAt,
@@ -722,7 +591,7 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 
 func (self *DeviceService) BasicByUserId(userId int) (*model.Device, error) {
 	device := &model.Device{}
-	r := common.DB.Model(&model.Device{}).Where("user_id = ?", userId).First(device)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id = ?", userId).First(device)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -732,7 +601,7 @@ func (self *DeviceService) BasicByUserId(userId int) (*model.Device, error) {
 func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.Device, error) {
 	list := []*model.Device{}
 	deviceMap := make(map[string]*model.Device, 0)
-	r := common.DB.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
+	r := common.SodaMngDB_R.Model(&model.Device{}).Where("user_id in (?)", userId).Find(&list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -743,8 +612,7 @@ func (self *DeviceService) BasicMapByUserId(userId ...int) (map[string]*model.De
 }
 
 func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, serialNumbers []string) (bool, error) {
-	transAction := common.DB.Begin()
-	mnTransAction := common.MNDB.Begin()
+	transAction := common.SodaMngDB_WR.Begin()
 	assignedAt := time.Now().Local().Format("2006-01-02 15:04:05")
 	data := map[string]interface{}{
 		"user_id":        toUser.Id,
@@ -759,22 +627,7 @@ func (self *DeviceService) Assign(toUser *model.User, fromUser *model.User, seri
 		common.Logger.Warningln("DB Device Assign:", r.Error.Error())
 		return false, r.Error
 	}
-	_data := map[string]interface{}{
-		"COMPANYID": (toUser.Id - 1),
-		"UPDATETIME": assignedAt,
-		"INSERTTIME": assignedAt,
-		"STATUS":     "0",
-	}
-	r = mnTransAction.Model(&muniu.BoxInfo{}).Where("DEVICENO in  (?) ", serialNumbers).Updates(_data)
-	if r.Error != nil {
-		mnTransAction.Rollback()
-		transAction.Rollback()
-		common.Logger.Warningln("MNDB BoxInfo Assign:", r.Error.Error())
-		return false, r.Error
-	}
-
 	transAction.Commit()
-	mnTransAction.Commit()
 	return true, nil
 }
 
@@ -827,12 +680,7 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 
 func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error) {
 	timeFormat := "2006-01-02 15:04:05"
-	r := common.MNDB.Model(&muniu.BoxInfo{}).Where("DEVICETYPE = 0 and STATUS = '" + status + "' and UPDATETIME <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("STATUS", '0')
-	if r.Error != nil {
-		common.Logger.Warningln("Timed Update " + status + " BoxInfo-STATUS:", r.Error.Error())
-		return false, r.Error
-	}
-	r = common.DB.Model(&model.Device{}).Where("reference_device_id = 1 and status = " + status + " and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	r := common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 1 and status = " + status + " and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update " + status + " Device-STATUS:", r.Error.Error())
 		return false, r.Error

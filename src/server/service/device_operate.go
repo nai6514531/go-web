@@ -11,14 +11,14 @@ type DeviceOperateService struct {
 
 func (self *DeviceOperateService) Create(deviceOperate *model.DeviceOperate) (int, error) {
 	var err error
-	isTrue := common.DB.NewRecord(deviceOperate)
+	isTrue := common.SodaMngDB_WR.NewRecord(deviceOperate)
 	if !isTrue {
 		e := &functions.DefinedError{}
 		e.Msg = "can not create a new record!"
 		err = e
 		return 0, err
 	}
-	r := common.DB.Create(&deviceOperate)
+	r := common.SodaMngDB_WR.Create(&deviceOperate)
 	if r.Error != nil {
 		return 0, r.Error
 	}

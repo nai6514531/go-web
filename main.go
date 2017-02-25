@@ -16,11 +16,7 @@ func main() {
 
 	common.SetUpSession()
 
-	common.SetUpDB()
-
-	common.SetUpMNDB()
-
-	common.SetUpMNREAD()
+	common.SetupDB()
 
 	common.SetUpRedis()
 

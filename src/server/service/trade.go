@@ -1,141 +1,90 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/common"
-	"maizuo.com/soda-manager/src/server/model/muniu"
 	"github.com/jinzhu/gorm"
-	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/model/soda"
+	"maizuo.com/soda-manager/src/server/service/soda"
 )
 
 type TradeService struct {
 }
 
-func (self *TradeService) TotalOfDevice(serialNumber string, account string) (int, error) {
+func (self *TradeService) TotalOfDevice(serialNumber string, mobile string) (int, error) {
 	var total int
-	param := make([]interface{}, 0)
-	sql := "select count(*) as total from box_wash w left join box_admin a on " +
-		"w.companyid=a.localid left join box_info i on w.deviceno=i.deviceno "
+	var r *gorm.DB
 	if serialNumber != "" {
-		sql += " where i.deviceno=? "
-		param = append(param, serialNumber)
-	}else if account != "" {
-		sql += " where w.usermobile=? "
-		param = append(param, account)
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("device_serial = ?", serialNumber).Count(&total)
+	} else if mobile != "" {
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("mobile = ?", mobile).Count(&total)
 	}
-	r := common.MNREAD.Raw(sql, param...).Count(&total)
 	if r.Error != nil {
 		return 0, r.Error
 	}
 	return total, nil
 }
 
-func (self *TradeService) BasicOfDevice(serialNumber string, account string, page int, perPage int) (*[]*map[string]interface{}, error) {
-	var sql string = ""
+func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page int, perPage int) (*[]*map[string]interface{}, error) {
 	list := make([]*map[string]interface{}, 0)
-	param := make([]interface{}, 0)
-	sql = "select a.name,a.servicephone,a.agencyid,w.deviceno,w.passwd,w.usermobile,w.price,w.washtype," +
-	"w.inserttime,IFNULL(i.address, '') as address,w.status,w.localid from box_wash w left join box_admin a on " +
-	"w.companyid=a.localid left join box_info i on w.deviceno=i.deviceno "
-
+	tickets := &[]*soda.Ticket{}
+	var r *gorm.DB
 	if serialNumber != "" {
-		sql += " where i.deviceno=? "
-		param = append(param, serialNumber)
-	}else if account != "" {
-		sql += " where w.usermobile=? "
-		param = append(param, account)
+		r = common.SodaDB_R.Where("device_serial = ?", serialNumber).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
+	} else if mobile != "" {
+		r = common.SodaDB_R.Where("mobile = ?", mobile).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
 	}
-
-	sql += "order by w.inserttime desc limit ? offset ? "
-	param = append(param, perPage, (page - 1) * perPage)
-	rows, err := common.MNREAD.Raw(sql, param...).Rows()
-	defer rows.Close()
-	if err != nil {
-		return nil, err
+	if r.Error != nil {
+		return nil, r.Error
 	}
-
-	for rows.Next() {
+	userService := &UserService{}
+	deviceService := &DeviceService{}
+	for _, ticket := range *tickets {
 		m := make(map[string]interface{}, 0)
-		var name string
-		var servicephone string
-		var agencyid int
-		var deviceno string
-		var passwd string
-		var usermobile string
-		var price float64
-		var washtype int
-		var inserttime string
-		var address string
-		var status int
-		var localid int
-		err := rows.Scan(&name, &servicephone, &agencyid, &deviceno, &passwd, &usermobile, &price, &washtype, &inserttime, &address, &status, &localid)
-		m["user"] = name
-		m["telephone"] = servicephone
-		m["address"] = address
-		m["account"] = usermobile
-		m["token"] = passwd
-		m["amount"] = price
-		m["pulseType"] = washtype
-		m["time"] = inserttime
-		m["serialNumber"] = deviceno
-		m["washId"] = localid
-		m["status"] = status
-		if err != nil {
-			return nil, err
+		user, err := userService.Basic(ticket.OwnerId)
+		if err == nil {
+			m["user"] = user.Contact
+			m["telephone"] = user.Telephone
 		}
+		device, err := deviceService.BasicBySerialNumber(ticket.DeviceSerial)
+		if err == nil {
+			m["address"] = device.Address
+			m["token"] = device.Password
+		}
+		m["amount"] = ticket.Value / 100
+		m["account"] = ticket.Mobile
+		m["pulseType"] = 600 + ticket.DeviceMode
+		m["createdAt"] = ticket.CreatedAt
+		m["serialNumber"] = ticket.DeviceSerial
+		m["ticketId"] = ticket.TicketId
+		m["status"] = ticket.Status
 		list = append(list, &m)
 	}
 	return &list, nil
 }
 
-func BasicOfBoxWash(localId int) (*muniu.BoxWash, error) {
-	boxWash := &muniu.BoxWash{}
-	r := common.MNREAD.Where(" localid = ?", localId).First(boxWash)
-	if r.Error != nil {
-		return nil, r.Error
-	}
-	return boxWash, nil
-}
-
-func BasicOfBoxUser(account string) (*muniu.BoxUser, error) {
-	boxUser := &muniu.BoxUser{}
-	r := common.MNREAD.Where(" mobile = ? ", account).First(boxUser)
-	if r.Error != nil {
-		return nil, r.Error
-	}
-	return boxUser, nil
-}
-
-func (self *TradeService) Refund(washId int, account string) (int, error) {
-	var r *gorm.DB
-	boxWash, err := BasicOfBoxWash(washId)
+func (self *TradeService) Refund(ticketId string, mobile string) (int, error) {
+	ticketService := &sodaService.TicketService{}
+	walletService := &sodaService.WalletService{}
+	ticket, err := ticketService.BasicByTicketId(ticketId)
 	if err != nil {
 		return 0, err
 	}
-	boxUser, err := BasicOfBoxUser(account)
-	if err != nil {
-		return 0, err
-	}
-	txmn := common.MNDB.Begin()
-	r = txmn.Model(&muniu.BoxUser{}).Where(" mobile = ? ", account).Update("CONSUMPTION", boxUser.Consumption - boxWash.Price)
-	if r.Error != nil {
-		txmn.Rollback()
-		return 0, r.Error
-	}
-	r = txmn.Model(&muniu.BoxWash{}).Where(" localid = ? ", washId).Update("STATUS", 1)
-	if r.Error != nil {
-		txmn.Rollback()
-		return 0, r.Error
-	}
-
-	tx := common.DB.Begin()
-	r = tx.Model(&model.DailyBillDetail{}).Where(" wash_id = ? ", washId).Update("status", 1)
+	tx := common.SodaDB_WR.Begin()
+	r := tx.Model(&soda.Ticket{}).Where("ticket_id = ? ", ticket.TicketId).Update("status", 4)
 	if r.Error != nil {
 		tx.Rollback()
-		txmn.Rollback()
 		return 0, r.Error
 	}
-
+	wallet, err := walletService.BasicByMobile(mobile)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	r = tx.Model(&soda.Wallet{}).Where("mobile = ?", mobile).Update("value", wallet.Value+ticket.Value)
+	if r.Error != nil {
+		tx.Rollback()
+		return 0, r.Error
+	}
 	tx.Commit()
-	txmn.Commit()
-	return int(r.RowsAffected), nil
+	return 1, nil
 }
