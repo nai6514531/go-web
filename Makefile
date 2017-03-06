@@ -10,7 +10,7 @@ ENV = VERSION=${VERSION}
 
 # config
 config:
-	@NODE_ENV=${env} node -e "var cfg=require('config');cfg.version='${VERSION}';console.log(JSON.stringify(cfg, null, 2))" > ${RUNTIME_CONFIG_FILE}.json
+	node -e "var cfg=require('config');cfg.version='${VERSION}';console.log(JSON.stringify(cfg, null, 2))" > ${RUNTIME_CONFIG_FILE}.json
 
 
 # compile
