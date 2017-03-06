@@ -2,12 +2,12 @@ package service
 
 import (
 	"fmt"
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
-	"time"
-	"github.com/spf13/viper"
-	"github.com/jinzhu/gorm"
 	"strings"
+	"time"
 )
 
 type DeviceService struct {
@@ -128,11 +128,11 @@ func (self *DeviceService) TotalByUserAndNextLevel(isAssigned bool, user *model.
 			sql += " and d.serial_number in (" + serialNumber + ") "
 		} else {
 			sql += " and d.serial_number like ? "
-			params = append(params, "%" + serialNumber + "%")
+			params = append(params, "%"+serialNumber+"%")
 		}
 	} else if userQuery != "" {
 		sql += " and ( (u.id=d.user_id /*or u.id=d.from_user_Id*/) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
-		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
+		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
 	}
 	r := common.SodaMngDB_R.Raw(sql, params...).Count(&total)
 	if r.Error != nil {
@@ -178,11 +178,11 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 			sql += " and d.serial_number in (" + serialNumber + ") "
 		} else {
 			sql += " and d.serial_number like ? "
-			params = append(params, "%" + serialNumber + "%")
+			params = append(params, "%"+serialNumber+"%")
 		}
 	} else if userQuery != "" {
 		sql += " and ( (u.id=d.user_id ) and (u.name like ? or u.account like ? or u.contact like ? ) ) "
-		params = append(params, "%" + userQuery + "%", "%" + userQuery + "%", "%" + userQuery + "%")
+		params = append(params, "%"+userQuery+"%", "%"+userQuery+"%", "%"+userQuery+"%")
 	}
 	//测试按设备编号排序
 	if user.Id == 1 {
@@ -194,7 +194,7 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 	params = append(params, user.Id)
 	if perPage > 0 && page > 0 {
 		sql += " limit ? offset ? "
-		params = append(params, perPage, (page - 1) * perPage)
+		params = append(params, perPage, (page-1)*perPage)
 	}
 	rows, err := common.SodaMngDB_R.Raw(sql, params...).Rows()
 	defer rows.Close()
@@ -213,7 +213,7 @@ func (self *DeviceService) ListByUserAndNextLevel(isAssigned bool, user *model.U
 func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	//limit perPage offset (page-1)*perPage
-	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
+	r := common.SodaMngDB_R.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -247,7 +247,7 @@ func (self *DeviceService) ListByUserAndSchool(userId int, schoolId int, page in
 		sql += " and serial_number in (?)"
 		params = append(params, serialNums)
 	}
-	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
+	r := common.SodaMngDB_R.Offset((page-1)*perPage).Limit(perPage).Where(sql, params...).Order("id desc").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -414,10 +414,10 @@ func (self *DeviceService) Reset(id int, user *model.User) bool {
 	device := &model.Device{}
 	transAction := common.SodaMngDB_WR.Begin()
 	data := map[string]interface{}{
-		"user_id":          1,
-		"from_user_id":     user.Id,
-		"status":           9,
-		"has_retrofited":   1,
+		"user_id":        1,
+		"from_user_id":   user.Id,
+		"status":         9,
+		"has_retrofited": 1,
 	}
 	r := transAction.Model(&model.Device{}).Where("id = ?", id).Updates(data).Scan(device)
 	if r.Error != nil {
@@ -512,7 +512,7 @@ func (self *DeviceService) BatchCreateBySerialNum(device *model.Device, serialLi
 	for k, serial := range serialList {
 		val := fmt.Sprintf("(%d,'%s',%d,'%s',%d,%d,%d,%d,%d,'%s',%d,%d,%d,%d,'%s','%s','%s','%s',%d,'%s','%s')", device.UserId, device.Label, step, serial, device.ReferenceDeviceId, device.ProvinceId, device.CityId, device.DistrictId, device.SchoolId, device.Address, device.FirstPulsePrice, device.SecondPulsePrice, device.ThirdPulsePrice, device.FourthPulsePrice, device.FirstPulseName, device.SecondPulseName, device.ThirdPulseName, device.FourthPulseName, device.Status, device.CreatedAt, device.UpdatedAt)
 		sql = sql + val
-		if k != len(serialList) - 1 {
+		if k != len(serialList)-1 {
 			sql = sql + ","
 		}
 	}
@@ -543,7 +543,7 @@ func (self *DeviceService) ListByUserId(userId int) (*[]*model.Device, error) {
 	return &list, nil
 }
 func (self *DeviceService) DailyBill(serialNumber string, billAt string, page int, perPage int) (*[]*map[string]interface{}, error) {
-	sql:=`
+	sql := `
 	select value,mobile,
 	(case
 		when device_mode=1 then 601
@@ -557,7 +557,7 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 	where device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
 	order by created_timestamp desc
 	`
-	rows, err := common.SodaDB_R.Raw(sql,serialNumber,billAt).Rows()
+	rows, err := common.SodaDB_R.Raw(sql, serialNumber, billAt).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -578,7 +578,7 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 		m := map[string]interface{}{
 			"serialNumber": serialNumber,
 			"address":      address,
-			"price":        price/100,
+			"price":        price / 100,
 			"mobile":       mobile,
 			"washType":     washtype,
 			"createdAt":    createdAt,
@@ -668,6 +668,15 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 	case 604:
 		_, err = timedUpdateStatus("604", fourthTimedDuration)
 		break
+	case 606:
+		_, err = timedUpdateStatus("606", secondTimedDuration)
+		break
+	case 607:
+		_, err = timedUpdateStatus("607", thirdTimedDuration)
+		break
+	case 608:
+		_, err = timedUpdateStatus("608", fourthTimedDuration)
+		break
 	default:
 		return false, r.Error
 	}
@@ -680,9 +689,14 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 
 func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error) {
 	timeFormat := "2006-01-02 15:04:05"
-	r := common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 1 and status = " + status + " and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	var r *gorm.DB
+	if status == "606" || status == "607" || status == "608" {
+		r = common.SodaMngDB_WR.Model(&model.Device{}).Where("status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 2)
+	} else {
+		r = common.SodaMngDB_WR.Model(&model.Device{}).Where("status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	}
 	if r.Error != nil {
-		common.Logger.Warningln("Timed Update " + status + " Device-STATUS:", r.Error.Error())
+		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
 	}
 	return true, nil

@@ -43,17 +43,26 @@ func SetUpCron() {
 		c.AddFunc(updateFourthDeviceSpec, func() {
 			deviceService.TimedUpdateStatus(604)
 		})
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(606)
+		})
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(607)
+		})
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(608)
+		})
 		c.AddFunc(syncDailyBillDetailSpec, func() {
-			syncService.SyncDailyBillDetail()
+			//syncService.SyncDailyBillDetail()
 		})
 		c.AddFunc(syncDailyBillSpec, func() {
-			syncService.SyncDailyBill()
+			//syncService.SyncDailyBill()
 		})
 		c.AddFunc(syncDeviceSpec, func() {
-			syncService.SyncDevice()
+			//syncService.SyncDevice()
 		})
 		c.AddFunc(syncUserSpec, func() {
-			syncService.SyncUserAndRel()
+			//syncService.SyncUserAndRel()
 		})
 
 		c.Start()
