@@ -127,6 +127,11 @@
 			"Rev": "197e8d3cf42199cfd53cd775deb37f3637234635"
 		},
 		{
+			"ImportPath": "github.com/hoisie/mustache",
+			"Comment": "0.0.1-17-g6375acf",
+			"Rev": "6375acf62c69d9d3ad20fd0599d82ca94ea12284"
+		},
+		{
 			"ImportPath": "github.com/imdario/mergo",
 			"Comment": "0.2.2-6-g50d4dbd",
 			"Rev": "50d4dbd4eb0e84778abe37cefef140271d96fade"
