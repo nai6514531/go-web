@@ -48,8 +48,8 @@ func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page
 		device, err := deviceService.BasicBySerialNumber(ticket.DeviceSerial)
 		if err == nil {
 			m["address"] = device.Address
-			m["token"] = device.Password
 		}
+		m["token"] = ticket.Token
 		m["amount"] = ticket.Value / 100
 		m["account"] = ticket.Mobile
 		m["pulseType"] = 600 + ticket.DeviceMode
