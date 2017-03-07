@@ -689,12 +689,17 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 
 func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error) {
 	timeFormat := "2006-01-02 15:04:05"
-	var r *gorm.DB
-	if status == "606" || status == "607" || status == "608" {
-		r = common.SodaMngDB_WR.Model(&model.Device{}).Where("status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 2)
-	} else {
-		r = common.SodaMngDB_WR.Model(&model.Device{}).Where("status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	r := common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 3 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 2)
+	if r.Error != nil {
+		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
+		return false, r.Error
 	}
+	r = common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 2 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	if r.Error != nil {
+		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
+		return false, r.Error
+	}
+	r = common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 1 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
