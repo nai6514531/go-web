@@ -448,7 +448,7 @@ func (self *DailyBillService) Mark(id int) (bool, error) {
 	data := map[string]interface{}{
 		"has_marked": hasMarked,
 	}
-	r := common.SodaMngDB_R.Model(&model.DailyBill{}).Where("user_id = ?", userId).Updates(data)
+	r := common.SodaMngDB_WR.Model(&model.DailyBill{}).Where("user_id = ?", userId).Updates(data)
 	if r.Error != nil {
 		return false, r.Error
 	}
