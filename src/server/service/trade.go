@@ -29,9 +29,9 @@ func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page
 	tickets := &[]*soda.Ticket{}
 	var r *gorm.DB
 	if serialNumber != "" {
-		r = common.SodaDB_R.Where("device_serial = ?", serialNumber).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
+		r = common.SodaDB_R.Where("device_serial = ? and status in (3,4,5,6,7,9,10) ", serialNumber).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
 	} else if mobile != "" {
-		r = common.SodaDB_R.Where("mobile = ?", mobile).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
+		r = common.SodaDB_R.Where("mobile = ? and status in (3,4,5,6,7,9,10) ", mobile).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
 	}
 	if r.Error != nil {
 		return nil, r.Error
