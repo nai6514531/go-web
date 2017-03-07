@@ -33,6 +33,7 @@ var (
 		"01030203": "设备状态不能小于0!",
 		"01030204": "所传设备状态有误!",
 		"01030205": "该设备不属于当前登录用户",
+		"01030206": "无设备信息",
 
 		"01030300": "更新设备成功!",
 		"01030301": "更新设备失败!",
@@ -468,6 +469,14 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
+	tempDevice, err := deviceService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01030206", nil, device_msg["01030206"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	_device, err := deviceService.BasicByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01030205", nil, device_msg["01030205"]}
@@ -488,6 +497,11 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
+	if device.Status == 0 {
+		deviceService.UnLockDevice(tempDevice.SerialNumber)
+	}
+
 	result = &enity.Result{"01030200", nil, device_msg["01030200"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
@@ -575,6 +589,7 @@ func (self *DeviceController) UnLock(ctx *iris.Context) {
 		return
 	}
 	device.Status = 0
+
 	boo := deviceService.UpdateStatus(*device)
 	if !boo {
 		result = &enity.Result{"01031001", nil, device_msg["01031001"]}
@@ -582,6 +597,9 @@ func (self *DeviceController) UnLock(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//删除c端占用和使用中的设备（删除redis中的值）
+	deviceService.UnLockDevice(serialNum)
+
 	result = &enity.Result{"01031000", nil, device_msg["01031000"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)

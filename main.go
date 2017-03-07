@@ -20,6 +20,8 @@ func main() {
 
 	common.SetUpRedis()
 
+	common.SetUpUserRedis()
+
 	//common.SetUpRateLimiter()
 
 	//common.SetUpCors()

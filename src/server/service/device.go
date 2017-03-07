@@ -8,6 +8,7 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"strings"
 	"time"
+	"strconv"
 )
 
 type DeviceService struct {
@@ -703,6 +704,33 @@ func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
+	}
+	return true, nil
+}
+
+func (self *DeviceService) UnLockDevice(serial string) (bool, error) {
+	prefix := viper.GetString("device.unlockPrefix")
+	useKey := prefix + "USE:" + strings.ToUpper(serial)
+	lockKey := prefix + "LOCK:" + strings.ToUpper(serial)
+	common.Logger.Debugln("useKey===", useKey)
+	common.Logger.Debugln("lockKey===", lockKey)
+	i, err1 := common.UserRedis.Del(useKey).Result()
+	j, err2 := common.UserRedis.Del(lockKey).Result()
+	if err1 != nil {
+		//有可能是没这个key
+		common.Logger.Warningln("delete redis key:", useKey, ", failed, err:", err1.Error())
+		//return false, err
+	}
+	if err2 != nil {
+		common.Logger.Warningln("delete redis key:", lockKey, ", failed, err:", err2.Error())
+	}
+	if i <= int64(0) {
+		common.Logger.Warningln("delete redis key:", useKey, ", rowsAffected:", strconv.Itoa(int(i)))
+		//return false, nil
+	}
+	if j <= int64(0) {
+		common.Logger.Warningln("delete redis key:", lockKey, ", rowsAffected:", strconv.Itoa(int(j)))
+		//return false, nil
 	}
 	return true, nil
 }
