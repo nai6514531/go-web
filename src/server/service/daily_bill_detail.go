@@ -1,14 +1,13 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
-	"time"
+	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/soda"
+	"time"
 )
 
 type DailyBillDetailService struct {
-
 }
 
 func (self *DailyBillDetailService) Basic(id int) (*model.DailyBillDetail, error) {
@@ -41,32 +40,34 @@ func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt st
 	t, _ := time.Parse("2006-01-02", billAt)
 	tomorrow := t.Local().AddDate(0, 0, 1).Format("2006-01-02")
 	var total int64
-	sql:=`
+	sql := `
 	owner_id=convert(?,signed)
 	and
 	created_timestamp>=unix_timestamp(?)
 	and
 	created_timestamp<unix_timestamp(?)
 	`
-	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt,tomorrow).Count(&total)
+	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt, tomorrow).Count(&total)
 	if r.Error != nil {
-		return 0,r.Error
+		return 0, r.Error
 	}
 	return int(total), nil
 }
 
-func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt string, page int, perPage int, serialNum string) (*[]*soda.Ticket, error){
+func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt string, page int, perPage int, serialNum string) (*[]*soda.Ticket, error) {
 	list := &[]*soda.Ticket{}
 	t, _ := time.Parse("2006-01-02", billAt)
 	tomorrow := t.Local().AddDate(0, 0, 1).Format("2006-01-02")
-	sql:=`
+	sql := `
 	owner_id=convert(?,signed)
 	and
 	created_timestamp>=unix_timestamp(?)
 	and
 	created_timestamp<unix_timestamp(?)
+	and
+	status = 7
 	`
-	r:=common.SodaDB_R.Model(&soda.Ticket{}).Where(sql,userId,billAt,tomorrow).Offset((page - 1) * perPage).Limit(perPage).Find(list)
+	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt, tomorrow).Offset((page - 1) * perPage).Limit(perPage).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
