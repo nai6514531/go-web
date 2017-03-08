@@ -111,7 +111,12 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			sum(case when device_mode=2 then 1 else 0 end),
 			sum(case when device_mode=3 then 1 else 0 end),
 			sum(case when device_mode=4 then 1 else 0 end)
-			from ticket where owner_id=? and created_timestamp>=unix_timestamp(?) and created_timestamp<unix_timestamp(?)
+			from ticket
+			where owner_id=?
+			and
+			created_timestamp>=unix_timestamp(?) and created_timestamp<unix_timestamp(?)
+			and
+			status =7
 			group by device_serial
 			order by created_timestamp desc;
 			`
@@ -247,6 +252,8 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
 		sum(case when device_mode=4 then 1 else 0 end) totalMode4
 		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m')=?
+		and
+		status = 7
 		group by from_unixtime(created_timestamp,'%Y-%m-%d')
 		order by created_timestamp desc;
 		`
@@ -259,6 +266,8 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		(case when device_mode=3 then 1 else 0 end),
 		(case when device_mode=4 then 1 else 0 end)
 		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
+		and
+		status = 7
 		order by created_timestamp desc;
 		`
 	}else {
@@ -270,6 +279,8 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
 		sum(case when device_mode=4 then 1 else 0 end) totalMode4
 		from ticket where owner_id=?
+		and
+		status = 7
 		group by from_unixtime(created_timestamp,'%Y-%m'),device_serial
 		order by created_timestamp desc
 		`

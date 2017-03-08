@@ -556,6 +556,8 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 	created_at
 	from ticket
 	where device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
+	and
+	status = 7
 	order by created_timestamp desc
 	`
 	rows, err := common.SodaDB_R.Raw(sql, serialNumber, billAt).Rows()
