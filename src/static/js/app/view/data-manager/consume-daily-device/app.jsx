@@ -3,7 +3,7 @@ import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import DailyBillDetailService from "../../../service/daily_bill_detail";
 import StatisConsumeService from "../../../service/statis_consume";
 import { Link } from 'react-router';
-
+var _ = require('lodash');
 const App = React.createClass({
   propTypes: {
     user_id: React.PropTypes.string,
@@ -110,15 +110,18 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           let rowColor = {};
+          let _list=data.data.map((item,key) => {
+            item.url = baseUrl+item.serialNumber;
+            item.key = key + 1;
+            rowColor[item.key] = key%2==0?'white':'gray';
+            self.rowColor = rowColor;
+            return item;
+          })
+          _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
+          _list= _.reverse(_list);
           this.setState({
             total: data.data.length,
-            list: data.data.map((item,key) => {
-              item.url = baseUrl+item.serialNumber;
-              item.key = key + 1;
-              rowColor[item.key] = key%2==0?'white':'gray';
-              self.rowColor = rowColor;
-              return item;
-            })
+            list: _list
           });
         } else {
           message.info(data.msg);
@@ -178,8 +181,8 @@ const App = React.createClass({
           <Breadcrumb.Item>{date}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} 
-             columns={columns} pagination={pagination} 
+      <Table scroll={{ x: 500 }} dataSource={list}
+             columns={columns} pagination={pagination}
              bordered loading={this.state.loading}
              rowClassName={this.rowClassName}
       />
