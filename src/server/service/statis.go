@@ -58,6 +58,8 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			sum(case when device_mode=4 then 1 else 0 end)
 			from ticket
 			where created_timestamp>=unix_timestamp(?) and created_timestamp<unix_timestamp(?)
+			and
+			status =7
 			group by device_serial
 			order by created_timestamp desc;
 			`
