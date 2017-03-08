@@ -192,12 +192,13 @@ const columns = [{
         <a href="#">取消锁定</a>
       </Popconfirm>
     }
-    else if (status == 0) {
+    else if (status == 0 || status == 2) {
       action = <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
         <a href="#">锁定</a>
       </Popconfirm>
     }
-    else if (status == 601 || status == 602 || status == 603 || status == 604) {
+    else if (status == 601 || status == 602 || status == 603 
+      || status == 604 || status == 605 || status == 606 || status == 607 || status == 608) {
       action = <Popconfirm title="确认取消占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
         <a href="#">取消占用</a>
       </Popconfirm>
