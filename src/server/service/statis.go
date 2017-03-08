@@ -150,7 +150,7 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
 		var _date string //日期
-		var amount int   //金额
+		var amount float64   //金额
 		var userId int
 		var userName string
 		var deviceType int
@@ -318,7 +318,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		var _date string
 		var deviceno string
 		var address string
-		var money int
+		var money float64
 		var dt int
 		var kx int
 		var bz int
