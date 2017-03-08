@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 )
 
 type DeviceService struct {
@@ -692,7 +692,7 @@ func (self *DeviceService) TimedUpdateStatus(status int) (bool, error) {
 
 func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error) {
 	timeFormat := "2006-01-02 15:04:05"
-	r := common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 3 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 2)
+	/*r := common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 3 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 2)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
@@ -701,8 +701,8 @@ func timedUpdateStatus(status string, timedDuration time.Duration) (bool, error)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
-	}
-	r = common.SodaMngDB_WR.Model(&model.Device{}).Where("reference_device_id = 1 and status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
+	}*/
+	r := common.SodaMngDB_WR.Model(&model.Device{}).Where("status = "+status+" and updated_at <= ?", time.Now().Add(timedDuration).Format(timeFormat)).Update("status", 0)
 	if r.Error != nil {
 		common.Logger.Warningln("Timed Update "+status+" Device-STATUS:", r.Error.Error())
 		return false, r.Error
