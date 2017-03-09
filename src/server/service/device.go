@@ -569,7 +569,7 @@ func (self *DeviceService) DailyBill(serialNumber string, billAt string, page in
 	list := make([]*map[string]interface{}, 0)
 	for rows.Next() {
 		var address string
-		var price int
+		var price float64
 		var mobile string
 		var washtype int
 		var createdAt string

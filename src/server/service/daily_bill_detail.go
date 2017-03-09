@@ -46,6 +46,8 @@ func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt st
 	created_timestamp>=unix_timestamp(?)
 	and
 	created_timestamp<unix_timestamp(?)
+	and
+	status=7
 	`
 	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt, tomorrow).Count(&total)
 	if r.Error != nil {
