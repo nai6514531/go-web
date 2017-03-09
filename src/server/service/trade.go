@@ -14,9 +14,9 @@ func (self *TradeService) TotalOfDevice(serialNumber string, mobile string) (int
 	var total int
 	var r *gorm.DB
 	if serialNumber != "" {
-		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("device_serial = ? and status = 7", serialNumber).Count(&total)
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("device_serial = ? and status in (3,4,5,6,7,9,10) ", serialNumber).Count(&total)
 	} else if mobile != "" {
-		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("mobile = ? and status = 7", mobile).Count(&total)
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("mobile = ? and status in (3,4,5,6,7,9,10) ", mobile).Count(&total)
 	}
 	if r.Error != nil {
 		return 0, r.Error
