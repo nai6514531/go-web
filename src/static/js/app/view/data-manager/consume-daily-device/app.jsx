@@ -96,14 +96,14 @@ const App = React.createClass({
   rowClassName(record, index) {
     return this.rowColor[record.key];
   },
-  list(userId, billAt,serialNumbr, pager) {
+  list(userId, billAt, serialNumbr, pager) {
     var self = this;
     this.setState({
       loading: true,
     });
     const {id} = this.props.params;
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    StatisConsumeService.dateList(billAt,{})
+    StatisConsumeService.dateList(billAt, pager)
       .then((data) => {
         self.setState({
           loading: false,
@@ -117,36 +117,14 @@ const App = React.createClass({
             self.rowColor = rowColor;
             return item;
           })
-          _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
-          _list= _.reverse(_list);
           this.setState({
-            total: data.data.length,
+            total: data.data.total || 0,
             list: _list
           });
         } else {
           message.info(data.msg);
         }
       });
-    // return
-    // const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    /*DailyBillDetailService.list(userId, billAt, '', pager)
-      .then((data) => {
-        self.setState({
-          loading: false,
-        });
-        if (data && data.status == '00') {
-          this.setState({
-            total: data.data.total,
-            list: data.data.list.map((item,key) => {
-              item.url = baseUrl+item.serialNumber;
-              item.key = key + 1;
-              return item;
-            })
-          });
-        } else {
-          message.info(data.msg);
-        }
-      })*/
   },
 
   initializePagination() {
@@ -159,12 +137,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        // self.list(USER.id,date,'', pager);
+        self.list(USER.id,date,'', pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        // self.list(USER.id,date,'',pager);
+        self.list(USER.id,date,'',pager);
       },
     }
   },
