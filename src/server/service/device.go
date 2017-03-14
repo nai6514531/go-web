@@ -221,6 +221,15 @@ func (self *DeviceService) ListByUser(userId int, page int, perPage int) (*[]*mo
 	return list, nil
 }
 
+func (self *DeviceService) ListByUserOrderByAddress(userId int, page int, perPage int) (*[]*model.Device, error) {
+	list := &[]*model.Device{}
+	r := common.SodaMngDB_R.Offset((page-1)*perPage).Limit(perPage).Where("user_id = ?", userId).Order("address desc").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
+
 func (self *DeviceService) ListBySerialNumbers(serialNumbers ...string) (*[]*model.Device, error) {
 	list := &[]*model.Device{}
 	r := common.SodaMngDB_R.Where("serial_number in (?) ", serialNumbers).Find(list)

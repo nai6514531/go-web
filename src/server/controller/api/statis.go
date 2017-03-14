@@ -56,17 +56,33 @@ func (self *StatisController) Consume(ctx *iris.Context) {
 	statisService := &service.StatisService{}
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
-	list, err := statisService.Consume(userId, date)
-	if err != nil {
-		result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
-		common.Log(ctx, result)
+	perPage, _ := ctx.URLParamInt("perPage")
+	page, _ := ctx.URLParamInt("page")
+	deviceService := &service.DeviceService{}
+	if len(date)==10{
+		total,err:=deviceService.TotalByUser(userId)
+		list, err := statisService.Consume(userId, date,page,perPage)
+		if err != nil {
+			result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		result = &enity.Result{"01070100", &enity.Pagination{total, list}, statis_msg["01070100"]}
+		common.Log(ctx, nil)
 		ctx.JSON(iris.StatusOK, result)
-		return
+	}else{
+		list, err := statisService.Consume(userId, date,page,perPage)
+		if err != nil {
+			result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		result = &enity.Result{"01070100", &list, statis_msg["01070100"]}
+		common.Log(ctx, nil)
+		ctx.JSON(iris.StatusOK, result)
 	}
-
-	result = &enity.Result{"01070100", &list, statis_msg["01070100"]}
-	common.Log(ctx, nil)
-	ctx.JSON(iris.StatusOK, result)
 }
 
 /*

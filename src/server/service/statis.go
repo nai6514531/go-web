@@ -2,18 +2,21 @@ package service
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hoisie/mustache"
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
+	"strings"
 	"time"
 )
 
 type StatisService struct {
 }
 
-func (self *StatisService) Consume(userId int, date string) (*[]*map[string]interface{}, error) {
+func (self *StatisService) Consume(userId int, date string, page int, perPage int) (*[]*map[string]interface{}, error) {
 	list := make([]*map[string]interface{}, 0)
+	devices := &[]*model.Device{}
 	var sql string = ""
 	userRoleRelService := &UserRoleRelService{}
 	deviceService := &DeviceService{}
@@ -102,25 +105,46 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			`
 			r = common.SodaMngDB_R.Raw(sql, userId, date+"-01", date+"-01")
 		} else if len(date) == 10 {
+			devices, err = deviceService.ListByUserOrderByAddress(userId, page, perPage)
+			if err != nil {
+				return nil, err
+			}
+			var serialNumbers []string
+			for _, device := range *devices {
+				serialNumbers = append(serialNumbers, "'"+device.SerialNumber+"'")
+			}
+			_serialNumber := strings.Join(serialNumbers, ",")
 			t, _ := time.Parse("2006-01-02", date)
 			after := t.AddDate(0, 0, 1).Format("2006-01-02")
+			data := map[string]interface{}{
+				"owner_id":       userId,
+				"date":           date,
+				"serial_numbers": _serialNumber,
+				"after":          after,
+			}
 			sql = `
 			select device_serial,
-			sum(value) ,
+			sum(value),
 			sum(case when device_mode=1 then 1 else 0 end),
 			sum(case when device_mode=2 then 1 else 0 end),
 			sum(case when device_mode=3 then 1 else 0 end),
 			sum(case when device_mode=4 then 1 else 0 end)
 			from ticket
-			where owner_id=?
+			where
+			owner_id={{owner_id}}
 			and
-			created_timestamp>=unix_timestamp(?) and created_timestamp<unix_timestamp(?)
+			device_serial in ({{{serial_numbers}}})
+			and
+			created_timestamp>=unix_timestamp('{{date}}')
+			and
+			created_timestamp<unix_timestamp('{{after}}')
 			and
 			status =7
 			group by device_serial
 			order by created_timestamp desc;
 			`
-			r = common.SodaDB_R.Raw(sql, userId, date, after)
+			sql = mustache.Render(sql, data)
+			r = common.SodaDB_R.Raw(sql)
 		} else {
 			sql = `
 			select month,
@@ -143,37 +167,24 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 	if err != nil {
 		return nil, err
 	}
-	devices, err := deviceService.ListByUserId(userId)
-	if err!=nil{
-		return nil,err
-	}
-	for rows.Next() {
-		m := make(map[string]interface{}, 0)
-		var _date string //日期
-		var amount float64   //金额
-		var userId int
-		var userName string
-		var deviceType int
-		var serialNumber string
-		var address string
-		var dc int //模块数
-		var dt int //单脱
-		var kx int //快洗
-		var bz int //标准
-		var dw int //大物
-
-		if len(date) == 10 {
+	if len(date) == 10 {
+		results := make(map[string]interface{}, 0)
+		for rows.Next() {
+			m := make(map[string]interface{}, 0)
+			var amount float64 //金额
+			var userId int
+			var userName string
+			var deviceType int
+			var serialNumber string
+			var address string
+			var dc int //模块数
+			var dt int //单脱
+			var kx int //快洗
+			var bz int //标准
+			var dw int //大物
 			err := rows.Scan(&serialNumber, &amount, &dt, &kx, &bz, &dw)
 			if err != nil {
 				return nil, err
-			}
-			/**
-			暂时逻辑，待优化
-			 */
-			for _,device:=range *devices {
-				if serialNumber == device.SerialNumber {
-					address=device.Address
-				}
 			}
 			m["serialNumber"] = serialNumber
 			m["amount"] = amount / 100
@@ -188,7 +199,53 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			m["userName"] = userName
 			m["address"] = address
 			m["deviceCount"] = dc
-		} else {
+			results[serialNumber] = m
+		}
+		for _, device := range *devices {
+			m, has := results[device.SerialNumber]
+			if has {
+				_m := m.(map[string]interface{})
+				_m["address"] = device.Address
+				list = append(list, &_m)
+			} else {
+				m := make(map[string]interface{}, 0)
+				var amount float64 //金额
+				var userId int
+				var userName string
+				var deviceType int
+				var address string
+				var dc int //模块数
+				var dt int //单脱
+				var kx int //快洗
+				var bz int //标准
+				var dw int //大物
+				address = device.Address
+				m["serialNumber"] = device.SerialNumber
+				m["amount"] = amount / 100
+				m["money"] = amount / 100
+				m["firstPulseAmount"] = dt
+				m["secondPulseAmount"] = kx
+				m["thirdPulseAmount"] = bz
+				m["fourthPulseAmount"] = dw
+
+				m["deviceType"] = deviceType
+				m["userId"] = userId
+				m["userName"] = userName
+				m["address"] = address
+				m["deviceCount"] = dc
+				list = append(list, &m)
+			}
+		}
+	} else {
+		for rows.Next() {
+			m := make(map[string]interface{}, 0)
+			var _date string   //日期
+			var amount float64 //金额
+			var dc int         //模块数
+			var dt int         //单脱
+			var kx int         //快洗
+			var bz int         //标准
+			var dw int         //大物
 			err := rows.Scan(&_date, &amount, &dc, &dt, &kx, &bz, &dw)
 			if err != nil {
 				return nil, err
@@ -200,8 +257,8 @@ func (self *StatisService) Consume(userId int, date string) (*[]*map[string]inte
 			m["secondPulseAmount"] = kx
 			m["thirdPulseAmount"] = bz
 			m["fourthPulseAmount"] = dw
+			list = append(list, &m)
 		}
-		list = append(list, &m)
 	}
 	return &list, nil
 }
@@ -270,7 +327,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		status = 7
 		order by created_timestamp desc;
 		`
-	}else {
+	} else {
 		sql = `
 		select device_serial, from_unixtime(created_timestamp,'%Y-%m') _month,
 		sum(value) totalAmount,
@@ -310,8 +367,8 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 	}
 	deviceService := &DeviceService{}
 	devices, err := deviceService.ListByUserId(userId)
-	if err!=nil{
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
@@ -328,9 +385,9 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		if err != nil {
 			return nil, err
 		}
-		for _,device:=range *devices {
+		for _, device := range *devices {
 			if deviceno == device.SerialNumber {
-				address=device.Address
+				address = device.Address
 			}
 		}
 		m["date"] = _date
@@ -356,9 +413,9 @@ func (self *StatisService) BalanceSum() (float64, error) {
 	return s, nil
 }
 
-func (self *StatisService) Recharge(start string ,end string) (map[string]float64, error) {
+func (self *StatisService) Recharge(start string, end string) (map[string]float64, error) {
 	data := make(map[string]float64, 0)
-	sql:=`
+	sql := `
 	select date_format(date,'%Y-%m-%d') as 'date',total_recharge as recharge
 	from daily_operate
 	where
@@ -366,7 +423,7 @@ func (self *StatisService) Recharge(start string ,end string) (map[string]float6
 	order by
 	created_timestamp desc
 	`
-	rows, err := common.SodaMngDB_R.Raw(sql,start,end).Rows()
+	rows, err := common.SodaMngDB_R.Raw(sql, start, end).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -378,7 +435,7 @@ func (self *StatisService) Recharge(start string ,end string) (map[string]float6
 		if err != nil {
 			return nil, err
 		}
-		data[date] = recharge/100
+		data[date] = recharge / 100
 	}
 	common.Logger.Debug("recharge=========", data)
 	return data, nil
@@ -394,9 +451,9 @@ func (self *StatisService) RechargeSum() (float64, error) {
 	return s, nil
 }
 
-func (self *StatisService) Consumption(start string ,end string) (map[string]float64, error) {
+func (self *StatisService) Consumption(start string, end string) (map[string]float64, error) {
 	data := make(map[string]float64, 0)
-	sql:=`
+	sql := `
 	select date_format(date,'%Y-%m-%d') as 'date',total_consume as consume
 	from daily_operate
 	where
@@ -404,7 +461,7 @@ func (self *StatisService) Consumption(start string ,end string) (map[string]flo
 	order by
 	created_timestamp desc
 	`
-	rows, err := common.SodaMngDB_R.Raw(sql,start,end).Rows()
+	rows, err := common.SodaMngDB_R.Raw(sql, start, end).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -417,7 +474,7 @@ func (self *StatisService) Consumption(start string ,end string) (map[string]flo
 		if err != nil {
 			return nil, err
 		}
-		data[date] = consume/100
+		data[date] = consume / 100
 	}
 	common.Logger.Debug("consumption=========", data)
 	return data, nil

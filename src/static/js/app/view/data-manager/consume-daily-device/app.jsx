@@ -110,7 +110,7 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           let rowColor = {};
-          let _list=data.data.map((item,key) => {
+          let _list=data.data.list.map((item,key) => {
             item.url = baseUrl+item.serialNumber;
             item.key = key + 1;
             rowColor[item.key] = key%2==0?'white':'gray';

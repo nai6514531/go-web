@@ -42,7 +42,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page
 		m := make(map[string]interface{}, 0)
 		user, err := userService.Basic(ticket.OwnerId)
 		if err == nil {
-			m["user"] = user.Contact
+			m["user"] = user.Name
 			m["telephone"] = user.Telephone
 		}
 		device, err := deviceService.BasicBySerialNumber(ticket.DeviceSerial)
