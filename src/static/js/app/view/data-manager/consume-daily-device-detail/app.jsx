@@ -85,9 +85,6 @@ const App = React.createClass({
     const pager = {page: this.state.page, perPage: this.state.perPage};
     this.list(USER.id, date, serialNumber, pager);
   },
-  rowClassName(record, index) {
-    return this.rowColor[record.key];
-  },
   list(userId, billAt, serialNumber, pager) {
     var self = this;
     this.setState({
@@ -101,13 +98,10 @@ const App = React.createClass({
           loading: false,
         });
         if (data && data.status == '00') {
-          let rowColor = {};
           this.setState({
             list: data.data.map((item, key) => {
               item.url = baseUrl + item.serialNumber;
               item.key = key + 1;
-              rowColor[item.key] = key%2==0?'white':'gray';
-              self.rowColor = rowColor;
               return item;
             })
           });
@@ -150,7 +144,6 @@ const App = React.createClass({
       </header>
       <Table scroll={{x: 400}} dataSource={list} columns={columns} pagination={false} bordered
              loading={this.state.loading}              
-             rowClassName={this.rowClassName}
       />
     </section>);
   }

@@ -83,9 +83,6 @@ const App = React.createClass({
   componentWillMount() {
     this.list();
   },
-  rowClassName(record, index) {
-    return this.rowColor[record.key];
-  },
   list() {
     var self = this;
     this.setState({
@@ -98,11 +95,8 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const total = data.data.length;
-          let rowColor = {};
           let _list=data.data.map((item, key) => {
             item.key = key + 1;
-            rowColor[item.key] = key%2==0?'white':'gray';
-            self.rowColor = rowColor;
             return item;
           })
           _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
@@ -150,7 +144,6 @@ const App = React.createClass({
       <Table scroll={{ x: 650 }} dataSource={list}
              columns={columns} pagination={pagination}
              bordered loading={this.state.loading}
-             rowClassName={this.rowClassName}
       />
     </section>);
   }
