@@ -11,7 +11,7 @@ import (
 type UserService struct {
 }
 
-//通过登陆名查找user表
+//通过登录名查找user表
 func (self *UserService) FindByAccount(name string) (*model.User, error) {
 	user := &model.User{}
 	r := common.SodaMngDB_WR.Where("account = ?", name).First(user)

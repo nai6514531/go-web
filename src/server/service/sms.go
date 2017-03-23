@@ -5,12 +5,13 @@ import (
 	"maizuo.com/soda-manager/src/server/kit/sms"
 	"github.com/levigross/grequests"
 	"github.com/spf13/viper"
+	"maizuo.com/soda-manager/src/server/common"
 )
 
 type SmsService struct {
 }
 
-func (self *SmsService) SendMsg(code string, mobile string, smsFreeSignName string, smsParam string, smsTemplateCode string) (*grequests.Response, error) {
+func (self *SmsService) SmsCodes(code string, mobile string, smsFreeSignName string, smsParam string, smsTemplateCode string) (*grequests.Response, error) {
 	param := make(map[string]string, 0)
 	param["method"] = viper.GetString("sms.method")
 	param["app_key"] = viper.GetString("sms.mng.appKey")
@@ -37,6 +38,11 @@ func (self *SmsService) SendMsg(code string, mobile string, smsFreeSignName stri
 	return response, err
 }
 
-func (self *SmsService) verifyMsg() (bool, error) {
-	return true, nil
+func (self *SmsService) VerifySmsCodes(key string, smsCode string) bool {
+	result, _ := common.Redis.Get(key).Result()
+	common.Logger.Debugln("result======", result)
+	if result != smsCode {
+		return false
+	}
+	return true
 }

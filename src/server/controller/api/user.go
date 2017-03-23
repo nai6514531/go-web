@@ -11,8 +11,6 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"regexp"
 	"strings"
-	"encoding/json"
-	"maizuo.com/soda-manager/src/server/kit/sms"
 )
 
 /**
@@ -31,12 +29,12 @@ import (
 	@apiParam (错误码) {String} 00100200 注销成功
 
 	@apiParam (错误码) {String} 01010400 添加用户记录成功
-	@apiParam (错误码) {String} 01010401 登陆账号不能为空
+	@apiParam (错误码) {String} 01010401 登录账号不能为空
 	@apiParam (错误码) {String} 01010402 名称不能为空
 	@apiParam (错误码) {String} 01010403 联系人不能为空
 	@apiParam (错误码) {String} 01010404 密码不能为空
 	@apiParam (错误码) {String} 01010406 联系人手机不能为空
-	@apiParam (错误码) {String} 01010407 登陆账号已被注册
+	@apiParam (错误码) {String} 01010407 登录账号已被注册
 	@apiParam (错误码) {String} 01010410 新增用户记录失败
 	@apiParam (错误码) {String} 01010411 新增用户结算账号失败
 	@apiParam (错误码) {String} 01010412 新增用户角色记录失败
@@ -44,12 +42,12 @@ import (
 	@apiParam (错误码) {String} 01010414 请输入11位的手机号
 
 	@apiParam (错误码) {String} 01010500 修改用户记录成功
-	@apiParam (错误码) {String} 01010501 登陆账号不能为空
+	@apiParam (错误码) {String} 01010501 登录账号不能为空
 	@apiParam (错误码) {String} 01010502 名称不能为空
 	@apiParam (错误码) {String} 01010503 联系人不能为空
 	@apiParam (错误码) {String} 01010504 密码不能为空
 	@apiParam (错误码) {String} 01010506 联系人手机不能为空
-	@apiParam (错误码) {String} 01010507 登陆账号已被注册
+	@apiParam (错误码) {String} 01010507 登录账号已被注册
 	@apiParam (错误码) {String} 01010508 手机号码已被使用
 
 	@apiParam (错误码) {String} 01010511 修改用户记录失败
@@ -177,15 +175,6 @@ var (
 		"01011600": "拉取用户详情成功",
 		"01011601": "用户账户不能为空",
 		"01011602": "该用户不存在",
-
-		"01011700": "短信验证码发送成功",
-		"01011701": "短信验证码发送失败",
-		"01011702": "不存在当前登录用户信息",
-		"01011703": "当前登录用户无手机信息",
-		"01011704": "请求发送短信验证码失败",
-		"01011705": "json格式转换失败",
-		"01011706": "未知错误",
-
 	}
 )
 
@@ -296,14 +285,14 @@ func (self *UserController) Signin(ctx *iris.Context) {
 		return
 	}
 
-	/*登陆密码错误*/
+	/*登录密码错误*/
 	if user.Password != password {
 		result := &enity.Result{"01010110", nil, user_msg["01010110"]}
 		returnCleanCaptcha(result)
 		return
 	}
 
-	/*登陆成功*/
+	/*登录成功*/
 	ctx.Session().Set(viper.GetString("server.session.user.id"), user.Id)
 
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
@@ -410,7 +399,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//判断登陆名是否已经存在
+	//判断登录名是否已经存在
 	currentUser, _ := userService.FindByAccount(user.Account)
 	if currentUser != nil {
 		//可以找到
@@ -507,9 +496,9 @@ func (self *UserController) Update(ctx *iris.Context) {
 	ctx.ReadJSON(&user)
 	user.Id = userId
 	//user信息校验
-	//判断登陆名是否已经存在,不能对account进行更新
+	//判断登录名是否已经存在,不能对account进行更新
 	if user.Account != "" {
-		//如果有登陆账号传入
+		//如果有登录账号传入
 		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -1298,61 +1287,4 @@ func (self *UserController) DetailByAccount(ctx *iris.Context) {
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 
-}
-
-func (self *UserController) SendSMS(ctx *iris.Context) {
-	smsService := &service.SmsService{}
-	//userService := &service.UserService{}
-	result := &enity.Result{}
-	respMap := make(map[string]interface{})
-	//userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-
-	/*user, err := userService.Basic(userId)
-	if err != nil {
-		result = &enity.Result{"01011702", err.Error(), user_msg["01011702"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if user.Mobile == "" {
-		result = &enity.Result{"01011703", nil, user_msg["01011703"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}*/
-	code := sms.Code()
-	response, err := smsService.SendMsg(code, "13145940304", "苏打生活", "{\"code\":\"" +code + "\"}", "SMS_36100137")
-	if err != nil {
-		result = &enity.Result{"01011701", err.Error(), user_msg["01011701"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if response.StatusCode != 200 || !response.Ok {
-		result = &enity.Result{"01011704", nil, user_msg["01011704"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if json.Unmarshal(response.Bytes(), &respMap) != nil {
-		result = &enity.Result{"01011705", nil, user_msg["01011705"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	if respMap["error_response"] != nil  {
-		_map := respMap["error_response"].(map[string]interface{})
-		if _map["sub_msg"] != "" {
-			result = &enity.Result{"01011707", &respMap, _map["sub_msg"].(string)}
-		}else {
-			result = &enity.Result{"01011706", &respMap, user_msg["01011706"]}
-		}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	common.Logger.Debug("respMap================", respMap)
-	result = &enity.Result{"01011700", &respMap, user_msg["01011700"]}
-	common.Log(ctx, nil)
-	ctx.JSON(iris.StatusOK, result)
 }

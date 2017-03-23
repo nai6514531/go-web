@@ -18,6 +18,7 @@ func Api() {
 		sync = &controller.SyncController{}
 		statis = &controller.StatisController{}
 		trade = &controller.TradeController{}
+		sms = &controller.SmsController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -28,6 +29,8 @@ func Api() {
 
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
+	//api.Get("/user/:id/reset", user.Reset)
+	api.Post("/reset-sms", sms.ResetSmsCodes)
 
 	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
 
@@ -58,7 +61,6 @@ func Api() {
 	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
-	api.Get("/user-sms", user.SendSMS)
 	api.Get("/user-detail/:account", user.DetailByAccount)
 
 	api.Get("/school/:id", school.Basic)
