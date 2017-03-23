@@ -13,14 +13,14 @@ type RoleService struct {
 func (self *RoleService) BasicByUserId(userId int) (*model.Role, error) {
 	_userId := strconv.Itoa(userId);
 	sql := "select r.id,r.name  from role r,user_role_rel urr where urr.user_id =" + _userId + " and r.id=urr.role_id"
-	rows, err := common.DB.Raw(sql).Rows()
+	rows, err := common.SodaMngDB_R.Raw(sql).Rows()
 	role := &model.Role{}
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 	for rows.Next() {
-		common.DB.ScanRows(rows, role)
+		common.SodaMngDB_R.ScanRows(rows, role)
 	}
 	return role, nil
 }
@@ -30,7 +30,7 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 	var roleIDs []int
 	//通过用户->角色查找
 	userRoleRelList := &[]*model.UserRoleRel{}
-	r := common.DB.Where("user_id = ?", userId).Find(userRoleRelList)
+	r := common.SodaMngDB_R.Where("user_id = ?", userId).Find(userRoleRelList)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -39,14 +39,14 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 	}
 	//通过用户->组->角色查找
 	groupRelList := &[]*model.UserGroupRel{}
-	r = common.DB.Where("user_id = ?", userId).Find(groupRelList) //找出user所属的所有组
+	r = common.SodaMngDB_R.Where("user_id = ?", userId).Find(groupRelList) //找出user所属的所有组
 	if r.Error != nil {
 		return nil, r.Error
 	}
 	for _, groupRel := range *groupRelList {
 		//对user的每一组找出对应的所有角色
 		roleRelList := &[]*model.GroupRoleRel{}
-		r = common.DB.Where("group_id = ?", groupRel.GroupId).Find(roleRelList)
+		r = common.SodaMngDB_R.Where("group_id = ?", groupRel.GroupId).Find(roleRelList)
 		if r.Error != nil {
 			return nil, r.Error
 		}
@@ -62,7 +62,7 @@ func (self *RoleService) ListIdByUserId(userId int) ([]int, error) {
 //通过角色id列表拉取角色详情列表
 func (self *RoleService) ListByRoleIds(roleIDs []int) (*[]*model.Role, error) {
 	roleList := &[]*model.Role{}
-	r := common.DB.Where("id IN (?)", roleIDs).Find(roleList) //找出user所属的所有组
+	r := common.SodaMngDB_R.Where("id IN (?)", roleIDs).Find(roleList) //找出user所属的所有组
 	if r.Error != nil {
 		return nil, r.Error
 	}

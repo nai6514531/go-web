@@ -47,8 +47,8 @@
     "rateLimiter": {
       "rate": "10-M",
       "redis": {
-        "addr": "127.0.0.1:6379",
-        "password": "",
+        "addr": "192.168.1.204:6379",
+        "password": "123456",
         "database": 10,
         "prefix": "soda-manager-rate-limiter:",
         "maxRetry": 3
@@ -62,8 +62,8 @@
       "cookie": "sess",
       "expires": 3600,
       "redis": {
-        "addr": "127.0.0.1:6379",
-        "password": "",
+        "addr": "192.168.1.204:6379",
+        "password": "123456",
         "database": 10,
         "prefix": "soda-manager-session:",
         "maxIdle": 20,
@@ -72,44 +72,93 @@
         "idleTimeout": 60
       }
     },
-    "db": {
-      "dialect": "mysql",
-      "host": "127.0.0.1",
-      "port": 3306,
-      "user": "root",
-      "password": "",
-      "database": "soda-manager",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
-    "mndb": {
-      "dialect": "mysql",
-      "host": "127.0.0.1",
-      "port": 3306,
-      "user": "root",
-      "password": "",
-      "database": "soda-manager",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
-    "mnread": {
-      "dialect": "mysql",
-      "host": "127.0.0.1",
-      "port": 3307,
-      "user": "root",
-      "password": "",
-      "database": "soda-manager",
-      "maxIdle": 20,
-      "maxOpen": 20
-    },
     "redis": {
-      "addr": "127.0.0.1:6379",
-      "password": "",
+      "addr": "192.168.1.204:6379",
+      "password": "123456",
       "database": 10,
       "prefix": "soda-manager:",
       "maxIdle": 20,
       "maxActive": 50,
       "idleTimeout": 60
+    },
+    "userRedis": {
+      "addr": "192.168.1.204:6379",
+      "password": "123456",
+      "database": 10,
+      "prefix": "soda-manager:",
+      "maxIdle": 20,
+      "maxActive": 50,
+      "idleTimeout": 60
+    }
+  },
+  "resource":{
+    "database":{
+      "soda-manager": {
+        "r":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "soda-manager",
+          "maxIdle": 20,
+          "maxOpen": 20
+        },
+        "wr":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "soda-manager",
+          "maxIdle": 20,
+          "maxOpen": 20
+        }
+      },
+      "soda":{
+        "r":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "soda",
+          "maxIdle": 20,
+          "maxOpen": 20
+        },
+        "wr":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "soda",
+          "maxIdle": 20,
+          "maxOpen": 20
+        }
+      },
+      "mnzn": {
+        "r":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "mnzn",
+          "maxIdle": 20,
+          "maxOpen": 20
+        },
+        "wr":{
+          "dialect": "mysql",
+          "host": "192.168.1.204",
+          "port": 3306,
+          "user": "web",
+          "password": "123456",
+          "database": "mnzn",
+          "maxIdle": 20,
+          "maxOpen": 20
+        }
+      }
     }
   },
   "device": {
@@ -121,7 +170,8 @@
     "rateLimiter": {
       "prefix": "soda-manager-update-device-limiter:",
       "maxRetry": 3
-    }
+    },
+    "unlockPrefix": "soda-api:device:"
   },
   "export": {
     "loadsPath": "/temp"

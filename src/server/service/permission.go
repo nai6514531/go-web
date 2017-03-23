@@ -13,7 +13,7 @@ type PermissionService struct {
 func (self *PermissionService) ListIdsByRoleIds(roleIds []int) ([]int, error) {
 	theStructList := &[]*model.RolePermissionRel{}
 	var permissionIds []int
-	r := common.DB.Where("role_id IN (?)", roleIds).Find(theStructList)
+	r := common.SodaMngDB_R.Where("role_id IN (?)", roleIds).Find(theStructList)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -27,7 +27,7 @@ func (self *PermissionService) ListIdsByRoleIds(roleIds []int) ([]int, error) {
 //根据权限id列出详情
 func (self *PermissionService) ListByIds(permissionIds []int) (*[]*model.Permission, error) {
 	permissionList := &[]*model.Permission{}
-	r := common.DB.Where("id IN (?)", permissionIds).Find(permissionList)
+	r := common.SodaMngDB_R.Where("id IN (?)", permissionIds).Find(permissionList)
 	if r.Error != nil {
 		return nil, r.Error
 	}

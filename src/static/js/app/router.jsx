@@ -26,61 +26,79 @@ const router = (
         }} />
         <Route path="/user" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 用户首页
             callback(null, require('./view/user/detail/app.jsx').default);
           });
         }} />
         <Route path="/user/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 下级代理商列表
             callback(null, require('./view/user/list/app.jsx').default);
           });
         }} />
         <Route path="/user/edit/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 编辑/新增代理商列表
             callback(null, require('./view/user/edit/app.jsx').default);
-          });
-        }} />
-        <Route path="/user/:id/device/list" getComponent={(location, callback) => {
-          require.ensure([], (require) => {
-            callback(null, require('./view/user/device_list/app.jsx').default);
           });
         }} />
         <Route path="/user/:id/device/school/:schoolId" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+            // 原来的具体学校的设备列表,现暂时没用
             callback(null, require('./view/user/school_device/app.jsx').default);
           });
         }} />
         <Route path="/user/:id/device/school/:schoolId/edit(/:deviceId)" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 原设备新增/编辑页面,现暂时没用
             callback(null, require('./view/user/device_edit/app.jsx').default);
-          });
-        }} />
-        <Route path="/user/edit" getComponent={(location, callback) => {
-          require.ensure([], (require) => {
-            callback(null, require('./view/user/list/app.jsx').default);
           });
         }} />
         <Route path="/settlement" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 结算管理列表
             callback(null, require('./view/settlement/list/app.jsx').default);
           });
         }} />
         <Route path="/settlement/daily-bill-detail/:user_id/:bill_at" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 结算管理详情
             callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
           });
         }} />
         <Route path="/device" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 设备管理列表(按用户分类)
+            callback(null, require('./view/device/list/self-device.jsx').default);
+          });
+        }} />
+        <Route path="/device/child" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+          // 设备管理列表(按用户分类)
+            callback(null, require('./view/device/list/child-device.jsx').default);
+          });
+        }} />
+        <Route path="/device/user/:id/list" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+          // 设备管理列表(按学校分类)
+            callback(null, require('./view/device/school_filter_list/app.jsx').default);
+          });
+        }} />
+        <Route path="/device/list" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+          // 设备管理列表,具体到某个用户某个学校
             callback(null, require('./view/device/list/app.jsx').default);
           });
         }} />
         <Route path="/device/edit(/:id)" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 设备编辑/新增
             callback(null, require('./view/device/edit/app.jsx').default);
           });
         }} />
         <Route path="/device/batch-edit" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 批量修改设备
             callback(null, require('./view/device/batch-edit/app.jsx').default);
           });
         }} />
@@ -91,42 +109,50 @@ const router = (
         }} />
         <Route path="/data/consume" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 消费统计
             callback(null, require('./view/data-manager/consume-month/app.jsx').default);
           });
         }} />
         <Route path="/data/consume/month/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 消费统计(具体月份)
             callback(null, require('./view/data-manager/consume-daily/app.jsx').default);
           });
         }} />
         <Route path="/data/consume/month/:id/:date" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          //消费统计(具体日期)
             callback(null, require('./view/data-manager/consume-daily-device/app.jsx').default);
           });
         }} />
         <Route path="/data/consume/month/:id/:date/:serialNumber" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 消费统计(具体日期的具体设备号)
             callback(null, require('./view/data-manager/consume-daily-device-detail/app.jsx').default);
           });
         }} />
         <Route path="/data/manage" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 经营统计(按月)
             callback(null, require('./view/data-manager/operate-month/app.jsx').default);
           });
         }} />
         <Route path="/data/manage/month/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 经营统计(按日)
             callback(null, require('./view/data-manager/operate-daily/app.jsx').default);
           });
         }} />
         <Route path="/data/device_search" getComponent={(location, callback) => {
           require.ensure([], (require) => {
+          // 设备查询(已合并进了消费查询)
             callback(null, require('./view/data-manager/device-search/app.jsx').default);
           });
         }} />
-        <Route path="/data/wash_search" getComponent={(location, callback) => {
+        <Route path="/data/consume_search" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-            callback(null, require('./view/data-manager/wash-search/app.jsx').default);
+          // 消费查询
+            callback(null, require('./view/data-manager/consume-search/app.jsx').default);
           });
         }} />
         <Route path="/data/device" getComponent={(location, callback) => {

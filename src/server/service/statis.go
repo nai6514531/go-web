@@ -1,257 +1,350 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model/muniu"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/hoisie/mustache"
+	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
-	"strings"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"maizuo.com/soda-manager/src/server/model"
+	"strings"
+	"time"
 )
 
 type StatisService struct {
 }
 
-func BoxAdminByLocalId(localId int) (*muniu.BoxAdmin, error) {
-	admin := &muniu.BoxAdmin{}
-	r := common.MNREAD.Where("localid = ?", localId).First(admin)
-	if r.Error != nil {
-		return nil, r.Error
-	}
-	return admin, nil
-}
-
-func (self *StatisService) Consume(userId int, date string) (*[]*map[string]interface{}, error) {
+func (self *StatisService) Consume(userId int, date string, page int, perPage int) (*[]*map[string]interface{}, error) {
 	list := make([]*map[string]interface{}, 0)
+	devices := &[]*model.Device{}
 	var sql string = ""
-	var companyId int = -1
-	var agencyId int = -1
-	param := make([]interface{}, 0)
-
-	admin, err := BoxAdminByLocalId(userId - 1)
+	userRoleRelService := &UserRoleRelService{}
+	deviceService := &DeviceService{}
+	role, err := userRoleRelService.BasicByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
-
-	if admin.UserType == "1" {
-		agencyId = admin.LocalId
-	} else if admin.UserType == "2" {
-		companyId = admin.LocalId
-	}
-
-	sql = "select substring(b.inserttime,1,7) d," +
-		"sum(b.price) money,count(distinct deviceno) dc," +
-		"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-		"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-		"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-		"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-		"from box_wash b where b.companyid=? " +
-		"group by substring(b.inserttime,1,7) order by d desc"
-	if len(date) == 7 {
-		sql = "select substring(b.inserttime,1,10) d," +
-			"sum(b.price) money,count(distinct deviceno) dc," +
-			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-			"from box_wash b where substring(b.inserttime,1,7)=? and b.companyid=? " +
-			"group by substring(b.inserttime,1,10) order by d desc"
-	} else if len(date) == 10 {
-		//i.devicetype,i.companyid,i.deviceno,a.name,i.address address,
-		sql = "select i.devicetype,i.companyid,i.deviceno,IFNULL(a.name,'') name,IFNULL(i.address,'') address," +
-			"sum(case when b.price is null then 0 else b.price end) money, " +
-			"count(distinct b.deviceno) dc," +
-			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-			"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=? and companyid!=0) b on b.deviceno=i.deviceno " +
-			"left join box_admin a on i.companyid=a.localid " +
-			"where i.companyid=? " +
-			"group by i.deviceno order by a.localid, i.address, i.deviceno"
-	}
-	/**
-	else {
-		sql = "select i.devicetype,i.companyid,substring(b.inserttime,1,10) d,i.deviceno,IFNULL(a.name,''),IFNULL(i.address,'') address," +
-			"sum(case when b.price is null then 0 else b.price end) money, " +
-			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-			"from box_info i left join (select * from box_wash where substring(inserttime,1,10)=curdate() and companyid!=0) b on b.deviceno=i.deviceno " +
-			"left join box_admin a on i.companyid=a.localid " +
-			"where i.companyid=? " +
-			"group by i.deviceno order by a.localid,i.deviceno";
-	}
-	*/
-	if companyId == -1 {
-		if agencyId == -1 {
-			sql = strings.Replace(sql, " and b.companyid=?", " and b.companyid!=0", -1)
-			sql = strings.Replace(sql, "where b.companyid=?", "where b.companyid!=0", -1)
-			sql = strings.Replace(sql, "where i.companyid=?", "where i.companyid!=0", -1)
+	var r *gorm.DB
+	if role.RoleId == 1 { //管理员
+		if len(date) == 7 {
+			sql = `
+			select date,
+			sum(total_amount),
+			sum(total_device),
+			sum(total_mode_1),
+			sum(total_mode_2),
+			sum(total_mode_3),
+			sum(total_mode_4)
+			from daily_consume
+			where created_timestamp
+			between
+			unix_timestamp(cast(date_format(? ,'%Y-%m-01') as date))
+			and
+			unix_timestamp(last_day(date_add(date(?), interval 0 month)))
+			group by date
+			order by date desc;
+			`
+			r = common.SodaMngDB_R.Raw(sql, date+"-01", date+"-01")
+		} else if len(date) == 10 {
+			/*
+				from_unixtime(created_timestamp,'%Y-%m-%d')=?
+				unix_timestamp(date_sub(date('2016-01-01'), interval -1 day))
+			*/
+			t, _ := time.Parse("2006-01-02", date)
+			after := t.AddDate(0, 0, 1).Format("2006-01-02")
+			sql = `
+			select device_serial,
+			sum(value),
+			sum(case when device_mode=1 then 1 else 0 end),
+			sum(case when device_mode=2 then 1 else 0 end),
+			sum(case when device_mode=3 then 1 else 0 end),
+			sum(case when device_mode=4 then 1 else 0 end)
+			from ticket
+			where created_timestamp>=unix_timestamp(?) and created_timestamp<unix_timestamp(?)
+			and
+			status =7
+			group by device_serial
+			order by created_timestamp desc;
+			`
+			r = common.SodaDB_R.Raw(sql, date, after)
 		} else {
-			agency := "(select localid from box_admin b where agencyid=?)"
-			sql = strings.Replace(sql, " and b.companyid=?", " and b.companyid in " + agency, -1)
-			sql = strings.Replace(sql, "where b.companyid=?", "where b.companyid in " + agency, -1)
-			sql = strings.Replace(sql, "where i.companyid=?", "where i.companyid in " + agency, -1)
+			sql = `
+			select month,
+			sum(total_amount),
+			sum(total_device),
+			sum(total_mode_1),
+			sum(total_mode_2),
+			sum(total_mode_3),
+			sum(total_mode_4)
+			from monthly_consume
+			group by month
+			order by month desc;
+			`
+			r = common.SodaMngDB_R.Raw(sql)
+		}
+	} else { //普通用户
+		if len(date) == 7 {
+			sql = `
+			select date,
+			total_amount,
+			total_device,
+			total_mode_1,
+			total_mode_2,
+			total_mode_3,
+			total_mode_4
+			from daily_consume
+			where user_id=?
+			and
+			created_timestamp
+			between
+			unix_timestamp(cast(date_format(? ,'%Y-%m-01') as date))
+			and
+			unix_timestamp(last_day(date_add(date(?), interval 0 month)))
+			group by date
+			order by date desc;
+			`
+			r = common.SodaMngDB_R.Raw(sql, userId, date+"-01", date+"-01")
+		} else if len(date) == 10 {
+			devices, err = deviceService.ListByUserOrderByAddress(userId, page, perPage)
+			if err != nil {
+				return nil, err
+			}
+			var serialNumbers []string
+			for _, device := range *devices {
+				serialNumbers = append(serialNumbers, "'"+device.SerialNumber+"'")
+			}
+			_serialNumber := strings.Join(serialNumbers, ",")
+			t, _ := time.Parse("2006-01-02", date)
+			after := t.AddDate(0, 0, 1).Format("2006-01-02")
+			data := map[string]interface{}{
+				"owner_id":       userId,
+				"date":           date,
+				"serial_numbers": _serialNumber,
+				"after":          after,
+			}
+			sql = `
+			select device_serial,
+			sum(value),
+			sum(case when device_mode=1 then 1 else 0 end),
+			sum(case when device_mode=2 then 1 else 0 end),
+			sum(case when device_mode=3 then 1 else 0 end),
+			sum(case when device_mode=4 then 1 else 0 end)
+			from ticket
+			where
+			owner_id={{owner_id}}
+			and
+			device_serial in ({{{serial_numbers}}})
+			and
+			created_timestamp>=unix_timestamp('{{date}}')
+			and
+			created_timestamp<unix_timestamp('{{after}}')
+			and
+			status =7
+			group by device_serial
+			order by created_timestamp desc;
+			`
+			sql = mustache.Render(sql, data)
+			r = common.SodaDB_R.Raw(sql)
+		} else {
+			sql = `
+			select month,
+			total_amount,
+			total_device,
+			total_mode_1,
+			total_mode_2,
+			total_mode_3,
+			total_mode_4
+			from monthly_consume
+			where user_id=?
+			group by month
+			order by month desc;
+			`
+			r = common.SodaMngDB_R.Raw(sql, userId)
 		}
 	}
-
-	if date != "" {
-		param = append(param, date)
-	}
-	if companyId != -1 {
-		param = append(param, companyId)
-	}
-	if companyId == -1 && agencyId != -1 {
-		param = append(param, agencyId)
-	}
-	rows, err := common.MNREAD.Raw(sql, param...).Rows()
+	rows, err := r.Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-
-	for rows.Next() {
-		m := make(map[string]interface{}, 0)
-		var _date string    //日期
-		var money float64 //金额
-		var userId int
-		var userName string
-		var deviceType int
-		var serialNumber string
-		var address string
-		var dc int      //模块数
-		var dt int      //单脱
-		var kx int      //快洗
-		var bz int      //标准
-		var dw int      //大物
-
-		if len(date) == 10 {
-			err := rows.Scan(&deviceType, &userId, &serialNumber, &userName, &address, &money, &dc, &dt, &kx, &bz, &dw)
+	if len(date) == 10 {
+		results := make(map[string]interface{}, 0)
+		for rows.Next() {
+			m := make(map[string]interface{}, 0)
+			var amount float64 //金额
+			var userId int
+			var userName string
+			var deviceType int
+			var serialNumber string
+			var address string
+			var dc int //模块数
+			var dt int //单脱
+			var kx int //快洗
+			var bz int //标准
+			var dw int //大物
+			err := rows.Scan(&serialNumber, &amount, &dt, &kx, &bz, &dw)
 			if err != nil {
 				return nil, err
 			}
-			m["deviceType"] = _date
-			m["userId"] = userId
 			m["serialNumber"] = serialNumber
-			m["userName"] = userName
-			m["address"] = address
-			m["money"] = money
-			m["deviceCount"] = dc
+			m["amount"] = amount / 100
+			m["money"] = amount / 100
 			m["firstPulseAmount"] = dt
 			m["secondPulseAmount"] = kx
 			m["thirdPulseAmount"] = bz
 			m["fourthPulseAmount"] = dw
-			m["amount"] = money
-		} else {
-			err := rows.Scan(&_date, &money, &dc, &dt, &kx, &bz, &dw)
+
+			m["deviceType"] = deviceType
+			m["userId"] = userId
+			m["userName"] = userName
+			m["address"] = address
+			m["deviceCount"] = dc
+			results[serialNumber] = m
+		}
+		for _, device := range *devices {
+			m, has := results[device.SerialNumber]
+			if has {
+				_m := m.(map[string]interface{})
+				_m["address"] = device.Address
+				list = append(list, &_m)
+			} else {
+				m := make(map[string]interface{}, 0)
+				var amount float64 //金额
+				var userId int
+				var userName string
+				var deviceType int
+				var address string
+				var dc int //模块数
+				var dt int //单脱
+				var kx int //快洗
+				var bz int //标准
+				var dw int //大物
+				address = device.Address
+				m["serialNumber"] = device.SerialNumber
+				m["amount"] = amount / 100
+				m["money"] = amount / 100
+				m["firstPulseAmount"] = dt
+				m["secondPulseAmount"] = kx
+				m["thirdPulseAmount"] = bz
+				m["fourthPulseAmount"] = dw
+
+				m["deviceType"] = deviceType
+				m["userId"] = userId
+				m["userName"] = userName
+				m["address"] = address
+				m["deviceCount"] = dc
+				list = append(list, &m)
+			}
+		}
+	} else {
+		for rows.Next() {
+			m := make(map[string]interface{}, 0)
+			var _date string   //日期
+			var amount float64 //金额
+			var dc int         //模块数
+			var dt int         //单脱
+			var kx int         //快洗
+			var bz int         //标准
+			var dw int         //大物
+			err := rows.Scan(&_date, &amount, &dc, &dt, &kx, &bz, &dw)
 			if err != nil {
 				return nil, err
 			}
 			m["date"] = _date
+			m["amount"] = amount / 100
 			m["deviceCount"] = dc
 			m["firstPulseAmount"] = dt
 			m["secondPulseAmount"] = kx
 			m["thirdPulseAmount"] = bz
 			m["fourthPulseAmount"] = dw
-			m["amount"] = money
+			list = append(list, &m)
 		}
-		list = append(list, &m)
 	}
 	return &list, nil
 }
 
-func (self *StatisService) Operate(date string) (*[]*map[string]interface{}, error) {
-	list := make([]*map[string]interface{}, 0)
-	param := make([]interface{}, 0)
-	var sql string = ""
-	sql = "select * from box_stat_month order by d desc"
-	if date != "" {
-		sql = "select * from box_stat_date where substring(d,1,7)=? order by d desc"
+func (self *StatisService) Operate(date string) (*[]*model.DailyOperate, error) {
+	list := &[]*model.DailyOperate{}
+	var r *gorm.DB
+	if len(date) == 7 {
+		date = date + "-01"
+		r = common.SodaMngDB_R.Where(`
+		created_timestamp
+		between
+		unix_timestamp(cast(date_format(? ,'%Y-%m-01') as date))
+		and
+		unix_timestamp(last_day(date_add(?, interval 0 month)))
+		`, date, date).Order("created_timestamp desc").Find(&list)
+	} else if len(date) == 10 {
+		r = common.SodaMngDB_R.Where("date = ?", date).Find(list)
 	}
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
+}
 
-	if date != "" {
-		param = append(param, date)
+func (self *StatisService) MonthlyOperate() (*[]*model.MonthlyOperate, error) {
+	list := &[]*model.MonthlyOperate{}
+	r := common.SodaMngDB_R.Order("created_timestamp desc").Find(list)
+	if r.Error != nil {
+		return nil, r.Error
 	}
-	rows, err := common.MNREAD.Raw(sql, param...).Rows()
-	defer rows.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	for rows.Next() {
-		m := make(map[string]interface{}, 0)
-		var d string    //日期
-		var dc int      //空闲模块数
-		var u int       //新增用户数
-		var r float64       //充值金额
-		var c float64       //消费金额
-		var ic int      //新增模块
-		err := rows.Scan(&d, &u, &r, &c, &dc, &ic)
-		if err != nil {
-			return nil, err
-		}
-		m["date"] = d
-		m["increaseUserCount"] = u
-		m["enabledDeviceCount"] = dc
-		m["increaseDeviceCount"] = ic
-		m["rechargeAmount"] = r
-		m["consumeAmount"] = c
-		list = append(list, &m)
-	}
-	return &list, nil
+	return list, nil
 }
 
 func (self *StatisService) Device(userId int, serialNumber string, date string) (*[]*map[string]interface{}, error) {
-	var companyId int = -1
 	list := make([]*map[string]interface{}, 0)
 	param := make([]interface{}, 0)
 	var err error
-	/*admin, err := BoxAdminByLocalId(userId - 1)
-	if err != nil {
-		return nil, err
-	}*/
 
 	var sql string = ""
-	sql = "select i.companyid, case when b.inserttime is null then substring(curdate(),1,7) else substring(b.inserttime,1,7) end d," +
-		"i.deviceno,i.address,sum(case when b.companyid=i.companyid then b.price else 0 end) money, " +
-		"sum(case when b.washtype='601' and b.companyid=i.companyid then 1 else 0 end) dt," +
-		"sum(case when b.washtype='602' and b.companyid=i.companyid then 1 else 0 end) kx," +
-		"sum(case when b.washtype='603' and b.companyid=i.companyid then 1 else 0 end) bz," +
-		"sum(case when b.washtype='604' and b.companyid=i.companyid then 1 else 0 end) dw " +
-		"from box_info i left join box_wash b on i.deviceno=b.deviceno " +
-		"where i.companyid=? group by i.deviceno,substring(b.inserttime,1,7) " +
-		"order by d desc,deviceno"
+
 	if len(date) == 7 {
-		sql = "select b.companyid,substring(b.inserttime,1,10) d," +
-			"i.deviceno,i.address,sum(b.price) money, " +
-			"sum(case when b.washtype='601' then 1 else 0 end) dt," +
-			"sum(case when b.washtype='602' then 1 else 0 end) kx," +
-			"sum(case when b.washtype='603' then 1 else 0 end) bz," +
-			"sum(case when b.washtype='604' then 1 else 0 end) dw " +
-			"from box_wash b left join box_info i on b.deviceno=i.deviceno " +
-			"where b.companyid=? and b.deviceno=? and substring(b.inserttime,1,7)=? " +
-			"group by substring(b.inserttime,1,10) order by d desc"
+		sql = `
+		select device_serial, from_unixtime(created_timestamp,'%Y-%m-%d') _date,
+		sum(value) totalAmount,
+		sum(case when device_mode=1 then 1 else 0 end) totalMode1,
+		sum(case when device_mode=2 then 1 else 0 end) totalMode2,
+		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
+		sum(case when device_mode=4 then 1 else 0 end) totalMode4
+		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m')=?
+		and
+		status = 7
+		group by from_unixtime(created_timestamp,'%Y-%m-%d')
+		order by created_timestamp desc;
+		`
 	} else if len(date) == 10 {
-		sql = "select b.inserttime d,i.deviceno,i.address,b.price money,b.usermobile from box_wash b " +
-			"left join box_info i on b.deviceno=i.deviceno " +
-			"where b.companyid=? and b.deviceno=? and substring(b.inserttime,1,10)=? " +
-			"order by d desc"
+		sql = `
+		select device_serial, from_unixtime(created_timestamp,'%Y-%m-%d') _date,
+		value ,
+		(case when device_mode=1 then 1 else 0 end),
+		(case when device_mode=2 then 1 else 0 end),
+		(case when device_mode=3 then 1 else 0 end),
+		(case when device_mode=4 then 1 else 0 end)
+		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
+		and
+		status = 7
+		order by created_timestamp desc;
+		`
+	} else {
+		sql = `
+		select device_serial, from_unixtime(created_timestamp,'%Y-%m') _month,
+		sum(value) totalAmount,
+		sum(case when device_mode=1 then 1 else 0 end) totalMode1,
+		sum(case when device_mode=2 then 1 else 0 end) totalMode2,
+		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
+		sum(case when device_mode=4 then 1 else 0 end) totalMode4
+		from ticket where owner_id=?
+		and
+		status = 7
+		group by from_unixtime(created_timestamp,'%Y-%m'),device_serial
+		order by created_timestamp desc
+		`
 	}
 
-	companyId = userId - 1
-	param = append(param, companyId)
+	param = append(param, userId)
 
-	/*if admin.UserType == "1" || admin.UserType == "0"{
-		companyId = admin.LocalId
-	}
-	if companyId != -1 {
-		param = append(param, companyId)
-	}else {
-		e := &functions.DefinedError{}
-		e.Msg = "无操作权限"
-		err = e
-		return nil, err
-	}*/
 	if serialNumber != "" {
 		param = append(param, serialNumber)
 	}
@@ -267,17 +360,19 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 			return nil, err
 		}
 	}
-
-	rows, err := common.MNREAD.Raw(sql, param...).Rows()
+	rows, err := common.SodaDB_R.Raw(sql, param...).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
-
+	deviceService := &DeviceService{}
+	devices, err := deviceService.ListByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
 	for rows.Next() {
 		m := make(map[string]interface{}, 0)
-		var companyid int
-		var d string
+		var _date string
 		var deviceno string
 		var address string
 		var money float64
@@ -286,18 +381,134 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		var bz int
 		var dw int
 
-		err := rows.Scan(&companyid, &d, &deviceno, &address, &money, &dt, &kx, &bz, &dw)
+		err := rows.Scan(&deviceno, &_date, &money, &dt, &kx, &bz, &dw)
 		if err != nil {
 			return nil, err
 		}
-		m["date"] = d
+		for _, device := range *devices {
+			if deviceno == device.SerialNumber {
+				address = device.Address
+			}
+		}
+		m["date"] = _date
 		m["serialNumber"] = deviceno
 		m["firstPulseAmount"] = dt
 		m["secondPulseAmount"] = kx
 		m["thirdPulseAmount"] = bz
 		m["fourthPulseAmount"] = dw
-		m["amount"] = money
+		m["amount"] = money / 100
 		m["address"] = address
+		list = append(list, &m)
+	}
+	return &list, nil
+}
+
+func (self *StatisService) BalanceSum() (float64, error) {
+	var s float64
+	sql := "select ifnull(sum(total_recharge-total_consume),0) from daily_operate"
+	err := common.SodaMngDB_R.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
+}
+
+func (self *StatisService) Recharge(start string, end string) (map[string]float64, error) {
+	data := make(map[string]float64, 0)
+	sql := `
+	select date_format(date,'%Y-%m-%d') as 'date',total_recharge as recharge
+	from daily_operate
+	where
+	date_format(date,'%Y-%m-%d') between ? and ?
+	order by
+	created_timestamp desc
+	`
+	rows, err := common.SodaMngDB_R.Raw(sql, start, end).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var date string
+		var recharge float64
+		err := rows.Scan(&date, &recharge)
+		if err != nil {
+			return nil, err
+		}
+		data[date] = recharge / 100
+	}
+	common.Logger.Debug("recharge=========", data)
+	return data, nil
+}
+
+func (self *StatisService) RechargeSum() (float64, error) {
+	var s float64
+	sql := "select sum(total_recharge) from daily_operate"
+	err := common.SodaMngDB_R.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
+}
+
+func (self *StatisService) Consumption(start string, end string) (map[string]float64, error) {
+	data := make(map[string]float64, 0)
+	sql := `
+	select date_format(date,'%Y-%m-%d') as 'date',total_consume as consume
+	from daily_operate
+	where
+	date_format(date,'%Y-%m-%d') between ? and ?
+	order by
+	created_timestamp desc
+	`
+	rows, err := common.SodaMngDB_R.Raw(sql, start, end).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var date string
+		var consume float64
+
+		err := rows.Scan(&date, &consume)
+		if err != nil {
+			return nil, err
+		}
+		data[date] = consume / 100
+	}
+	common.Logger.Debug("consumption=========", data)
+	return data, nil
+}
+
+func (self *StatisService) ConsumptionSum() (float64, error) {
+	var s float64
+	sql := "select sum(total_consume) from daily_operate"
+	err := common.SodaMngDB_R.Raw(sql).Row().Scan(&s)
+	if err != nil {
+		return float64(0), err
+	}
+	return s, nil
+}
+
+func (self *StatisService) FailedTrade() (*[]*map[string]interface{}, error) {
+	list := make([]*map[string]interface{}, 0)
+	sql := "select date(inserttime) as 'date',count(*) as 'count' from trade_info where tradestatus='' and date(inserttime)>='2016-01-01' group by date(inserttime)"
+	rows, err := common.SodaMngDB_R.Raw(sql).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		m := make(map[string]interface{}, 0)
+		var date string
+		var count int
+
+		err := rows.Scan(&date, &count)
+		if err != nil {
+			return nil, err
+		}
+		m["date"] = date
+		m["count"] = count
 		list = append(list, &m)
 	}
 	return &list, nil

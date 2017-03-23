@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb} from "antd";
 import "./app.less";
+import moment from 'moment';
 import DailyBillDetailService from "../../../service/daily_bill_detail";
 const App = React.createClass({
   propTypes: {
@@ -17,35 +18,35 @@ const App = React.createClass({
         sorter: (a, b) => +a.id - +b.id
       }, {
         title: '设备编号/楼道信息',
-        dataIndex: 'serialNumber',
-        key: 'serialNumber',
+        dataIndex: 'deviceSerial',
+        key: 'deviceSerial',
         width:100,
-        render: (serialNumber,record)=>{
-          return <span>{serialNumber} {record.address?' / '+record.address:""}</span>
+        render: (deviceSerial,record)=>{
+          return <span>{deviceSerial} {record.address?' / '+record.address:""}</span>
         }
       }, {
         title: '服务类型',
-        dataIndex: 'pulseType',
-        key: 'pulseType',
+        dataIndex: 'deviceMode',
+        key: 'deviceMode',
         width:20,
         render: (data) => {
-          if (data == 601) {
+          if (data == 1) {
             return <div>单脱</div>
-          } else if (data == 602) {
+          } else if (data == 2) {
             return <div>快洗</div>
-          } else if (data == 603) {
+          } else if (data == 3) {
             return <div>标准</div>
-          } else if (data == 604) {
+          } else if (data == 4) {
             return <div>大物洗</div>
           }
         }
       }, {
         title: '金额',
-        dataIndex: 'amount',
-        key: 'amount',
+        dataIndex: 'value',
+        key: 'value',
         width:60,
-        render: (total_amount) => {
-          return total_amount / 100 + "元";
+        render: (value) => {
+          return value / 100 + "元";
         }
       },{
         title: '洗衣手机号',
@@ -54,18 +55,21 @@ const App = React.createClass({
         width:60,
       }, {
         title: '下单时间',
-        dataIndex: 'billAt',
-        key: 'billAt',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
         width:70,
+        render:(createdAt)=>{
+          return moment(createdAt).format('YYYY-MM-DD HH:mm:ss');
+        }
       }, {
         title: '状态',
         dataIndex: 'status',
         key: 'status',
         width:50,
         render: (status) => {
-          if (status == 0) {
+          if (status == 7) {
             return <div className="status">正常</div>
-          } else if (status == 1) {
+          } else if (status == 4) {
             return <div className="status highlight">已退款</div>
           } else {
             return <div className="status"> / </div>
@@ -76,6 +80,9 @@ const App = React.createClass({
       total: 0,
       loading: false
     };
+  },
+  rowClassName(record, index) {
+    return this.rowColor[record.id];
   },
   list(userId, billAt, serialNumber, pager) {
     var self = this;
@@ -88,9 +95,12 @@ const App = React.createClass({
           loading: false,
         });
         if (data && data.status == '00') {
+          let rowColor = {};
           this.setState({
             total: data.data.total,
-            list: data.data.list.map((item) => {
+            list: data.data.list.map((item, key) => {
+              rowColor[item.id] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -133,7 +143,11 @@ const App = React.createClass({
           <Breadcrumb.Item>明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list}
+             columns={columns} pagination={pagination}
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

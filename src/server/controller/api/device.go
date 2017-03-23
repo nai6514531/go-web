@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"gopkg.in/kataras/iris.v4"
+	"encoding/json"
 	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
-	"maizuo.com/soda-manager/src/server/kit/functions"
-	"encoding/json"
 )
 
 type DeviceController struct {
@@ -33,11 +33,12 @@ var (
 		"01030203": "设备状态不能小于0!",
 		"01030204": "所传设备状态有误!",
 		"01030205": "该设备不属于当前登录用户",
+		"01030206": "无设备信息",
 
 		"01030300": "更新设备成功!",
 		"01030301": "更新设备失败!",
-		"01030302": "请输入10位设备编号!",
-		"01030303": "设备编号格式不对,长度为10位!",
+		"01030302": "设备号不能为空!",
+		"01030303": "设备编号格式不对,长度为6位或10位!",
 		"01030304": "请选择省份!",
 		"01030305": "请选择学校!",
 		"01030306": "请填写楼层信息!",
@@ -48,6 +49,7 @@ var (
 		"01030311": "请填写大件洗价格!",
 		"01030312": "设备id不能小于0!",
 		"01030313": "该设备序列号已经存在!",
+		"01030314": "记录更新设备操作记录失败",
 
 		"01030400": "拉取设备列表成功!",
 		"01030401": "拉取设备列表失败!",
@@ -56,8 +58,8 @@ var (
 
 		"01030500": "更新设备成功!",
 		"01030501": "批量更新设备失败!",
-		"01030502": "请输入一个或多个10位设备编号,以回车分隔!",
-		"01030503": "设备编号格式不对,长度为10位!",
+		"01030502": "请输入一个或多个6位或10位设备编号,以回车分隔!",
+		"01030503": "设备编号格式不对,长度为6位或10位!",
 		"01030504": "请选择省份!",
 		"01030505": "请选择学校!",
 		"01030506": "请填写楼层信息!",
@@ -74,11 +76,13 @@ var (
 		"01030601": "重置设备失败!",
 		"01030602": "设备id不能小于0!",
 		"01030603": "该设备已被重置或不存在!",
+		"01030604": "不支持删除测试员名下设备!",
+		"01030605": "记录重置设备操作记录失败",
 
 		"01030700": "添加设备成功!",
 		"01030701": "添加设备失败!",
-		"01030702": "请输入一个或多个10位设备编号,以回车分隔!",
-		"01030703": "设备编号格式不对,长度为10位!",
+		"01030702": "请输入一个或多个6位或10位设备编号,以回车分隔!",
+		"01030703": "设备编号格式不对,长度为6位或10位!",
 		"01030704": "请选择省份!",
 		"01030705": "请选择学校!",
 		"01030706": "请填写楼层信息!",
@@ -127,10 +131,10 @@ var (
 		"01031403": "请操作你自身或下级的设备",
 		"01031404": "无所选设备用户信息",
 
-		"01031500": "批量更新设备号成功",
-		"01031501": "批量更新设备号失败",
+		"01031500": "批量更新设备成功",
+		"01031501": "批量更新设备失败",
 		"01031502": "设备号不能为空",
-
+		"01031503": "记录批量更新设备操作记录失败",
 	}
 )
 
@@ -138,7 +142,7 @@ var (
 func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //要操作的设备id
 	result := &enity.Result{}
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	deviceService := &service.DeviceService{}
 	userService := &service.UserService{}
@@ -157,7 +161,10 @@ func (self *DeviceController) OwnToMeOrTest(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if device.UserId == userId || user.ParentId == userId {
+	common.Logger.Debug("=============", device.UserId)
+	common.Logger.Debug("=============", userId)
+	common.Logger.Debug("=============", user.ParentId)
+	if device.UserId == userId || user.ParentId == userId || device.FromUserId == userId {
 		ctx.Next()
 		return
 	} else {
@@ -177,7 +184,7 @@ func (self *DeviceController) OwnToMeOrTestBySerialNumbers(ctx *iris.Context) {
 	serialNumber := param["serialNumber"]
 	common.Logger.Debug("serialNumber=====", serialNumber)
 	s := strings.Split(serialNumber, ",")
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	list, err := deviceService.ListBySerialNumbers(s...)
 	if err != nil {
 		result = &enity.Result{"01031401", err.Error(), device_msg["01031401"]}
@@ -202,7 +209,7 @@ func (self *DeviceController) OwnToMeOrTestBySerialNumbers(ctx *iris.Context) {
 	}
 	for _, _device := range *list {
 		_user := users[_device.UserId]
-		if _device.UserId != userId && _user != nil && _user.ParentId != userId {
+		if _device.UserId != userId && _user != nil && _user.ParentId != userId && _device.FromUserId != userId {
 			result = &enity.Result{"01031403", nil, device_msg["01031403"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -313,17 +320,19 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	serialNumber := ctx.URLParam("serialNumber")
 	userQuery := ctx.URLParam("userQuery")
 	equal, _ := ctx.URLParamInt("isEqual")
+	isAssigned, _ := ctx.URLParamInt("isAssigned")
 	isEqual := functions.IntToBool(equal)
+	common.Logger.Debug("isAssigned====", isAssigned)
 	common.Logger.Debug("isEqual=====", isEqual)
 	//_list := make([]*model.Device, 0)
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
 	schoolService := &service.SchoolService{}
 	userIds := make([]int, 0)
 	schoolIds := make([]int, 0)
-	user, err:= userService.Basic(userId)
+	user, err := userService.Basic(userId)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
@@ -334,7 +343,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		serialNumber = strings.Join(strings.Split(serialNumber, ","), "','")
 		serialNumber = "'" + serialNumber + "'"
 	}
-	list, err := deviceService.ListByUserAndNextLevel(user, serialNumber, userQuery, isEqual, page, perPage)
+	list, err := deviceService.ListByUserAndNextLevel(functions.IntToBool(isAssigned), user, serialNumber, userQuery, isEqual, page, perPage)
 	if err != nil {
 		result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 		common.Log(ctx, result)
@@ -342,7 +351,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 		return
 	}
 	if page > 0 && perPage > 0 {
-		total, err = deviceService.TotalByUserAndNextLevel(user, serialNumber, userQuery, isEqual)
+		total, err = deviceService.TotalByUserAndNextLevel(functions.IntToBool(isAssigned), user, serialNumber, userQuery, isEqual)
 		if err != nil {
 			result = &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
 			common.Log(ctx, result)
@@ -366,20 +375,20 @@ func (self *DeviceController) List(ctx *iris.Context) {
 			_school[_device.SchoolId] = _device.SchoolId
 		}
 	}
-	userMap, err := userService.BasicMapById(userIds...)
-	if err != nil {
+	userMap, _ := userService.BasicMapById(userIds...)
+	/*if err != nil {
 		result = &enity.Result{"01030403", err.Error(), device_msg["01030403"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
-	schoolMap, err := schoolService.BasicMap(schoolIds...)
-	if err != nil {
+	}*/
+	schoolMap, _ := schoolService.BasicMap(schoolIds...)
+	/*if err != nil {
 		result = &enity.Result{"01030402", err.Error(), device_msg["01030402"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
-	}
+	}*/
 	for _, device := range *list {
 		if schoolMap[device.SchoolId] != nil {
 			device.SchoolName = schoolMap[device.SchoolId].Name
@@ -416,7 +425,7 @@ func (self *DeviceController) List(ctx *iris.Context) {
 	}
 	if page > 0 && perPage > 0 {
 		result = &enity.Result{"01030400", &enity.Pagination{total, list}, device_msg["01030400"]}
-	}else {
+	} else {
 		result = &enity.Result{"01030400", list, device_msg["01030400"]}
 	}
 	common.Log(ctx, nil)
@@ -442,7 +451,7 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
-	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	var device model.Device
 	ctx.ReadJSON(&device)
 	if id <= 0 {
@@ -460,6 +469,14 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
+	tempDevice, err := deviceService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01030206", nil, device_msg["01030206"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	_device, err := deviceService.BasicByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01030205", nil, device_msg["01030205"]}
@@ -480,6 +497,11 @@ func (self *DeviceController) UpdateStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
+	if device.Status == 0 {
+		deviceService.UnLockDevice(tempDevice.SerialNumber)
+	}
+
 	result = &enity.Result{"01030200", nil, device_msg["01030200"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
@@ -501,15 +523,15 @@ func (self *DeviceController) UpdateStatusLimiter(ctx *iris.Context) {
 		return
 	}
 	switch device.Status {
-	case 0:		//如果为0，对应锁定操作
+	case 0: //如果为0，对应锁定操作
 		key = prefix + "lock:" + strconv.Itoa(id)
 		count, _ = common.Redis.Get(key).Int64()
 		break
-	case 9:		//如果为9，对应取消锁定操作
+	case 9: //如果为9，对应取消锁定操作
 		key = prefix + "unlock:" + strconv.Itoa(id)
 		count, _ = common.Redis.Get(key).Int64()
 		break
-	default:	//如果为60x，对应取消占用操作
+	default: //如果为60x，对应取消占用操作
 		key = prefix + "unoccupation:" + strconv.Itoa(id)
 		count, _ = common.Redis.Get(key).Int64()
 		break
@@ -567,6 +589,7 @@ func (self *DeviceController) UnLock(ctx *iris.Context) {
 		return
 	}
 	device.Status = 0
+
 	boo := deviceService.UpdateStatus(*device)
 	if !boo {
 		result = &enity.Result{"01031001", nil, device_msg["01031001"]}
@@ -574,6 +597,9 @@ func (self *DeviceController) UnLock(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	//删除c端占用和使用中的设备（删除redis中的值）
+	deviceService.UnLockDevice(serialNum)
+
 	result = &enity.Result{"01031000", nil, device_msg["01031000"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
@@ -625,8 +651,10 @@ func (self *DeviceController) DailyBill(ctx *iris.Context) {
 func (self *DeviceController) Update(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	ctx.ReadJSON(&device)
 	if id <= 0 {
 		result = &enity.Result{"01030312", nil, device_msg["01030312"]}
@@ -638,7 +666,7 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if len(device.SerialNumber) != 10 {
+	if len(device.SerialNumber) != 10 && len(device.SerialNumber) != 6 {
 		result = &enity.Result{"01030303", nil, device_msg["01030303"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -664,14 +692,26 @@ func (self *DeviceController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	deviceOperate := &model.DeviceOperate{
+		OperatorId:   operatorId,
+		OperatorType: 2,
+		SerialNumber: currentDevice.SerialNumber,
+		UserId:       currentDevice.UserId,
+		FromUserId:   currentDevice.FromUserId,
+	}
+	_, err := deviceOperateService.Create(deviceOperate)
+	if err != nil {
+		result = &enity.Result{"01030314", err.Error(), device_msg["01030314"]}
+		common.Log(ctx, result)
+	}
 	result = &enity.Result{"01030300", nil, device_msg["01030300"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }
 
-
 func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
@@ -680,12 +720,34 @@ func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	serialNumbers := strings.Split(device.SerialNumber, ",")
+	_map, _ := deviceService.BasicMapBySerialNumber(serialNumbers...)
+	common.Logger.Debug("===========", _map)
 	success := deviceService.Update(device, true)
 	if !success {
 		result = &enity.Result{"01031501", nil, device_msg["01031501"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
+	}
+	for _, s := range serialNumbers {
+		_device := &model.Device{}
+		if _map[s] != nil {
+			_device = _map[s]
+		}
+		deviceOperate := &model.DeviceOperate{
+			OperatorId:   operatorId,
+			OperatorType: 2,
+			SerialNumber: s,
+			UserId:       _device.UserId,
+			FromUserId:   _device.FromUserId,
+		}
+		_, err := deviceOperateService.Create(deviceOperate)
+		if err != nil {
+			result = &enity.Result{"01031503", err.Error(), device_msg["01031503"] + ":" + s}
+			common.Log(ctx, result)
+		}
 	}
 	result = &enity.Result{"01031500", nil, device_msg["01031500"]}
 	ctx.JSON(iris.StatusOK, result)
@@ -728,8 +790,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 {
-			//必须为10位的
+		if len(v) != 10 && len(v) != 6 {
 			result = &enity.Result{"01030503", nil, device_msg["01030503"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -752,7 +813,7 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		return
 	}
 	//修改设备的用户为当前用户id
-	sessionUserId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	sessionUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, err := userService.Basic(device.UserId)
 	if err != nil {
 		result = &enity.Result{"01030514", err.Error(), device_msg["01030514"]}
@@ -798,8 +859,10 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 */
 //事实上是重置设备，将userid变回1
 func (self *DeviceController) Reset(ctx *iris.Context) {
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
+	deviceOperatorService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	if id <= 0 {
 		result = &enity.Result{"01030602", nil, device_msg["01030602"]}
@@ -813,14 +876,19 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
-	if currentDevice == nil || currentDevice.UserId == 1 {
+	if currentDevice == nil {
 		//设备被重置了或不存在
 		result = &enity.Result{"01030603", nil, device_msg["01030603"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if currentDevice.UserId == 1 {
+		result = &enity.Result{"01030604", nil, device_msg["01030604"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	userService := &service.UserService{}
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, _ := userService.Basic(userId)
 	success := deviceService.Reset(id, user)
 	if !success {
@@ -828,6 +896,18 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
+	}
+	deviceOperator := &model.DeviceOperate{
+		OperatorId:   operatorId,
+		OperatorType: 1,
+		SerialNumber: currentDevice.SerialNumber,
+		UserId:       currentDevice.UserId,
+		FromUserId:   currentDevice.FromUserId,
+	}
+	_, err = deviceOperatorService.Create(deviceOperator)
+	if err != nil {
+		result = &enity.Result{"01030605", err.Error(), device_msg["01030605"]}
+		common.Log(ctx, result)
 	}
 	result = &enity.Result{"01030600", nil, device_msg["01030600"]}
 	ctx.JSON(iris.StatusOK, result)
@@ -917,8 +997,7 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 	}
 	serialList := strings.Split(device.SerialNumber, ",")
 	for _, v := range serialList {
-		if len(v) != 10 {
-			//必须为10位的
+		if len(v) != 10 && len(v) != 6 {
 			result = &enity.Result{"01030703", nil, device_msg["01030703"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -1042,7 +1121,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	serialNumberList := strings.Split(assignData.SerialNumbers, ",")
 	//serialNumbers := assignData.SerialNumbers
-	sessionUserId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	sessionUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
 	devices, err := deviceService.ListByUserAndSerialNumbers(sessionUserId, serialNumberList)
 	if err != nil {

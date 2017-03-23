@@ -3,7 +3,7 @@ import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import DailyBillDetailService from "../../../service/daily_bill_detail";
 import StatisConsumeService from "../../../service/statis_consume";
 import { Link } from 'react-router';
-
+var _ = require('lodash');
 const App = React.createClass({
   propTypes: {
     user_id: React.PropTypes.string,
@@ -93,51 +93,38 @@ const App = React.createClass({
     const pager = { page : this.state.page, perPage: this.state.perPage};
     this.list(USER.id,date,'', pager);
   },
-  list(userId, billAt,serialNumbr, pager) {
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  },
+  list(userId, billAt, serialNumbr, pager) {
     var self = this;
     this.setState({
       loading: true,
     });
     const {id} = this.props.params;
     const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    StatisConsumeService.dateList(billAt,{})
+    StatisConsumeService.dateList(billAt, pager)
       .then((data) => {
         self.setState({
           loading: false,
         });
         if (data && data.status == '00') {
+          let rowColor = {};
+          let _list=data.data.list.map((item,key) => {
+            item.url = baseUrl+item.serialNumber;
+            item.key = key + 1;
+            rowColor[item.key] = key%2==0?'white':'gray';
+            self.rowColor = rowColor;
+            return item;
+          })
           this.setState({
-            total: data.data.length,
-            list: data.data.map((item,key) => {
-              item.url = baseUrl+item.serialNumber;
-              item.key = key + 1;
-              return item;
-            })
+            total: data.data.total || 0,
+            list: _list
           });
         } else {
           message.info(data.msg);
         }
       });
-    // return
-    // const baseUrl = "/data/consume/month/"+id+"/"+billAt+"/";
-    /*DailyBillDetailService.list(userId, billAt, '', pager)
-      .then((data) => {
-        self.setState({
-          loading: false,
-        });
-        if (data && data.status == '00') {
-          this.setState({
-            total: data.data.total,
-            list: data.data.list.map((item,key) => {
-              item.url = baseUrl+item.serialNumber;
-              item.key = key + 1;
-              return item;
-            })
-          });
-        } else {
-          message.info(data.msg);
-        }
-      })*/
   },
 
   initializePagination() {
@@ -150,12 +137,12 @@ const App = React.createClass({
       onShowSizeChange(current, pageSize) {
         const pager = { page : current, perPage: pageSize};
         self.setState(pager);
-        // self.list(USER.id,date,'', pager);
+        self.list(USER.id,date,'', pager);
       },
       onChange(current) {
         const pager = { page : current, perPage: self.state.perPage};
         self.setState(pager);
-        // self.list(USER.id,date,'',pager);
+        self.list(USER.id,date,'',pager);
       },
     }
   },
@@ -172,7 +159,11 @@ const App = React.createClass({
           <Breadcrumb.Item>{date}</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 500 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 500 }} dataSource={list}
+             columns={columns} pagination={pagination}
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

@@ -192,7 +192,9 @@ var (
 func (self *UserController) SignInUser(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}
-	list, err := userService.ListOfSignIn()
+	format := ctx.URLParam("format")
+	common.Logger.Debug("format========", format)
+	list, err := userService.ListOfSignIn(format)
 	if err != nil {
 		result = &enity.Result{"1", err, "拉取注册用户数据异常"}
 		common.Log(ctx, result)
@@ -416,28 +418,9 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//判断手机号是否存在
-	/*currentUser, _ = userService.FindByMobile(user.Mobile)
-	if currentUser != nil {
-		result = &enity.Result{"01010413", nil, user_msg["01010413"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}*/
 	//获取cashAccount
 	cashAccount := &model.UserCashAccount{}
 	mapstructure.Decode(user.CashAccount, cashAccount)
-	//cash内容判断
-	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-	// 	//1-实时分账(支付宝)，2-微信 3-银行
-	// 	result = &enity.Result{"01010408", nil, user_msg["01010408"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if cashAccount.Account == "" {
-	// 	result = &enity.Result{"01010409", nil, user_msg["01010409"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 
 	//插入user到user表
 	user.ParentId ,_= ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid

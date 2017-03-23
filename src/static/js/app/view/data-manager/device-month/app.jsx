@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
 import StatisDeviceService from "../../../service/statis_device";
 import { Link } from 'react-router';
-
+var _ = require('lodash');
 const App = React.createClass({
   propTypes: {
     user_id: React.PropTypes.string,
@@ -83,6 +83,9 @@ const App = React.createClass({
   componentWillMount() {
     this.list();
   },
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  },
   list() {
     var self = this;
     this.setState({
@@ -95,12 +98,18 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const total = data.data.length;
+          let rowColor = {};
+          let _list=data.data.map((item, key) => {
+            item.key = key + 1;
+            rowColor[item.key] = key%2==0?'white':'gray';
+            self.rowColor = rowColor;
+            return item;
+          })
+          _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
+          _list= _.reverse(_list);
           this.setState({
             total: total,
-            list: data.data.map((item, key) => {
-              item.key = key + 1;
-              return item;
-            })
+            list:_list
           });
         } else if (data && data.status == '01') {
           // nothing to do
@@ -138,7 +147,11 @@ const App = React.createClass({
           <Breadcrumb.Item>模块统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 650 }} dataSource={list} columns={columns} pagination={pagination} bordered loading={this.state.loading}/>
+      <Table scroll={{ x: 650 }} dataSource={list}
+             columns={columns} pagination={pagination}
+             bordered loading={this.state.loading}
+             rowClassName={this.rowClassName}
+      />
     </section>);
   }
 });

@@ -6,6 +6,8 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/common"
 	"github.com/spf13/viper"
+	"maizuo.com/soda-manager/src/server/service/soda"
+	"strings"
 )
 
 var (
@@ -20,6 +22,8 @@ var (
 		"01080202": "参数错误",
 		"01080203": "无当前用户登陆信息",
 		"01080204": "无操作权限",
+		"01080205": "用户信息与洗衣记录不符",
+		"01080206": "洗衣记录不存在",
 	}
 )
 
@@ -42,20 +46,6 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	/*rel, err := userRoleRelService.BasicByUserId(userId)
-	if err != nil {
-
-	}
-	if rel.RoleId == 2 { //代理商
-		ids, err = userService.SubChildIdsByUserId(userId)
-		if err != nil {
-
-		}
-		ids = append(ids, userId)
-		if len(ids) <= 0 {
-
-		}
-	}*/
 	list, err := tradeService.BasicOfDevice(serialNumber, account, page, perPage)
 	common.Logger.Debug("list========", list)
 	if err != nil {
@@ -95,21 +85,29 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	washId, err := ctx.URLParamInt("washId")
-	if err != nil {
-		result = &enity.Result{"01080202", err.Error(), trade_msg["01080202"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	account := ctx.URLParam("account")
-	if washId < 0 || account == "" {
+	ticketId:= ctx.URLParam("washId")
+	mobile := ctx.URLParam("account")
+	if ticketId=="" || mobile == "" {
 		result = &enity.Result{"01080202", nil, trade_msg["01080202"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	_, err = tradeService.Refund(washId, account)
+	ticketService:=&sodaService.TicketService{}
+	ticket,err:=ticketService.BasicByTicketId(ticketId)
+	if err!=nil{
+		result = &enity.Result{"01080206", err.Error(), trade_msg["01080206"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if ticket.Mobile!=strings.Trim(mobile," "){
+		result = &enity.Result{"01080205", err.Error(), trade_msg["01080205"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	_, err = tradeService.Refund(ticketId,mobile)
 	if err != nil {
 		result = &enity.Result{"01080201", err.Error(), trade_msg["01080201"]}
 		common.Log(ctx, result)

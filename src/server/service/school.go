@@ -12,7 +12,7 @@ type SchoolService struct {
 
 func (self *SchoolService) Basic(id int) (*model.School, error) {
 	school := &model.School{}
-	r := common.DB.Where("id = ?", id).First(school)
+	r := common.SodaMngDB_R.Where("id = ?", id).First(school)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -23,9 +23,9 @@ func (self *SchoolService) List(ids ...int) (*[]*model.School, error) {
 	list := &[]*model.School{}
 	var r *gorm.DB
 	if len(ids) <= 0 {
-		r = common.DB.Find(list)
+		r = common.SodaMngDB_R.Find(list)
 	}else {
-		r = common.DB.Where("id in (?) ", ids).Find(list)
+		r = common.SodaMngDB_R.Where("id in (?) ", ids).Find(list)
 	}
 	if r.Error != nil {
 		return nil, r.Error
@@ -35,7 +35,7 @@ func (self *SchoolService) List(ids ...int) (*[]*model.School, error) {
 
 func (self *SchoolService) ListByIdList(idList []int) (*[]*model.School, error) {
 	schools := &[]*model.School{}
-	r := common.DB.Where("id IN (?)", idList).Find(schools)
+	r := common.SodaMngDB_R.Where("id IN (?)", idList).Find(schools)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -64,7 +64,7 @@ func (self *SchoolService) BasicMap(ids ...int) (map[int]*model.School, error) {
 func (self *SchoolService) BasicMapByLikeName(name string)  (map[int]*model.School, error) {
 	list := &[]*model.School{}
 	data := make(map[int]*model.School, 0)
-	r := common.DB.Where("name like ?", "%"+name+"%").Find(list)
+	r := common.SodaMngDB_R.Where("name like ?", "%"+name+"%").Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -77,7 +77,7 @@ func (self *SchoolService) BasicMapByLikeName(name string)  (map[int]*model.Scho
 func (self *SchoolService) BasicMapAll() (map[int]*model.School, error) {
 	list := &[]*model.School{}
 	data := make(map[int]*model.School, 0)
-	r := common.DB.Find(list)
+	r := common.SodaMngDB_R.Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

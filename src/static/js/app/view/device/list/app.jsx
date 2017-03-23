@@ -1,13 +1,16 @@
 import React from 'react';
-import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row} from 'antd';
+import { Table, Button, Breadcrumb, Popconfirm, message,Modal,Steps,Input,Icon,Col,Row,Tabs} from 'antd';
 import { Link,hashHistory } from 'react-router';
 const Step = Steps.Step;
+const TabPane = Tabs.TabPane;
+import SodaTabs from '../tabs/app.jsx';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as UserActions from '../../../actions/user';
 import UserService from "../../../service/user";
 import DeviceService from "../../../service/device";
+
 import './app.less';
 import _ from 'lodash';
 import moment from 'moment';
@@ -189,22 +192,23 @@ const columns = [{
         <a href="#">取消锁定</a>
       </Popconfirm>
     }
-    else if (status == 0) {
+    else if (status == 0 || status == 2) {
       action = <Popconfirm title="确认锁定吗?" onConfirm={record.changeStatus.bind(this, record.id, false)}>
         <a href="#">锁定</a>
       </Popconfirm>
     }
-    else if (status == 601 || status == 602 || status == 603 || status == 604) {
+    else if (status == 601 || status == 602 || status == 603 
+      || status == 604 || status == 605 || status == 606 || status == 607 || status == 608) {
       action = <Popconfirm title="确认取消占用吗?" onConfirm={record.changeStatus.bind(this, record.id, true)}>
         <a href="#">取消占用</a>
       </Popconfirm>
     }
-    if(USER.id == record.userId) {
+    // if(USER.id == record.userId) {
       node =
         <span>
           <Link to={"/device/edit/" + record.id}>修改</Link>
           <span className="ant-divider" />
-            {USER.role.id == 5 && USER.id == record.userId?
+            {USER.role.id == 5 && USER.id == record.userId && +record.isAssigned == 0?
               <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
                 <a href="#">删除</a>
               </Popconfirm>
@@ -218,18 +222,11 @@ const columns = [{
             {action}
           </span>
         </span>
-    }
+    // }
     return node;
   },
 }];
 
-const steps = [{
-  title: '填写运营商账号',
-}, {
-  title: '验证运营商信息',
-}, {
-  title: '完成',
-}];
 
 class DeviceList extends React.Component {
   constructor(props) {
@@ -257,34 +254,49 @@ class DeviceList extends React.Component {
       rowColor:{},
       serialNumber:'',
       userQuery:'',
+      userId:'',
+      schoolId:'',
       lockButton: false,
-
+      // 此处是 hardCode,根据后续需求再改
+      isAssigned: props.isAssigned,
+      // tabs:[{title:'我的设备', url:'0'},
+      //   {title:'已分配设备', url:'1'}],
+      // defaultTab: '0',
+      // tabSearch:'?child=0'
     };
     this.remove = this.remove.bind(this);
     this.reset = this.reset.bind(this);
     this.changeStatus = this.changeStatus.bind(this);
-
+    this.getNowQuery = this.getNowQuery.bind(this);
+    this.replaceLocation = this.replaceLocation.bind(this);
   }
   componentWillMount() {
-    let pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    let pager = this.getNowQuery();
     // 拉取设备详情
     this.loading = true;
+    // 从列表操作处进入的时候,路由会变化,
+    // 因为使用路由只有 userId 和 schoolId,没有 page 和 perPage
     const query = this.props.location.query;
     if(!_.isEmpty(query)) {
-      const serialNumber = query.serialNumber;
-      const userQuery = query.userQuery;
-      const page = +query.page || 1;
-      const perPage = +query.perPage || 10;
-      pager.serialNumber = serialNumber;
-      pager.userQuery = userQuery;
-      pager.page = page;
-      pager.perPage = perPage;
+      pager.serialNumber = query.serialNumber;
+      pager.userQuery = query.userQuery;
+      pager.userId = query.userId;
+      pager.schoolId = query.schoolId;
+      pager.page = +query.page || 1;
+      pager.perPage = +query.perPage || 10;
+      pager.isAssigned = +query.isAssigned || 0;
       this.setState({
-        serialNumber: serialNumber,
-        userQuery: userQuery,
-        page: page,
-        perPage: perPage,
+        serialNumber: query.serialNumber,
+        userQuery: query.userQuery,
+        userId: query.userId,
+        schoolId: query.schoolId,
+        page: +query.page || 1,
+        perPage: +query.perPage || 10,
+        isAssigned: +query.isAssigned || 0,
       })
+      if(pager.isAssigned) {
+        this.setState({defaultTab:'1'});
+      }
     }
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -292,14 +304,14 @@ class DeviceList extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
     // 成功才拉取,失败就提示
-    const pager = { page : this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    const pager = this.getNowQuery();
     if(this.theStatus !== -1) {
       const status = nextProps.status;
       if(status && self.theStatus !== -1 && self.theStatus !== undefined){
         if(status.fetch == true){
           this.props.getDeviceList(pager);
           this.setSearchValues(pager);
-          message.success('操作成功!',3);
+          message.success(nextProps.status.result.msg,3);
         } else {
           message.error(nextProps.status.result.msg, 3);
           console.log(nextProps.status.result.msg);
@@ -307,6 +319,7 @@ class DeviceList extends React.Component {
         self.theStatus = -1;
       }
     }
+    // 可以替换成普通的请求
     if(this.removeDevice !== -1 && this.removeDevice !== undefined) {
       const remove = nextProps.resultRemove;
       if(remove){
@@ -328,7 +341,7 @@ class DeviceList extends React.Component {
           this.props.getDeviceList(pager);
           this.setSearchValues(pager);
           self.loading = true;
-          message.success('删除成功',3);
+          message.success('删除成功!',3);
         } else {
           message.error(resultReset.result.msg,3);
         }
@@ -339,6 +352,16 @@ class DeviceList extends React.Component {
     if(this.props.list !== nextProps.list) {
       self.loading = false;
     }
+  }
+  getNowQuery() {
+    const pager = {
+      page: this.state.page,
+      perPage: this.state.perPage,
+      serialNumber: this.state.serialNumber,
+      userQuery: this.state.userQuery,
+      isAssigned: this.state.isAssigned,
+    }
+    return pager;
   }
   initializePagination() {
     let total = 1;
@@ -355,14 +378,17 @@ class DeviceList extends React.Component {
       },
       defaultPageSize: this.state.perPage,
       onShowSizeChange(current, pageSize) {
-        const pager = { page : +current, perPage: +pageSize, serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = self.getNowQuery();
+        pager.page = +current;
+        pager.perPage = +pageSize;
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
         self.setSearchValues(pager);
       },
       onChange(current) {
-        const pager = { page : +current, perPage: +self.state.perPage,serialNumber:self.state.serialNumber,userQuery:self.state.userQuery};
+        const pager = self.getNowQuery();
+        pager.page = +current;
         self.setState(pager);
         self.loading = true;
         self.props.getDeviceList(pager);
@@ -428,22 +454,24 @@ class DeviceList extends React.Component {
   handleCancel(e) {
     this.setState({
       visible: false,
-      // userAccount:'',
     });
   }
   resetHashHistory() {
     this.props.location.query.serialNumber = "";
-    hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
+    // hashHistory.replace(this.props.location);
     this.setState({serialNumber:""})
   }
   resetList() {
-    const pager = { page: this.state.page, perPage: this.state.perPage,serialNumber:this.state.serialNumber,userQuery:this.state.userQuery};
+    const pager = this.getNowQuery();
     this.setState({selectedRowKeys:[]});
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
   }
   rowClassName(record, index) {
     // 改变表格颜色
+    // record.key 是表格行的 key,
+    // 而 this.rowColor 是以 record.key 为 key 的对象,此处是取对应的 className
     return this.rowColor[record.key];
   }
   handleSerialNumberChange(e){
@@ -458,21 +486,19 @@ class DeviceList extends React.Component {
   }
   handleSearch(){
     const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g,"");
-    const pager = {
-      page: 1,
-      perPage: this.state.perPage,
-      serialNumber:serialNumber,
-      userQuery:''
-    };
-    this.setState({
-      page:1,
-      userQuery:''
-    });
-    this.refs.searchUserInput.refs.input.value=''
+    let pager = this.getNowQuery();
+    pager.page = 1;
+    pager.serialNumber = serialNumber;
+    pager.userQuery = '';
+    this.setState({page:1, userQuery:''});
+    if(+this.props.isAssigned) {
+      this.refs.searchUserInput.refs.input.value=''
+    }
     // 重置 URL 参数
     this.props.location.query.serialNumber = this.state.serialNumber;
     this.props.location.query.userQuery = '';
-    hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
+    // hashHistory.replace(this.props.location);
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -480,21 +506,17 @@ class DeviceList extends React.Component {
   }
   handleUserSearch(){
     const userQuery = this.state.userQuery.replace(/[\r\n\s]/g,"");
-    const pager = {
-      page: 1,
-      perPage: this.state.perPage,
-      userQuery:userQuery,
-      serialNumber:''
-    };
-    this.setState({
-      page:1,
-      serialNumber:''
-    });
+    let pager = this.getNowQuery();
+    pager.page = 1;
+    pager.serialNumber = '';
+    pager.userQuery = userQuery;
+    this.setState({page:1, serialNumber:''});
     this.refs.searchSerialInput.refs.input.value=''
     // 重置 URL 参数
     this.props.location.query.userQuery = this.state.userQuery;
     this.props.location.query.serialNumber = '';
-    hashHistory.replace(this.props.location);
+    // hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location)
     // 拉取设备详情
     this.props.getDeviceList(pager);
     this.setSearchValues(pager);
@@ -502,10 +524,15 @@ class DeviceList extends React.Component {
   }
   setSearchValues(items) {
     this.props.location.query = items;
-    hashHistory.replace(this.props.location);
+    // hashHistory.replace(this.props.location);
+    this.replaceLocation(this.props.location);
+  }
+  replaceLocation(e) {
+    this.props.replaceLocation(e);
   }
   render() {
     const query = this.props.location.query;
+    // 给 input 设置初始值
     let serialNumber = '';
     let userQuery = '';
     let current = this.state.page;
@@ -516,7 +543,6 @@ class DeviceList extends React.Component {
       current = +query.page;
       pageSize = +query.pageSize;
     }
-
     const self = this;
     this.pagination = this.initializePagination();
     this.pagination.current = current;
@@ -528,15 +554,13 @@ class DeviceList extends React.Component {
         this.setState({
           selectedRowKeys:selectedRowKeys,
         });
-        // console.log('onChange',selectedRows,selectedRowKeys);
       },
       onSelect: (record, selected, selectedRows) => {
         // record 当前被操作的行,selected 是否选中当前被操作的行,selectedRows 所有被选中的行
-        // console.log('onSelect',record,selected,selectedRows);
       },
-      getCheckboxProps: record => ({
-        disabled: record.hasAssigned,
-      }),
+      // getCheckboxProps: record => ({
+      //   disabled: record.hasAssigned,
+      // }),
     };
     const list = this.props.list;
     let dataSource = [];
@@ -546,13 +570,15 @@ class DeviceList extends React.Component {
         self.dataLen = data.length;
         let rowColor = {};
         dataSource = data.map(function (item, key) {
-          rowColor[item.serialNumber] = item.hasAssigned?'lock':'';
+          // 奇数为白,偶数不变
+          rowColor[item.serialNumber] = item.hasAssigned?'lock':key%2==0?'white':'gray';
           self.rowColor = rowColor;
           item.key = item.serialNumber;
           item.statusCode = item.status;
           item.remove = self.remove;
           item.reset = self.reset;
           item.changeStatus = self.changeStatus;
+          item.isAssigned = self.state.isAssigned;
           return item;
         })
       }
@@ -562,16 +588,22 @@ class DeviceList extends React.Component {
       <section className="view-device-list">
         <header>
           <Breadcrumb>
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item>设备管理</Breadcrumb.Item>
           </Breadcrumb>
         </header>
         <div className="toolbar">
-          <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
-          <Link to={"/device/batch-edit?serialNumbers="+serialNumbers}
+         <SodaTabs tabs={this.props.tabs}
+                   defaultTab={this.props.defaultTab}
+                   replaceLocation={this.replaceLocation.bind(this)}
+                   location={this.props.location}
+         />
+          {+this.props.isAssigned?"":
+            <Button onClick={this.handleAllocate.bind(this)} type="primary">批量分配</Button>
+          }
+          <Link to={"/device/batch-edit?isAssigned="+this.props.isAssigned+"&serialNumbers="+serialNumbers}
                 className="ant-btn ant-btn-primary item"
                 onClick={this.handleBatchEdit.bind(this)}>批量修改</Link>
-          {USER.role.id == 5 ?
+          {USER.role.id == 5 && +this.props.isAssigned == 0?
             <Link to="/device/edit" className="ant-btn ant-btn-primary item">
               添加新设备
             </Link>:""
@@ -586,17 +618,20 @@ class DeviceList extends React.Component {
               />
             </div>
             <Button className="item" onClick={this.handleSearch.bind(this)} type="primary">筛选</Button>
-            <div className="user search-input">
-              <Input ref="searchUserInput" 
-                     onChange={this.handleUserChange.bind(this)} 
-                     addonBefore="账户或用户名:" defaultValue={userQuery} 
-                     placeholder="请输入用户账户或用户名"
-                     onPressEnter={this.handleUserSearch.bind(this)}
-              />
-            </div>
-            <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
+            {+this.props.isAssigned ?
+              <div className="search-div">
+                <div className="user search-input">
+                  <Input ref="searchUserInput"
+                         onChange={this.handleUserChange.bind(this)}
+                         addonBefore="账户或用户名:" defaultValue={userQuery}
+                         placeholder="请输入用户账户或用户名"
+                         onPressEnter={this.handleUserSearch.bind(this)}
+                  />
+                </div>
+                <Button className="item" onClick={this.handleUserSearch.bind(this)} type="primary">筛选</Button>
+              </div>:""
+            }
           </div>
-
         </div>
         <article>
           <Table

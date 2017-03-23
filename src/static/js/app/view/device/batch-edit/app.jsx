@@ -96,6 +96,8 @@ class DeviceForm extends React.Component {
       // 是否直接跳转到设备列表页
       goBackDirect: false,
       firstGoBack: false,
+      // 是否是分配出去的设备,默认为自己的设备
+      isAssigned:"0",
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
@@ -117,20 +119,23 @@ class DeviceForm extends React.Component {
     this.props.getProvinceSchoolList(110000);
     // 将 query 的内容放到 state 里
     const serialNumbers = this.props.location.query.serialNumbers;
+    const isAssigned = this.props.location.query.isAssigned;
     this.setState({
       serialNumbers: serialNumbers,
-      serialNumberSum: serialNumbers.split(",").length});
+      serialNumberSum: serialNumbers.split(",").length,
+      isAssigned: isAssigned,
+    });
   }
   componentWillReceiveProps(nextProps) {
 
 	}
   componentDidUpdate(prevProps, prevState) {
     if(!this.state.successEditVisible && prevState.successEditVisible && this.state.firstGoBack) {
-      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
     }
 
     if(this.state.visible && prevState.visible && this.state.goBackDirect) {
-      setTimeout(function() { this.context.router.goBack(); }.bind(this), 250);
+      setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
     }
   }
   closeSucEditVisible() {
@@ -243,8 +248,14 @@ class DeviceForm extends React.Component {
       if (data && data.status == '00') {
         // 修改成功后要重新拉数据
         this.setState({getList: true});
-        // 确认是否要批量分配
-        this.editSuccess();
+        // 如果是用户自己的设备,需要确认是否要批量分配,如果是已经分配出去的设备,需要提示,并且跳转回去
+        if(+this.state.isAssigned) {
+          message.success(data.msg,3);
+          // 直接返回
+          setTimeout(function() { this.context.router.goBack(); }.bind(this), 500);
+        } else {
+          this.editSuccess();
+        }
         // 且将标红样式还原
         this.resetColor();
       } else {
@@ -426,7 +437,6 @@ class DeviceForm extends React.Component {
 			<section className="view-device-list" >
 				<header>
 					<Breadcrumb>
-            <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
             <Breadcrumb.Item><Link to="/device">设备管理</Link></Breadcrumb.Item>
 						<Breadcrumb.Item>批量修改</Breadcrumb.Item>
 					</Breadcrumb>
@@ -632,6 +642,7 @@ class DeviceForm extends React.Component {
             className={this.state.className}
             getList={this.state.getList}
             hasGetList={this.hasGetList.bind(this)}
+            isAssigned={this.state.isAssigned}
           />
           <AllocateModal
             visible={this.state.visible}
@@ -777,13 +788,15 @@ class DeviceTable extends React.Component {
       baseDataSource: [],
     }
   }
-
   componentWillMount() {
     this.getTableList();
   }
+  rowClassName(record, index) {
+    return this.rowColor[record.key];
+  }
   getTableList(){
     const serialNumbers = this.props.serialNumbers;
-    const pager = {page:0,perPage:0,serialNumber:serialNumbers,isEqual:1};
+    const pager = {page:0,perPage:0,serialNumber:serialNumbers,isEqual:1,isAssigned:this.props.isAssigned};
     this.list(pager);
   }
   componentWillReceiveProps(nextProps) {
@@ -809,6 +822,7 @@ class DeviceTable extends React.Component {
         });
         if (data && data.status == '00') {
           const total = data.data.length;
+          let rowColor = {};
           this.setState({
             total: total,
             baseDataSource: data.data.map((item, key) => {
@@ -819,6 +833,8 @@ class DeviceTable extends React.Component {
               item.secondPulsePrice = (+item.secondPulsePrice)/100;
               item.thirdPulsePrice = (+item.thirdPulsePrice)/100;
               item.fourthPulsePrice = (+item.fourthPulsePrice)/100;
+              rowColor[item.key] = key%2==0?'white':'gray';
+              self.rowColor = rowColor;
               return item;
             })
           });
@@ -832,10 +848,12 @@ class DeviceTable extends React.Component {
   changeDataSource(values,className) {
     const baseDataSource = this.state.baseDataSource;
     let newDataSource = [];
+    let rowColor = {};
     for(let i = 0;i < baseDataSource.length;i++) {
       const item = baseDataSource[i];
       newDataSource[i] = {
         index: item.index,
+        key: item.serialNumber,
         serialNumber: item.serialNumber,
         schoolName: values.schoolId?values.schoolId.label:item.schoolName,
         address: values.address?values.address:item.address,
@@ -849,7 +867,9 @@ class DeviceTable extends React.Component {
         fourthPulsePrice: values.fourthPulsePrice!==undefined?values.fourthPulsePrice/100:item.fourthPulsePrice,
         className: className,
       }
+      rowColor[item.serialNumber] = i%2==0?'white':'gray';
     }
+    this.rowColor = rowColor;
     this.setState({dataSource: newDataSource});
     this.props.hasChangedTable();
     setTimeout(function() { this.setState({loading: false}); }.bind(this), 100);
@@ -863,7 +883,9 @@ class DeviceTable extends React.Component {
           columns={this.state.columns}
           pagination={false}
           bordered
-          loading={this.state.loading}/>
+          loading={this.state.loading}
+          rowClassName={this.rowClassName.bind(this)}
+        />
       </div>
     );
   }

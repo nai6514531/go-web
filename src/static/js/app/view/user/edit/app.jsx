@@ -48,7 +48,7 @@ class UserForm extends React.Component {
     super(props, context);
     this.state = {
       type: "3",
-      payType: 0,
+      payType: 1,
       unsaved: true,
       passwordDirty: false,
     }
@@ -80,7 +80,7 @@ class UserForm extends React.Component {
       if(nextProps.detail.result.data.cashAccount){
         const type = nextProps.detail.result.data.cashAccount.type;
         // type 1 for alipay,3 for bank,0 for none
-        if(type) {
+        if(type!==undefined) {
           switch (type) {
             case 1:
               this.setState({ payType: 1 });
@@ -329,6 +329,10 @@ class UserForm extends React.Component {
               type: data.cashAccount.type.toString(),
               alipayAccount: data.cashAccount.account,
               alipayName: data.cashAccount.realName,
+            }
+          } else if(type == 0) {
+            cashValues = {
+              type: "0",
             }
           }
         }
@@ -618,7 +622,7 @@ class UserForm extends React.Component {
                 rules: [
                   {  message: '请选择收款方式' },
                 ],
-                initialValue: initialValue.type? initialValue.type: this.state.payType.toString(),
+                initialValue: initialValue.type!==undefined? initialValue.type: this.state.payType.toString(),
               })(
                 <RadioGroup>
                   <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">

@@ -10,7 +10,7 @@ type ReferenceDeviceService struct {
 
 func (self *ReferenceDeviceService) Basic(id int) (*model.ReferenceDevice, error) {
 	referenceDevice := &model.ReferenceDevice{}
-	r := common.DB.Where("id = ?", id).First(referenceDevice)
+	r := common.SodaMngDB_R.Where("id = ?", id).First(referenceDevice)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -19,7 +19,7 @@ func (self *ReferenceDeviceService) Basic(id int) (*model.ReferenceDevice, error
 
 func (self *ReferenceDeviceService) List(page int, perPage int) (*[]*model.ReferenceDevice, error) {
 	list := &[]*model.ReferenceDevice{}
-	r := common.DB.Offset((page - 1) * perPage).Limit(perPage).Find(list)
+	r := common.SodaMngDB_R.Offset((page - 1) * perPage).Limit(perPage).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}

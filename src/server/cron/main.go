@@ -2,14 +2,14 @@ package cron
 
 import (
 	"github.com/robfig/cron"
+	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/controller/api"
 	"maizuo.com/soda-manager/src/server/service"
-	"github.com/spf13/viper"
 )
 
 var (
-	dailyBill = &controller.DailyBillController{}
-	syncService = &service.SyncService{}
+	dailyBill     = &controller.DailyBillController{}
+	syncService   = &service.SyncService{}
 	deviceService = &service.DeviceService{}
 )
 
@@ -19,10 +19,10 @@ func SetUpCron() {
 	if isDevelopment == false {
 		c := cron.New()
 
-		syncDailyBillDetailSpec := viper.GetString("cron.syncDailyBillDetailSpec")
-		syncDailyBillSpec := viper.GetString("cron.syncDailyBillSpec")
-		syncDeviceSpec := viper.GetString("cron.syncDeviceSpec")
-		syncUserSpec := viper.GetString("cron.syncUserSpec")
+		// syncDailyBillDetailSpec := viper.GetString("cron.syncDailyBillDetailSpec")
+		// syncDailyBillSpec := viper.GetString("cron.syncDailyBillSpec")
+		// syncDeviceSpec := viper.GetString("cron.syncDeviceSpec")
+		// syncUserSpec := viper.GetString("cron.syncUserSpec")
 		updateSpec := viper.GetString("cron.updateSpec")
 		updateFirstDeviceSpec := viper.GetString("cron.updateFirstDeviceSpec")
 		updateSecondDeviceSpec := viper.GetString("cron.updateSecondDeviceSpec")
@@ -43,7 +43,16 @@ func SetUpCron() {
 		c.AddFunc(updateFourthDeviceSpec, func() {
 			deviceService.TimedUpdateStatus(604)
 		})
-		c.AddFunc(syncDailyBillDetailSpec, func() {
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(606)
+		})
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(607)
+		})
+		c.AddFunc(updateFourthDeviceSpec, func() {
+			deviceService.TimedUpdateStatus(608)
+		})
+		/*c.AddFunc(syncDailyBillDetailSpec, func() {
 			syncService.SyncDailyBillDetail()
 		})
 		c.AddFunc(syncDailyBillSpec, func() {
@@ -54,7 +63,7 @@ func SetUpCron() {
 		})
 		c.AddFunc(syncUserSpec, func() {
 			syncService.SyncUserAndRel()
-		})
+		})*/
 
 		c.Start()
 	}
