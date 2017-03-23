@@ -90,7 +90,7 @@ account | required,string  | 用户登录账号
 # Group 设备
 >
 
-## 重置设备密码计数 [/device/reset-step]
+## 重置设备密码计数 [/device-step]
 > 
 
 ### 重置设备密码计数 [POST]
