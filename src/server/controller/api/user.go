@@ -1,16 +1,20 @@
 package controller
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"regexp"
+	"strings"
+
 	"github.com/bitly/go-simplejson"
-	"gopkg.in/kataras/iris.v4"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
-	"regexp"
-	"strings"
+	"maizuo.com/soda-manager/src/server/service/soda"
 )
 
 /**
@@ -175,6 +179,13 @@ var (
 		"01011600": "拉取用户详情成功",
 		"01011601": "用户账户不能为空",
 		"01011602": "该用户不存在",
+
+		"01011700": "重置密码成功",
+		"01011701": "重置密码失败",
+		"01011702": "当前账号权限不足，不能重置密码",
+		"01011703": "重置密码异常，请稍后再试！",
+		"01011704": "账号不存在",
+		"01011705": "参数异常，请检查请求参数",
 	}
 )
 
@@ -412,7 +423,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	mapstructure.Decode(user.CashAccount, cashAccount)
 
 	//插入user到user表
-	user.ParentId ,_= ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
+	user.ParentId, _ = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	_, err := userService.Create(&user)
 	if err != nil {
 		result = &enity.Result{"01010410", err.Error(), user_msg["01010410"]}
@@ -548,7 +559,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 
 	//更新到user表
 	_, err := userService.Update(&user)
-	if err!=nil {
+	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -582,7 +593,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 
 	//修改直接前端传什么type就保存什么
 	_, err = userCashAccountService.UpdateByUserId(cashAccount)
-	if err!=nil {
+	if err != nil {
 		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -708,7 +719,7 @@ func (self *UserController) ListByParent(ctx *iris.Context) {
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
 	searchStr := ctx.URLParam("searchStr")
-	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	userService := &service.UserService{}
 	deviceService := &service.DeviceService{}
 	result := &enity.Result{}
@@ -1211,7 +1222,7 @@ func (self *UserController) Password(ctx *iris.Context) {
 	var err error
 	current := ctx.URLParam("current")
 	newer := ctx.URLParam("newer")
-	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	user, err := userService.Basic(userId)
 	if err != nil {
 		result = &enity.Result{"01011402", err.Error(), user_msg["01011402"]}
@@ -1245,10 +1256,86 @@ func (self *UserController) Password(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
+func (self *UserController) ResetPassword(ctx *iris.Context) {
+	body := simplejson.New()
+	ctx.ReadJSON(body)
+	account, _ := body.Get("account").String()
+	_password, _ := body.Get("password").String()
+	_type, _ := body.Get("type").Int()
+	result := &enity.Result{}
+	if account == "" || _type == 0 {
+		result = &enity.Result{"01011705", nil, user_msg["01011705"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	userService := &service.UserService{}
+	acccuntService := &sodaService.AccountService{}
+
+	roleService := &service.RoleService{}
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	role, err := roleService.BasicByUserId(userId)
+	if err != nil {
+		result = &enity.Result{"01011703", err.Error(), user_msg["01011703"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if role.Id != 4 || role.Id != 1 {
+		result = &enity.Result{"01011702", nil, user_msg["01011702"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	md5Ctx := md5.New()
+	_password = strings.Trim(_password, " ")
+	if _password == "" {
+		_password = viper.GetString("user.account.password.default")
+	}
+	md5Ctx.Write([]byte(_password))
+	password := hex.EncodeToString(md5Ctx.Sum(nil))
+	if len(password) == 0 {
+		result = &enity.Result{"01011703", err.Error(), user_msg["01011703"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if _type == 1 {
+		user, err := userService.FindByAccount(account)
+		if err != nil {
+			result = &enity.Result{"01011704", err.Error(), user_msg["01011704"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		_, err = userService.Password(user.Id, password)
+		if err != nil {
+			result = &enity.Result{"01011701", err.Error(), user_msg["01011701"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		} else {
+			result = &enity.Result{"01011700", nil, user_msg["01011700"]}
+			ctx.JSON(iris.StatusOK, result)
+		}
+	} else {
+		_account, err := acccuntService.FindByMobile(account)
+		if err != nil {
+			result = &enity.Result{"01011704", err.Error(), user_msg["01011704"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		_, err = acccuntService.UpdatePasswordByMobile(_account.Mobile, password)
+		if err != nil {
+			result = &enity.Result{"01011701", err.Error(), user_msg["01011701"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		} else {
+			result = &enity.Result{"01011700", nil, user_msg["01011700"]}
+			ctx.JSON(iris.StatusOK, result)
+		}
+	}
+}
+
 func (self *UserController) IsMeOrSub(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id") //前端传的id
 	result := &enity.Result{}
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//根据要操作的设备id查找
 	userService := &service.UserService{}
 	user, err := userService.Basic(id)

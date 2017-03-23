@@ -9,15 +9,15 @@ import (
 func Api() {
 
 	var (
-		user = &controller.UserController{}
-		region = &controller.RegionController{}
-		device = &controller.DeviceController{}
-		school = &controller.SchoolController{}
+		user            = &controller.UserController{}
+		region          = &controller.RegionController{}
+		device          = &controller.DeviceController{}
+		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
-		dailyBill = &controller.DailyBillController{}
-		sync = &controller.SyncController{}
-		statis = &controller.StatisController{}
-		trade = &controller.TradeController{}
+		dailyBill       = &controller.DailyBillController{}
+		sync            = &controller.SyncController{}
+		statis          = &controller.StatisController{}
+		trade           = &controller.TradeController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -51,9 +51,10 @@ func Api() {
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
 	api.Post("/user", user.Create)
 	api.Put("/user-password", user.Password)
+	api.Post("/user/reset-password", user.ResetPassword)
 	api.Put("/user/:id", user.Update)
 	api.Get("/user/:id", user.Basic)
-	api.Get("/user/:id/device", user.IsMeOrSub,user.DeviceList)
+	api.Get("/user/:id/device", user.IsMeOrSub, user.DeviceList)
 	api.Get("/user/:id/school", user.IsMeOrSub, user.SchoolList)
 	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
@@ -84,7 +85,7 @@ func Api() {
 	api.Post("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock", device.UnLock)
 	api.Put("/device-assign", device.Assign)
-
+	api.Post("/device/reset-step", device.ResetPasswordStep)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
