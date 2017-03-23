@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"time"
 	"github.com/bitly/go-simplejson"
+	"strconv"
 )
 
 type SmsController struct {}
@@ -28,9 +29,18 @@ var (
 		"01011709": "发送短信次数已超限",
 		"01011710": "手机号格式有误，请检查",
 		"01011711": "服务器异常",
-		"01011712": "图片验证码不能为空",
-		"01011713": "图片验证码已过期",
-		"01011714": "图片验证码错误",
+		"01011712": "图形验证码不能为空",
+		"01011713": "图形验证码已过期",
+		"01011714": "图形验证码错误",
+
+		"01011900": "短信校验成功",
+		"01011901": "服务器异常",
+		"01011902": "服务器异常",
+		"01011903": "账户不能为空",
+		"01011904": "无该账户信息",
+		"01011905": "短信验证码错误，请检查",
+		"01011906": "短信验证码不能为空",
+
 	}
 
 )
@@ -148,7 +158,7 @@ func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 
 	//存到redis
 	motivation := "RESET_PASSWORD"
-	key := prefix + motivation + ":" + user.Account
+	key := prefix + motivation + ":" + strconv.Itoa(user.Id)
 	common.Logger.Debugln("key-----", key)
 	_, err = common.Redis.Set(key, code, time.Minute * expiration).Result()
 	if err != nil {
@@ -164,4 +174,57 @@ func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 	result = &enity.Result{"01011700", data, sms_msg["01011700"]}
 	common.Log(ctx, nil)
 	returnCleanCaptcha(result)
+}
+
+func (self *SmsController) Verify(ctx *iris.Context) {
+	smsService := &service.SmsService{}
+	userService := &service.UserService{}
+	result := &enity.Result{}
+	prefix := viper.GetString("sms.prefix")
+	params := simplejson.New()
+	err := ctx.ReadJSON(&params)
+	if err != nil {
+		result = &enity.Result{"01011901", err, sms_msg["01011901"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	motivation := params.Get("motivation").MustString()
+	if motivation == "" {
+		result = &enity.Result{"01011902", nil, sms_msg["01011902"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	account := params.Get("account").MustString()
+	if account == "" {
+		result = &enity.Result{"01011903", nil, sms_msg["01011903"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	user, err := userService.FindByAccount(account)
+	if err != nil {
+		result = &enity.Result{"01011904", err, sms_msg["01011904"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	key := prefix + motivation + ":" + strconv.Itoa(user.Id)
+	code := params.Get("code").MustString()
+	if code == "" {
+		result = &enity.Result{"01011906", nil, sms_msg["01011906"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if !smsService.VerifySmsCodes(key, code) {
+		result = &enity.Result{"01011905", nil, sms_msg["01011905"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01011900", nil, sms_msg["01011900"]}
+	common.Log(ctx, result)
+	ctx.JSON(iris.StatusOK, result)
 }

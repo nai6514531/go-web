@@ -29,7 +29,8 @@ func Api() {
 
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
-	//api.Get("/user/:id/reset", user.Reset)
+	api.Post("/user/reset", user.ResetPassword)
+	api.Post("/sms/verity", sms.Verify)
 	api.Post("/reset-sms", sms.ResetSmsCodes)
 
 	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)

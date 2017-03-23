@@ -11,6 +11,7 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"regexp"
 	"strings"
+	"strconv"
 )
 
 /**
@@ -175,6 +176,14 @@ var (
 		"01011600": "拉取用户详情成功",
 		"01011601": "用户账户不能为空",
 		"01011602": "该用户不存在",
+
+		"01011800": "新密码设置成功",
+		"01011801": "服务器内部异常",
+		"01011802": "账户名不能为空",
+		"01011803": "不存在该账户",
+		"01011804": "图形验证码错误",
+		"01011805": "密码不能为空",
+		"01011806": "重设密码失败",
 	}
 )
 
@@ -1287,4 +1296,61 @@ func (self *UserController) DetailByAccount(ctx *iris.Context) {
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 
+}
+
+func (self *UserController) ResetPassword(ctx *iris.Context) {
+	userService := &service.UserService{}
+	smsService := &service.SmsService{}
+	result := &enity.Result{}
+	params := simplejson.New()
+	err := ctx.ReadJSON(&params)
+	if err != nil {
+		result = &enity.Result{"01011801", nil, user_msg["01011801"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	account := params.Get("account").MustString()
+	if account == "" {
+		result = &enity.Result{"01011802", nil, user_msg["01011802"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//校验短信验证码
+	motivation :=  "RESET_PASSWORD"
+	user, err := userService.FindByAccount(account)
+	if err != nil {
+		result = &enity.Result{"01011803", err, user_msg["01011803"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	prefix := viper.GetString("sms.prefix")
+	key := prefix + motivation + ":" + strconv.Itoa(user.Id)
+	code := params.Get("code").MustString()
+	if !smsService.VerifySmsCodes(key, code) {
+		result = &enity.Result{"01011804", nil, user_msg["01011804"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	password := params.Get("password").MustString()
+	if password == "" {
+		result = &enity.Result{"01011805", nil, user_msg["01011805"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//重设密码
+	_, err = userService.Password(user.Id, password)
+	if err != nil {
+		result = &enity.Result{"01011806", err, user_msg["01011806"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01011800", nil, user_msg["01011800"]}
+	common.Log(ctx, result)
+	ctx.JSON(iris.StatusOK, result)
 }
