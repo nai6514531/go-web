@@ -120,7 +120,7 @@ class VerifyForm extends React.Component {
     });
   }
   componentWillUnmount() {
-    self.clearTimer();
+    this.clearTimer();
   }
   render() {
     const { getFieldDecorator } = this.props.form;

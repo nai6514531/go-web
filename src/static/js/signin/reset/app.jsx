@@ -51,7 +51,7 @@ class App extends React.Component {
                         prev={this.prev.bind(this)}/>
     } else if(current == 2) {
       show = <div className="result-text"><h2><Icon type="check-circle" />新密码设置成功！</h2>
-          <p>请牢记您的新密码。<a href="#">返回登陆</a></p>
+          <p>请牢记您的新密码。<a href="#">返回登录</a></p>
         </div>
     }
     return show;
