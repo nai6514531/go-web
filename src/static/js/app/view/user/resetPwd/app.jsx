@@ -74,8 +74,8 @@ const App = Form.create()(React.createClass({
               rules: [{required: true, message: '请选择重置商家端还是用户端密码',}],
             })(
               <Select placeholder="请选择">
-                <Select.Option value="2">重置商家端密码</Select.Option>
-                <Select.Option value="1">重置用户端密码</Select.Option>
+                <Select.Option value="1">重置商家端密码</Select.Option>
+                <Select.Option value="2">重置用户端密码</Select.Option>
               </Select>
             )}
           </FormItem>
