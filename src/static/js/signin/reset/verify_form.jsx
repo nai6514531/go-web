@@ -56,7 +56,6 @@ class VerifyForm extends React.Component {
         self.timer = setInterval(function () {
           let count = self.state.count;
           if(count > 0) {
-            console.log('count',count);
             self.setState({
               count: --self.state.count,
             })
@@ -68,7 +67,6 @@ class VerifyForm extends React.Component {
             })
           }
         },1000);
-        this.getCaptcha();
       },(error)=>{
         message.error(error.msg,3);
         this.getCaptcha();
