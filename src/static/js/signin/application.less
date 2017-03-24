@@ -1,0 +1,42 @@
+@dark-bg-color: #404040;
+
+.application {
+  height: 100%;
+  width: 100%;
+  .application-main {
+    background: #FCFCFC;
+    height: 100%;
+    min-height: 500px;
+    padding: 16px;
+    border: 1px solid rgba(0,0,0,0);
+    & > section {
+      & > header {
+        border-bottom: 1px solid #ddd;
+        height: 50px;
+        line-height: 50px;
+        padding-left: 15px;
+        margin-bottom: 15px;
+      }
+      & > .toolbar {
+        margin-bottom: 15px;
+        line-height: 50px;
+        .item {
+          margin: 5px 10px;
+        }
+      }
+      & > article {
+        margin-bottom: 15px;
+        button {
+          margin: 0.2rem;
+        }
+      }
+    }
+    .ant-table table, .ant-table-thead > tr > th {
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      margin: 50px 0 0 0;
+    }
+  }
+}
+

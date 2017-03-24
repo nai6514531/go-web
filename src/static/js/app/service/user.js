@@ -45,6 +45,15 @@ const UserService = {
   },
   detailByAccount: (account) => {
     return apiGet(`/api/user-detail/${account}`);
+  },
+  sms: (values) => {
+    return apiPost(`/api/reset-sms`, values);
+  },
+  smsVerify: (values) => {
+    return apiPost(`/api/sms/verity`, values);
+  },
+  reset: (values) => {
+    return apiPost(`/api/user/reset`, values);
   }
 };
 
