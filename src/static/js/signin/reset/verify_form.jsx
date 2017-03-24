@@ -92,7 +92,7 @@ class VerifyForm extends React.Component {
                   count: --self.state.count,
                 })
               } else {
-                window.clearInterval(timer);
+                window.clearInterval(this.timer);
                 self.setState({
                     smsCode: true,
                     count: COUNTDOWN,
@@ -127,7 +127,7 @@ class VerifyForm extends React.Component {
           {...formItemLayout}
           label="登录账号：">
           {getFieldDecorator('account', {
-            rules: [{ required: true, message: '登录账号为空' }],
+            rules: [{ required: true, message: '登录账号不可为空' }],
             initialValue: initialAccount,
           })(
             <Input placeholder="请输入登录账号" />
@@ -137,7 +137,7 @@ class VerifyForm extends React.Component {
           {...formItemLayout}
           label="图形验证码：">
           {getFieldDecorator('captcha', {
-            rules: [{ required: true, message: '图形验证码为空' }],
+            rules: [{ required: true, message: '图形验证码不可为空' }],
           })(
             <div>
               <Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
@@ -152,7 +152,7 @@ class VerifyForm extends React.Component {
           {...formItemLayout}
           label="短信验证码：">
           {getFieldDecorator('code', {
-            rules: [{ required: true, message: '短信验证码为空' }],
+            rules: [{ required: true, message: '短信验证码不可为空' }],
           })(
             <div>
               <Input  placeholder="请输入短信验证码" style={{ width: '60%', marginRight: 8 }}/>
