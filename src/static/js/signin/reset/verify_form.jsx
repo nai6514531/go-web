@@ -43,17 +43,39 @@ class VerifyForm extends React.Component {
     });
   }
   handleSmsCode(values) {
+    const self = this;
     UserService.sms(values)
       .then((data) => {
         const mobile = data.data.mobile;
         this.showInfo(mobile);
-        this.setState({
+        self.setState({
+          smsCode: false,
           mobile,
-        });
+        })
+        // 图形验证码通过以后,再执行倒计时
+        self.timer = setInterval(function () {
+          let count = self.state.count;
+          if(count > 0) {
+            console.log('count',count);
+            self.setState({
+              count: --self.state.count,
+            })
+          } else {
+            self.clearTimer();
+            self.setState({
+              smsCode: true,
+              count: COUNTDOWN,
+            })
+          }
+        },1000);
         this.getCaptcha();
       },(error)=>{
         message.error(error.msg,3);
         this.getCaptcha();
+        self.setState({
+          smsCode: true,
+          count: COUNTDOWN,
+        })
       })
   }
   verifyAccount() {
@@ -77,28 +99,14 @@ class VerifyForm extends React.Component {
         message.error(error.msg,3);
       })
   }
+  clearTimer() {
+    clearInterval(this.timer);
+  }
   getSmsCode() {
     const self = this;
     const verifyAccount = this.verifyAccount();
     if(verifyAccount) {
       this.handleSmsCode(verifyAccount);
-      self.setState({
-        smsCode: false,
-      })
-      this.timer = setInterval(function () {
-          let count = self.state.count;
-            if(count > 0) {
-                self.setState({
-                  count: --self.state.count,
-                })
-              } else {
-                window.clearInterval(this.timer);
-                self.setState({
-                    smsCode: true,
-                    count: COUNTDOWN,
-                })
-              }
-          },1000);
     }
 
   }
@@ -112,7 +120,7 @@ class VerifyForm extends React.Component {
     });
   }
   componentWillUnmount() {
-    clearInterval(this.timer)
+    self.clearTimer();
   }
   render() {
     const { getFieldDecorator } = this.props.form;
