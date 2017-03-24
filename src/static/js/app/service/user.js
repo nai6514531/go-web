@@ -45,6 +45,9 @@ const UserService = {
   },
   detailByAccount: (account) => {
     return apiGet(`/api/user-detail/${account}`);
+  },
+  resetPwd: (data) => {
+    return apiPost('/api/user/reset-password',data);
   }
 };
 
