@@ -47,7 +47,6 @@ const DeviceService = {
     return apiPut(`/api/device-assign`, data);
   },
   setDeviceStep: (data)=>{
-    "use strict";
     return apiPost(`/api/device-step`, data);
   }
 };
