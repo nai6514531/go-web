@@ -24,7 +24,7 @@ const Header = React.createClass({
         }).then(response=>response.json())
           .then(function (data) {
             if (data && data.status && parseInt(data.status.substr(-2)) == 0) {
-              window.location.href = '/'
+              window.location.reload();
             } else {
               alert(data.msg || '系统异常,请重试!')
             }
