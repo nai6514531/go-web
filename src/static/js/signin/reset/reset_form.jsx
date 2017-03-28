@@ -107,7 +107,9 @@ class ResetForm extends React.Component {
         </FormItem>
         <FormItem>
           <Button className="submit" type="primary" htmlType="submit" size="large">确认修改</Button>
-          <a className="prev" href="#" onClick={this.prev.bind(this)}>返回上一步</a>
+          <p className="prev" >
+            <a href="#" onClick={this.prev.bind(this)}>返回上一步</a>
+          </p>
         </FormItem>
       </Form>
     );
