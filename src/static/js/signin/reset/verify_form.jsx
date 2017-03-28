@@ -94,6 +94,7 @@ class VerifyForm extends React.Component {
         // 账户信息传递给父组件
         self.props.setValues(values);
       },(error)=>{
+        this.getCaptcha();
         message.error(error.msg,3);
       })
   }
