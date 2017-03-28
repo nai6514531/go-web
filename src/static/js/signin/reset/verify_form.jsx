@@ -137,7 +137,7 @@ class VerifyForm extends React.Component {
             rules: [{ required: true, message: '登录账号不可为空' }],
             initialValue: initialAccount,
           })(
-            <Input placeholder="请输入登录账号" />
+            <Input size="large" placeholder="请输入登录账号" />
           )}
         </FormItem>
         <FormItem
@@ -147,7 +147,7 @@ class VerifyForm extends React.Component {
             rules: [{ required: true, message: '图形验证码不可为空' }],
           })(
             <div>
-              <Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
+              <Input size="large" placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
               <div className="captcha">
                 <img   src={this.state.url} onClick={this.getCaptcha}/>
               </div>
@@ -162,7 +162,7 @@ class VerifyForm extends React.Component {
             rules: [{ required: true, message: '短信验证码不可为空' }],
           })(
             <div>
-              <Input  placeholder="请输入短信验证码" style={{ width: '60%', marginRight: 8 }}/>
+              <Input  size="large" placeholder="请输入短信验证码" style={{ width: '60%', marginRight: 8 }}/>
                 {this.state.smsCode ?
                   <Button type="primary" className="codeSms" onClick={this.getSmsCode}>发送验证码</Button>
            						:

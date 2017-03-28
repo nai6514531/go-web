@@ -88,7 +88,7 @@ class ResetForm extends React.Component {
               validator: this.checkConfirm.bind(this),
             }],
           })(
-            <Input type="password" placeholder="请输入新密码" onBlur={this.handlePasswordBlur.bind(this)} />
+            <Input size="large" type="password" placeholder="请输入新密码" onBlur={this.handlePasswordBlur.bind(this)} />
           )}
         </FormItem>
         <FormItem
@@ -102,7 +102,7 @@ class ResetForm extends React.Component {
               validator: this.checkPassowrd.bind(this),
             }],
           })(
-            <Input type="password" placeholder="请再次输入新密码" />
+            <Input size="large" type="password" placeholder="请再次输入新密码" />
           )}
         </FormItem>
         <FormItem>
