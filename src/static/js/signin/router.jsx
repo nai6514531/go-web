@@ -9,6 +9,10 @@ const trackPage = function () {
   ga.pageview(path);
 };
 
+const validErrorRoute = function(nextState, replace) {
+  replace({ pathname: '/' })
+}
+
 const router = (
     <Router history={hashHistory} onUpdate={trackPage}>
       <Route path="/" component={ Application }>
@@ -22,6 +26,7 @@ const router = (
             callback(null, require('./reset/app.jsx').default);
           });
         }} />
+        <Route path="*" onEnter= { validErrorRoute }/>
       </Route>
     </Router>
 )
