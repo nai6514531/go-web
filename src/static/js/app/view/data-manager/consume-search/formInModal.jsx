@@ -59,7 +59,7 @@ class FormInModalI extends React.Component {
           onCancel={onCancel}
           footer={null}
         >
-          <Form layout="horizontal" onSubmit={this.handleSubmit}>
+          <Form layout="horizontal" style={{padding:24}} onSubmit={this.handleSubmit}>
             <FormItem
               {...formItemLayout}
               label="模块编号"
