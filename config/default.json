@@ -175,5 +175,12 @@
   },
   "export": {
     "loadsPath": "/temp"
+  },
+  "user":{
+    "account":{
+      "password":{
+        "default":"123456"
+      }
+    }
   }
 }

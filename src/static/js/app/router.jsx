@@ -170,6 +170,11 @@ const router = (
             callback(null, require('./view/setting/password/app.jsx').default);
           });
         }} />
+        <Route path="/setting/reset-password" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+            callback(null, require('./view/user/resetPwd/app.jsx').default);
+          });
+        }} />
       </Route>
 
     </Router>

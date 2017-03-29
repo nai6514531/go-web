@@ -64,7 +64,13 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    message.error('系统开小差了,请重试!', 3);
+    if (error.response) {
+      message.error(error.response.status,' 系统开小差了,请重试!', 3);
+      console.error(error.response.status,error.response.data);
+    } else {
+      message.error('系统开小差了,请重试!', 3);
+      console.error('Error', error.message);
+    }
     return Promise.reject(error);
   }
 );

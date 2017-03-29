@@ -230,7 +230,7 @@ const App = React.createClass({
         <LoginForm />
       </div>
       <div className="copy">
-        Copyright &copy; 2016 苏打生活. All Rights Reserved<br/>
+        Copyright &copy; 2017 苏打生活. All Rights Reserved<br/>
         客服电话:4008290029 粤ICP备<a href="http://www.miitbeian.gov.cn">16090794</a>号<br/>
         深圳市华策网络科技有限公司
       </div>
