@@ -1280,7 +1280,7 @@ func (self *UserController) ResetPassword(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if role.Id != 4 || role.Id != 1 {
+	if role.Id != 4 && role.Id != 1 {
 		result = &enity.Result{"01011702", nil, user_msg["01011702"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
