@@ -4,19 +4,23 @@ import UserService from "../../../service/user";
 import "./app.less";
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
+const PasswordRegExp = /([0-9]|[a-z]|[A-Z])/;
 
 const App = Form.create()(React.createClass({
   showConfirm(data) {
     confirm({
       title: `账号 ${data.account} 的密码将重置为：${data.password}，是否确认修改？`,
       content: '',
-      okText:'确认',
-      cancelText:'取消',
+      okText: '确认',
+      cancelText: '取消',
       onOk() {
         return UserService.resetPwd(data)
-          .then((data)=>{
-            message.success(data.msg)},
-            (data)=>{message.error(data.msg)}
+          .then((data)=> {
+              message.success(data.msg)
+            },
+            (data)=> {
+              message.error(data.msg)
+            }
           );
       },
       onCancel() {
@@ -28,15 +32,26 @@ const App = Form.create()(React.createClass({
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        let data = this.props.form.getFieldsValue();
-        if(data.hasOwnProperty('type'))data.type = parseInt(data.type);
-        this.showConfirm(data);
+        if (values.hasOwnProperty('type'))values.type = parseInt(values.type);
+        this.showConfirm(values);
+        //冗余验证
+        // UserService.detailByAccount(values.account).then(
+        //   ()=> {
+        //     if (values.hasOwnProperty('type'))values.type = parseInt(values.type);
+        //     this.showConfirm(values);
+        //   },
+        //   (err)=> {
+        //     message.error(err.msg)
+        //   })
       }
     });
   },
   checkPassword(rule, value, callback) {
     const form = this.props.form;
     if (value) {
+      if(!PasswordRegExp.test(value)) {
+        callback('只能输入大小写字母和数字');
+      }
       if (value.length >= 6 && value.length <= 16) {
         callback();
       } else {
