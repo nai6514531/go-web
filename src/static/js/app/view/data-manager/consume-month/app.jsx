@@ -105,9 +105,6 @@ const App = React.createClass({
   componentWillMount() {
     this.list();
   },
-  rowClassName(record, index) {
-    return this.rowColor[record.key];
-  },
   list() {
     var self = this;
     this.setState({
@@ -132,11 +129,8 @@ const App = React.createClass({
             "fourthPulseAmount": fourthPulseAmount,
             "amount": amount,
           };
-          let rowColor = {};
           let theList = list.map((item, key) => {
             item.key = key;
-            rowColor[item.key] = key%2==0?'white':'gray';
-            self.rowColor = rowColor;
             return item;
           });
           theList.push(total);
@@ -160,7 +154,6 @@ const App = React.createClass({
       <Table scroll={{ x: 450 }} dataSource={list} 
              columns={columns} pagination={false} 
              bordered loading={this.state.loading}
-             rowClassName={this.rowClassName}
       />
     </section>);
   }

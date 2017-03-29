@@ -54,6 +54,9 @@ const UserService = {
   },
   reset: (values) => {
     return apiPost(`/api/user/reset`, values);
+  },
+  resetPwd: (data) => {
+    return apiPost('/api/user/reset-password',data);
   }
 };
 

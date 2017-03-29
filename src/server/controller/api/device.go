@@ -2,6 +2,11 @@ package controller
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
+	"time"
+
+	simplejson "github.com/bitly/go-simplejson"
 	"github.com/spf13/viper"
 	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/common"
@@ -9,9 +14,6 @@ import (
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type DeviceController struct {
@@ -135,6 +137,11 @@ var (
 		"01031501": "批量更新设备失败",
 		"01031502": "设备号不能为空",
 		"01031503": "记录批量更新设备操作记录失败",
+
+		"01031600": "模块计数重置成功",
+		"01031601": "模块计数重置失败",
+		"01031602": "请输入正常的密码计数",
+		"01031603": "该模块不存在，请检查",
 	}
 )
 
@@ -1154,4 +1161,34 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 
+}
+
+func (self *DeviceController) ResetPasswordStep(ctx *iris.Context) {
+	body := simplejson.New()
+	ctx.ReadJSON(body)
+	serialNumber, _ := body.Get("serialNumber").String()
+	step, _ := body.Get("step").Int()
+	result := &enity.Result{}
+	if serialNumber == "" || step == 0 {
+		result = &enity.Result{"01031602", nil, device_msg["01031602"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	deviceService := &service.DeviceService{}
+	_, err := deviceService.BasicBySerialNumber(serialNumber)
+	if err != nil {
+		result = &enity.Result{"01031603", nil, device_msg["01031603"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	err = deviceService.ResetPasswordStep(serialNumber, step)
+	if err != nil {
+		result = &enity.Result{"01031601", nil, device_msg["01031601"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	} else {
+		result = &enity.Result{"01031600", nil, device_msg["01031600"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 }

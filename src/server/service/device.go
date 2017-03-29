@@ -2,13 +2,14 @@ package service
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type DeviceService struct {
@@ -437,6 +438,20 @@ func (self *DeviceService) Reset(id int, user *model.User) bool {
 	}
 	transAction.Commit()
 	return true
+}
+
+func (self *DeviceService) ResetPasswordStep(serialNumber string, step int) error {
+	transAction := common.SodaMngDB_WR.Begin()
+	data := map[string]interface{}{
+		"step": step,
+	}
+	r := transAction.Model(&model.Device{}).Where("serial_number = ?", serialNumber).Updates(data)
+	if r.Error != nil {
+		transAction.Rollback()
+		return r.Error
+	}
+	transAction.Commit()
+	return nil
 }
 
 func (self *DeviceService) Delete(id int) bool {
