@@ -1,0 +1,61 @@
+.reset-view {
+  margin: 50px auto;
+  padding: 50px;
+  width: 60%;
+  @media (max-width: 768px) {
+    padding: 5px;
+    width: 100%;
+  }
+  .steps-content {
+    margin: 15px auto;
+    padding: 10px;
+    @media (max-width: 768px) {
+      padding: 0px;
+    }
+  }
+  .verify-form {
+    width: 60%;
+    margin: 0 auto;
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+    .captcha, .codeSms {
+      display: inline-block;
+      vertical-align: middle;
+      cursor: pointer;
+      width: 35%;
+      height: 32px;
+      padding: 2px;
+      & > img {
+        width: 100%;
+      }
+    }
+    .submit {
+      margin: 0 auto;
+      display: block;
+    }
+  }
+  .reset-form {
+    width: 60%;
+    margin: 0 auto;
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+    .submit {
+      display: block;
+      margin: 0 auto;
+    }
+    .prev {
+      display: block;
+      text-align: center;
+    }
+  }
+  .result-text {
+    text-align: center;
+    h2 i {
+      margin-right: 5px;
+      color: green;
+    }
+  }
+}
+
