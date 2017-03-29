@@ -3,9 +3,6 @@ package controller
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"regexp"
-	"strings"
-
 	"github.com/bitly/go-simplejson"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
