@@ -2,24 +2,24 @@ package controller
 
 import (
 	"encoding/json"
-	"maizuo.com/soda-manager/src/server/kit/sms"
-	"gopkg.in/kataras/iris.v4"
-	"maizuo.com/soda-manager/src/server/service"
-	"maizuo.com/soda-manager/src/server/enity"
-	"maizuo.com/soda-manager/src/server/common"
-	"github.com/spf13/viper"
-	"time"
 	"github.com/bitly/go-simplejson"
+	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/sms"
+	"maizuo.com/soda-manager/src/server/service"
 	"strconv"
+	"time"
 )
 
-type SmsController struct {}
+type SmsController struct{}
 
 var (
 	sms_msg = map[string]string{
 		"01011700": "短信验证码发送成功",
 		"01011701": "短信验证码发送失败",
-		"01011702": "不存在该用户",
+		"01011702": "该账号不存在，请检查",
 		"01011703": "该用户无手机信息",
 		"01011704": "请求发送短信验证码失败",
 		"01011705": "服务器异常",
@@ -27,7 +27,7 @@ var (
 		"01011707": "服务器异常",
 		"01011708": "登录账户不能为空",
 		"01011709": "发送短信次数已超限",
-		"01011710": "手机号格式有误，请检查",
+		"01011710": "手机号格式有误，请联系客服修改",
 		"01011711": "服务器异常",
 		"01011712": "图形验证码不能为空",
 		"01011713": "图形验证码已过期",
@@ -40,12 +40,8 @@ var (
 		"01011904": "无该账户信息",
 		"01011905": "短信验证码错误，请检查",
 		"01011906": "短信验证码不能为空",
-
 	}
-
 )
-
-
 
 func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 	var returnCleanCaptcha = func(re *enity.Result) {
@@ -112,9 +108,9 @@ func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 		returnCleanCaptcha(result)
 		return
 	}
-	common.Logger.Debugln("mobile=======",user.Mobile)
+	common.Logger.Debugln("mobile=======", user.Mobile)
 	code := sms.Code()
-	response, err := smsService.SmsCodes(code, user.Mobile, "苏打生活", "{\"code\":\"" +code + "\"}", smsId)
+	response, err := smsService.SmsCodes(code, user.Mobile, "苏打生活", "{\"code\":\""+code+"\"}", smsId)
 	if err != nil {
 		result = &enity.Result{"01011701", err.Error(), sms_msg["01011701"]}
 		common.Log(ctx, result)
@@ -133,7 +129,7 @@ func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 		returnCleanCaptcha(result)
 		return
 	}
-	if respMap["error_response"] != nil  {
+	if respMap["error_response"] != nil {
 		_map := respMap["error_response"].(map[string]interface{})
 		if _map["sub_code"] != "" && _map["sub_code"].(string) == "isv.BUSINESS_LIMIT_CONTROL" {
 			result = &enity.Result{"01011709", nil, sms_msg["01011709"]}
@@ -160,7 +156,7 @@ func (self *SmsController) ResetSmsCodes(ctx *iris.Context) {
 	motivation := "RESET_PASSWORD"
 	key := prefix + motivation + ":" + strconv.Itoa(user.Id)
 	common.Logger.Debugln("key-----", key)
-	_, err = common.Redis.Set(key, code, time.Minute * expiration).Result()
+	_, err = common.Redis.Set(key, code, time.Minute*expiration).Result()
 	if err != nil {
 		result = &enity.Result{"01011711", err, sms_msg["01011711"]}
 		common.Log(ctx, result)
