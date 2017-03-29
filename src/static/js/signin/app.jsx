@@ -189,14 +189,13 @@ export class LoginForm extends React.Component {
               <div>
                 <Input  placeholder="请输入图形验证码" style={{ width: '60%', marginRight: 8 }}/>
                 <img className="captcha"  src={this.state.url} onClick={this.getCaptcha}/>
-                <span><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></span>
+                <p><a href="#" onClick={this.getCaptcha}>看不清楚? 换一张</a></p>
               </div>
             )}
           </FormItem>
           <FormItem  wrapperCol={{ span: 12, offset: 7 }} style={{ marginBottom: 8 }}>
             {getFieldDecorator('remember', {
               valuePropName: 'checked',
-              // initialValue: true,
             })(
               <Checkbox>记住密码</Checkbox>
             )}
