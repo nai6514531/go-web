@@ -15,7 +15,6 @@ class FormInModalI extends React.Component {
     };
     //this.handleSubmit = this.handleSubmit.bind(this);
   }
-
   handleSubmit = (e) => {
     e.preventDefault();
     this.setState({loading: true});
@@ -37,8 +36,14 @@ class FormInModalI extends React.Component {
         this.setState({loading: false});
       }
     });
-  };
-
+  }
+  numberOnly = (rule,value,callback)=>{
+    if (isNaN(value)) {
+      callback('只能输入数字');
+    }else {
+      callback();
+    }
+  }
   render() {
     const {form, visible, onCancel} = this.props;
     const {getFieldDecorator} = form;
@@ -79,7 +84,12 @@ class FormInModalI extends React.Component {
               {getFieldDecorator('step', {
                 rules: [{
                   required: true, message: '密码计数不可为空'
-                }]
+                },{
+                  validator:this.numberOnly
+                },{
+                  max:8, message:'最多输入8位数字'
+                }
+                ]
               })(
                 <Input type="text" placeholder="请输入密码计数"/>
               )}

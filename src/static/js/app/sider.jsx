@@ -26,8 +26,7 @@ const App = React.createClass({
         {'title':'设备管理','icon':'calculator'},
         {'title':'数据统计','icon':'line-chart'},
         {'title': '洗衣查询','icon':'search'},
-        {'title': '模块查询','icon':'search'},
-        {'title': '重置客户密码','icon':'syn'}
+        {'title': '模块查询','icon':'search'}
   ],
       openKeys: [],
     };
