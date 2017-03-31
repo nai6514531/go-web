@@ -4,7 +4,7 @@ import UserService from "../../../service/user";
 import "./app.less";
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
-const PasswordRegExp = /([0-9]|[a-z]|[A-Z])/;
+const PasswordRegExp = /[^0-9a-zA-Z]/;
 
 const App = Form.create()(React.createClass({
   showConfirm(data) {
@@ -49,8 +49,9 @@ const App = Form.create()(React.createClass({
   checkPassword(rule, value, callback) {
     const form = this.props.form;
     if (value) {
-      if(!PasswordRegExp.test(value)) {
+      if(PasswordRegExp.test(value)) {
         callback('只能输入大小写字母和数字');
+        return false;
       }
       if (value.length >= 6 && value.length <= 16) {
         callback();
