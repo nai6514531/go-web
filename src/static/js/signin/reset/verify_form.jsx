@@ -4,7 +4,7 @@ import { Form, Icon, Input, Button, Modal, message } from 'antd';
 const FormItem = Form.Item;
 import  UserService  from "../../app/service/user";
 
-const COUNTDOWN = 5
+const COUNTDOWN = 60;
 
 class VerifyForm extends React.Component {
   constructor(props) {
@@ -15,7 +15,7 @@ class VerifyForm extends React.Component {
       smsCode: true,
       count: COUNTDOWN,
       visible: true,
-      mobile: 'xxxxxxxxxxx'
+      mobile: ''
     }
     this.getCaptcha = this.getCaptcha.bind(this);
     this.getSmsCode = this.getSmsCode.bind(this);
