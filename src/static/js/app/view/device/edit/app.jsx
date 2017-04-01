@@ -674,7 +674,7 @@ class PulseName extends React.Component {
       {getFieldDecorator(itemKey,{
         rules: [
           { required: true, message: '必填' },
-          { max:30, message: '不超过三十个字'}
+          { max: 20, message: '不超过二十个字'}
         ],
         initialValue:initialValue
       })(<Input type="text"/>)}
