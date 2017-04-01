@@ -206,7 +206,9 @@ export class LoginForm extends React.Component {
                 :
               <Button type="primary" disabled onClick={this.handleSubmit}>登录</Button>
             }
-            <a className="reset" href="/#/reset">忘记密码?</a>
+            <p className="reset">
+              <a href="/#/reset">忘记密码?</a>
+            </p>
           </FormItem>
         </Form>
     );
