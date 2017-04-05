@@ -91,10 +91,10 @@
       "idleTimeout": 60
     }
   },
-  "resource":{
-    "database":{
+  "resource": {
+    "database": {
       "soda-manager": {
-        "r":{
+        "r": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -104,7 +104,7 @@
           "maxIdle": 20,
           "maxOpen": 20
         },
-        "wr":{
+        "wr": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -115,8 +115,8 @@
           "maxOpen": 20
         }
       },
-      "soda":{
-        "r":{
+      "soda": {
+        "r": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -126,7 +126,7 @@
           "maxIdle": 20,
           "maxOpen": 20
         },
-        "wr":{
+        "wr": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -138,7 +138,7 @@
         }
       },
       "mnzn": {
-        "r":{
+        "r": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -148,7 +148,7 @@
           "maxIdle": 20,
           "maxOpen": 20
         },
-        "wr":{
+        "wr": {
           "dialect": "mysql",
           "host": "192.168.1.204",
           "port": 3306,
@@ -176,11 +176,24 @@
   "export": {
     "loadsPath": "/temp"
   },
-  "user":{
-    "account":{
-      "password":{
-        "default":"123456"
+  "user": {
+    "account": {
+      "password": {
+        "default": "123456"
       }
+    }
+  },
+  "sms": {
+    "method": "alibaba.aliqin.fc.sms.num.send",
+    "requestUrl": "http://gw.api.taobao.com/router/rest",
+    "mng": {
+      "appKey": "",
+      "appSecret": ""
+    },
+    "prefix": "soda-manager:sms:",
+    "expiration": 5,
+    "smsId": {
+      "resetPassword": "SMS_36100137"
     }
   }
 }

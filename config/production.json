@@ -1,22 +1,2 @@
 {
-  "isDevelopment": false,
-  "templateServe": "./src/build/template",
-  "logFilePath": "/data/logs/maizuo.log",
-  "cron": {
-    "syncDailyBillDetailSpec": "0 30 4 * * ?",
-    "syncDailyBillSpec": "0 0 4 * * ?",
-    "syncDeviceSpec": "0 0/10 * * * ?",
-    "syncUserSpec": "0 0/10 * * * ?",
-    "syncUserCashSpec": "0 0/10 * * * ?",
-    "syncUserRoleSpec": "0 0/10 * * * ?",
-    "updateSpec": "0 0/15 * * * ?",
-    "applySpec": "0 50 6 * * ?",
-    "updateFirstDeviceSpec": "0 0/4 * * * ?",
-    "updateSecondDeviceSpec": "0 0/20 * * * ?",
-    "updateThirdDeviceSpec": "0 0/30 * * * ?",
-    "updateFourthDeviceSpec": "0 0/40 * * * ?"
-  },
-  "server": {
-    "port": 9999
-  }
 }
