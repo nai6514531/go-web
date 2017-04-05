@@ -226,7 +226,6 @@ const App = React.createClass({
     return (<div className="application application-login">
       <h2>
         <img src={require("./WechatIMG130.png")} alt=""/>
-        <p className="tips">木牛物联正式更名为苏打生活，更多服务敬请期待</p>
       </h2>
       <div className="form">
         <LoginForm />
