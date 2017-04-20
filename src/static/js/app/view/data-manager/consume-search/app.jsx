@@ -349,7 +349,7 @@ const App = React.createClass({
             ""
           }
           {
-            <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.changeStatus.bind(this,"lock")}>锁定</Button> 
+            USER.role.id == 4 ? <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.changeStatus.bind(this,"lock")}>锁定</Button> : null 
           }
         </div>
         <article>

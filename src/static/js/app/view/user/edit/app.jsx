@@ -463,7 +463,7 @@ class UserForm extends React.Component {
         </FormItem>
         <FormItem
           {...formItemLayout}
-          label="开户行">
+          label="开户支行">
           {getFieldDecorator('bankName', {
             rules: [
               {required: true, message: '必填'},
@@ -472,12 +472,12 @@ class UserForm extends React.Component {
             initialValue: initialValue.bankName,
 
           })(
-            <Input placeholder="请输入开户行"/>
+            <Input placeholder="请输入开户支行"/>
           )}
         </FormItem>
         <FormItem
           {...formItemLayout}
-          label="银行账号">
+          label="银行卡号">
           {getFieldDecorator('account', {
             rules: [
               {required: true, message: '必填'},
@@ -487,7 +487,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.account,
 
           })(
-            <Input placeholder="请输入银行账号"/>
+            <Input placeholder="请输入银行卡号"/>
           )}
         </FormItem>
         <FormItem
