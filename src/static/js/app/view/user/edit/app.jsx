@@ -684,7 +684,7 @@ class UserForm extends React.Component {
                     footer={null}
                     onCancel={this.handleCancel.bind(this)}
                     style={{textAlign:'center'}}>
-                <img src={imgUrl} />
+                <img src={imgUrl} width="60%"/>
              </Modal>
            </div>
         </article>
