@@ -449,11 +449,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 
 	//校验cashAccount
-	if cashAccount.Type == ""{
-		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+
 	if cashAccount.Type == 1 {
 		if cashAccount.Account == "" {
 			result = &enity.Result{"01010417", nil, user_msg["01010417"]}
@@ -482,12 +478,12 @@ func (self *UserController) Create(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		if cashAccount.ProvinceId == "" {
+		if cashAccount.ProvinceId == 0 {
 			result = &enity.Result{"01010422", nil, user_msg["01010422"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		if cashAccount.CityId == "" {
+		if cashAccount.CityId == 0 {
 			result = &enity.Result{"01010423", nil, user_msg["01010423"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
@@ -665,11 +661,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// }
 
 	//校验cashAccount
-	if cashAccount.Type == ""{
-		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+
 	if cashAccount.Type == 1 {
 		if cashAccount.Account == "" {
 			result = &enity.Result{"01010517", nil, user_msg["01010517"]}
@@ -698,12 +690,12 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		if cashAccount.ProvinceId == "" {
+		if cashAccount.ProvinceId == 0 {
 			result = &enity.Result{"01010522", nil, user_msg["01010522"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		if cashAccount.CityId == "" {
+		if cashAccount.CityId == 0 {
 			result = &enity.Result{"01010523", nil, user_msg["01010523"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
