@@ -37,6 +37,9 @@ const DeviceService = {
   statusBySN: (serialNumber, status) => {
     return apiPut(`/api/device-unlock?serial-number=${serialNumber}`, status);
   },
+  lockDeviceBySN: (serialNumber, status) => {
+    return apiPut(`/api/device-lock?serial-number=${serialNumber}`, status);
+  },
   pulseName: (id, device) => {
     return apiPost(`/api/device/${id}/pulse-name`, device);
   },

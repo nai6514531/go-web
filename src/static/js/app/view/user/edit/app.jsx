@@ -51,6 +51,8 @@ class UserForm extends React.Component {
       payType: 1,
       unsaved: true,
       passwordDirty: false,
+      imgUrl: '',
+      modalVisible: false
     }
     this.handleSubmit = this.handleSubmit.bind(this);
         this.provinceChange = this.provinceChange.bind(this);
@@ -127,25 +129,15 @@ class UserForm extends React.Component {
     this.props.getProvinceCityList(event);
     const { setFieldsValue } = this.props.form;
     setFieldsValue({'cityId':'-1'});
+    this.provinceHelp = {};
     this.default = -1;
     }
   cityChange(event) {
-    // this.cityIdHelp = {};
+    this.cityIdHelp = {};
     }
   handleSubmit(e) {
-      e.preventDefault();
-      const self = this;
+    e.preventDefault();
     this.props.form.validateFields((errors, values) => {
-      let cityId = values.cityId;
-      if(cityId == -1 || !cityId || cityId=="请选择城市") {
-        cityId = 0;
-        // self.cityIdHelp = {'help':'必选','className':'has-error'};
-        // return false;
-      }
-      let provinceId = values.provinceId;
-      if(!provinceId || provinceId=="请选择省份" ) {
-        provinceId = 0;
-      }
       if (errors) {
         return;
       }
@@ -159,6 +151,17 @@ class UserForm extends React.Component {
           "email": ""
       }
       if(values.type == 3) {
+          let cityId = values.cityId;
+          if(cityId == -1 || !cityId || cityId=="请选择城市") {
+            cityId = 0;
+            this.cityIdHelp = {'help':'必选','className':'has-error'};
+            return false;
+          }
+          let provinceId = values.provinceId;
+          if(!provinceId || provinceId=="请选择省份" ) {
+            this.provinceHelp = {'help':'必选','className':'has-error'};
+            return false;
+          }
           cashAccount = {
               "type": parseInt(values.type),
               "realName": values.realName,
@@ -179,7 +182,7 @@ class UserForm extends React.Component {
           "type": parseInt(values.type),
         }
       }
-            user.cashAccount = cashAccount;
+      user.cashAccount = cashAccount;
       if(this.props.params.id == 'new') {
         user.password = md5(values.password);
         user.account = values.userAccount;
@@ -187,7 +190,7 @@ class UserForm extends React.Component {
       } else {
           this.props.putUserDetail(this.props.params.id, user);
       }
-      self.saveDetail = 1;
+      this.saveDetail = 1;
     });
   }
 
@@ -277,6 +280,24 @@ class UserForm extends React.Component {
       callback();
     }
   }
+  showModal(type) {
+    if(type == 'account') {
+      this.setState({
+        modalVisible: true,
+        imgUrl: require("../../../../../img/app/account_demo.png")
+      });
+    } else {
+      this.setState({
+        modalVisible: true,
+        imgUrl: require("../../../../../img/app/name_demo.png")
+      });
+    }
+  }
+  handleCancel(e) {
+    this.setState({
+      modalVisible: false,
+    });
+  }
   render() {
     let ProvinceNode = [];
     if(this.props.provinceList && this.props.provinceList.fetch == true){
@@ -351,39 +372,46 @@ class UserForm extends React.Component {
       breadcrumb = '修改运营商';
     }
     let payNode = '';
+    let imgUrl = this.state.imgUrl;
     // if(!this.cityIdHelp){
     //   this.cityIdHelp = {};
     // }
     if(this.state.payType == 1){
       payNode = <div>
-        <FormItem
-          {...formItemLayout}
-          label="支付宝账号">
-          {getFieldDecorator('alipayAccount', {
-            rules: [
-              {required: true,  message: '必填'},
-              { max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.alipayAccount,
+        <div className="form-wrapper">
+          <FormItem
+            {...formItemLayout}
+            label="支付宝账号">
+            {getFieldDecorator('alipayAccount', {
+              rules: [
+                {required: true,  message: '必填'},
+                { max:30, message: '不超过三十个字'},
+              ],
+              initialValue: initialValue.alipayAccount,
 
-          })(
+            })(
             <Input placeholder="请输入支付宝账号"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="真实姓名">
-          {getFieldDecorator('alipayName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.alipayName,
+            )}
+          </FormItem>
+          <Button className="button-style" type="primary" onClick={this.showModal.bind(this,'account')}>查看示例</Button> 
+        </div>
+        <div className="form-wrapper">
+            <FormItem
+              {...formItemLayout}
+              label="真实姓名">
+              {getFieldDecorator('alipayName', {
+                rules: [
+                  {required: true, message: '必填'},
+                  {max:30, message: '不超过三十个字'},
+                ],
+                initialValue: initialValue.alipayName,
 
-          })(
-            <Input placeholder="请输入支付宝账号对应的真实姓名"/>
-          )}
-        </FormItem>
+              })(
+                <Input placeholder="请输入支付宝账号对应的真实姓名"/>
+              )}
+            </FormItem>
+            <Button type="primary" className="button-style" onClick={this.showModal.bind(this,'name')}>查看示例</Button>
+         </div>
       </div>
     } else if (this.state.payType == 3){
       payNode = <div>
@@ -399,6 +427,38 @@ class UserForm extends React.Component {
 
           })(
             <Input placeholder="请输入收款户名"/>
+          )}
+        </FormItem>
+        <FormItem
+          {...formItemLayout}
+          label="开户行所在省"
+          {...this.provinceHelp}
+        >
+          {getFieldDecorator('provinceId', {
+            rules: [
+              {required: true, message: '必填'}
+            ],
+            initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
+          })(
+            <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
+              {ProvinceNode}
+            </Select>
+          )}
+        </FormItem>
+        <FormItem
+          {...formItemLayout}
+          label="开户行所在市"
+          {...this.cityIdHelp}
+        >
+          {getFieldDecorator('cityId', {
+            rules: [
+              {required: true, message: '必填'}
+            ],
+            initialValue: +initialValue.cityId !==0?initialValue.cityId:'请选择城市',
+          })(
+            <Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
+              {cityNode}
+            </Select>
           )}
         </FormItem>
         <FormItem
@@ -443,31 +503,6 @@ class UserForm extends React.Component {
             <Input placeholder="请输入短信通知手机号"/>
           )}
         </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="省份"
-        >
-          {getFieldDecorator('provinceId', {
-            initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
-          })(
-            <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
-              {ProvinceNode}
-            </Select>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="城市"
-          // {...this.cityIdHelp}
-        >
-          {getFieldDecorator('cityId', {
-            initialValue: +initialValue.cityId !==0?initialValue.cityId:'请选择城市',
-          })(
-            <Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
-              {cityNode}
-            </Select>
-          )}
-        </FormItem>
       </div>
     }
     // const disable = id !== 'new'?{disabled:true}:{};
@@ -489,7 +524,7 @@ class UserForm extends React.Component {
 
         </header>
         <article>
-          <Form horizontal>
+          <Form layout="horizontal">
             {id !== 'new'? <FormItem
               {...formItemLayout}
               label="登录账号" >
@@ -613,7 +648,6 @@ class UserForm extends React.Component {
                 <Input placeholder="请输入服务电话" />
               )}
             </FormItem>
-
             <FormItem
               {...formItemLayout}
               label="收款方式"
@@ -629,12 +663,10 @@ class UserForm extends React.Component {
                     无设备
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                    <span>自动分账-无须手动申请结账</span>
-                    <p className="tips">必须有支付宝账号</p>
+                    <span>支付宝收款(T+1结算，周末照常结算)</span>
                   </Radio>
                   <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                      <span>财务定期结账-需手动申请结账</span>
-                      <p className="tips">请确保输入正确的银行卡相关信息</p>
+                      <span>银行卡收款(T+1结算，仅工作日进行)</span>
                   </Radio>
                 </RadioGroup>
 
@@ -646,6 +678,15 @@ class UserForm extends React.Component {
               <Button type="primary" onClick={this.handleSubmit}>保存</Button>
             </FormItem>
           </Form>
+          <div>
+             <Modal title="示例图片" 
+                    visible={this.state.modalVisible}
+                    footer={null}
+                    onCancel={this.handleCancel.bind(this)}
+                    style={{textAlign:'center'}}>
+                <img src={imgUrl} />
+             </Modal>
+           </div>
         </article>
       </section>
     );

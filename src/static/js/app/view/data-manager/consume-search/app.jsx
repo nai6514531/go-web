@@ -179,7 +179,7 @@ const App = React.createClass({
         }
       })
   },
-  status(serialNumber, status) {
+  unlockDevice(serialNumber, status) {
     // 解除占用
     DeviceService.statusBySN(serialNumber, status)
       .then((data) => {
@@ -188,10 +188,27 @@ const App = React.createClass({
         message.error(error.msg, 3);
       })
   },
-  changeStatus() {
+  lockDevice(serialNumber, status) {
+    // 解除占用
+    DeviceService.lockDeviceBySN(serialNumber, status)
+      .then((data) => {
+        message.success(data.msg, 3);
+      }, (error)=> {
+        message.error(error.msg, 3);
+      })
+  },
+  changeStatus(type) {
     const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g, "");
-    if (serialNumber) {
-      this.status(serialNumber, {status: 0});
+    if(!serialNumber) {
+      message.info("请输入模块编号", 3);
+    }
+    if (serialNumber && type == "unlock") {
+      this.unlockDevice(serialNumber, {status: 0});
+      return;
+    } 
+    if (serialNumber && type == "lock") {
+      this.lockDevice(serialNumber, {status: 9});
+      return;
     }
   },
   handleInputChange(item, e) {
@@ -324,12 +341,15 @@ const App = React.createClass({
           />
           <Button type="primary item" onClick={this.handleSearch.bind(this,'serialNumber')}>查询</Button>
           { USER.id == 4 || USER.id == 5 || USER.id == 368 || USER.id == 465 || USER.id == 1140 || USER.id == 1631 ?
-            <Button type="primary item" onClick={this.changeStatus}>解除占用</Button> :
+            <Button type="primary item" onClick={this.changeStatus.bind(this,"unlock")}>解除占用</Button> :
             ""
           }
           { USER.id == 368 ?
             <Button type="primary item" onClick={this.showModal}>重置模块计数</Button> :
             ""
+          }
+          {
+            <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.changeStatus.bind(this,"lock")}>锁定</Button> 
           }
         </div>
         <article>
