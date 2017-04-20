@@ -116,6 +116,7 @@ var (
 		"01010404": "密码不能为空!",
 		"01010406": "联系人手机不能为空!",
 		"01010407": "登录账号已被注册!",
+		"01010408": "结算方式不能为空!",
 		"01010410": "新增用户记录失败",
 		"01010411": "新增用户结算账号失败",
 		"01010412": "新增用户角色记录失败",
@@ -123,6 +124,14 @@ var (
 		"01010414": "请输入11位的手机号!",
 		"01010415": "添加用户记录失败!",
 		"01010416": "账号必须为11位手机号码",
+		"01010417": "支付宝账号不能为空",
+		"01010418": "真实姓名不能为空",
+		"01010419": "收款户名不能为空",
+		"01010420": "开户行不能为空",
+		"01010421": "银行账号不能为空",
+		"01010422": "省份不能为空",
+		"01010423": "城市不能为空",
+
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登录账号不能为空!",
@@ -132,11 +141,19 @@ var (
 		"01010506": "联系人手机不能为空!",
 		"01010507": "登录账号已被注册!",
 		"01010508": "手机号码已被使用!",
+		"01010509": "结算方式不能为空!",
 		"01010511": "修改用户记录失败",
 		"01010512": "修改用户结算账号失败",
 		"01010513": "请输入11位的手机号!",
 		"01010514": "修改用户记录错误!",
 		"01010515": "不能对账号进行更新!",
+		"01010517": "支付宝账号不能为空",
+		"01010518": "真实姓名不能为空",
+		"01010519": "收款户名不能为空",
+		"01010520": "开户行不能为空",
+		"01010521": "银行账号不能为空",
+		"01010522": "省份不能为空",
+		"01010523": "城市不能为空",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -378,6 +395,10 @@ func (self *UserController) Create(ctx *iris.Context) {
 	result := &enity.Result{}
 	ctx.ReadJSON(&user)
 
+	//获取cashAccount
+	cashAccount := &model.UserCashAccount{}
+	mapstructure.Decode(user.CashAccount, cashAccount)
+
 	//user信息校验
 	if user.Account == "" {
 		result = &enity.Result{"01010401", nil, user_msg["01010401"]}
@@ -426,9 +447,53 @@ func (self *UserController) Create(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//获取cashAccount
-	cashAccount := &model.UserCashAccount{}
-	mapstructure.Decode(user.CashAccount, cashAccount)
+
+	//校验cashAccount
+	if cashAccount.Type == ""{
+		result = &enity.Result{"01010408", nil, user_msg["01010408"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if cashAccount.Type == 1 {
+		if cashAccount.Account == "" {
+			result = &enity.Result{"01010417", nil, user_msg["01010417"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.RealName == "" {
+			result = &enity.Result{"01010418", nil, user_msg["01010418"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+	if cashAccount.Type == 3 {
+		if cashAccount.Account == "" {
+			result = &enity.Result{"01010421", nil, user_msg["01010421"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.RealName == "" {
+			result = &enity.Result{"01010419", nil, user_msg["01010419"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.BankName == "" {
+			result = &enity.Result{"01010420", nil, user_msg["01010420"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.ProvinceId == "" {
+			result = &enity.Result{"01010422", nil, user_msg["01010422"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.CityId == "" {
+			result = &enity.Result{"01010423", nil, user_msg["01010423"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+
 
 	//插入user到user表
 	user.ParentId, _ = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
@@ -598,6 +663,52 @@ func (self *UserController) Update(ctx *iris.Context) {
 	// 		}
 	// 	} //没有记录的不做处理
 	// }
+
+	//校验cashAccount
+	if cashAccount.Type == ""{
+		result = &enity.Result{"01010509", nil, user_msg["01010509"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if cashAccount.Type == 1 {
+		if cashAccount.Account == "" {
+			result = &enity.Result{"01010517", nil, user_msg["01010517"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.RealName == "" {
+			result = &enity.Result{"01010518", nil, user_msg["01010518"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+	if cashAccount.Type == 3 {
+		if cashAccount.Account == "" {
+			result = &enity.Result{"01010521", nil, user_msg["01010521"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.RealName == "" {
+			result = &enity.Result{"01010519", nil, user_msg["01010519"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.BankName == "" {
+			result = &enity.Result{"01010520", nil, user_msg["01010520"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.ProvinceId == "" {
+			result = &enity.Result{"01010522", nil, user_msg["01010522"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.CityId == "" {
+			result = &enity.Result{"01010523", nil, user_msg["01010523"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
 
 	//修改直接前端传什么type就保存什么
 	_, err = userCashAccountService.UpdateByUserId(cashAccount)

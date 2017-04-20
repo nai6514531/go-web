@@ -88,6 +88,7 @@ func Api() {
 	api.Post("/device/:id/status", device.OwnToMeOrTest, device.UpdateStatusLimiter, device.UpdateStatus)
 	api.Post("/device/:id/pulse-name", device.OwnToMeOrTest, device.UpdatePulseName)
 	api.Put("/device-unlock", device.UnLock)
+	api.Put("/device-lock", device.Lock)
 	api.Put("/device-assign", device.Assign)
 	api.Post("/device-step", device.ResetPasswordStep)
 
