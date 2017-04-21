@@ -272,7 +272,6 @@ const App = React.createClass({
     })
   },
   checkVaildSerialNumber() {
-    console.log("this.state.serialNumber",this.state.serialNumber,this.state.popUpvisible)
     if(!this.state.serialNumber) {
       message.error("请输入设备号")
     } else {
@@ -368,7 +367,7 @@ const App = React.createClass({
             USER.role.id == 4 ? 
             <Popconfirm 
               title={`是否对${this.state.serialNumber}进行锁定?`} 
-              onConfirm={this.lockDevice} 
+              onConfirm={this.changeStatus.bind(this,"lock")} 
               visible={this.state.popUpvisible} 
               onCancel={this.handlePopUpVisibleChange.bind(this,false)}
               okText="确定" 
