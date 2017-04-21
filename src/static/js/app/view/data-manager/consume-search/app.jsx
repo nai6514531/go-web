@@ -119,7 +119,8 @@ const App = React.createClass({
           },
         }],
       loading: false,
-      modalVisible: false
+      modalVisible: false,
+      popUpvisible: false
     };
   },
   componentWillMount() {
@@ -193,8 +194,10 @@ const App = React.createClass({
     DeviceService.lockDeviceBySN(serialNumber, status)
       .then((data) => {
         message.success(data.msg, 3);
+        this.handlePopUpVisibleChange(false);
       }, (error)=> {
         message.error(error.msg, 3);
+        this.handlePopUpVisibleChange(false);
       })
   },
   changeStatus(type) {
@@ -262,6 +265,19 @@ const App = React.createClass({
   },
   hideModal(){
     this.setState({modalVisible: false});
+  },
+  handlePopUpVisibleChange(visible) {
+    this.setState({
+      popUpvisible: visible
+    })
+  },
+  checkVaildSerialNumber() {
+    console.log("this.state.serialNumber",this.state.serialNumber,this.state.popUpvisible)
+    if(!this.state.serialNumber) {
+      message.error("请输入设备号")
+    } else {
+      this.handlePopUpVisibleChange(true);
+    }
   },
   initializePagination() {
     const account = this.state.account;
@@ -349,7 +365,18 @@ const App = React.createClass({
             ""
           }
           {
-            USER.role.id == 4 ? <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.changeStatus.bind(this,"lock")}>锁定</Button> : null 
+            USER.role.id == 4 ? 
+            <Popconfirm 
+              title={`是否对${this.state.serialNumber}进行锁定?`} 
+              onConfirm={this.lockDevice} 
+              visible={this.state.popUpvisible} 
+              onCancel={this.handlePopUpVisibleChange.bind(this,false)}
+              okText="确定" 
+              cancelText="取消">
+                <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.checkVaildSerialNumber}>锁定</Button> 
+            </Popconfirm> : 
+            null
+             
           }
         </div>
         <article>

@@ -364,8 +364,8 @@ class UserForm extends React.Component {
     }
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
-      labelCol: { span: 7 },
-      wrapperCol: { span: 12 },
+      labelCol: { span: 9 },
+      wrapperCol: { span: 10 },
     };
     let breadcrumb = '添加运营商';
     if(id !== 'new') {
@@ -663,17 +663,17 @@ class UserForm extends React.Component {
                     无设备
                   </Radio>
                   <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                    <span>支付宝收款(T+1结算，周末照常结算)</span>
+                     <span>支付宝收款(T+1结算，周末照常结算)</span>
                   </Radio>
                   <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                      <span>银行卡收款(T+1结算，仅工作日进行)</span>
+                    <span>银行卡收款(T+1结算，仅工作日进行)</span>
                   </Radio>
                 </RadioGroup>
 
               )}
             </FormItem>
             {payNode}
-            <FormItem wrapperCol={{ span: 12, offset: 7 }}>
+            <FormItem className="button-wrapper">
               <Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
               <Button type="primary" onClick={this.handleSubmit}>保存</Button>
             </FormItem>
@@ -684,7 +684,7 @@ class UserForm extends React.Component {
                     footer={null}
                     onCancel={this.handleCancel.bind(this)}
                     style={{textAlign:'center'}}>
-                <img src={imgUrl} width="60%"/>
+                <img src={imgUrl} width="70%"/>
              </Modal>
            </div>
         </article>

@@ -1,15 +1,26 @@
 .radio-block {
   display: block;
   width: 100%;
+  white-space: normal;
   //height:70px;
 }
 .form-wrapper {
   position: relative !important;
 }
+.button-wrapper {
+  text-align: center;
+  width: 100%;
+}
 .button-style {
   position: absolute;
   top: 0px;
-  right: 12%;
+  right: 10%;
+  @media (max-width: 320px) {
+    right: -25px;
+  }
+  @media (min-width: 320px) and (max-width: 768px) {
+    right: -14px;
+  }
 }
 .tips {
   color: #f50;
