@@ -151,15 +151,15 @@ class UserForm extends React.Component {
           "email": ""
       }
       if(values.type == 3) {
+          let provinceId = values.provinceId;
           let cityId = values.cityId;
+          if(!provinceId || provinceId=="请选择省份" ) {
+            this.provinceHelp = {'help':'必选','className':'has-error'};
+            return false;
+          }
           if(cityId == -1 || !cityId || cityId=="请选择城市") {
             cityId = 0;
             this.cityIdHelp = {'help':'必选','className':'has-error'};
-            return false;
-          }
-          let provinceId = values.provinceId;
-          if(!provinceId || provinceId=="请选择省份" ) {
-            this.provinceHelp = {'help':'必选','className':'has-error'};
             return false;
           }
           cashAccount = {
