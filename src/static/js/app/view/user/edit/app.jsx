@@ -390,7 +390,7 @@ class UserForm extends React.Component {
               initialValue: initialValue.alipayAccount,
 
             })(
-            <Input placeholder="请输入支付宝账号"/>
+            <Input placeholder="需要确认是邮箱还是手机号"/>
             )}
           </FormItem>
           <Button className="button-style" type="primary" onClick={this.showModal.bind(this,'account')}>查看示例</Button> 
@@ -407,7 +407,7 @@ class UserForm extends React.Component {
                 initialValue: initialValue.alipayName,
 
               })(
-                <Input placeholder="请输入支付宝账号对应的真实姓名"/>
+                <Input placeholder="必须为实名认证过的姓名"/>
               )}
             </FormItem>
             <Button type="primary" className="button-style" onClick={this.showModal.bind(this,'name')}>查看示例</Button>
@@ -426,7 +426,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.realName,
 
           })(
-            <Input placeholder="请输入收款户名"/>
+            <Input placeholder="如：张三"/>
           )}
         </FormItem>
         <FormItem
@@ -472,7 +472,7 @@ class UserForm extends React.Component {
             initialValue: initialValue.bankName,
 
           })(
-            <Input placeholder="请输入开户支行"/>
+            <Input placeholder="如：招商银行深圳科技园支行"/>
           )}
         </FormItem>
         <FormItem
