@@ -102,7 +102,7 @@ const App = React.createClass({
           width: 40,
           render: (text, record) => {
             if (USER.role.id == 4) {
-              if (record.status == 7) {
+              if (record.status == 7 || record.status == 6) {
                 return <div>
                   <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
                     <p><a href="#">退款</a></p>
