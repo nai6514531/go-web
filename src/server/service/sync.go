@@ -1,13 +1,12 @@
 package service
 
 import (
-	"strconv"
-	"time"
-
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
+	"strconv"
+	"time"
 )
 
 type SyncService struct {
@@ -22,7 +21,7 @@ func ListByTimed(isCreated bool) (*[]*muniu.BoxAdmin, error) {
 	} else {
 		_column = "UPDATETIME"
 	}
-	r := common.MNDB_R.Where(_column+" > ?", _time).Find(list)
+	r := common.MNDB_R.Where(_column + " > ?", _time).Find(list)
 	if r.Error != nil {
 		return nil, r.Error
 	}
@@ -41,7 +40,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 		return false, err
 	}
 	for _, _admin := range *newAdminList {
-		newUserIds = append(newUserIds, _admin.LocalId+1) //新库用户id
+		newUserIds = append(newUserIds, _admin.LocalId + 1) //新库用户id
 	}
 	exitsUserList, err := userService.ListById(newUserIds...) //判断新数据库中是否存在
 	if err != nil {
@@ -54,17 +53,17 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 
 	for _, _admin := range *newAdminList {
 		boo := true
-		if exitsUserMap[_admin.LocalId+1] != nil {
+		if exitsUserMap[_admin.LocalId + 1] != nil {
 			boo, _ = syncService.UpdateUser(_admin)
 			if !boo {
-				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+				common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 				return false, err
 			}
 			continue
 		}
 		boo, _ = syncService.AddUser(_admin)
 		if !boo {
-			common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			common.Logger.Warningln("Soda_Sync_Error:SyAddBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 			return false, err
 		}
 	}
@@ -78,7 +77,7 @@ func (self *SyncService) SyncUserNew() (bool, error) {
 		boo := true
 		boo, _ = syncService.UpdateUser(_admin)
 		if !boo {
-			common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId+1, ", error:", err.Error())
+			common.Logger.Warningln("Soda_Sync_Error:UpdateBoxAdmin:Id:", _admin.LocalId + 1, ", error:", err.Error())
 			return false, err
 		}
 	}
@@ -422,7 +421,6 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill, userCashAc
 	account := ""
 	realName := ""
 	bankName := ""
-	headBankName := ""
 	mobile := ""
 	if userCashAccount != nil {
 		accountType = userCashAccount.Type
@@ -438,24 +436,22 @@ func (self *SyncService) AddDailyBill(boxStatBill *muniu.BoxStatBill, userCashAc
 		account = userCashAccount.Account
 		realName = userCashAccount.RealName
 		bankName = userCashAccount.BankName
-		headBankName = userCashAccount.HeadBankName
 		mobile = userCashAccount.Mobile
 	}
 	dailyBill := &model.DailyBill{
-		UserId:       (boxStatBill.CompanyId + 1),
-		UserName:     boxStatBill.MerchName,
-		TotalAmount:  int(boxStatBill.Money * 100),
-		SettledAt:    boxStatBill.BillDate,
-		BillAt:       boxStatBill.PeriodStart,
-		OrderCount:   boxStatBill.Times,
-		Status:       status,
-		AccountType:  accountType,
-		AccountName:  accountName,
-		Account:      account,
-		RealName:     realName,
-		BankHeadName: headBankName,
-		BankName:     bankName,
-		Mobile:       mobile,
+		UserId:      (boxStatBill.CompanyId + 1),
+		UserName:    boxStatBill.MerchName,
+		TotalAmount: int(boxStatBill.Money * 100),
+		SettledAt:   boxStatBill.BillDate,
+		BillAt:      boxStatBill.PeriodStart,
+		OrderCount:  boxStatBill.Times,
+		Status:      status,
+		AccountType: accountType,
+		AccountName: accountName,
+		Account:     account,
+		RealName:    realName,
+		BankName:    bankName,
+		Mobile:      mobile,
 	}
 	r := common.SodaMngDB_WR.Create(dailyBill)
 	if r.Error != nil {
@@ -665,7 +661,7 @@ func (self *SyncService) SyncUpdateBillStatusFromSodaToMnzn() (bool, error) {
 			if _map[billAt] == "" {
 				_map[billAt] = strconv.Itoa(_dailyBill.UserId - 1)
 			} else {
-				_map[billAt] = _map[billAt] + "," + strconv.Itoa(_dailyBill.UserId-1)
+				_map[billAt] = _map[billAt] + "," + strconv.Itoa(_dailyBill.UserId - 1)
 			}
 		} else {
 			common.Logger.Debug("err:==========", err.Error())
@@ -673,7 +669,7 @@ func (self *SyncService) SyncUpdateBillStatusFromSodaToMnzn() (bool, error) {
 	}
 
 	for _billAt, _companyIds := range _map {
-		r = common.MNDB_WR.Model(&muniu.BoxStatBill{}).Where("COMPANYID in ("+_companyIds+") and PERIOD_START = date(?)", _billAt).Update("STATUS", "2")
+		r = common.MNDB_WR.Model(&muniu.BoxStatBill{}).Where("COMPANYID in (" + _companyIds + ") and PERIOD_START = date(?)", _billAt).Update("STATUS", "2")
 		if r.Error != nil {
 			common.Logger.Debug("false count=========", count)
 			return false, r.Error
