@@ -214,7 +214,7 @@ class UserForm extends React.Component {
           "type": parseInt(values.type),
           "realName": values.realName,
           "bankName": values.bankName,
-          "bankHeadName": values.bankHeadName,
+          "headBankName": values.headBankName,
           "account": values.account,
           "mobile": values.bankMobile,
           "cityId": parseInt(cityId),
@@ -405,7 +405,7 @@ class UserForm extends React.Component {
               type: data.cashAccount.type.toString(),
               realName: data.cashAccount.realName,
               bankName: data.cashAccount.bankName,
-              bankHeadName: data.cashAccount.bankHeadName,
+              headBankName: data.cashAccount.headBankName,
               account: data.cashAccount.account,
               bankMobile: data.cashAccount.mobile,
               provinceId: data.cashAccount.provinceId.toString(),
@@ -536,12 +536,12 @@ class UserForm extends React.Component {
         <FormItem
           {...formItemLayout}
           label="开户总行">
-          {getFieldDecorator('bankHeadName', {
+          {getFieldDecorator('headBankName', {
             rules: [
               {required: true, message: '必填'},
               {max:30, message: '不超过三十个字'},
             ],
-            initialValue: initialValue.bankHeadName,
+            initialValue: initialValue.headBankName,
 
           })(
             <Input placeholder="如：招商银行"/>
