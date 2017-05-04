@@ -127,11 +127,11 @@ var (
 		"01010417": "支付宝账号不能为空",
 		"01010418": "真实姓名不能为空",
 		"01010419": "收款户名不能为空",
-		"01010420": "开户行不能为空",
+		"01010420": "开户支行不能为空",
 		"01010421": "银行账号不能为空",
 		"01010422": "省份不能为空",
 		"01010423": "城市不能为空",
-
+		"01010424": "开户总行不能为空",
 
 		"01010500": "修改用户记录成功!",
 		"01010501": "登录账号不能为空!",
@@ -150,10 +150,11 @@ var (
 		"01010517": "支付宝账号不能为空",
 		"01010518": "真实姓名不能为空",
 		"01010519": "收款户名不能为空",
-		"01010520": "开户行不能为空",
+		"01010520": "开户支行不能为空",
 		"01010521": "银行账号不能为空",
 		"01010522": "省份不能为空",
 		"01010523": "城市不能为空",
+		"01010524": "开户总行不能为空",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -473,6 +474,11 @@ func (self *UserController) Create(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
+		if cashAccount.HeadBankName == "" {
+			result = &enity.Result{"01010424", nil, user_msg["01010424"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 		if cashAccount.BankName == "" {
 			result = &enity.Result{"01010420", nil, user_msg["01010420"]}
 			ctx.JSON(iris.StatusOK, result)
@@ -489,7 +495,6 @@ func (self *UserController) Create(ctx *iris.Context) {
 			return
 		}
 	}
-
 
 	//插入user到user表
 	user.ParentId, _ = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
@@ -682,6 +687,11 @@ func (self *UserController) Update(ctx *iris.Context) {
 		}
 		if cashAccount.RealName == "" {
 			result = &enity.Result{"01010519", nil, user_msg["01010519"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.HeadBankName == "" {
+			result = &enity.Result{"01010524", nil, user_msg["01010524"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
