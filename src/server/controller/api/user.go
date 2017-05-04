@@ -475,7 +475,7 @@ func (self *UserController) Create(ctx *iris.Context) {
 			return
 		}
 		if cashAccount.HeadBankName == "" {
-			result = &enity.Result{"01010424", nil, user_msg["01010420"]}
+			result = &enity.Result{"01010424", nil, user_msg["01010424"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
@@ -691,7 +691,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 			return
 		}
 		if cashAccount.HeadBankName == "" {
-			result = &enity.Result{"01010524", nil, user_msg["01010420"]}
+			result = &enity.Result{"01010524", nil, user_msg["01010524"]}
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
