@@ -18,7 +18,7 @@ const Service = {
     return api.post('/api/daily-bill/cancel', data)
   },
   bankBillCancel: (data) => {
-    return api.post('/api/daily-bill/bank-cancel', data)
+    return api.post('/api/daily-bill/bank-bill-cancel', data)
   },
   apply: (data) => {
     return api.get('/api/daily-bill/apply', {
