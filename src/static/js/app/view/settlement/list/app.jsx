@@ -503,7 +503,7 @@ const App = React.createClass({
 					if (list[j].accountType == 1 && resStatus == 0 && list[j].status != 3) {
 						list[j].status = 3;
 						aliPayNum++
-					} else if (list[j].accountType == 3) {
+					} else {
 						list[j].status = 2;
 					}
 				}
@@ -595,7 +595,7 @@ const App = React.createClass({
 			this.setState({
 				clickLock: false
 			});
-			if (res.status == "00") {
+			if (res.status == "0") {
 				// 只有返回了支付宝相关字段才会出现支付宝二次确认框
 				if (res.data != undefined) {
 					self.setState({
@@ -605,9 +605,9 @@ const App = React.createClass({
 					self.setPayModalVisible(true);
 				}
 				self.changeSettlementStatus(data, res.status);
-			} else if (res.status == "01") {
+			} else if (res.status == "1") {
 				message.info("结账操作失败，请稍后重试！")
-			} else if (res.status == "02") {
+			} else if (res.status == "2") {
 				self.changeSettlementStatus(data, res.status);
 				message.info("银行结账成功，支付宝结账失败")
 			} else(
