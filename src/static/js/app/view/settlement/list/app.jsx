@@ -142,8 +142,8 @@ const App = React.createClass({
 						case 1:
 							spanDiv = (
 								<div>
-                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
-                </div>
+				                  <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+				                </div>
 							)
 							break;
 						case 2:
@@ -199,7 +199,7 @@ const App = React.createClass({
 							break;
 						case 3:
 							if (status == 2) {
-								let renderCancelModal = accountType == 3 ? (<Popconfirm title="确定要取消结账吗?" onConfirm={this.deposit.bind(this, data)}>
+								let renderCancelModal = accountType == 3 ? (<Popconfirm title="确定要取消结账吗?" onConfirm={this.cancelBankBill.bind(this, data)}>
 											<a>取消结账</a>
 											<span> | </span>
 										</Popconfirm>) : ""
@@ -425,6 +425,31 @@ const App = React.createClass({
 		this.setState({
 			list: newList
 		});
+	},
+	cancelBankBill(data) {
+		const self = this;
+		if (this.state.clickLock) {
+			return;
+		} //是否存在点击锁
+		this.setState({
+			clickLock: true
+		});
+		DailyBillService.bankBillCancel(data).then((res) => {
+			this.setState({
+				clickLock: false
+			});
+			if (res.status == "00") {
+				message.info("已取消结账")
+				self.changeApplyStatus(data.id, data.willApplyStatus);
+			} else {
+				message.info(res.msg)
+			}
+		}).catch((err) => {
+			this.setState({
+				clickLock: false
+			});
+			message.info(err)
+		})
 	},
 	deposit(data) {
 		const self = this;

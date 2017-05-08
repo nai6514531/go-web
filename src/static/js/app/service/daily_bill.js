@@ -17,6 +17,9 @@ const Service = {
   billCancel: (data) => {
     return api.post('/api/daily-bill/cancel', data)
   },
+  bankBillCancel: (data) => {
+    return api.post('/api/daily-bill/bank-cancel', data)
+  },
   apply: (data) => {
     return api.get('/api/daily-bill/apply', {
       params: {
@@ -32,7 +35,7 @@ const Service = {
     })
   },
   mark: (id) => {
-    return api.get('/api/daily-bill/mark',{
+    return api.get('/api/daily-bill/mark', {
       params: {
         id: id
       }
