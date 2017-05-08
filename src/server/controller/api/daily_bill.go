@@ -53,6 +53,7 @@ var (
 		"01060409": "传参json异常",
 		"01060410": "所选支付宝账单超出批次结算最大值1000",
 		"01060411": "所选账单中包含已结账账单，请重新选择",
+		"01060412": "无付款账号订单结算更新状态失败",
 
 		"01060500": "更新支付宝账单成功",
 		"01060501": "更新支付宝账单结账状态失败",
@@ -182,8 +183,8 @@ func (self *DailyBillController) Apply(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, result)
 }
 
-/**
-	申请结账
+/*
+	日结账单明细查看
  */
 func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	dailyBillDetailService := &service.DailyBillDetailService{}
@@ -299,8 +300,10 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	}
 	paramList := params["params"].([]interface{})
 	for _, _param := range paramList {
+		unfilledUserIds:=[]string{}
 		aliPayUserIds := []string{}
 		bankPayUserIds := []string{}
+		unfilledBillMap:=make(map[int]*model.DailyBill, 0)
 		AliPayBillMap := make(map[int]*model.DailyBill, 0)
 		bankPayBillMap := make(map[int]*model.DailyBill, 0)
 
@@ -326,11 +329,17 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 			}
 			common.Log(ctx, result)
 			continue        //查询不到用户的账户信息就没有必要往下执行
-		}
+		}//TODO 上下两个函数功能有重叠，可以优化下
 		//过滤掉未申请提现的用户
 		billMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)
 		if err == nil  && len(billMap) > 0 {
 			for _userId, _dailyBill := range billMap {
+				common.Logger.Debug(accountMap[_userId])
+				if accountMap[_userId].Account == "" {			//所有未填收款账号的单归总
+					unfilledBillMap[_userId] = _dailyBill
+					unfilledUserIds = append(unfilledUserIds, strconv.Itoa(_userId))
+					continue
+				}
 				switch accountMap[_userId].AccountType {
 				case 1:                                                 //查询支付宝"已申请"的账单(后台自动将未结算改成已申请)
 					AliPayBillMap[_userId] = _dailyBill
@@ -352,6 +361,23 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 				}
 			}
 			common.Logger.Warningln(billAt, "==>aliPayUserIds:", aliPayUserIds)
+		}
+		if len(unfilledUserIds) > 0 {
+			rows, err := dailyBillService.BatchUpdateStatus(2, billAt, unfilledUserIds...)
+			if err != nil {
+				common.Logger.Debugln(billAt, "==>", daily_bill_msg["01060412"], ":", err.Error())
+				result = &enity.Result{"01060412", err.Error(), daily_bill_msg["01060412"]}
+				common.Log(ctx, result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+			if rows != len(unfilledUserIds) {
+				common.Logger.Debugln(billAt, "==>信息缺失订单结算部分更新失败:bankPayUserIds", unfilledUserIds)
+				result = &enity.Result{"01060412", nil, daily_bill_msg["01060412"]}
+				common.Log(ctx, result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
 		}
 		//aliPay bill
 		if len(aliPayUserIds) > 0 {
