@@ -212,10 +212,7 @@ const columns = [{
               <Popconfirm title="确认删除吗?" onConfirm={record.remove.bind(this, record.id)}>
                 <a href="#">删除</a>
               </Popconfirm>
-              :
-              <Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.reset.bind(this, record.id)}>
-                <a href="#">删除</a>
-              </Popconfirm>
+              :""//<Popconfirm title="你确认要删除并锁定该设备吗？" onConfirm={record.reset.bind(this, record.id)}><a href="#">删除</a></Popconfirm>
             }
           <span>
             <span className="ant-divider" />
