@@ -74,6 +74,7 @@ var (
 		"01060801":"导出结算列表失败",
 		"01060802":"无当前登录用户角色信息",
 		"01060803":"拉取日账单列表失败",
+		"01060804":"无导出权限",
 	}
 )
 
@@ -882,6 +883,12 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	status, userId, roleId, err := dailyBillService.Permission(s, signinUserId)
+	if roleId == 4 {//客服角色无导出账单权限
+		result = &enity.Result{"01060804", err.Error(), daily_bill_msg["01060804"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	if err != nil {
 		result = &enity.Result{"01060802", err.Error(), daily_bill_msg["01060802"]}
 		common.Log(ctx, result)
