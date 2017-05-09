@@ -781,7 +781,7 @@ func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	_, err := deviceOperateService.BatchCreateBussiness(operatorId, 2, _map, serialNumbers, 0)
+	_, err := deviceOperateService.BatchCreateBussiness(operatorId, 6, _map, serialNumbers, 0)
 	if err != nil {
 		result = &enity.Result{"01031503", err.Error(), device_msg["01031503"]}
 		common.Log(ctx, result)
@@ -948,6 +948,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		SerialNumber: currentDevice.SerialNumber,
 		UserId:       currentDevice.UserId,
 		FromUserId:   currentDevice.FromUserId,
+		ToUserId:     1,
 	}
 	_, err = deviceOperateService.Create(deviceOperator)
 	if err != nil {
@@ -1167,7 +1168,7 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	_, err = deviceOperateService.Create(
 		&model.DeviceOperate{
 			OperatorId:   operatorId,
-			OperatorType: 6,
+			OperatorType: 2,
 			SerialNumber: currentDevice.SerialNumber,
 			UserId:       currentDevice.UserId,
 			FromUserId:   currentDevice.FromUserId,
