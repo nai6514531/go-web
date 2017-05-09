@@ -76,6 +76,12 @@ var (
 		"01060802":"无当前登录用户角色信息",
 		"01060803":"拉取日账单列表失败",
 		"01060804":"无导出权限",
+
+		"01060900":"取消银行账单结算操作成功",
+		"01060901":"取消银行账单结算操作失败",
+		"01060902":"无此账单信息",
+		"01060903":"次账单为非银行结算方式，无法取消",
+
 	}
 )
 
@@ -334,7 +340,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		billMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)
 		if err == nil  && len(billMap) > 0 {
 			for _userId, _dailyBill := range billMap {
-				common.Logger.Debug(accountMap[_userId])
 				if accountMap[_userId].Account == "" {			//所有未填收款账号的单归总
 					unfilledBillMap[_userId] = _dailyBill
 					unfilledUserIds = append(unfilledUserIds, strconv.Itoa(_userId))
@@ -689,6 +694,43 @@ func BasicMnznBillLists(isSuccessed bool, billIdSettledAtMap *map[string]string,
 	return list, nil
 }
 
+func (self *DailyBillController) CancelBankBill(ctx *iris.Context) {
+	result := &enity.Result{}
+	dailyBillService := &service.DailyBillService{}
+	billId,err := ctx.ParamInt("id")
+	if err != nil {
+		common.Logger.Debugln("参数错误")
+		result = &enity.Result{"01060901", err.Error(), daily_bill_msg["01060901"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//判断该账单是否为银行结算,其他方式暂不支持从已结账（2）转为未结账（1）
+	bill, err := dailyBillService.Basic(billId)
+	if err != nil {
+		common.Logger.Debugln(daily_bill_msg["01060902"], ":", err.Error())
+		result := &enity.Result{"01060902", err.Error(), daily_bill_msg["01060902"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if bill.AccountType != 3 {
+		result = &enity.Result{"01060903", nil, daily_bill_msg["01060903"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	row, err := dailyBillService.BatchUpdateStatusById(2, billId)
+	if err != nil || row != 1{
+		result = &enity.Result{"01060901", err.Error(), daily_bill_msg["01060901"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01060900", nil, daily_bill_msg["01060900"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
 /**
 	取消提交支付宝批量付款申请
  */
