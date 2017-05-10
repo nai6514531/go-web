@@ -64,25 +64,26 @@ const App = React.createClass({
 				key: 'settledAt',
 				width: 250,
 				render: (settled_at, record) => {
-					if (record.accountType == 1) {
+					if (record.accountType == 1 || record.accountType == 2) {
 						return <div>
-              {record.realName?<span>{record.realName}</span>:''}
-              {record.realName && record.account ?' | ':''}
-              {record.account?<span className="info">账号: {record.account}</span>:''}
-              {record.account && record.mobile ?' | ':''}
-              {record.mobile?<span className="info">手机号: {record.mobile}</span>:''}
-            </div>
+			              {record.realName?<span>{record.realName}</span>:''}
+			              {record.realName && record.account ?' | ':''}
+			              {record.account?<span className="info">账号: {record.account}</span>:''}
+			              {record.account && record.mobile ?' | ':''}
+			              {record.mobile?<span className="info">手机号: {record.mobile}</span>:''}
+			            </div>
 					} else if (record.accountType == 3) {
 						return <div>
-              {record.realName?<span>户名: {record.realName}</span>:''}
-              {record.realName && record.bankName ?' | ':''}
-              {record.bankName?<span className="info">{record.bankName}</span>:''}
-              {record.bankName && record.account ?' | ':''}
-              {record.account?<span className="info">{record.account}</span>:''}
-              {record.account && record.mobile ?' | ':''}
-              {record.mobile?<span className="info">{record.mobile}</span>:''}
-            </div>
+				              {record.realName?<span>户名: {record.realName}</span>:''}
+				              {record.realName && record.bankName ?' | ':''}
+				              {record.bankName?<span className="info">{record.bankName}</span>:''}
+				              {record.bankName && record.account ?' | ':''}
+				              {record.account?<span className="info">{record.account}</span>:''}
+				              {record.account && record.mobile ?' | ':''}
+				              {record.mobile?<span className="info">{record.mobile}</span>:''}
+				            </div>
 					}
+
 				}
 			}, {
 				title: '订单量',
@@ -438,7 +439,7 @@ const App = React.createClass({
 			this.setState({
 				clickLock: false
 			});
-			if (res.status == "00") {
+			if (res.status == "0") {
 				message.info("已取消结账")
 				self.changeApplyStatus(data.id, data.willApplyStatus);
 			} else {
@@ -528,10 +529,10 @@ const App = React.createClass({
 		params.push(paramsObj);
 		this.settleAjax(params);
 	},
-	multiSettle() {
-
+	getCheckedData() {
 		if (this.state.selectedList.length == 0) {
-			return message.info('请勾选您需要结账的账单');
+			message.info('请勾选您需要结账的账单');
+			return;
 		}
 
 		let params = [];
@@ -563,21 +564,25 @@ const App = React.createClass({
 			// 按照日期聚合的账单号以及用户ID数组
 			params.push(paramsObj);
 		}
-		this.settleAjax(params);
+		return params;
+	},
+	multiSettle() {
+		let params = this.getCheckedData();
+		params && this.settleAjax(params);
 		this.closeAmountVisible();
 	},
 	settleAjax(data) {
 		let self = this;
 		/*var res = {"status":"00","data":{"_input_charset":"utf-8","account_name":"深圳市华策网络科技有限公司","batch_fee":"0.02","batch_no":"20161104151149","batch_num":"1","detail_data":"963^13631283955pp^余跃群^0.02^无","email":"laura@maizuo.com","notify_url":"http://a4bff7d7.ngrok.io/api/daily-bill/alipay/notification","partner":"","pay_date":"20161104","request_url":"https://mapi.alipay.com/gateway.do","service":"batch_trans_notify","sign":"e553969dd81c1f3504111045ae1da4d3","sign_type":"MD5"},"msg":"日账单结账成功"};
-		if(res.status == "00"){
+		if (res.status == "0") {
 			if(res.data != undefined){
 				self.setState({ payList: res.data, nowSettlement: data });
 				self.setPayModalVisible(true);
 			}
 			self.changeSettlementStatus(data, res.status);
-		}else if(res.status == "01"){
+		}else if(res.status == "1"){
 			message.info("结账操作失败，请稍后重试！")
-		}else if(res.status == "02"){
+		}else if(res.status == "2"){
 			self.changeSettlementStatus(data, res.status);
 			message.info("银行结账成功，支付宝结账失败")
 		}else(
@@ -639,6 +644,35 @@ const App = React.createClass({
 			message.info('勾选项金额合计为0或者账单状态不是未结账', 3);
 		}
 
+	},
+	updateBillStatus() {
+		let data = this.getCheckedData();
+		let selectedList = this.state.selectedList;
+		let len = selectedList.length;
+		for (let i = 0; i < len; i++) {
+			let item = selectedList[i];
+			if ((item.accountType != 1 || item.status != 4) && (item.account || item.realName || item.mobile)) {
+				message.info("您所勾选的不是异常账单");
+				return;
+			}
+		}
+		DailyBillService.updateAbnormalBill(data).then((res) => {
+			this.setState({
+				clickLock: false
+			});
+			if (res.status == "0") {
+				this.changeSettlementStatus(data, res.status);
+			} else {
+				message.info(res.msg)
+			}
+
+		}).catch((err) => {
+			message.info(err)
+			this.setState({
+				clickLock: false
+			});
+			message.info(err)
+		})
 	},
 	// 筛选相关
 	handleFilter() {
@@ -892,14 +926,14 @@ const App = React.createClass({
 			if (this.state.selectedList.length == 0) {
 				footer = (
 					<Button onClick={this.multiSettle} className="multiSettleBtn" size="large" type="primary">
-    				结账
-    			</Button>
+			 				结账
+			 			</Button>
 				)
 			} else {
 				footer = (
 					<Popconfirm title="确认结账吗?" onConfirm={this.multiSettle}>
-				    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
-				  </Popconfirm>
+					    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
+					</Popconfirm>
 				)
 			}
 		} else {
@@ -1002,9 +1036,14 @@ const App = React.createClass({
           {USER.role.id == 3 ?
           <Button className="item" type="primary" icon="download" onClick={this.exportBill} loading={this.state.exportLoading}>导出</Button>
           :""}
-            {USER.role.id == 3 ?
-            <Button className="calculate item" onClick={this.CalculateAmount} type="primary">计算金额</Button>
-            :""}
+          {USER.role.id == 3 ?
+           <Button className="calculate item" onClick={this.CalculateAmount} type="primary">计算金额</Button>
+           :""}
+           {USER.role.id == 3 ?
+           	<Popconfirm title="是否将这些账单改成已结账?" onConfirm={this.updateBillStatus}>
+           	    <Button className="update-bill-button item" type="primary">更新账单</Button>
+           	</Popconfirm>
+           :""}
         </div>
       </div>
 			{tableDiv}
