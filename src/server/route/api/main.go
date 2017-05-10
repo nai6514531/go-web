@@ -99,7 +99,7 @@ func Api() {
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
 	api.Get("/daily-bill/apply", dailyBill.Apply)
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
-	api.Put("/daily-bill/bank-bill-cancel", dailyBill.CancelBankBill)
+	api.Put("/daily-bill/bank-bill-cancel/:id", dailyBill.CancelBankBill)
 	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
 	api.Get("/daily-bill/mark", dailyBill.Mark)
 	api.Get("/daily-bill/device/:serialNumber", device.DailyBill)
