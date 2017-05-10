@@ -661,7 +661,8 @@ const App = React.createClass({
 				clickLock: false
 			});
 			if (res.status == "0") {
-				this.changeSettlementStatus(data, res.status);
+				this.changeSettlementStatus(data, 2);
+				message.info(res.msg);
 			} else {
 				message.info(res.msg)
 			}
