@@ -649,19 +649,24 @@ const App = React.createClass({
 		let data = this.getCheckedData();
 		let selectedList = this.state.selectedList;
 		let len = selectedList.length;
-		for (let i = 0; i < len; i++) {
-			let item = selectedList[i];
-			if ((item.accountType != 1 || item.status != 4) && (item.account || item.realName || item.mobile)) {
-				message.info("您所勾选的不是异常账单");
-				return;
+		if (len) {
+			for (let i = 0; i < len; i++) {
+				let item = selectedList[i];
+				if ((item.accountType != 1 || item.status != 4) && item.account) {
+					message.info("您所勾选的不是异常账单");
+					return;
+				}
 			}
+		} else {
+			return;
 		}
 		DailyBillService.updateAbnormalBill(data).then((res) => {
 			this.setState({
 				clickLock: false
 			});
 			if (res.status == "0") {
-				this.changeSettlementStatus(data, res.status);
+				this.changeSettlementStatus(data, 2);
+				message.info(res.msg);
 			} else {
 				message.info(res.msg)
 			}
