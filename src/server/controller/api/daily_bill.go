@@ -759,7 +759,7 @@ func (self *DailyBillController) CancelBankBill(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	row, err := dailyBillService.BatchUpdateStatusById(2, billId)
+	row, err := dailyBillService.BatchUpdateStatusById(1, billId)
 	if err != nil || row != 1 {
 		result = &enity.Result{"01060901", err.Error(), daily_bill_msg["01060901"]}
 		common.Log(ctx, result)
