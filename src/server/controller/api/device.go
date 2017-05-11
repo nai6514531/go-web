@@ -73,6 +73,7 @@ var (
 		"01030512": "你已经添加了该设备!",
 		"01030513": "请操作你自身、下级或Test账号下的设备!",
 		"01030514": "无该设备用户信息",
+		"01030515": "记录批量更新设备操作记录失败",
 
 		"01030600": "重置设备成功!",
 		"01030601": "重置设备失败!",
@@ -94,25 +95,25 @@ var (
 		"01030710": "请填写标准洗价格!",
 		"01030711": "请填写大件洗价格!",
 		"01030712": "新添加设备中包含已存在的设备，请检查!",
+		"01030713": "记录批量添加设备操作记录失败",
 
 		"01030800": "更新设备脉冲名成功!",
 		"01030801": "更新设备脉冲名失败!",
 		"01030802": "设备id不能小于0!",
 		"01030803": "设备脉冲名不能为空!",
+		"01030804": "设备不存在",
+		"01030805": "记录更新设备脉冲名操作记录失败",
 
 		"01030900": "删除设备成功!",
 		"01030901": "删除设备失败!",
 		"01030902": "设备id不能小于0!",
 		"01030903": "该设备已被注册或不存在!",
+		"01030904": "记录删除设备操作记录失败",
 
 		"01031000": "解除占用成功",
 		"01031001": "解除占用失败",
 		"01031002": "该设备不存在",
 		"01031003": "当前用户无操作权限",
-
-		"01031700": "设备锁定成功",
-		"01031701": "设备锁定失败",
-		"01031702": "该设备不存在",
 
 		"01031100": "拉取设备消费详情成功",
 		"01031101": "拉取设备消费详情失败",
@@ -125,6 +126,7 @@ var (
 		"01031205": "被分配的设备不能为空",
 		"01031206": "获取被分配的设备所有者信息异常",
 		"01031207": "所选设备存在不合法数据，请检查所选设备是否为自有设备或已被分配",
+		"01031208": "记录批量分配设备操作记录失败",
 
 		"01031301": "获取操作次数失败",
 		"01031302": "设置操作次数失败",
@@ -146,6 +148,10 @@ var (
 		"01031601": "模块计数重置失败",
 		"01031602": "请输入正常的密码计数",
 		"01031603": "该模块不存在，请检查",
+
+		"01031700": "设备锁定成功",
+		"01031701": "设备锁定失败",
+		"01031702": "该设备不存在",
 	}
 )
 
@@ -775,23 +781,10 @@ func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	for _, s := range serialNumbers {
-		_device := &model.Device{}
-		if _map[s] != nil {
-			_device = _map[s]
-		}
-		deviceOperate := &model.DeviceOperate{
-			OperatorId:   operatorId,
-			OperatorType: 2,
-			SerialNumber: s,
-			UserId:       _device.UserId,
-			FromUserId:   _device.FromUserId,
-		}
-		_, err := deviceOperateService.Create(deviceOperate)
-		if err != nil {
-			result = &enity.Result{"01031503", err.Error(), device_msg["01031503"] + ":" + s}
-			common.Log(ctx, result)
-		}
+	_, err := deviceOperateService.BatchCreateBussiness(operatorId, 6, _map, serialNumbers, 0)
+	if err != nil {
+		result = &enity.Result{"01031503", err.Error(), device_msg["01031503"]}
+		common.Log(ctx, result)
 	}
 	result = &enity.Result{"01031500", nil, device_msg["01031500"]}
 	ctx.JSON(iris.StatusOK, result)
@@ -824,6 +817,7 @@ func (self *DeviceController) BatchUpdate(ctx *iris.Context) {
 func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
 	userService := &service.UserService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
@@ -885,6 +879,13 @@ func (self *DeviceController) UpdateBySerialNumber(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	_map, _ := deviceService.BasicMapBySerialNumber(serialList...)
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	_, err = deviceOperateService.BatchCreateBussiness(operatorId, 6, _map, serialList, 0)
+	if err != nil {
+		result = &enity.Result{"01030515", err.Error(), device_msg["01030515"]}
+		common.Log(ctx, result)
+	}
 	result = &enity.Result{"01030500", nil, device_msg["01030500"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
@@ -906,7 +907,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
-	deviceOperatorService := &service.DeviceOperateService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	if id <= 0 {
 		result = &enity.Result{"01030602", nil, device_msg["01030602"]}
@@ -947,8 +948,9 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 		SerialNumber: currentDevice.SerialNumber,
 		UserId:       currentDevice.UserId,
 		FromUserId:   currentDevice.FromUserId,
+		ToUserId:     1,
 	}
-	_, err = deviceOperatorService.Create(deviceOperator)
+	_, err = deviceOperateService.Create(deviceOperator)
 	if err != nil {
 		result = &enity.Result{"01030605", err.Error(), device_msg["01030605"]}
 		common.Log(ctx, result)
@@ -973,6 +975,7 @@ func (self *DeviceController) Reset(ctx *iris.Context) {
 func (self *DeviceController) Delete(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	if id <= 0 {
 		result = &enity.Result{"01030902", nil, device_msg["01030902"]}
@@ -999,6 +1002,19 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx, result)
 		return
+	}
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	_, err = deviceOperateService.Create(
+		&model.DeviceOperate{
+			OperatorId:   operatorId,
+			OperatorType: 5,
+			SerialNumber: currentDevice.SerialNumber,
+			UserId:       currentDevice.UserId,
+			FromUserId:   currentDevice.FromUserId,
+		})
+	if err != nil {
+		result = &enity.Result{"01030904", err.Error(), device_msg["01030904"]}
+		common.Log(ctx, result)
 	}
 	result = &enity.Result{"01030900", nil, device_msg["01030900"]}
 	ctx.JSON(iris.StatusOK, result)
@@ -1031,6 +1047,7 @@ func (self *DeviceController) Delete(ctx *iris.Context) {
 */
 func (self *DeviceController) Create(ctx *iris.Context) {
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	var device model.Device
 	ctx.ReadJSON(&device)
@@ -1081,6 +1098,13 @@ func (self *DeviceController) Create(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
+	_map, _ := deviceService.BasicMapBySerialNumber(serialList...)
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	_, err = deviceOperateService.BatchCreateBussiness(operatorId, 3, _map, serialList, 0)
+	if err != nil {
+		result = &enity.Result{"01030713", err.Error(), device_msg["01030713"]}
+		common.Log(ctx, result)
+	}
 	result = &enity.Result{"01030700", nil, device_msg["01030700"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
@@ -1109,6 +1133,7 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 	var device model.Device
 	ctx.ReadJSON(&device)
 	deviceService := &service.DeviceService{}
+	deviceOperateService := &service.DeviceOperateService{}
 	result := &enity.Result{}
 	if id <= 0 {
 		result = &enity.Result{"01030802", nil, device_msg["01030802"]}
@@ -1132,12 +1157,33 @@ func (self *DeviceController) UpdatePulseName(ctx *iris.Context) {
 		common.Log(ctx, result)
 		return
 	}
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	currentDevice, err := deviceService.Basic(id)
+	if err != nil {
+		result = &enity.Result{"01030804", err, device_msg["01030804"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	_, err = deviceOperateService.Create(
+		&model.DeviceOperate{
+			OperatorId:   operatorId,
+			OperatorType: 2,
+			SerialNumber: currentDevice.SerialNumber,
+			UserId:       currentDevice.UserId,
+			FromUserId:   currentDevice.FromUserId,
+		})
+	if err != nil {
+		result = &enity.Result{"01030805", err.Error(), device_msg["01030805"]}
+		common.Log(ctx, result)
+	}
 	result = &enity.Result{"01030800", nil, device_msg["01030800"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }
 
 func (self *DeviceController) Assign(ctx *iris.Context) {
+	deviceOperateService := &service.DeviceOperateService{}
 	type AssignData struct {
 		UserAccount   string `json:"userAccount"`
 		SerialNumbers string `json:"serialNumbers"`
@@ -1193,6 +1239,17 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
+	}
+	_map := make(map[string]*model.Device, 0)
+	for _, d := range *devices {
+		_map[d.SerialNumber] = d
+	}
+	operatorId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	common.Logger.Debugln("--------------", toUser.Id)
+	_, err = deviceOperateService.BatchCreateBussiness(operatorId, 4, _map, serialNumberList, toUser.Id)
+	if err != nil {
+		result = &enity.Result{"01031208", err.Error(), device_msg["01031208"]}
+		common.Log(ctx, result)
 	}
 	result = &enity.Result{"01031200", nil, device_msg["01031200"]}
 	common.Log(ctx, nil)
