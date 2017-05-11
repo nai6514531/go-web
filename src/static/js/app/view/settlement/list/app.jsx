@@ -223,7 +223,7 @@ const App = React.createClass({
 							} else if (status == 4) {
 								spanDiv = (
 									<span>
-										<Popconfirm title="确认重新结账吗?" onConfirm={this.settle.bind(this, data)}>
+										<Popconfirm title="确定重新结账吗?" onConfirm={this.settle.bind(this, data)}>
 							              <a>重新结账</a>
 							            </Popconfirm>
 							            <span> | </span>
@@ -235,7 +235,7 @@ const App = React.createClass({
 							} else {
 								spanDiv = (
 									<span>
-										<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+										<Popconfirm title="确定结账吗?" onConfirm={this.settle.bind(this, data)}>
 							              <a>结账</a>
 							            </Popconfirm>
 							            <span> | </span>
@@ -249,7 +249,7 @@ const App = React.createClass({
 								<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
 							) : (status == 1||status == 4)?(
 								<span>
-									<Popconfirm title="确认结账吗?" onConfirm={this.settle.bind(this, data)}>
+									<Popconfirm title="确定结账吗?" onConfirm={this.settle.bind(this, data)}>
 						              <a>结账</a>
 						            </Popconfirm>
 				            		<span> | </span>
@@ -318,7 +318,7 @@ const App = React.createClass({
 				self.setState({
 					loading: false,
 				});
-				if (data && data.status == "00") {
+				if (data && data.status == "0") {
 					this.clearSelectRows(); //清空结账勾选
 					const list = data.data.list;
 					let rowColor = {};
@@ -354,7 +354,7 @@ const App = React.createClass({
 				self.setState({
 					loading: false,
 				});
-				if (data && data.status == '00') {
+				if (data && data.status == '0') {
 					message.success(data.msg, 3);
 					// 成功则需要重新拉数据,做保持搜索条件功能时此处需要再加上搜索的条件
 					let search = this.getSearchCondition();
@@ -401,7 +401,7 @@ const App = React.createClass({
 		const self = this;
 		const data = this.state.payList;
 		DailyBillService.billCancel(data).then((res) => {
-			if (res.status == "00") {
+			if (res.status == "0") {
 				this.refuseSettlementStatus(this.state.nowSettlement);
 				this.setState({
 					payModalVisible: false
@@ -464,7 +464,7 @@ const App = React.createClass({
 			this.setState({
 				clickLock: false
 			});
-			if (res.status == "00") {
+			if (res.status == "0") {
 				let msg = data.willApplyStatus == 1 ? "已成功申请结账" : "已取消结账"
 				message.info(msg)
 				self.changeApplyStatus(data.id, data.willApplyStatus);
@@ -529,19 +529,25 @@ const App = React.createClass({
 		params.push(paramsObj);
 		this.settleAjax(params);
 	},
-	getCheckedData() {
-		if (this.state.selectedList.length == 0) {
-			message.info('请勾选您需要结账的账单');
-			return;
-		}
-
+	getCheckedData(data) {
+		let selectedList;
 		let params = [];
 		let paramsObj = {};
 
 		let billAtObj = {};
 		let userIdArr = [];
 		let idArr = [];
-		this.state.selectedList.map((item, i) => {
+		selectedList = data ? data : this.state.selectedList;
+
+		if (!data && selectedList.length == 0) {
+			message.info('请勾选您需要结账的账单');
+			return;
+		}
+		if (data && selectedList.length == 0) {
+			message.info('您所勾选的账单不支持更新状态');
+			return;
+		}
+		selectedList.map((item, i) => {
 			let billAt = moment(item.billAt).format('YYYY-MM-DD')
 				// 按照日期来存储当天所有需要结算的单
 			if (!billAtObj[billAt]) {
@@ -549,6 +555,7 @@ const App = React.createClass({
 			}
 			billAtObj[billAt].push(item);
 		})
+
 		for (var i in billAtObj) {
 			paramsObj = {};
 			paramsObj.billAt = i;
@@ -608,6 +615,8 @@ const App = React.createClass({
 						nowSettlement: data
 					});
 					self.setPayModalVisible(true);
+				} else {
+					message.info("结账操作成功。");
 				}
 				self.changeSettlementStatus(data, res.status);
 			} else if (res.status == "1") {
@@ -646,27 +655,28 @@ const App = React.createClass({
 
 	},
 	updateBillStatus() {
-		let data = this.getCheckedData();
 		let selectedList = this.state.selectedList;
 		let len = selectedList.length;
+		let needUpdateData = [];
 		if (len) {
 			for (let i = 0; i < len; i++) {
 				let item = selectedList[i];
-				if ((item.accountType != 1 || item.status != 4) && item.account) {
-					message.info("您所勾选的不是异常账单");
-					return;
+				if ((item.accountType == 1 && item.status == 4) || (!item.account && !item.realName && !item.mobile)) {
+					needUpdateData.push(item)
 				}
 			}
 		} else {
+			message.info("您尚未勾选");
 			return;
 		}
-		DailyBillService.updateAbnormalBill(data).then((res) => {
+		needUpdateData = this.getCheckedData(needUpdateData);
+		needUpdateData && DailyBillService.updateAbnormalBill(needUpdateData).then((res) => {
 			this.setState({
 				clickLock: false
 			});
 			if (res.status == "0") {
-				this.changeSettlementStatus(data, 2);
-				message.info(res.msg);
+				this.changeSettlementStatus(needUpdateData, 2);
+				message.info("更新账单状态成功");
 			} else {
 				message.info(res.msg)
 			}
@@ -773,7 +783,7 @@ const App = React.createClass({
 		});
 		const search = this.getSearchCondition();
 		DailyBillService.export(search).then((data) => {
-			if (data.status == "00") {
+			if (data.status == "0") {
 				// message.info(data.msg,3);
 				this.setState({
 					exportLoading: false
@@ -936,7 +946,7 @@ const App = React.createClass({
 				)
 			} else {
 				footer = (
-					<Popconfirm title="确认结账吗?" onConfirm={this.multiSettle}>
+					<Popconfirm title="确定结账吗?" onConfirm={this.multiSettle}>
 					    <Button className="multiSettleBtn" size="large" type="primary">结账</Button>
 					</Popconfirm>
 				)
