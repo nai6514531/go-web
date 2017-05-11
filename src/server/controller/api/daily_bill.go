@@ -345,10 +345,8 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 	}
 	paramList := params["params"].([]interface{})
 	for _, _param := range paramList {
-		unfilledUserIds := []string{}
 		aliPayUserIds := []string{}
 		bankPayUserIds := []string{}
-		unfilledBillMap := make(map[int]*model.DailyBill, 0)
 		AliPayBillMap := make(map[int]*model.DailyBill, 0)
 		bankPayBillMap := make(map[int]*model.DailyBill, 0)
 
@@ -379,11 +377,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		billMap, err := dailyBillService.BasicMap(billAt, 1, userIds...)
 		if err == nil && len(billMap) > 0 {
 			for _userId, _dailyBill := range billMap {
-				if accountMap[_userId].Account == "" { //所有未填收款账号的单归总
-					unfilledBillMap[_userId] = _dailyBill
-					unfilledUserIds = append(unfilledUserIds, strconv.Itoa(_userId))
-					continue
-				}
 				switch accountMap[_userId].AccountType {
 				case 1: //查询支付宝"已申请"的账单(后台自动将未结算改成已申请)
 					AliPayBillMap[_userId] = _dailyBill
@@ -405,23 +398,6 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 				}
 			}
 			common.Logger.Warningln(billAt, "==>aliPayUserIds:", aliPayUserIds)
-		}
-		if len(unfilledUserIds) > 0 {
-			rows, err := dailyBillService.BatchUpdateStatus(2, billAt, unfilledUserIds...)
-			if err != nil {
-				common.Logger.Debugln(billAt, "==>", daily_bill_msg["01060412"], ":", err.Error())
-				result = &enity.Result{"01060412", err.Error(), daily_bill_msg["01060412"]}
-				common.Log(ctx, result)
-				ctx.JSON(iris.StatusOK, result)
-				return
-			}
-			if rows != len(unfilledUserIds) {
-				common.Logger.Debugln(billAt, "==>信息缺失订单结算部分更新失败:bankPayUserIds", unfilledUserIds)
-				result = &enity.Result{"01060412", nil, daily_bill_msg["01060412"]}
-				common.Log(ctx, result)
-				ctx.JSON(iris.StatusOK, result)
-				return
-			}
 		}
 		//aliPay bill
 		if len(aliPayUserIds) > 0 {
