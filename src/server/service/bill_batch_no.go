@@ -1,9 +1,9 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 type BillBatchNoService struct {
@@ -59,8 +59,8 @@ func (self *BillBatchNoService) Create(billBatchNo *model.BillBatchNo) (int, err
 	return int(r.RowsAffected), nil
 }
 
-func (self *BillBatchNoService) Delete(billIds ...interface{}) (int, error){
-	r := common.SodaMngDB_R.Where("bill_id in (?)", billIds...).Delete(&model.BillBatchNo{})
+func (self *BillBatchNoService) Delete(billIds ...interface{}) (int, error) {
+	r := common.SodaMngDB_WR.Where("bill_id in (?)", billIds...).Delete(&model.BillBatchNo{})
 	if r.Error != nil {
 		return 0, r.Error
 	}
