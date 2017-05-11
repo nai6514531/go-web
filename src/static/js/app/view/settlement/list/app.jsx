@@ -661,7 +661,7 @@ const App = React.createClass({
 		if (len) {
 			for (let i = 0; i < len; i++) {
 				let item = selectedList[i];
-				if ((item.accountType == 1 && item.status == 4) || (!item.account && !item.realName && !item.mobile)) {
+				if ((item.accountType == 1 && item.status == 4) || (!item.account && !item.realName && !item.mobile) || !item.accountType) {
 					needUpdateData.push(item)
 				}
 			}
