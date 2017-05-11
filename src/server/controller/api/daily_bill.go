@@ -1003,15 +1003,8 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-
-	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, userId, searchStr, 0, 0, roleId, startAt, endAt)
-	if err != nil {
-		result = &enity.Result{"01060803", err.Error(), daily_bill_msg["01060803"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	file, err := dailyBillExport.Excel(roleId, list)
+	common.Logger.Debugln(cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
+	file, err := dailyBillExport.Excel(cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060801", err.Error(), daily_bill_msg["01060801"]}
 		common.Log(ctx, result)
