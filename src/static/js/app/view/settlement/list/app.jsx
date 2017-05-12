@@ -504,7 +504,7 @@ const App = React.createClass({
 					if (list[j].accountType == 1 && resStatus == 0 && list[j].status != 3) {
 						list[j].status = 3;
 						aliPayNum++
-					} else {
+					} else if (resStatus == -1 || list[j].accountType == 3) {
 						list[j].status = 2;
 					}
 				}
@@ -675,7 +675,7 @@ const App = React.createClass({
 				clickLock: false
 			});
 			if (res.status == "0") {
-				this.changeSettlementStatus(needUpdateData, 2);
+				this.changeSettlementStatus(needUpdateData, -1);
 				message.info("更新账单状态成功");
 			} else {
 				message.info(res.msg)
