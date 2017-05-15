@@ -66,7 +66,17 @@ func (self *DailyBillExport) Excel(cashAccountType int, status []string, userId 
 		Select("bill.id,bill.user_name,bill.account_name,bill_at,order_count,status,bill.account,bill.real_name,bill.bank_name,p.name as province,c.name as city,total_amount,cash.head_bank_name").
 		Joins("left join user_cash_account cash on bill.user_id = cash.user_id").
 		Joins("left join region c on c.id = cash.city_id").
-		Joins("left join region p on p.id = cash.province_id").Scopes(scopes...).Rows()
+		Joins("left join region p on p.id = cash.province_id").Scopes(scopes...).
+		Order("bill.has_marked").
+		Order("case " +
+		"when bill.status=4 then 1 " +
+		"when bill.status=3 then 2 " +
+		"when bill.status=1 then 3 " +
+		"else 4 end asc").
+		Order("bill.user_id").
+		Order("bill.bill_at DESC").
+		Order("bill.id DESC").
+		Rows()
 
 	//common.Logger.Debugln(cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
 	defer rows.Close()
