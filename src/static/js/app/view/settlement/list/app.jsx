@@ -676,7 +676,7 @@ const App = React.createClass({
 			});
 			if (res.status == "0") {
 				this.changeSettlementStatus(needUpdateData, -1);
-				message.info("更新账单状态成功");
+				message.info(`${needUpdateData.length}个账单更新成功`);
 			} else {
 				message.info(res.msg)
 			}
