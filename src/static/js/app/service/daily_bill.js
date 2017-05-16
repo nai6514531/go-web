@@ -17,6 +17,9 @@ const Service = {
   billCancel: (data) => {
     return api.post('/api/daily-bill/cancel', data)
   },
+  bankBillCancel: (data) => {
+    return api.put(`/api/daily-bill/bank-bill/${data.id}/cancel`)
+  },
   apply: (data) => {
     return api.get('/api/daily-bill/apply', {
       params: {
@@ -26,13 +29,18 @@ const Service = {
       }
     })
   },
+  updateAbnormalBill: (data) => {
+    return api.put('/api/daily-bill/set-paid-up', {
+      params: data
+    })
+  },
   updateSettlement: (data) => {
     return api.put('/api/daily-bill/batch-pay', {
       params: data
     })
   },
   mark: (id) => {
-    return api.get('/api/daily-bill/mark',{
+    return api.get('/api/daily-bill/mark', {
       params: {
         id: id
       }

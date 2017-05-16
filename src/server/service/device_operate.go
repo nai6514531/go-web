@@ -1,9 +1,10 @@
 package service
 
 import (
-	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"maizuo.com/soda-manager/src/server/model"
+	"strings"
 )
 
 type DeviceOperateService struct {
@@ -23,4 +24,47 @@ func (self *DeviceOperateService) Create(deviceOperate *model.DeviceOperate) (in
 		return 0, r.Error
 	}
 	return int(r.RowsAffected), nil
+}
+
+func (self *DeviceOperateService) BatchCreate(deviceOperates []*model.DeviceOperate) (int, error) {
+	params := make([]string, 0)
+	values := make([]interface{}, 0)
+	if len(deviceOperates) <= 0 {
+		return 0, error(&functions.DefinedError{"length of deviceOperares no bigger than 0"})
+	}
+	sql := "insert into `device_operate` (`operator_id`,`operator_type`,`serial_number`,`user_id`,`from_user_id`,`to_user_id`,`created_at`,`updated_at`) values"
+	for _, operate := range deviceOperates {
+		params = append(params, "(?,?,?,?,?,?,now(),now())")
+		values = append(values, operate.OperatorId, operate.OperatorType, operate.SerialNumber, operate.UserId, operate.FromUserId, operate.ToUserId)
+	}
+	sql += strings.Join(params, ",")
+	result := common.SodaMngDB_WR.Exec(sql, values...)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	if result.RowsAffected <= 0 {
+		return int(result.RowsAffected), error(&functions.DefinedError{"RowsAffected no bigger than 0"})
+	}
+	return int(result.RowsAffected), nil
+}
+
+func (self *DeviceOperateService) BatchCreateBussiness(operatorId int, operatorType int, deviceMap map[string]*model.Device, serialNums []string, toUserId int) (int, error) {
+	deviceOperates := make([]*model.DeviceOperate, 0)
+	for _, s := range serialNums {
+		_device := &model.Device{}
+		if deviceMap[s] == nil {
+			continue
+		}
+		_device = deviceMap[s]
+		deviceOperate := &model.DeviceOperate{
+			OperatorId:   operatorId,
+			OperatorType: operatorType,
+			SerialNumber: s,
+			UserId:       _device.UserId,
+			FromUserId:   _device.FromUserId,
+			ToUserId:     toUserId,
+		}
+		deviceOperates = append(deviceOperates, deviceOperate)
+	}
+	return self.BatchCreate(deviceOperates)
 }

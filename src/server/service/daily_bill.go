@@ -1,13 +1,14 @@
 package service
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/model/muniu"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type DailyBillService struct {
@@ -502,6 +503,9 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 		case 3:
 			status = append(status, []string{"1", "2", "3", "4"}...)
 			break
+		case 4:
+			status = _status
+			break
 		default:
 			userId = signinUserId
 			break
@@ -517,6 +521,9 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
 					status = append(status, s)
 				}
+				break
+			case 4:
+				status = append(status, s)
 				break
 			default:
 				status = append(status, s)
