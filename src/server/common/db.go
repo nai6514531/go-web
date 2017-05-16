@@ -51,8 +51,8 @@ func SetupDB() {
 	SodaMngDB_WR = _SetupDB("soda-manager", false)
 	SodaMngDB_R = _SetupDB("soda-manager", true)
 
-	MNDB_WR = _SetupDB("mnzn", false)
-	MNDB_R = _SetupDB("mnzn", true)
+	//MNDB_WR = _SetupDB("mnzn", false)
+	//MNDB_R = _SetupDB("mnzn", true)
 }
 
 var (
