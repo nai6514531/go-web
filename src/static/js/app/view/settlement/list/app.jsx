@@ -190,7 +190,7 @@ const App = React.createClass({
 										<span>
 											{/*<Popconfirm title="取消结账申请吗?" onConfirm={this.deposit.bind(this, data)}>*/}
 					              			{/*<a>取消申请</a>*/}
-											{ /*</Popconfirm>*/ } 
+											{ /*</Popconfirm>*/ }
 											{ /*<span> | </span>*/ }
 											<a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
                    						</span>
@@ -201,8 +201,10 @@ const App = React.createClass({
 						case 3:
 							if (status == 2) {
 								let renderCancelModal = accountType == 3 ? (<Popconfirm title="确定要取消结账吗?" onConfirm={this.cancelBankBill.bind(this, data)}>
-											<a>取消结账</a>
-											<span> | </span>
+											<div>
+                        <a>取消结账</a>
+                        <span> | </span>
+                      </div>
 										</Popconfirm>) : ""
 								spanDiv = (
 									<div>
