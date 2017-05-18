@@ -148,9 +148,6 @@ const App = React.createClass({
 							)
 							break;
 						case 2:
-						case 4:
-							spanDiv = '-'
-							break;
 						case 5:
 							if (accountType == 1) {
 								spanDiv = (
@@ -198,6 +195,9 @@ const App = React.createClass({
 								}
 							}
 							break;
+            case 4:
+              spanDiv = '-'
+              break;
 						case 3:
 							if (status == 2) {
 								let renderCancelModal = accountType == 3 ? (<Popconfirm title="确定要取消结账吗?" onConfirm={this.cancelBankBill.bind(this, data)}>
