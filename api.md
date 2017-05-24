@@ -142,3 +142,99 @@ serialNumber | required,string  | 设备编号
                 "msg":"设备不存在",
                 "data":{}
             }
+# Group IC卡
+>
+
+## 获取ic卡充值记录 [/ic-card{?mobile,page,perPage}]
+> 
+
+### 获取ic卡充值记录 [GET]
+
++ Parameters
+	 + mobile: `13681010234` (string, required) - 手机号码.
+	 + page: `1` (number, required) - 第几页.
+	 + perPage: `20` (number, required) - 每页多少项.
++ Response 01031600 (application/json)
+    + Body
+
+            {
+                "status": 01031600,
+                "msg":"更新设备密码计数成功",
+                "data":{}
+            }
++ Response 01031601 (application/json)
+    + Body
+
+            {
+                "status": 01031601,
+                "msg":"更新设备密码计数失败",
+                "data":{}
+            }
++ Response 01031602 (application/json)
+    + Body
+
+            {
+                "status": 01031602,
+                "msg":"参数异常，请检查请求参数",
+                "data":{}
+            }
++ Response 01031603 (application/json)
+    + Body
+
+            {
+                "status": 01011703,
+                "msg":"设备不存在",
+                "data":{}
+            }
+## 对用户进行充值操作 [/ic-card/recharge]
+> 
+
+### 对用户进行充值操作 [POST]
+参数 | 类型 | 描述
+--:| ---- | -----------
+mobile | required, string  | 手机号码
+amount | required,number  | 充值金额
+applyProviders | required,array  | 适用商家账号
+
++ Request with body (application/json)
+
+    + Body
+
+            {
+                "mobile": "136777777777",
+                "amount": 0000000,
+                "applyProviders":["admin","tester"]
+            }
+
++ Response 01031600 (application/json)
+    + Body
+
+            {
+                "status": 01031600,
+                "msg":"更新设备密码计数成功",
+                "data":{}
+            }
++ Response 01031601 (application/json)
+    + Body
+
+            {
+                "status": 01031601,
+                "msg":"更新设备密码计数失败",
+                "data":{}
+            }
++ Response 01031602 (application/json)
+    + Body
+
+            {
+                "status": 01031602,
+                "msg":"参数异常，请检查请求参数",
+                "data":{}
+            }
++ Response 01031603 (application/json)
+    + Body
+
+            {
+                "status": 01011703,
+                "msg":"设备不存在",
+                "data":{}
+            }
