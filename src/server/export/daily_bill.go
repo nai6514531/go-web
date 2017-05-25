@@ -63,7 +63,7 @@ func (self *DailyBillExport) Excel(cashAccountType int, status []string, userId 
 		scopes = append(scopes, func(db *gorm.DB)*gorm.DB {return db.Where("bill.bill_at <= ?", endAt)})
 	}
 	rows, err := common.SodaMngDB_R.Table("daily_bill bill").
-		Select("bill.id,bill.user_name,bill.account_name,bill_at,order_count,status,bill.account,bill.real_name,bill.bank_name,p.name as province,c.name as city,total_amount,cash.head_bank_name").
+		Select("bill.id,bill.user_name,bill.account_name,bill_at,order_count,status,REPLACE(REPLACE(REPLACE(REPLACE(d.`account`,' ',''),'*',''),'-',''),'?','') AS account,bill.real_name,bill.bank_name,p.name as province,c.name as city,total_amount,cash.head_bank_name").
 		Joins("left join user_cash_account cash on bill.user_id = cash.user_id").
 		Joins("left join region c on c.id = cash.city_id").
 		Joins("left join region p on p.id = cash.province_id").Scopes(scopes...).
