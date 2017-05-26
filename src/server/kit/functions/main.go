@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 	"math/rand"
+	"fmt"
 )
 
 //int数组去重
@@ -90,4 +91,16 @@ func RandInt64(min, max int64) int64 {
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return r.Int63n(max-min) + min
+}
+
+func GenerateIdByMobile(mobile string) string {
+	if len(mobile) != 11 {
+		return ""
+	}
+	prefix := mobile[len(mobile)-4:]
+	ymd := time.Now().Format("060102")
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	code := fmt.Sprintf("%06v", rnd.Int31n(1000000))
+	id := ymd + prefix + code
+	return id
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/service/soda"
 	"strings"
+	"maizuo.com/soda-manager/src/server/model/soda"
 )
 
 var (
@@ -24,6 +25,16 @@ var (
 		"01080204": "无操作权限",
 		"01080205": "用户信息与洗衣记录不符",
 		"01080206": "洗衣记录不存在",
+
+		"01080300": "拉取充值记录列表成功",
+		"01080301": "拉取失败",
+
+		"01080400": "充值成功",
+		"01080401": "充值失败",
+		"01080402": "参数异常，请检查请求参数",
+		"01080403": "学生登录手机号不存在，请检查",
+		"01080404": "该学生用户已被其它商家操作充值，此次充值失败，请联系苏打生活工作人员解决。",
+		"01080405": "有不存在的商家账号，请检查",
 	}
 )
 
@@ -71,7 +82,7 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 	tradeService := &service.TradeService{}
 	userRoleRelService := service.UserRoleRelService{}
 
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	role, err := userRoleRelService.BasicByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01080203", err.Error(), trade_msg["01080203"]}
@@ -85,29 +96,29 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	ticketId:= ctx.URLParam("washId")
+	ticketId := ctx.URLParam("washId")
 	mobile := ctx.URLParam("account")
-	if ticketId=="" || mobile == "" {
+	if ticketId == "" || mobile == "" {
 		result = &enity.Result{"01080202", nil, trade_msg["01080202"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	ticketService:=&sodaService.TicketService{}
-	ticket,err:=ticketService.BasicByTicketId(ticketId)
-	if err!=nil{
+	ticketService := &sodaService.TicketService{}
+	ticket, err := ticketService.BasicByTicketId(ticketId)
+	if err != nil {
 		result = &enity.Result{"01080206", err.Error(), trade_msg["01080206"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if ticket.Mobile!=strings.Trim(mobile," "){
+	if ticket.Mobile != strings.Trim(mobile, " ") {
 		result = &enity.Result{"01080205", err.Error(), trade_msg["01080205"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	_, err = tradeService.Refund(ticketId,mobile)
+	_, err = tradeService.Refund(ticketId, mobile)
 	if err != nil {
 		result = &enity.Result{"01080201", err.Error(), trade_msg["01080201"]}
 		common.Log(ctx, result)
@@ -117,4 +128,53 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 	result = &enity.Result{"01080200", nil, statis_msg["01080200"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
+}
+//
+func (self *TradeController) Recharge(ctx *iris.Context) {
+	var body soda.ChipcardRecharge
+	accountService := sodaService.AccountService{}
+	chipcardService := sodaService.ChipcardService{}
+	mobile := ctx.URLParam("mobile")
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	ctx.ReadJSON(&body)
+
+	//验证手机号码是否存在
+	account, err := accountService.FindByMobile(mobile)
+	if account==nil && err != nil {
+		result := &enity.Result{"01080403", err.Error(), user_msg["01080403"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	card, err := chipcardService.BasicByMobile(mobile)
+
+}
+
+//按手机号码查询IC卡充值记录
+func (self *TradeController) ListRecharges(ctx *iris.Context) {
+	total := 0
+	perPage, _ := ctx.URLParamInt("perPage")
+	page, _ := ctx.URLParamInt("page")
+	mobile := ctx.URLParam("mobile")
+	chipcardService := sodaService.ChipcardService{}
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	list, err := chipcardService.ListByMobile(userId, mobile, perPage, page)
+	if err != nil {
+		result := &enity.Result{"01010701", err.Error(), user_msg["01010701"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if page > 0 && perPage > 0 {
+		total, err = chipcardService.TotalByMobile(userId, mobile)
+		if err != nil {
+			result := &enity.Result{"01030401", err.Error(), device_msg["01030401"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+	result := &enity.Result{"01080300",&enity.Pagination{total, list},device_msg["01080300"]}
+	ctx.JSON(iris.StatusOK,result)
 }
