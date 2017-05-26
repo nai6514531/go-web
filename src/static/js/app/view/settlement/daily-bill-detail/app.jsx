@@ -3,6 +3,12 @@ import {Button, Table, Icon, Popconfirm,Breadcrumb} from "antd";
 import "./app.less";
 import moment from 'moment';
 import DailyBillDetailService from "../../../service/daily_bill_detail";
+const filter = {
+  "1": "微信",
+  "2": "支付宝",
+  "3": "账户余额",
+  "4": "洗衣卡"
+}
 const App = React.createClass({
   propTypes: {
     user_id: React.PropTypes.string,
@@ -75,6 +81,16 @@ const App = React.createClass({
             return <div className="status"> / </div>
           }
         }
+      },{
+        title: '支付方式',
+        dataIndex: 'payType',
+        key: 'payType',
+        width:60,
+      },{
+        title: '是否结算',
+        dataIndex: 'settle',
+        key: 'settle',
+        width:60,
       }],
       list: [],
       total: 0,
@@ -99,6 +115,8 @@ const App = React.createClass({
           this.setState({
             total: data.data.total,
             list: data.data.list.map((item, key) => {
+              item.payType = filter[item.payType];
+              item.settle = item.settle ? "是" : "否";
               rowColor[item.id] = key%2==0?'white':'gray';
               self.rowColor = rowColor;
               return item;
