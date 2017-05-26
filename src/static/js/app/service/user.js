@@ -60,10 +60,10 @@ const UserService = {
   },
   icCardList: (mobile,pager) => {
     const { current, pageSize } = pager;
-    return apiGet(`/api/ic-card?mobile=${mobile}&page=${current}&perPage=${pageSize}`);
+    return apiGet(`/api/chipcard/recharge?mobile=${mobile}&page=${current}&perPage=${pageSize}`);
   },
   icCardRecharge: (values) => {
-    return apiPost(`/api/ic-card/recharge`,values);
+    return apiPost(`/api/chipcard/recharge`,values);
   },
   icCardpermission: () => {
     return apiGet(`api/permission/is-chipcard-operator`);
