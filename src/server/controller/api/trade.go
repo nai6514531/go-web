@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/service/soda"
 	"strings"
-	"maizuo.com/soda-manager/src/server/model/soda"
+	"maizuo.com/soda-manager/src/server/model"
 )
 
 var (
@@ -131,23 +131,61 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 }
 //
 func (self *TradeController) Recharge(ctx *iris.Context) {
-	var body soda.ChipcardRecharge
+	snapshot := make(map[string]interface{})
 	accountService := sodaService.AccountService{}
+	userSerrvice := service.UserService{}
 	chipcardService := sodaService.ChipcardService{}
-	mobile := ctx.URLParam("mobile")
+	type Param struct {
+		Mobile         string        `json:"mobile"`
+		Amount         int        `json:"amount"`
+		applyProviders []string        `json:"applyProviders"`
+	}
+	var param Param
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	ctx.ReadJSON(&body)
+	ctx.ReadJSON(&param)
 
+	if param.Amount <= 0||param.Mobile == ""||len(param.applyProviders) == 0{
+		result := &enity.Result{"01080402", nil, user_msg["01080402"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	//验证手机号码是否存在
-	account, err := accountService.FindByMobile(mobile)
-	if account==nil && err != nil {
+	account, err := accountService.FindByMobile(param.Mobile)
+	if account == nil && err != nil {
 		result := &enity.Result{"01080403", err.Error(), user_msg["01080403"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	snapshot["c_account"] = account
+	applyUsers := make([]*model.User,len(param.applyProviders))
+	//验证商家账号是否全部输入正确
+	for _,v := range param.applyProviders{
+		user,err := userSerrvice.FindByAccount(v)
+		if err != nil{
+			result := &enity.Result{"01080405", v, user_msg["01080405"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		applyUsers = append(applyUsers, user)
+	}
+	snapshot["apply_users"] = applyUsers
+	//验证商家是否能够为此C端用户充值
+	card, err := chipcardService.BasicByMobile(param.Mobile)
+	if err != nil {
+		result := &enity.Result{"01080401", err.Error(), user_msg["01080401"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	} else if card.OperatorId != userId{
+		result := &enity.Result{"01080404", nil, user_msg["01080404"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 
-	card, err := chipcardService.BasicByMobile(mobile)
 
 }
 
@@ -175,6 +213,6 @@ func (self *TradeController) ListRecharges(ctx *iris.Context) {
 			return
 		}
 	}
-	result := &enity.Result{"01080300",&enity.Pagination{total, list},device_msg["01080300"]}
-	ctx.JSON(iris.StatusOK,result)
+	result := &enity.Result{"01080300", &enity.Pagination{total, list}, device_msg["01080300"]}
+	ctx.JSON(iris.StatusOK, result)
 }

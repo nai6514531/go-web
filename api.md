@@ -157,49 +157,49 @@ serialNumber | required,string  | 设备编号
 + Response 01080300 (application/json)
     + Body
     
-          {
-              "status": "01080300",
-              "data": {
-                  "total": 164297,
-                  "list": [
-                      {
-                          "id": 162179,
-                          "rechargeId": "457709809987",
-                          "userId": 996581,
-                          "billId": "45770980989878",
-                          "count": 1,
-                          "snapshot": "[{"id":3367,"name":"赵俊翔"},{"id":3355,"name":"刘小松"}]",
-                          "extra": "额外描述",
-                          "status"：7
-                          "createdAt": "2017-03-12T02:10:38+08:00",
-                          "updatedAt": "2017-03-13T12:22:14+08:00",
-                          "deletedAt": null,
-                          "created_timestamp": 14987767633,
-                          "value": 400,
-                          "operatorId": 998664,
-                          "mobile": "15995952618"
-                      },
-                      {
-                                                "id": 162179,
-                                                "rechargeId": "457709809987",
-                                                "userId": 996581,
-                                                "billId": "45770980989878",
-                                                "count": 1,
-                                                "snapshot": "[{"id":3367,"name":"赵俊翔"},{"id":3355,"name":"刘小松"}]",
-                                                "extra": "额外描述",
-                                                "status"：7
-                                                "createdAt": "2017-03-12T02:10:38+08:00",
-                                                "updatedAt": "2017-03-13T12:22:14+08:00",
-                                                "deletedAt": null,
-                                                "created_timestamp": 14987767633,
-                                                "value": 400,
-                                                "operatorId": 998664,
-                                                "mobile": "15995952618"
-                                            },
-                  ]
-              },
-              "msg": "拉取充值记录列表成功"
+         {
+    "status": "01080300",
+    "data": {
+        "total": 164297,
+        "list": [
+            {
+                "id": 162179,
+                "rechargeId": "457709809987",
+                "userId": 996581,
+                "billId": "45770980989878",
+                "count": 1,
+                "snapshot": '[{"id":3367,"name":"赵俊翔"},{"id":3355,"name":"刘小松"}]',
+                "extra": "额外描述",
+                "status":7,
+                "createdAt": "2017-03-12T02:10:38+08:00",
+                "updatedAt": "2017-03-13T12:22:14+08:00",
+                "deletedAt": null,
+                "created_timestamp": 14987767633,
+                "value": 400,
+                "operatorId": 998664,
+                "mobile": "15995952618"
+            },
+            {
+              "id": 162180,
+              "rechargeId": "457709809987",
+              "userId": 996581,
+              "billId": "45770980989878",
+              "count": 1,
+              "snapshot": "[{'id':3367,'name':'赵俊翔'},{'id':3355,'name':'刘小松'}]",
+              "extra": "额外描述",
+              "status": 7,
+              "createdAt": "2017-03-12T02:10:38+08:00",
+              "updatedAt": "2017-03-13T12:22:14+08:00",
+              "deletedAt": null,
+              "created_timestamp": 14987767633,
+              "value": 400,
+              "operatorId": 998664,
+              "mobile": "15995952618"
           }
+        ]
+    },
+    "msg": "拉取充值记录列表成功"
+}
 + Response 01080301 (application/json)
     + Body
 

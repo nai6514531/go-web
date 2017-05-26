@@ -19,7 +19,7 @@ func (recv *ChipcardService) ListByMobile(userId int, mobile string, perPage int
 	list := []*soda.ChipcardRecharge{}
 	if userId > 0 {
 		scopes = append(scopes, func(db *gorm.DB) *gorm.DB {
-			return db.Where("user_id = ?", userId)
+			return db.Where("operator_id = ?", userId)
 		})
 	}
 	if mobile != "" {
@@ -58,9 +58,19 @@ func (recv *ChipcardService) TotalByMobile(userId int, mobile string) (int, erro
 
 func (recv *ChipcardService) BasicByMobile(mobile string) (soda.Chipcard, error) {
 	card := soda.Chipcard{}
-	err := common.SodaDB_R.Where("mobile = ?", mobile).Find(&card).Error
+	err := common.SodaDB_R.Where("mobile = ?", mobile).First(&card).Error
 	if err != nil {
-		return nil,err
+		return card,err
+	}
+	return card,nil
+}
+
+func (recv *ChipcardService) Recharge(mobile string) (soda.Chipcard, error) {
+	//tx := common.SodaDB_WR.Begin()
+	card := soda.Chipcard{}
+	err := common.SodaDB_R.Where("mobile = ?", mobile).First(&card).Error
+	if err != nil {
+		return card,err
 	}
 	return card,nil
 }

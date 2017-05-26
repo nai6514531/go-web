@@ -52,12 +52,26 @@ class App extends React.Component {
     this.state = {
       loading: false,
       list: [],
+      permission: false,
       breadItems: [{title:'运营商管理',url:''},]
     };
     this.detailTotal = this.detailTotal.bind(this);
   }
   componentWillMount() {
+    this.getOperateIcPermission();
     this.detailTotal(USER.id);
+  }
+  getOperateIcPermission() {
+    UserService.icCardpermission()
+      .then((data) => {
+        if( data.status == 0 ) {
+          this.setState({
+            permission: data.data
+          })
+        }
+      },(error)=>{
+        message.error(error.msg,3);
+      })
   }
   detailTotal(id) {
     this.setState({
@@ -78,6 +92,11 @@ class App extends React.Component {
       })
   }
   render() {
+    let renduerButton = this.state.permission ? (
+      <Link to={"/user/ic-card/recharge"} className="ant-btn ant-btn-primary item" style={{backgroundColor:"#ED9D51",borderColor:"#ED9D51"}}>
+        IC卡金额移动
+      </Link>
+    ) : "";
     return (
       <section className="view-user-detailTotal">
         <header>
@@ -87,6 +106,7 @@ class App extends React.Component {
           <Link to={"/user/" + USER.id} className="ant-btn ant-btn-primary item">
             下级运营商
           </Link>
+          {renduerButton}
         </div>
         <article>
           <Table

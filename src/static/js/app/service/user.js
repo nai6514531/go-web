@@ -57,6 +57,19 @@ const UserService = {
   },
   resetPwd: (data) => {
     return apiPost('/api/user/reset-password',data);
+  },
+  icCardList: (mobile,pager) => {
+    const { current, pageSize } = pager;
+
+    return apiGet(`/api/chipcard/recharge?mobile=${mobile}&page=${current}&perPage=${pageSize}`);
+  },
+  icCardRecharge: (values) => {
+    return apiPost(`/api/chipcard/recharge`,values);
+
+  },
+ 
+  icCardpermission: () => {
+    return apiGet(`api/permission/is-chipcard-operator`);
   }
 };
 

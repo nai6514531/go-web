@@ -1190,6 +1190,7 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	}
 	var assignData AssignData
 	ctx.ReadJSON(&assignData)
+
 	result := &enity.Result{}
 	if assignData.UserAccount == "" {
 		result = &enity.Result{"01031204", nil, device_msg["01031204"]}
