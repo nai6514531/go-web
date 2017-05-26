@@ -33,3 +33,9 @@ func (self *PermissionService) ListByIds(permissionIds []int) (*[]*model.Permiss
 	}
 	return permissionList, nil
 }
+
+func (self *PermissionService) ChipcardOper(userId int) (bool) {
+	c := 0
+	err := common.SodaMngDB_R.Table("chipcard_operator").Where("id = ?", userId).Count(&c).Error
+	return err == nil && c > 0
+}

@@ -1337,6 +1337,15 @@ func (self *UserController) Permission(ctx *iris.Context) {
 	common.Log(ctx, nil)
 }
 
+func (self *UserController) ChipcardOper(ctx *iris.Context) {
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	permissionService :=  service.PermissionService{}
+	common.Logger.Debug(userId)
+	boo := permissionService.ChipcardOper(userId)
+	result := &enity.Result{"01011300",boo,user_msg["01011300"]}
+	ctx.JSON(iris.StatusOK,result)
+}
+
 func (self *UserController) Password(ctx *iris.Context) {
 	userService := &service.UserService{}
 	result := &enity.Result{}

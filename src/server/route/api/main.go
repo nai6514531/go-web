@@ -63,6 +63,7 @@ func Api() {
 	api.Get("/user/:id/school/:schoolId/device", user.IsMeOrSub, user.DeviceOfSchool)
 	api.Get("/user/:id/menu", user.Menu)
 	api.Get("/user/:id/permission", user.Permission)
+	api.Get("/permission/is-chipcard-operator", user.ChipcardOper)
 	api.Get("/user-detail/:account", user.DetailByAccount)
 
 	api.Get("/school/:id", school.Basic)
@@ -115,4 +116,6 @@ func Api() {
 
 	api.Get("/trade", trade.Basic)
 	api.Get("/trade/refund", trade.Refund)
+	api.Get("/chipcard/recharge", trade.ListRecharges)
+	api.Post("/chipcard/recharge", trade.Recharge)
 }
