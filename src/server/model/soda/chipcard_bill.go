@@ -18,7 +18,7 @@ type ChipcardBill struct {
 	Type             int        `json:"type"`
 	Action           int        `json:"action"`
 	Status           int        `json:"status"`
-	createdTimestamp int        `json:"created_timestamp,omitempty"`
+	CreatedTimestamp int        `json:"created_timestamp,omitempty"`
 }
 
 func (self *ChipcardBill) BeforeCreate(scope *gorm.Scope) error {
