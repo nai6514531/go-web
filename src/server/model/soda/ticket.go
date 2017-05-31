@@ -16,8 +16,8 @@ type Ticket struct {
 	OwnerId      int    `json:"ownerId"`
 	Status       int    `json:"status"`
 	Address      string `json:"address" gorm:"-"`
-	PaymentId    int        `json:"payment_id"`
-	Settle	bool	`json:"settle",gorm:"-"`
+	PaymentId    int    `json:"paymentId"`
+	Settle       bool   `json:"settle",gorm:"-"`
 }
 
 func (Ticket) TableName() string {

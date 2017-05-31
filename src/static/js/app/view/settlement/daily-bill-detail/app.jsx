@@ -4,6 +4,7 @@ import "./app.less";
 import moment from 'moment';
 import DailyBillDetailService from "../../../service/daily_bill_detail";
 const filter = {
+  "0": "-",
   "1": "微信",
   "2": "支付宝",
   "3": "账户余额",
@@ -83,8 +84,8 @@ const App = React.createClass({
         }
       },{
         title: '支付方式',
-        dataIndex: 'payType',
-        key: 'payType',
+        dataIndex: 'paymentId',
+        key: 'paymentId',
         width:60,
       },{
         title: '是否结算',
@@ -115,7 +116,7 @@ const App = React.createClass({
           this.setState({
             total: data.data.total,
             list: data.data.list.map((item, key) => {
-              item.payType = filter[item.payType];
+              item.paymentId = filter[item.paymentId];
               item.settle = item.settle ? "是" : "否";
               rowColor[item.id] = key%2==0?'white':'gray';
               self.rowColor = rowColor;
