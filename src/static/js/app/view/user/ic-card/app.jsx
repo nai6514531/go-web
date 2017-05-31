@@ -74,10 +74,10 @@ class App extends React.Component {
     this.searchString = e.target.value
   }
   handleSearch(e) {
-    if(!this.searchString) {
-      message.info("请输入查询条件");
-      return;
-    }
+    // if(!this.searchString) {
+    //   message.info("请输入查询条件");
+    //   return;
+    // }
     this.fetchData();
   }
   handleRecharge() {
@@ -180,8 +180,12 @@ class App extends React.Component {
   }
   checkAmount = (rule, value, callback) => {
     const form = this.props.form;
+    value = Number(value);
     if (value > 500 ) {
       callback('不可超过500元');
+    } else if (Object.is(value,NaN) || value <= 0 ) {
+      console.log(value)
+      callback('请输入正确的金额');
     } else {
       callback();
     }
@@ -207,7 +211,7 @@ class App extends React.Component {
         <div className="toolbar">
           <Input
                  style={{width:160}}
-                 placeholder="请输入运营商或者联系人"
+                 placeholder="请输入手机号"
                  onChange={this.handleInputChange}
           />
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>

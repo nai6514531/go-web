@@ -94,7 +94,7 @@ class App extends React.Component {
   render() {
     let renduerButton = this.state.permission ? (
       <Link to={"/user/ic-card/recharge"} className="ant-btn ant-btn-primary item" style={{backgroundColor:"#ED9D51",borderColor:"#ED9D51"}}>
-        IC卡金额移动
+        IC卡金额转移
       </Link>
     ) : "";
     return (
