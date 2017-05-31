@@ -264,7 +264,11 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 		if deviceMap[_detail.DeviceSerial] != nil {
 			_detail.Address = deviceMap[_detail.DeviceSerial].Address
 		}
-
+		if _detail.Status == 4 || _detail.PaymentId == 4 {
+			_detail.Settle = false
+		} else {
+			_detail.Settle = true
+		}
 	}
 	result = &enity.Result{"01060200", &enity.Pagination{total, list}, daily_bill_msg["01060200"]}
 	common.Log(ctx, nil)

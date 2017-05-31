@@ -19,10 +19,6 @@ type Snapshot struct {
 	Bill       soda.ChipcardBill
 }
 
-func (recv *ChipcardService) Create(value int, mobile string, bUser int) {
-
-}
-
 func (recv *ChipcardService) ListByMobile(userId int, mobile string, perPage int, page int) (*[]*soda.ChipcardRecharge, error) {
 	var scopes []func(*gorm.DB) *gorm.DB
 	list := []*soda.ChipcardRecharge{}

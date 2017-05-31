@@ -47,7 +47,7 @@ func (self *DailyBillDetailService) TotalByUserIdAndBillAt(userId int, billAt st
 	and
 	created_timestamp<unix_timestamp(?)
 	and
-	status=7
+	status in (4,7)
 	`
 	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt, tomorrow).Count(&total)
 	if r.Error != nil {
@@ -67,7 +67,7 @@ func (self *DailyBillDetailService) ListByUserIdAndBillAt(userId int, billAt str
 	and
 	created_timestamp<unix_timestamp(?)
 	and
-	status = 7
+	status in (4,7)
 	`
 	r := common.SodaDB_R.Model(&soda.Ticket{}).Where(sql, userId, billAt, tomorrow).Offset((page - 1) * perPage).Limit(perPage).Find(list)
 	if r.Error != nil {

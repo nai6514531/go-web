@@ -134,6 +134,7 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 }
 //
 func (self *TradeController) Recharge(ctx *iris.Context) {
+	//这里的snapshot会储存大量相关查询得到的信息，以便在service调用的时候复用。在提交数据库时，会储存简化版本的simpleSnapshot
 	snapshot := sodaService.Snapshot{}
 	accountService := sodaService.AccountService{}
 	userSerrvice := service.UserService{}
