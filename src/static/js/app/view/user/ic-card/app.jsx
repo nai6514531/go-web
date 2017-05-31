@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 
 import UserService from '../../../service/user';
 import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
+import moment from 'moment';
 
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
@@ -100,11 +101,13 @@ class App extends React.Component {
         list.map((item) => {
           let applyProvidersName = "";
           let applyProvidersList = JSON.parse(item.snapshot);
-          applyProvidersList.map((value) => {
-            applyProvidersName = applyProvidersName + value.name + ",";
+          applyProvidersList.map((value,index) => {
+            let addComma = applyProvidersList.length - 1 == index ? '' : ',';
+            applyProvidersName = applyProvidersName + value.name + addComma;
           });
           item.applyProviders = applyProvidersName;
           item.value = item.value / 100;
+          item.createdAt = moment(item.createdAt).format('YYYY-MM-DD HH:mm:ss')
         })
         pager.total = result.data.total;
         this.setState({
