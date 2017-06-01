@@ -37,7 +37,7 @@ func (recv *ChipcardService) ListByMobile(userId int, mobile string, perPage int
 			return db.Limit(perPage).Offset((page - 1) * perPage)
 		})
 	}
-	err := common.SodaDB_R.Scopes(scopes...).Order("created_at desc").Find(&list).Error
+	err := common.SodaDB_R.Scopes(scopes...).Find(&list).Error
 	return &list, err
 }
 
