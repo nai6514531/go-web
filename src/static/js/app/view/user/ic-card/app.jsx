@@ -148,7 +148,7 @@ class App extends React.Component {
         self.recharge(params);
       },
       onCancel() {
-        self.disMissModal();
+        // self.disMissModal();
       },
     });
   }
@@ -180,11 +180,10 @@ class App extends React.Component {
   }
   checkAmount = (rule, value, callback) => {
     const form = this.props.form;
-    value = Number(value);
+    value = value === '' ? '' : Number(value);
     if (value > 500 ) {
       callback('不可超过500元');
-    } else if (Object.is(value,NaN) || value <= 0 ) {
-      console.log(value)
+    } else if (value !== '' && ( Object.is(value,NaN) || value <= 0 )) {
       callback('请输入正确的金额');
     } else {
       callback();
@@ -210,9 +209,10 @@ class App extends React.Component {
         </header>
         <div className="toolbar">
           <Input
-                 style={{width:160}}
-                 placeholder="请输入手机号"
-                 onChange={this.handleInputChange}
+            style={{width:160}}
+            placeholder="请输入手机号"
+            onChange={this.handleInputChange}
+            onPressEnter={this.handleSearch}
           />
           <Button type="primary item" onClick={this.handleSearch}>查询</Button>
           <Button type="primary item" style={{backgroundColor:"#ED9D51",borderColor:"#ED9D51"}} onClick={this.handleRecharge}>充值</Button>

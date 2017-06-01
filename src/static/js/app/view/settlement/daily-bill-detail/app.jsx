@@ -56,6 +56,11 @@ const App = React.createClass({
           return value / 100 + "元";
         }
       },{
+        title: '支付方式',
+        dataIndex: 'paymentId',
+        key: 'paymentId',
+        width:60,
+      },{
         title: '洗衣手机号',
         dataIndex: 'mobile',
         key: 'mobile',
@@ -82,11 +87,6 @@ const App = React.createClass({
             return <div className="status"> / </div>
           }
         }
-      },{
-        title: '支付方式',
-        dataIndex: 'paymentId',
-        key: 'paymentId',
-        width:60,
       },{
         title: '是否结算',
         dataIndex: 'settle',
