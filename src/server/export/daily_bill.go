@@ -59,7 +59,7 @@ func (self *DailyBillExport) Excel(cashAccountType int, status []string, userId 
 	if startAt != "" {
 		scopes = append(scopes, func(db *gorm.DB)*gorm.DB {return db.Where("bill.bill_at >= ?", startAt)})
 	}
-	if startAt != "" && endAt != "" {
+	if endAt != "" {
 		scopes = append(scopes, func(db *gorm.DB)*gorm.DB {return db.Where("bill.bill_at <= ?", endAt)})
 	}
 	rows, err := common.SodaMngDB_R.Table("daily_bill bill").
