@@ -106,9 +106,13 @@ func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []
 		//财务角色过滤掉测试账号的账单
 		sql += " and bill.user_id !=1 "
 	}
-	if startAt != "" && endAt != "" {
-		sql += " and bill.bill_at between ? and ? "
-		params = append(params, startAt, endAt)
+	if startAt != "" {
+		sql += " and bill.bill_at >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and bill.bill_at <= ? "
+		params = append(params, endAt)
 	}
 	sql += " order by bill.has_marked, case " +
 		"when bill.status=4 then 1 " +
