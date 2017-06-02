@@ -22,11 +22,14 @@ const columns = [{
   dataIndex: 'value',
   className: 'table-col',
   width:100,
-}, {
-  title: '适用商家',
-  dataIndex: 'applyProviders',
-  width:120,
-}, {
+}
+// ,
+//  {
+//   title: '适用商家',
+//   dataIndex: 'applyProviders',
+//   width:120,
+// }
+, {
   title: '充值时间',
   dataIndex: 'createdAt',
   className: 'table-col',
@@ -129,7 +132,7 @@ class App extends React.Component {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        values = this.checkParams(values);
+        values = this.formatParams(values);
         this.showConfirm(values);
       }
     });
@@ -173,20 +176,24 @@ class App extends React.Component {
         message.error(error.msg,3);
       })
   }
-  checkParams(params) {
+  formatParams(params) {
     params.applyProviders = params.applyProviders.replace(/，/g,",").split(",");
     params.amount = Number(params.amount) * 100;
     return params;
   }
   checkAmount = (rule, value, callback) => {
     const form = this.props.form;
-    value = value === '' ? '' : Number(value);
-    if (value > 500 ) {
-      callback('不可超过500元');
-    } else if (value !== '' && ( Object.is(value,NaN) || value <= 0 )) {
-      callback('请输入正确的金额');
-    } else {
+    if(value === '' || typeof value === 'undefined') {
       callback();
+    } else {
+      value = Number(value);
+      if (value > 500 ) {
+        callback('不可超过500元');
+      } else if ( Object.is(value,NaN) || value <= 0 ) {
+        callback('请输入正确的金额');
+      } else {
+        callback();
+      }
     }
   }
   render() {
@@ -248,7 +255,7 @@ class App extends React.Component {
             >
               {getFieldDecorator("mobile", {
                 rules: [{
-                  required: true, message: "请输入手机号",
+                  required: true, message: "手机号不可为空",
                 }],
               })(
                 <Input placeholder="请输入手机号"/>
@@ -260,7 +267,7 @@ class App extends React.Component {
             >
               {getFieldDecorator("amount", {
                 rules: [{
-                  required: true, message: "请输入充值金额",
+                  required: true, message: "金额不可为空",
                 }, {
                   validator: this.checkAmount
                 }],
@@ -274,7 +281,7 @@ class App extends React.Component {
             >
               {getFieldDecorator("applyProviders", {
                 rules: [{
-                  required: true, message: "请输入适用商家账号",
+                  required: true, message: "账号不可为空",
                 }],
               })(
                 <Input placeholder="如有多个账号，需用英文逗号隔开"/>
