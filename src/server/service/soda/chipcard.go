@@ -54,7 +54,8 @@ func (recv *ChipcardService) TotalByMobile(userId int, mobile string) (int, erro
 			return db.Where("mobile = ?", mobile)
 		})
 	}
-	err := common.SodaDB_R.Table("chipcard_recharge").Scopes(scopes...).Count(&total).Error
+	nothing := []*soda.ChipcardRecharge{}	//在gorm中，只会对绑定了模型的操作进行软删除排查，相当于在SQL中加上"deleted_at= null"的查询条件
+	err := common.SodaDB_R.Scopes(scopes...).Find(&nothing).Count(&total).Error
 	if err != nil {
 		return 0, err
 	}

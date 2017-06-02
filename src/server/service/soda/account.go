@@ -12,7 +12,7 @@ func (self *AccountService) FindByMobile(mobile string) (*soda.Account, error) {
 	account := &soda.Account{}
 	r := common.SodaDB_R.Where("app = 0 and mobile = ?", mobile).First(account)
 	if r.Error != nil {
-		return account, r.Error
+		return nil, r.Error
 	}
 	return account, nil
 }

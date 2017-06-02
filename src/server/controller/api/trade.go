@@ -146,6 +146,13 @@ func (self *TradeController) Recharge(ctx *iris.Context) {
 	applyProviders := param.Get("applyProviders").MustStringArray()
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
+	if amount > 500 || amount < 0{
+		result := &enity.Result{"01080402", nil, trade_msg["01080402"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	if err != nil || amount <= 0 || mobile == "" || len(applyProviders) == 0 {
 		result := &enity.Result{"01080402", nil, trade_msg["01080402"]}
 		common.Log(ctx, result)
@@ -154,7 +161,7 @@ func (self *TradeController) Recharge(ctx *iris.Context) {
 	}
 	//验证手机号码是否存在
 	account, err := accountService.FindByMobile(mobile)
-	if account.UserId <= 0 || err != nil {
+	if err != nil {
 		result := &enity.Result{"01080403", err.Error(), trade_msg["01080403"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
