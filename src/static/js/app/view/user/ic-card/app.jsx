@@ -187,7 +187,6 @@ class App extends React.Component {
     return params;
   }
   checkAmount = (rule, value, callback) => {
-    const form = this.props.form;
     if(value === '' || typeof value === 'undefined') {
       callback();
     } else {
@@ -199,6 +198,15 @@ class App extends React.Component {
       } else {
         callback();
       }
+    }
+  }
+  checkNumber = (rule, value, callback) => {
+    if(typeof value === "undefined" || value === "") {
+      callback();
+    } else if( Object.is(Number(value),NaN) || value.length !== 11) {
+      callback('请输入正确的手机号');
+    } else {
+      callback();
     }
   }
   render() {
@@ -261,6 +269,8 @@ class App extends React.Component {
               {getFieldDecorator("mobile", {
                 rules: [{
                   required: true, message: "手机号不可为空",
+                }, {
+                  validator: this.checkNumber
                 }],
               })(
                 <Input placeholder="请输入手机号"/>
@@ -289,7 +299,10 @@ class App extends React.Component {
                   required: true, message: "账号不可为空",
                 }],
               })(
+              <div>
                 <Input placeholder="如有多个账号，需用英文逗号隔开"/>
+                <span>充值金额只可用于适用商家名下的设备</span>
+              </div>
               )}
             </FormItem>
             <FormItem style={{textAlign: "center"}}>
