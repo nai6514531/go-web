@@ -177,7 +177,12 @@ class App extends React.Component {
       })
   }
   formatParams(params) {
-    params.applyProviders = params.applyProviders.replace(/，/g,",").split(",");
+    let data = params.applyProviders.replace(/，/g,",").split(",");
+    let formatData = [];
+    data.map((value) => {
+      (value !== "") && formatData.push(value);
+    })
+    params.applyProviders = formatData;
     params.amount = Number(params.amount) * 100;
     return params;
   }
