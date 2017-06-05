@@ -8,7 +8,7 @@ const filter = {
   "1": "微信",
   "2": "支付宝",
   "3": "账户余额",
-  "4": "IC卡"
+  "4": "IC卡余额"
 }
 const App = React.createClass({
   propTypes: {
