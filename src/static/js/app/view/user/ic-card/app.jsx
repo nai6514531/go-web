@@ -80,10 +80,6 @@ class App extends React.Component {
     this.searchString = e.target.value
   }
   handleSearch(e) {
-    // if(!this.searchString) {
-    //   message.info("请输入查询条件");
-    //   return;
-    // }
     this.fetchData();
   }
   handleRecharge() {

@@ -44,13 +44,16 @@ class App extends React.Component {
       .then((result) => {
         let data = result.data;
         let applyProvidersName = "";
+        let applyProvidersNameWithAccount = "";
         let applyProvidersList = data.applyProviders;
         data.value = data.value/100;
         applyProvidersList.map((value,index) => {
           let addComma = applyProvidersList.length - 1 == index ? '' : ',';
           applyProvidersName = applyProvidersName + value.account + addComma;
+          applyProvidersNameWithAccount = `${applyProvidersNameWithAccount}${value.name}(${value.account})${addComma}`
         });
         data.applyProvidersName = applyProvidersName;
+        data.applyProvidersNameWithAccount = applyProvidersNameWithAccount;
         this.setState({
           pageData: data,
           loading: false,
@@ -156,7 +159,7 @@ class App extends React.Component {
           </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}>IC卡适用商家:</Col>
-            <Col span={4}>{pageData.applyProvidersName || '-'}</Col>
+            <Col span={4}>{pageData.applyProvidersNameWithAccount || '-'}</Col>
           </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}></Col>
