@@ -96,19 +96,19 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 	userRoleRelService := service.UserRoleRelService{}
 
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	role, err := userRoleRelService.BasicByUserId(userId)
+	_, err := userRoleRelService.BasicByUserId(userId)
 	if err != nil {
 		result = &enity.Result{"01080203", err.Error(), trade_msg["01080203"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if role.RoleId == 2 {
-		result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	//if role.RoleId == 2 {
+	//	result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
+	//	common.Log(ctx, result)
+	//	ctx.JSON(iris.StatusOK, result)
+	//	return
+	//}
 	ticketId := ctx.URLParam("washId")
 	mobile := ctx.URLParam("account")
 	if ticketId == "" || mobile == "" {
