@@ -81,13 +81,7 @@ func (recv *ChipcardService) BasicByMobile(mobile string) (soda.Chipcard, error)
 		busiIdList = append(busiIdList, rel.BusinessUserId)
 	}
 	if len(busiIdList) != 0 {
-		a := make([]string, len(busiIdList))
-		for idx, v := range busiIdList {
-			a[idx] = strconv.Itoa(v)
-		}
-		str := strings.Join(a,",")
-		common.Logger.Debug(str)
-		err = common.SodaMngDB_R.Where("id in (?)", str).Find(&list).Error
+		err = common.SodaMngDB_R.Where("id in (?)", busiIdList).Find(&list).Error
 		if err != nil {
 			return card, err
 		}
