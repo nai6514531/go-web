@@ -48,7 +48,7 @@ class App extends React.Component {
         data.value = data.value/100;
         applyProvidersList.map((value,index) => {
           let addComma = applyProvidersList.length - 1 == index ? '' : ',';
-          applyProvidersName = applyProvidersName + value.name + addComma;
+          applyProvidersName = applyProvidersName + value.account + addComma;
         });
         data.applyProvidersName = applyProvidersName;
         this.setState({

@@ -223,7 +223,7 @@ class App extends React.Component {
         let applyProvidersList = result.data.applyProviders;
         applyProvidersList.map((value,index) => {
           let addComma = applyProvidersList.length - 1 == index ? '' : ',';
-          applyProvidersName = applyProvidersName + value.name + addComma;
+          applyProvidersName = applyProvidersName + value.account + addComma;
         });
         this.props.form.setFieldsValue({
            applyProviders: applyProvidersName,
