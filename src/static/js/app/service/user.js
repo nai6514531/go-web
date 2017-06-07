@@ -67,9 +67,15 @@ const UserService = {
     return apiPost(`/api/chipcard/recharge`,values);
 
   },
- 
-  icCardpermission: () => {
+
+  icCardPermission: () => {
     return apiGet(`api/permission/is-chipcard-operator`);
+  },
+  icCardBasicInfo: (mobile) => {
+    return apiGet(`api/chipcard?mobile=${mobile}`);
+  },
+  updateIcCardInfo: (values) => {
+    return apiPost(`api/chipcard/relation`,values);
   }
 };
 

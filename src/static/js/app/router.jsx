@@ -42,6 +42,12 @@ const router = (
             callback(null, require('./view/user/ic-card/app.jsx').default);
           });
         }} />
+         <Route path="/user/ic-card/recharge/:id" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+          // 下级代理商列表
+            callback(null, require('./view/user/ic-card-detail/app.jsx').default);
+          });
+        }} />
         <Route path="/user/edit/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
           // 编辑/新增代理商列表
