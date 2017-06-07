@@ -6,8 +6,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"encoding/json"
 	"maizuo.com/soda-manager/src/server/model"
-	"strings"
-	"strconv"
 )
 
 type ChipcardService struct {
