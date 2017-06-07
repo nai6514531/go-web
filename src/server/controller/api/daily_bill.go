@@ -27,6 +27,8 @@ var (
 		"01060102": "拉取日账单总数失败",
 		"01060103": "无当前登录用户角色信息",
 		"01060104": "页数或每页展示条数不大于0",
+		"01060105": "参数异常",
+		"01060106": "查询区间上限为30 天",
 
 		"01060200": "拉取日账单明细列表成功",
 		"01060201": "拉取日账单明细列表失败",
@@ -79,6 +81,8 @@ var (
 		"01060802": "无当前登录用户角色信息",
 		"01060803": "拉取日账单列表失败",
 		"01060804": "无导出权限",
+		"01060805": "参数异常",
+		"01060806": "查询区间上限为30 天",
 
 		"01060900": "取消银行账单结算操作成功",
 		"01060901": "取消银行账单结算操作失败",
@@ -99,6 +103,19 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	startAt := params["startAt"]
 	endAt := params["endAt"]
 	var status []string
+	startTime, err1 := time.Parse("2006-01-02",startAt)
+	endTime, err2 := time.Parse("2006-01-02",endAt)
+	if err1 != nil || err2 != nil{
+		result = &enity.Result{"01060105", nil, daily_bill_msg["01060105"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	} else if endTime.After(startTime.AddDate(0,0,30)) && endTime.After(startTime) {	//查询区间上限为30 天
+		result = &enity.Result{"01060106", nil, daily_bill_msg["01060106"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	userId := -1
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
 	status, userId, roleId, err := dailyBillService.Permission(params["status"], signinUserId)
@@ -968,6 +985,19 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	searchStr := ctx.URLParam("searchStr")
 	startAt := ctx.URLParam("startAt")
 	endAt := ctx.URLParam("endAt")
+	startTime, err1 := time.Parse("2006-01-02",startAt)
+	endTime, err2 := time.Parse("2006-01-02",endAt)
+	if err1 != nil || err2 != nil{
+		result = &enity.Result{"01060805", nil, daily_bill_msg["01060805"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	} else if endTime.After(startTime.AddDate(0,0,30)) && endTime.After(startTime) {	//查询区间上限为30 天
+		result = &enity.Result{"01060806", nil, daily_bill_msg["01060806"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	status, userId, roleId, err := dailyBillService.Permission(s, signinUserId)
