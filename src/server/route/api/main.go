@@ -118,4 +118,6 @@ func Api() {
 	api.Get("/trade/refund", trade.Refund)
 	api.Get("/chipcard/recharge", trade.ListRecharges)
 	api.Post("/chipcard/recharge", trade.Recharge)
+	api.Get("/chipcard", trade.ChipcardBasic)
+	api.Post("/chipcard/relation", trade.ChangeCBRels)
 }

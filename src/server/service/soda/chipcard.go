@@ -6,6 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"encoding/json"
 	"maizuo.com/soda-manager/src/server/model"
+	"strings"
+	"strconv"
 )
 
 type ChipcardService struct {
@@ -54,7 +56,7 @@ func (recv *ChipcardService) TotalByMobile(userId int, mobile string) (int, erro
 			return db.Where("mobile = ?", mobile)
 		})
 	}
-	nothing := []*soda.ChipcardRecharge{}	//在gorm中，只会对绑定了模型的操作进行软删除排查，相当于在SQL中加上"deleted_at= null"的查询条件
+	nothing := []*soda.ChipcardRecharge{}        //在gorm中，只会对绑定了模型的操作进行软删除排查，相当于在SQL中加上"deleted_at= null"的查询条件
 	err := common.SodaDB_R.Scopes(scopes...).Find(&nothing).Count(&total).Error
 	if err != nil {
 		return 0, err
@@ -64,17 +66,40 @@ func (recv *ChipcardService) TotalByMobile(userId int, mobile string) (int, erro
 
 func (recv *ChipcardService) BasicByMobile(mobile string) (soda.Chipcard, error) {
 	card := soda.Chipcard{}
+	list := make([]model.User, 0)
+	CBRelList := make([]soda.CBRel, 0)
+	busiIdList := make([]int, 0)
 	err := common.SodaDB_R.Where("mobile = ?", mobile).First(&card).Error
 	if err != nil {
 		return card, err
+	}
+	err = common.SodaDB_R.Where("chipcard_id = ?", card.Id).Find(&CBRelList).Error
+	if err != nil {
+		return card, err
+	}
+	for _, rel := range CBRelList {
+		busiIdList = append(busiIdList, rel.BusinessUserId)
+	}
+	if len(busiIdList) != 0 {
+		a := make([]string, len(busiIdList))
+		for idx, v := range busiIdList {
+			a[idx] = strconv.Itoa(v)
+		}
+		str := strings.Join(a,",")
+		common.Logger.Debug(str)
+		err = common.SodaMngDB_R.Where("id in (?)", str).Find(&list).Error
+		if err != nil {
+			return card, err
+		}
+		card.ApplyProviders = list
 	}
 	return card, nil
 }
 
 func (recv *ChipcardService) Recharge(recharge soda.ChipcardRecharge) (soda.ChipcardRecharge, error) {
 	type IdNameP struct {
-		Id 	int	`json:"id"`
-		Name	string	`json:"name"`
+		Id   int        `json:"id"`
+		Name string        `json:"name"`
 	}
 	tx := common.SodaDB_WR.Begin()
 	var snapshot Snapshot
@@ -107,8 +132,8 @@ func (recv *ChipcardService) Recharge(recharge soda.ChipcardRecharge) (soda.Chip
 		}
 	}
 	//重写适用商家表记录
-	list := make([]soda.CBRel,len(applyUsers))
-	simpleSnapshot := make([]IdNameP,len(applyUsers))
+	list := make([]soda.CBRel, len(applyUsers))
+	simpleSnapshot := make([]IdNameP, len(applyUsers))
 	for idx, user := range applyUsers {
 		rel := soda.CBRel{
 			ChipcardId:chipcard.Id,
@@ -144,7 +169,7 @@ func (recv *ChipcardService) Recharge(recharge soda.ChipcardRecharge) (soda.Chip
 	}
 	snapshot.Bill = bill
 	{
-		s,_ := json.Marshal(simpleSnapshot)
+		s, _ := json.Marshal(simpleSnapshot)
 		//生成充值记录
 		recharge.BillId = bill.BillId
 		recharge.UserId = chipcard.UserId
@@ -159,4 +184,33 @@ func (recv *ChipcardService) Recharge(recharge soda.ChipcardRecharge) (soda.Chip
 	}
 	tx.Commit()
 	return recharge, nil
+}
+
+func (recv *ChipcardService) ChangeRel(id int, applyUsers []model.User) (soda.Chipcard, error) {
+	chipcard := soda.Chipcard{}
+	err := common.SodaDB_R.First(&chipcard, id).Error
+	if err != nil {
+		return chipcard, err
+	}
+	tx := common.SodaDB_WR.Begin()
+
+	if err := tx.Where("user_id = ?", chipcard.UserId).Delete(&soda.CBRel{}).Error; err != nil {
+		tx.Rollback()
+		return chipcard, err
+	}
+	for _, user := range applyUsers {
+		rel := soda.CBRel{
+			ChipcardId:chipcard.Id,
+			UserId:chipcard.UserId,
+			BusinessUserId:user.Id,
+		}
+
+		if err := tx.Create(&rel).Error; err != nil {
+			tx.Rollback()
+			return chipcard, err
+		}
+	}
+	tx.Commit()
+	chipcard.ApplyProviders = applyUsers
+	return chipcard, nil
 }

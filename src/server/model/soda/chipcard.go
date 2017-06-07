@@ -4,11 +4,12 @@ import "maizuo.com/soda-manager/src/server/model"
 
 type Chipcard struct {
 	model.Model
-	Value      int        `json:"value,omitempty"`
-	Mobile     string        `json:"mobile,omitempty"`
-	UserId     int        `json:"userId,omitempty"`
-	Status     int        `json:"status"`
-	OperatorId int        `json:"operator_id,omitempty"`
+	Value          int        `json:"value,omitempty"`
+	Mobile         string        `json:"mobile,omitempty"`
+	UserId         int        `json:"userId,omitempty"`
+	Status         int        `json:"status"`
+	OperatorId     int        `json:"operator_id,omitempty"`
+	ApplyProviders []model.User        `json:"applyProviders",gorm:"-"`
 }
 
 func (Chipcard) TableName() string {
