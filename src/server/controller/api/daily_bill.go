@@ -103,19 +103,6 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	startAt := params["startAt"]
 	endAt := params["endAt"]
 	var status []string
-	startTime, err1 := time.Parse("2006-01-02",startAt)
-	endTime, err2 := time.Parse("2006-01-02",endAt)
-	if err1 != nil || err2 != nil{
-		result = &enity.Result{"01060105", nil, daily_bill_msg["01060105"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	} else if endTime.After(startTime.AddDate(0,0,30)) && endTime.After(startTime) {	//查询区间上限为30 天
-		result = &enity.Result{"01060106", nil, daily_bill_msg["01060106"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	userId := -1
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
 	status, userId, roleId, err := dailyBillService.Permission(params["status"], signinUserId)
@@ -985,19 +972,6 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	searchStr := ctx.URLParam("searchStr")
 	startAt := ctx.URLParam("startAt")
 	endAt := ctx.URLParam("endAt")
-	startTime, err1 := time.Parse("2006-01-02",startAt)
-	endTime, err2 := time.Parse("2006-01-02",endAt)
-	if err1 != nil || err2 != nil{
-		result = &enity.Result{"01060805", nil, daily_bill_msg["01060805"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	} else if endTime.After(startTime.AddDate(0,0,30)) && endTime.After(startTime) {	//查询区间上限为30 天
-		result = &enity.Result{"01060806", nil, daily_bill_msg["01060806"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	cashAccountType := functions.StringToInt(ctx.URLParam("cashAccountType"))
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	status, userId, roleId, err := dailyBillService.Permission(s, signinUserId)
