@@ -80,7 +80,9 @@ class App extends React.Component {
     this.searchString = e.target.value
   }
   handleSearch(e) {
-    this.fetchData();
+    let pager = { ...this.state.pagination };
+    pager.current = 0;
+    this.fetchData(pager);
   }
   handleRecharge() {
     this.setState({
@@ -189,11 +191,14 @@ class App extends React.Component {
     if(value === '' || typeof value === 'undefined') {
       callback();
     } else {
+      let pointPart = value.split(".")[1];
       value = Number(value);
-      if (value > 500 ) {
+      if ( value > 500 ) {
         callback('不可超过500元');
       } else if ( Object.is(value,NaN) || value <= 0 ) {
         callback('请输入正确的金额');
+      } else if( pointPart && pointPart.length > 2 ){
+        callback('金额不允许超过小数点后两位');
       } else {
         callback();
       }
@@ -225,12 +230,13 @@ class App extends React.Component {
            applyProviders: applyProvidersName,
          });
       },(error)=>{
-        message.error(error.msg);
+        // message.error(error.msg);
       })
   }
   render() {
     const { getFieldDecorator } = this.props.form;
     const { modalVisible, pagination, list, loading, newKey, btnLoading } = this.state;
+    console.log("pagination",pagination)
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },

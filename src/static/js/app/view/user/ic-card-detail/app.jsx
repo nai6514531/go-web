@@ -159,7 +159,7 @@ class App extends React.Component {
           </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}>IC卡适用商家:</Col>
-            <Col span={4}>{pageData.applyProvidersNameWithAccount || '-'}</Col>
+            <Col>{pageData.applyProvidersNameWithAccount || '-'}</Col>
           </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}></Col>
