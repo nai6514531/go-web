@@ -57,6 +57,8 @@ func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page
 		m["serialNumber"] = ticket.DeviceSerial
 		m["ticketId"] = ticket.TicketId
 		m["status"] = ticket.Status
+		m["ownerId"] = ticket.OwnerId
+		m["paymentId"] = ticket.PaymentId
 		list = append(list, &m)
 	}
 	return &list, nil
