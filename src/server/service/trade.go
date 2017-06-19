@@ -82,7 +82,21 @@ func (self *TradeService) Refund(ticketId string, mobile string) (int, error) {
 		tx.Rollback()
 		return 0, err
 	}
-	r = tx.Model(&soda.Wallet{}).Where("mobile = ?", mobile).Update("value", wallet.Value+ticket.Value)
+	r = tx.Model(&soda.Wallet{}).Where("mobile = ?", mobile).Update("value", wallet.Value + ticket.Value)
+	if r.Error != nil {
+		tx.Rollback()
+		return 0, r.Error
+	}
+	r = tx.Create(&soda.Bill{
+		Mobile:mobile,
+		UserID:wallet.UserId,
+		WalletID:wallet.Id,
+		Title:"退款",
+		Value:ticket.Value,
+		Type:4,
+		Action:1,
+		Status:0,
+	})
 	if r.Error != nil {
 		tx.Rollback()
 		return 0, r.Error
