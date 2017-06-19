@@ -45,6 +45,7 @@ var (
 		"01060307": "参数用户id不能为空",
 		"01060308": "解析json异常",
 		"01060309": "传参json异常",
+		"01060310": "所选账单均无法进行此操作",
 
 		"01060400": "日账单结账成功",
 		"01060401": "银行结算更新状态失败",
@@ -225,6 +226,10 @@ func (self *DailyBillController) SetPaidUp(ctx *iris.Context) {
 				ctx.JSON(iris.StatusOK, result)
 				return
 			}
+		}else {
+			result = &enity.Result{"01060310", nil, daily_bill_msg["01060310"]}
+			common.Log(ctx, nil)
+			ctx.JSON(iris.StatusOK, result)
 		}
 	}
 	result = &enity.Result{"01060300", nil, daily_bill_msg["01060300"]}
