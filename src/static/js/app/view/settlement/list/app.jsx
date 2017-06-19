@@ -700,7 +700,7 @@ const App = React.createClass({
 		let search = this.getSearchCondition();
 		search.page = 1;
 		search.perPage = this.state.perPage;
-    if( !search.startAt || !search.endAt ){
+    if((search.startAt && !search.endAt) || (!search.startAt && search.endAt)){
       message.info("请选择时间");
       return;
     }

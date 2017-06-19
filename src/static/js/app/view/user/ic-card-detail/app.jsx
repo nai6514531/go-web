@@ -47,6 +47,8 @@ class App extends React.Component {
         let applyProvidersNameWithAccount = "";
         let applyProvidersList = data.applyProviders;
         data.value = data.value/100;
+        data.totalCharged = data.totalCharged/100;
+        data.totalConsumed = data.totalConsumed/100;
         applyProvidersList.map((value,index) => {
           let addComma = applyProvidersList.length - 1 == index ? '' : ',';
           applyProvidersName = applyProvidersName + value.account + addComma;
@@ -153,9 +155,17 @@ class App extends React.Component {
             <Col span={4}>学生登录手机号:</Col>
             <Col span={4}>{pageData.mobile || '-'}</Col>
           </Row>
+           <Row type="flex" justify="start" className="item-wrap">
+            <Col span={4}>IC卡已充值金额:</Col>
+            <Col span={4}>{pageData.totalCharged || '0'}元</Col>
+          </Row>
+          <Row type="flex" justify="start" className="item-wrap">
+            <Col span={4}>IC卡已消费金额:</Col>
+            <Col span={4}>{pageData.totalConsumed || '0'}元</Col>
+          </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}>IC卡当前余额:</Col>
-            <Col span={4}>{pageData.value || '-'}元</Col>
+            <Col span={4}>{pageData.value || '0'}元</Col>
           </Row>
           <Row type="flex" justify="start" className="item-wrap">
             <Col span={4}>IC卡适用商家:</Col>
