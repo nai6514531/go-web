@@ -199,7 +199,7 @@ func (self *DailyBillController) SetPaidUp(ctx *iris.Context) {
 		} else {
 			for _userId, _dailyBill := range billMap {
 				bill := billMap[_userId]
-				if bill.Account == "" { //所有未填收款账号的单归总
+				if bill.Account == ""||bill.AccountType == 0 { //所有未填收款账号或收款类型为空（0）的单归总
 					unfilledBillMap[_userId] = _dailyBill
 					unfilledUserIds = append(unfilledUserIds, strconv.Itoa(_userId))
 				} else if bill.AccountType == 1 && bill.Status == 4 { //除此之外，支付宝账单状态为结账失败的也包含在内
