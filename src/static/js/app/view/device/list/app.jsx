@@ -144,6 +144,9 @@ const columns = [{
         case 3:
           referenceDevice = 'GPRS模块洗衣机';
           break;
+        case 4:
+          referenceDevice = '饮水机';
+          break;
         default:
           referenceDevice = '';
       }
