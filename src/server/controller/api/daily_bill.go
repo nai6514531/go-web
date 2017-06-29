@@ -27,6 +27,8 @@ var (
 		"01060102": "拉取日账单总数失败",
 		"01060103": "无当前登录用户角色信息",
 		"01060104": "页数或每页展示条数不大于0",
+		"01060105": "参数异常",
+		"01060106": "查询区间上限为30 天",
 
 		"01060200": "拉取日账单明细列表成功",
 		"01060201": "拉取日账单明细列表失败",
@@ -43,6 +45,7 @@ var (
 		"01060307": "参数用户id不能为空",
 		"01060308": "解析json异常",
 		"01060309": "传参json异常",
+		"01060310": "所选账单均无法进行此操作",
 
 		"01060400": "日账单结账成功",
 		"01060401": "银行结算更新状态失败",
@@ -79,6 +82,8 @@ var (
 		"01060802": "无当前登录用户角色信息",
 		"01060803": "拉取日账单列表失败",
 		"01060804": "无导出权限",
+		"01060805": "参数异常",
+		"01060806": "查询区间上限为30 天",
 
 		"01060900": "取消银行账单结算操作成功",
 		"01060901": "取消银行账单结算操作失败",
@@ -194,7 +199,7 @@ func (self *DailyBillController) SetPaidUp(ctx *iris.Context) {
 		} else {
 			for _userId, _dailyBill := range billMap {
 				bill := billMap[_userId]
-				if bill.Account == "" { //所有未填收款账号的单归总
+				if bill.Account == ""||bill.AccountType == 0 { //所有未填收款账号或收款类型为空（0）的单归总
 					unfilledBillMap[_userId] = _dailyBill
 					unfilledUserIds = append(unfilledUserIds, strconv.Itoa(_userId))
 				} else if bill.AccountType == 1 && bill.Status == 4 { //除此之外，支付宝账单状态为结账失败的也包含在内
@@ -221,6 +226,10 @@ func (self *DailyBillController) SetPaidUp(ctx *iris.Context) {
 				ctx.JSON(iris.StatusOK, result)
 				return
 			}
+		}else {
+			result = &enity.Result{"01060310", nil, daily_bill_msg["01060310"]}
+			common.Log(ctx, nil)
+			ctx.JSON(iris.StatusOK, result)
 		}
 	}
 	result = &enity.Result{"01060300", nil, daily_bill_msg["01060300"]}

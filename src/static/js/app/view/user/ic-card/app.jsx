@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import UserService from '../../../service/user';
 import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
 import moment from 'moment';
-
+import './app.less'
 const FormItem = Form.Item;
 const confirm = Modal.confirm;
 const columns = [{
@@ -17,6 +17,9 @@ const columns = [{
   dataIndex: 'mobile',
   width: 100,
   className: 'table-col',
+  render(text, record, index) {
+    return <Link to={"/user/ic-card/recharge/" + record.mobile}>{text}</Link>;
+  }
 }, {
   title: '充值金额(元)',
   dataIndex: 'value',
@@ -77,11 +80,9 @@ class App extends React.Component {
     this.searchString = e.target.value
   }
   handleSearch(e) {
-    // if(!this.searchString) {
-    //   message.info("请输入查询条件");
-    //   return;
-    // }
-    this.fetchData();
+    let pager = { ...this.state.pagination };
+    pager.current = 0;
+    this.fetchData(pager);
   }
   handleRecharge() {
     this.setState({
@@ -190,11 +191,14 @@ class App extends React.Component {
     if(value === '' || typeof value === 'undefined') {
       callback();
     } else {
+      let pointPart = value.split(".")[1];
       value = Number(value);
-      if (value > 500 ) {
+      if ( value > 500 ) {
         callback('不可超过500元');
       } else if ( Object.is(value,NaN) || value <= 0 ) {
         callback('请输入正确的金额');
+      } else if( pointPart && pointPart.length > 2 ){
+        callback('金额不允许超过小数点后两位');
       } else {
         callback();
       }
@@ -209,9 +213,30 @@ class App extends React.Component {
       callback();
     }
   }
+  onBlurHandler = (e) => {
+    let number = e.target.value;
+    if( Object.is(Number(number),NaN) || number.length !== 11) {
+      return;
+    }
+    UserService.icCardBasicInfo(number)
+      .then((result) => {
+        let applyProvidersName = "";
+        let applyProvidersList = result.data.applyProviders;
+        applyProvidersList.map((value,index) => {
+          let addComma = applyProvidersList.length - 1 == index ? '' : ',';
+          applyProvidersName = applyProvidersName + value.account + addComma;
+        });
+        this.props.form.setFieldsValue({
+           applyProviders: applyProvidersName,
+         });
+      },(error)=>{
+        // message.error(error.msg);
+      })
+  }
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { modalVisible, pagination, list, loading, newKey, btnLoading} = this.state;
+    const { modalVisible, pagination, list, loading, newKey, btnLoading } = this.state;
+    console.log("pagination",pagination)
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -273,7 +298,7 @@ class App extends React.Component {
                   validator: this.checkNumber
                 }],
               })(
-                <Input placeholder="请输入手机号"/>
+                <Input placeholder="请输入手机号" onBlur={this.onBlurHandler}/>
               )}
             </FormItem>
             <FormItem
@@ -299,12 +324,10 @@ class App extends React.Component {
                   required: true, message: "账号不可为空",
                 }],
               })(
-              <div>
                 <Input placeholder="如有多个账号，需用英文逗号隔开"/>
-                <span>充值金额只可用于适用商家名下的设备</span>
-              </div>
               )}
             </FormItem>
+            <p className="describe-text">充值金额只可用于适用商家名下的设备</p>
             <FormItem style={{textAlign: "center"}}>
               <Button
                 type="primary"

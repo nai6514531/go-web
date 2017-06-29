@@ -274,6 +274,7 @@ const App = React.createClass({
 			hasApplied: 0, //
 			startAt: '', //搜索结账开始时间
 			endAt: '', //搜索结账结束时间
+      defaultEndAt: null,
 			endOpen: false,
 			userOrBank: '', //搜索代理商或银行名
 			selectedList: [], //勾选的账单
@@ -699,6 +700,10 @@ const App = React.createClass({
 		let search = this.getSearchCondition();
 		search.page = 1;
 		search.perPage = this.state.perPage;
+    if((search.startAt && !search.endAt) || (!search.startAt && search.endAt)){
+      message.info("请选择时间");
+      return;
+    }
 		this.list(search);
 		this.props.location.query = search;
 		hashHistory.replace(this.props.location);
@@ -721,9 +726,16 @@ const App = React.createClass({
 	},
 	onStartChange(value) {
 		this.handleBillAtChange('startAt', value);
+    this.handleBillAtChange('endAt', value);
+    this.setState({
+      defaultEndAt: value
+    })
 	},
 	onEndChange(value) {
 		this.handleBillAtChange('endAt', value);
+    this.setState({
+      defaultEndAt: value
+    })
 	},
 	handleUserOrBankChange(e) {
 		const userOrBank = e.target.value.replace(/[\r\n\s]/g, "");
@@ -733,17 +745,21 @@ const App = React.createClass({
 	},
 	disabledStartDate(startAt) {
 		const endAt = new Date(this.state.endAt ? this.state.endAt : null).getTime();
+    let dateRange = startAt && startAt.valueOf() > Date.now();
 		if (!startAt || !endAt) {
-			return false;
+			return dateRange;
 		}
-		return startAt.valueOf() > endAt.valueOf();
+		return dateRange;
+
 	},
 	disabledEndDate(endAt) {
 		const startAt = new Date(this.state.startAt ? this.state.startAt : null).getTime();
+    let second = 30 * 24 * 60 * 60 * 1000;
+    let dateRange = (endAt && endAt.valueOf() >= startAt.valueOf() + second) || ( endAt && endAt.valueOf() > Date.now());
 		if (!endAt || !startAt) {
-			return false;
+      return dateRange;
 		}
-		return endAt.valueOf() <= startAt.valueOf();
+		return dateRange || endAt.valueOf() <= startAt.valueOf();
 	},
 	handleStartOpenChange(open) {
 		if (!open) {
@@ -1035,6 +1051,8 @@ const App = React.createClass({
             {...defaultEndDate}
             disabledDate={this.disabledEndDate}
             placeholder="结束日期"
+            value={this.state.defaultEndAt}
+            format="YYYY-MM-DD"
             onChange={this.onEndChange}
             open={endOpen}
             onOpenChange={this.handleEndOpenChange}

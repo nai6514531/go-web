@@ -28,6 +28,7 @@ var (
 		"01080204": "无操作权限",
 		"01080205": "用户信息与洗衣记录不符",
 		"01080206": "洗衣记录不存在",
+		"01080207": "芯片卡支付方式不支持退款",
 
 		"01080300": "拉取充值记录列表成功",
 		"01080301": "拉取失败",
@@ -38,6 +39,16 @@ var (
 		"01080403": "学生登录手机号不存在，请检查",
 		"01080404": "该学生用户已被其它商家操作充值，此次充值失败，请联系苏打生活工作人员解决。",
 		"01080405": "有不存在的商家账号，请检查",
+
+		"01080500": "修改成功",
+		"01080501": "修改失败",
+		"01080502": "有不存在的商家账号，请检查",
+		"01080503": "参数异常，请检查请求参数",
+		"01080505": "有不存在的商家账号，请检查",
+
+		"01080600": "查询成功",
+		"01080601": "查询失败",
+		"01080602": "参数异常，请检查请求参数",
 	}
 )
 
@@ -93,12 +104,6 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if role.RoleId == 2 {
-		result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
 	ticketId := ctx.URLParam("washId")
 	mobile := ctx.URLParam("account")
 	if ticketId == "" || mobile == "" {
@@ -115,6 +120,20 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	if role.RoleId == 2 && userId != ticket.OwnerId {
+		//限定了商家退款时只能操作自己名下的设备产生的订单
+		result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if ticket.PaymentId == 4 {
+		result = &enity.Result{"01080207", nil, trade_msg["01080207"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
 	if ticket.Mobile != strings.Trim(mobile, " ") {
 		result = &enity.Result{"01080205", err.Error(), trade_msg["01080205"]}
 		common.Log(ctx, result)
@@ -146,7 +165,7 @@ func (self *TradeController) Recharge(ctx *iris.Context) {
 	applyProviders := param.Get("applyProviders").MustStringArray()
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 
-	if amount > 50000 || amount < 0{
+	if amount > 50000 || amount < 0 {
 		result := &enity.Result{"01080402", nil, trade_msg["01080402"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
@@ -219,20 +238,98 @@ func (self *TradeController) ListRecharges(ctx *iris.Context) {
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	list, err := chipcardService.ListByMobile(userId, mobile, perPage, page)
 	if err != nil {
-		result := &enity.Result{"01010701", err.Error(), trade_msg["01010701"]}
+		result := &enity.Result{"01080301", err.Error(), trade_msg["010803001"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if page > 0 && perPage > 0 {
-		total, err = chipcardService.TotalByMobile(userId, mobile)
+	total, err = chipcardService.TotalByMobile(userId, mobile)
+	if err != nil {
+		result := &enity.Result{"01080301", err.Error(), trade_msg["010803001"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result := &enity.Result{"01080300", &enity.Pagination{total, list}, trade_msg["01080300"]}
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *TradeController) ChangeCBRels(ctx *iris.Context) {
+	userSerrvice := service.UserService{}
+	chipcardService := sodaService.ChipcardService{}
+	param, err := simplejson.NewJson(ctx.Request.Body())
+	if err != nil {
+		result := &enity.Result{"01080503", err.Error(), trade_msg["01080503"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	id := param.Get("id").MustInt()
+	applyProviders := param.Get("applyProviders").MustStringArray()
+	applyUsers := make([]model.User, len(applyProviders))
+	for i, v := range applyProviders {
+		user, err := userSerrvice.FindByAccount(v)
 		if err != nil {
-			result := &enity.Result{"01030401", err.Error(), trade_msg["01030401"]}
+			result := &enity.Result{"01080505", v, trade_msg["01080505"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
+		applyUsers[i] = *user
 	}
-	result := &enity.Result{"01080300", &enity.Pagination{total, list}, trade_msg["01080300"]}
+	chipcard, err := chipcardService.ChangeRel(id, applyUsers)
+	if chipcard.Id <= 0 {
+		result := &enity.Result{"01080503", err.Error(), trade_msg["01080503"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if err != nil {
+		result := &enity.Result{"01080405", nil, trade_msg["01080405"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result := &enity.Result{"01080500", chipcard, trade_msg["01080500"]}
+	common.Log(ctx, result)
 	ctx.JSON(iris.StatusOK, result)
+	return
+}
+
+func (self *TradeController) ChipcardBasic(ctx *iris.Context) {
+	type CardInfo struct {
+		soda.Chipcard
+		TotalCharged	int	`json:"totalCharged"`
+		TotalConsumed	int	`json:"totalConsumed"`
+	}
+	mobile := ctx.URLParam("mobile")
+	chipcardService := sodaService.ChipcardService{}
+	if mobile == "" {
+		result := &enity.Result{"01080602", nil, trade_msg["01080602"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	card, err := chipcardService.BasicByMobile(mobile)
+	cardInfo := CardInfo{
+		card,0,0,
+	}
+	rechargeList, err := chipcardService.ListByMobile(0, mobile, 0, 0)
+	temp := 0
+	for _, rec := range *rechargeList {
+		temp += rec.Value
+	}
+	cardInfo.TotalCharged = temp
+	cardInfo.TotalConsumed = temp - card.Value
+	if err != nil {
+		result := &enity.Result{"01080601", err.Error(), trade_msg["01080601"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	result := &enity.Result{"01080600", cardInfo, trade_msg["01080600"]}
+	common.Log(ctx, result)
+	ctx.JSON(iris.StatusOK, result)
+	return
 }

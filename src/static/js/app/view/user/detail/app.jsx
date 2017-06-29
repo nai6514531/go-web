@@ -62,7 +62,7 @@ class App extends React.Component {
     this.detailTotal(USER.id);
   }
   getOperateIcPermission() {
-    UserService.icCardpermission()
+    UserService.icCardPermission()
       .then((data) => {
         if( data.status == 0 ) {
           this.setState({

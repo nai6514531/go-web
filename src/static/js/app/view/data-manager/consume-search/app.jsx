@@ -101,8 +101,8 @@ const App = React.createClass({
           key: 'ticketId',
           width: 40,
           render: (text, record) => {
-            if (USER.role.id == 4) {
-              if (record.status == 7 || record.status == 6) {
+            if (USER.role.id == 4 || USER.role.id == 2) {
+              if ((record.status == 7 || record.status == 6) && record.paymentId != 4 && record.ownerId == USER.id ) {
                 return <div>
                   <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
                     <p><a href="#">退款</a></p>
@@ -208,7 +208,7 @@ const App = React.createClass({
     if (serialNumber && type == "unlock") {
       this.unlockDevice(serialNumber, {status: 0});
       return;
-    } 
+    }
     if (serialNumber && type == "lock") {
       this.lockDevice(serialNumber, {status: 9});
       return;
@@ -364,18 +364,18 @@ const App = React.createClass({
             ""
           }
           {
-            USER.role.id == 4 ? 
-            <Popconfirm 
-              title={`是否对${this.state.serialNumber}进行锁定?`} 
-              onConfirm={this.changeStatus.bind(this,"lock")} 
-              visible={this.state.popUpvisible} 
+            USER.role.id == 4 ?
+            <Popconfirm
+              title={`是否对${this.state.serialNumber}进行锁定?`}
+              onConfirm={this.changeStatus.bind(this,"lock")}
+              visible={this.state.popUpvisible}
               onCancel={this.handlePopUpVisibleChange.bind(this,false)}
-              okText="确定" 
+              okText="确定"
               cancelText="取消">
-                <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.checkVaildSerialNumber}>锁定</Button> 
-            </Popconfirm> : 
+                <Button type="primary item" style={{backgroundColor:'#fd9840',borderColor:'#fd9840'}} onClick={this.checkVaildSerialNumber}>锁定</Button>
+            </Popconfirm> :
             null
-             
+
           }
         </div>
         <article>
