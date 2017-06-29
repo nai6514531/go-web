@@ -5,29 +5,28 @@ BINARY_NAME = ./binary
 
 VERSION = $(shell git describe --tags)
 
-ENV = VERSION=${VERSION}
-
+env ?= development
 
 # config
 config:
-	@${ENV} node -e "var cfg=require('config');cfg.version='${VERSION}';console.log(JSON.stringify(cfg, null, 2))" > ${RUNTIME_CONFIG_FILE}.json
+	@NODE_ENV=${env} node -e "var cfg=require('config');cfg.version='${VERSION}';console.log(JSON.stringify(cfg, null, 2))" > ${RUNTIME_CONFIG_FILE}.json
 
 
 # compile
 static:
-	@${ENV} gulp build
+	@NODE_ENV=${env} gulp build
 
 binary: config
-	@${ENV} CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ${GO} build -o ${BINARY_NAME}
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ${GO} build -o ${BINARY_NAME}
 
 package: static binary
 
 
 # server
 development: config
-	@${ENV} ${GO} run ${ENTRY} -conf ${RUNTIME_CONFIG_FILE}
+	@VERSION=${VERSION} ${GO} run ${ENTRY} -conf ${RUNTIME_CONFIG_FILE}
 server:
-	@${ENV} ${BINARY_NAME} -conf ${RUNTIME_CONFIG_FILE}
+	@VERSION=${VERSION} ${BINARY_NAME} -conf ${RUNTIME_CONFIG_FILE}
 
 
 # alias
