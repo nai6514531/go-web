@@ -122,12 +122,20 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if role.RoleId == 2 && userId != ticket.OwnerId {
-		//限定了商家退款时只能操作自己名下的设备产生的订单
-		result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if role.RoleId == 2 {
+		if  userId != ticket.OwnerId {
+			//限定了商家退款时只能操作自己名下的设备产生的订单
+			result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if ticket.CreatedAt.Format("2006.01.02")!= time.Now().Format("2006.01.02") {
+			result = &enity.Result{"01080208", nil, trade_msg["01080208"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
 	if ticket.PaymentId == 4 {
 		result = &enity.Result{"01080207", nil, trade_msg["01080207"]}
@@ -142,12 +150,7 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	if ticket.CreatedAt.YearDay()!= time.Now().YearDay() {
-		result = &enity.Result{"01080208", nil, trade_msg["01080208"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+
 	_, err = tradeService.Refund(ticketId, mobile)
 	if err != nil {
 		result = &enity.Result{"01080201", err.Error(), trade_msg["01080201"]}
