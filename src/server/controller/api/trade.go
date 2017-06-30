@@ -12,6 +12,7 @@ import (
 	"github.com/bitly/go-simplejson"
 	"maizuo.com/soda-manager/src/server/model/soda"
 	"encoding/json"
+	"time"
 )
 
 var (
@@ -29,6 +30,7 @@ var (
 		"01080205": "用户信息与洗衣记录不符",
 		"01080206": "洗衣记录不存在",
 		"01080207": "芯片卡支付方式不支持退款",
+		"01080208": "只能为当天订单退款",
 
 		"01080300": "拉取充值记录列表成功",
 		"01080301": "拉取失败",
@@ -136,6 +138,12 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 
 	if ticket.Mobile != strings.Trim(mobile, " ") {
 		result = &enity.Result{"01080205", err.Error(), trade_msg["01080205"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	if ticket.CreatedAt.YearDay()!= time.Now().YearDay() {
+		result = &enity.Result{"01080208", nil, trade_msg["01080208"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
