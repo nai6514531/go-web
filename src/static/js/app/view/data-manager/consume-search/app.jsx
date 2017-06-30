@@ -101,7 +101,19 @@ const App = React.createClass({
           key: 'ticketId',
           width: 40,
           render: (text, record) => {
-            if (USER.role.id == 4 || USER.role.id == 2) {
+            if (USER.role.id == 4) {
+              if (record.status == 7 || record.status == 6 ) {
+                return <div>
+                  <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
+                    <p><a href="#">退款</a></p>
+                  </Popconfirm>
+                </div>
+              } else if (record.status == 4) {
+                return <span>已退款</span>
+              } else {
+                return '/'
+              }
+            } else if (USER.role.id == 2) {
               if ((record.status == 7 || record.status == 6) && record.paymentId != 4 && record.ownerId == USER.id ) {
                 return <div>
                   <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
