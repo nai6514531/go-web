@@ -101,7 +101,7 @@ func Api() {
 	api.Put("/daily-bill/set-paid-up", dailyBill.SetPaidUp)
 	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
 	api.Put("/daily-bill/bank-bill/:id/cancel", dailyBill.CancelBankBill)
-	api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
+	// api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
 	api.Get("/daily-bill/mark", dailyBill.Mark)
 	api.Get("/daily-bill/device/:serialNumber", device.DailyBill)
 	api.Get("/daily-bill/export", dailyBill.Export)
