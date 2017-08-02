@@ -78,6 +78,34 @@ const App = React.createClass({
           return Math.round(totalConsume)/100 + "元";
         }
       },{
+        title: '微信消费',
+        dataIndex: 'totalWechatConsume',
+        key: 'totalWechatConsume',
+        render: (totalWechatConsume) => {
+          return Math.round(totalWechatConsume)/100 + "元";
+        }
+      },{
+        title: '支付宝消费',
+        dataIndex: 'totalAlipayConsume',
+        key: 'totalAlipayConsume',
+        render: (totalAlipayConsume) => {
+          return Math.round(totalAlipayConsume)/100 + "元";
+        }
+      },{
+        title: '余额消费',
+        dataIndex: 'totalWalletConsume',
+        key: 'totalWalletConsume',
+        render: (totalWalletConsume) => {
+          return Math.round(totalWalletConsume)/100 + "元";
+        }
+      },{
+        title: 'IC卡消费',
+        dataIndex: 'totalChipcardConsume',
+        key: 'totalChipcardConsume',
+        render: (totalChipcardConsume) => {
+          return Math.round(totalChipcardConsume)/100 + "元";
+        }
+      },{
         title: '微信充值金额',
         dataIndex: 'totalWechatRecharge',
         key: 'totalWechatRecharge',
