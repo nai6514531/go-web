@@ -1005,3 +1005,18 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	common.Logger.Debug("=======", sendFile)
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", sendFile, daily_bill_msg["01060800"]})
 }
+
+// 计算商家可以提现的金额
+func (self *DailyBillController) SettlementAmount(ctx *iris.Context) {
+	dailyBillService := &service.DailyBillService{}
+	userId := ctx.Session().Get(viper.GetString("server.session.user.id")).(int)
+	common.Logger.Debugln("userId========",userId)
+	amount,err := dailyBillService.CountAllocatableMoneyByUserId(userId)
+	if err != nil || amount == -1 {
+		common.Logger.Debugln("CountAllocatableMoney CountAllocatableMoneyByUserId error")
+		ctx.JSON(iris.StatusOK,&enity.Result{"01060800", nil, daily_bill_msg["01060800"]})
+		return
+	}
+	ctx.JSON(iris.StatusOK,&enity.Result{"01060800", amount, daily_bill_msg["01060800"]})
+
+}

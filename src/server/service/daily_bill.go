@@ -541,3 +541,20 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 	}
 	return status, userId, roleId, nil
 }
+
+
+// 根据用户ID获取用户的可提现金额
+func (self *DailyBillService) CountAllocatableMoneyByUserId(userId int) (int, error){
+	type Result struct {
+		Amount int
+	}
+	result := &Result{}
+	r := common.SodaMngDB_R.Table("daily_bill").
+		Select("sum(total_amount) as 'amount'").
+		Where("user_id = ? and status = 0",userId).Scan(result)
+	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
+		return -1,r.Error
+	}
+	return result.Amount,nil
+
+}
