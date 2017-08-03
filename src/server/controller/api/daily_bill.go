@@ -474,7 +474,7 @@ func (self *DailyBillController) BatchPay(ctx *iris.Context) {
 		}
 		//create bill_batch_no
 		for _, _billId := range aliPayBillIds {
-			_billBatchNo := &model.BillBatchNo{BillId: _billId, BatchNo: aliPayReqParam["batch_no"]}
+			_billBatchNo := &model.BillBatchNo{BillId: functions.Int64ToString((int64(_billId))), BatchNo: aliPayReqParam["batch_no"]}
 			billBatchNoList = append(billBatchNoList, _billBatchNo)
 		}
 		if len(billBatchNoList) <= 0 {
@@ -577,7 +577,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 					insertTime, _ := time.Parse("20060102150405", _time)
 					_settledAt := insertTime.Format("2006-01-02 15:04:05")
 					_bill := &model.DailyBill{Model: model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 2} //已结账
-					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: true, Reason: _reason, OuterNo: _alipayno}
+					_billRel := &model.BillRel{BillId: _id, BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: true, Reason: _reason, OuterNo: _alipayno}
 					if _flag == "S" {
 						billList = append(billList, _bill)
 						billRelList = append(billRelList, _billRel)
@@ -607,7 +607,7 @@ func (self *DailyBillController) Notification(ctx *iris.Context) {
 					insertTime, _ := time.Parse("20060102150405", _time)
 					_settledAt := insertTime.Format("2006-01-02 15:04:05")
 					_bill := &model.DailyBill{Model: model.Model{Id: functions.StringToInt(_id)}, SettledAt: _settledAt, Status: 4} //结账失败
-					_billRel := &model.BillRel{BillId: functions.StringToInt(_id), BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: false, Reason: _reason, OuterNo: _alipayno}
+					_billRel := &model.BillRel{BillId: _id, BatchNo: reqMap["batch_no"], Type: 1, IsSuccessed: false, Reason: _reason, OuterNo: _alipayno}
 					if _flag == "F" {
 						failureList = append(failureList, _bill)
 						billRelList = append(billRelList, _billRel)

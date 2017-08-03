@@ -6,8 +6,7 @@ import (
 	"time"
 	"github.com/jinzhu/gorm"
 	"github.com/go-errors/errors"
-	"fmt"
-	"math/rand"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type BillService struct {
@@ -27,13 +26,12 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		return -1,r.Error
 	}
 	totalAmount,count,cast,rate := 0,0,2,0
+	billId := functions.GenerateIdByUserId(userId)
 	for _,dailyBill := range dailyBillList {
 		totalAmount += dailyBill.TotalAmount
 		count += 1
 	}
-	billId := fmt.Sprintf("%v%04d%06v\n",
-		time.Now().Local().Format("060102"), 2454,
-		rand.New(rand.NewSource(time.Now().UnixNano())).Intn(654321))
+
 	if !(totalAmount > 200 && userCashAccount.Type == 1) {
 		// 如果不是支付宝而且大于200
 		cast = totalAmount*1/100
@@ -65,6 +63,7 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		tx.Rollback()
 		return -1,errors.New("insert bill error")
 	}
+
 	tx.Commit()
 	return -1,nil
 }
