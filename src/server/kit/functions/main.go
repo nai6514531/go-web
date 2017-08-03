@@ -104,3 +104,11 @@ func GenerateIdByMobile(mobile string) string {
 	id := ymd + prefix + code
 	return id
 }
+
+func GenerateIdByUserId(userId int) string {
+	prefix := fmt.Sprintf("%04d",userId)
+	ymd := time.Now().Format("060102")
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	code := fmt.Sprintf("%06v", rnd.Int31n(1000000))
+	return ymd + prefix + code
+}
