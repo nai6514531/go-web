@@ -544,17 +544,18 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 
 
 // 根据用户ID获取用户的可提现金额
-func (self *DailyBillService) CountAllocatableMoneyByUserId(userId int) (int, error){
+func (self *DailyBillService) CountAllocatableMoneyByUserId(userId int) (int,int, error){
 	type Result struct {
 		Amount int
+		Count int
 	}
 	result := &Result{}
 	r := common.SodaMngDB_R.Table("daily_bill").
-		Select("sum(total_amount) as 'amount'").
+		Select("sum(total_amount) as 'amount', count(total_amount) as `count` ").
 		Where("user_id = ? and status = 0",userId).Scan(result)
 	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
-		return -1,r.Error
+		return -1,-1,r.Error
 	}
-	return result.Amount,nil
+	return result.Amount,result.Count,nil
 
 }

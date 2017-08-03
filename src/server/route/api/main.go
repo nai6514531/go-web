@@ -20,6 +20,7 @@ func Api() {
 		trade           = &controller.TradeController{}
 		sms             = &controller.SmsController{}
 		bill		= &controller.BillController{}
+		settle  	= &controller.SettleController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -35,8 +36,6 @@ func Api() {
 	api.Post("/reset-sms", sms.ResetSmsCodes)
 
 	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
-
-	api.Post("/bill",bill.InsertOrUpdate)
 
 	api.UseFunc(common.RequireSignin)
 
@@ -124,8 +123,8 @@ func Api() {
 	api.Get("/chipcard", trade.ChipcardBasic)
 	api.Post("/chipcard/relation", trade.ChangeCBRels)
 
-	api.Get("/settlement/amount",dailyBill.SettlementAmount)
+	api.Get("/settlement/detail",settle.SettlementDetails)
 
-
-
+	api.Get("/bill",bill.List)
+	api.Post("/bill",bill.InsertOrUpdate)
 }

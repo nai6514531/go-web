@@ -89,6 +89,9 @@ var (
 		"01060901": "取消银行账单结算操作失败",
 		"01060902": "无此账单信息",
 		"01060903": "次账单为非银行结算方式，无法取消",
+
+		"01110000": "拉取结算金额成功",
+		"01110001": "获取结算金额失败",
 	}
 )
 
@@ -1006,17 +1009,3 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", sendFile, daily_bill_msg["01060800"]})
 }
 
-// 计算商家可以提现的金额
-func (self *DailyBillController) SettlementAmount(ctx *iris.Context) {
-	dailyBillService := &service.DailyBillService{}
-	userId := ctx.Session().Get(viper.GetString("server.session.user.id")).(int)
-	common.Logger.Debugln("userId========",userId)
-	amount,err := dailyBillService.CountAllocatableMoneyByUserId(userId)
-	if err != nil || amount == -1 {
-		common.Logger.Debugln("CountAllocatableMoney CountAllocatableMoneyByUserId error")
-		ctx.JSON(iris.StatusOK,&enity.Result{"01060800", nil, daily_bill_msg["01060800"]})
-		return
-	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01060800", amount, daily_bill_msg["01060800"]})
-
-}

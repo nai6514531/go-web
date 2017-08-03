@@ -4,15 +4,25 @@ import (
 	"github.com/bitly/go-simplejson"
 	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/common"
-	//"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/service"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
+	//"time"
+	"time"
 )
 
 type BillController struct {
 }
+var (
+	bill_msg = map[string]string{
+		"01100000":"生成账单成功",
+		"01100001":"生成账单失败",
+		"01100002":"更新账单失败",
 
+		"01100100":"拉取账单列表成功",
+		"01100101":"拉取账单列表失败",
+	}
+)
 // 根据id是否为空来新增或者修改bill
 func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	billService := &service.BillService{}
@@ -21,18 +31,52 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	ctx.ReadJSON(reqeust)
 	id, _ := reqeust.Get("id").Int()
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	userId = 1
 	userCashAccount,err := userCashAccountService.BasicByUserId(userId)
 	if err != nil {
 		// 用户账号信息有误
-		common.Logger.Debugln("InsertOrUpdate userCashAccount err:",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"code",nil,"用户账号信息有误"})
+		common.Logger.Debugln("InsertOrUpdate userCashAccount err-----------",err)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01100001",nil,bill_msg["01100001"]} )
 		return
 	}
 	if id == 0 {
-		billService.Insert(userId,userCashAccount)
-	}else{
-		common.Logger.Debugln("重新发起提现")
-	}
+		id,err = billService.Insert(userId,userCashAccount)
+		if err != nil {
+			common.Logger.Debugln("InsertOrUpdate Insert err:",err)
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100001",nil,bill_msg["01100001"]} )
+			return
+		}
 
+	}else{
+		common.Logger.Debugln("发起重新提现")
+		_,err := billService.Update(id,userId,userCashAccount)
+		if err != nil {
+			common.Logger.Debugln("InsertOrUpdate Update err-----------",err)
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			return
+		}
+
+	}
+	ctx.JSON(iris.StatusOK,&enity.Result{"01100000",map[string]interface{}{"id":id},bill_msg["01100000"]})
+	return
+
+}
+// 获取账单列表
+func (self *BillController) List(ctx *iris.Context) {
+	billService := &service.BillService{}
+	page,perPage,status,startAt,endAt := 1,10,-1,"2006-01-02",time.Now().Local().Format("2006-01-02")
+	page,_ = ctx.ParamInt("page")
+	perPage,_ = ctx.ParamInt("perPage")
+	status,_ = ctx.ParamInt("status")
+	startAt = ctx.Param("startAt")
+	endAt = ctx.Param("endAt")
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	list, err := billService.List(page,perPage,status,startAt,endAt,userId)
+	if err != nil {
+		common.Logger.Debugln("List billService.List error---------",err)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
+	}
+	ctx.JSON(iris.StatusOK,&enity.Result{"01100100",map[string]interface{}{
+		"list":list,
+		"total":len(list),
+	},bill_msg["01100100"]} )
 }
