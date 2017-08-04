@@ -551,7 +551,7 @@ func (self *DailyBillService) CountAllocatableMoneyByUserId(userId int) (int,int
 	}
 	result := &Result{}
 	r := common.SodaMngDB_R.Table("daily_bill").
-		Select("sum(total_amount) as 'amount', count(total_amount) as `count` ").
+		Select("sum(total_amount) as 'amount', count(id) as `count` ").
 		Where("user_id = ? and status = 0",userId).Scan(result)
 	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
 		return -1,-1,r.Error

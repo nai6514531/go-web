@@ -37,10 +37,10 @@ func (self *SettleController) SettlementDetails(ctx *iris.Context){
 		ctx.JSON(iris.StatusOK,&enity.Result{"01110001", nil, daily_bill_msg["01110001"]})
 		return
 	}
-	cast := 200
-	if !(accountMap[userId].Type == 1 && amount <= 20000) {
+	cast := viper.GetInt("bill.cast")
+	if !(accountMap[userId].Type == 1 && amount <= viper.GetInt("bill.borderValue")) {
 		// 如果不是支付宝且金额少于200的情况
-		cast = amount/100
+		cast = amount*viper.GetInt("bill.rate")/100
 	}
 
 	ctx.JSON(iris.StatusOK,&enity.Result{"01110000", map[string]interface{}{
