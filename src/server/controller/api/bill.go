@@ -7,8 +7,6 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
-	//"time"
-	"time"
 )
 
 type BillController struct {
@@ -74,20 +72,18 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 // 获取账单列表
 func (self *BillController) List(ctx *iris.Context) {
 	billService := &service.BillService{}
-	page,perPage,status,startAt,endAt := 1,10,-1,"2006-01-02",time.Now().Local().Format("2006-01-02")
-	page,_ = ctx.URLParamInt("page")
-	perPage,_ = ctx.URLParamInt("perPage")
-	status,_ = ctx.URLParamInt("status")
-	startAt = ctx.URLParam("startAt")
-	endAt = ctx.URLParam("endAt")
+	page,_ := ctx.URLParamInt("page")
+	perPage,_ := ctx.URLParamInt("perPage")
+	status,_ := ctx.URLParamInt("status")
+	createdAt := ctx.URLParam("createdAt")
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	total,err := billService.Total(page,perPage,status,startAt,endAt,userId)
+	total,err := billService.Total(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.Total error---------",err)
 		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
 		return
 	}
-	list, err := billService.List(page,perPage,status,startAt,endAt,userId)
+	list, err := billService.List(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)
 		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )

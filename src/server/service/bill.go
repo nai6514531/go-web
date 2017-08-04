@@ -139,7 +139,7 @@ func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCash
 	return id,nil
 }
 
-func  (self *BillService)List(page int,perPage int,status int,startAt string,endAt string,userId int) ([]*model.Bill,error) {
+func  (self *BillService)List(page int,perPage int,status int,createdAt string,userId int) ([]*model.Bill,error) {
 	billList := []*model.Bill{}
 	params := []interface{}{}
 	sql := "select * from bill where ( bill.deleted_at IS NULL "
@@ -147,13 +147,9 @@ func  (self *BillService)List(page int,perPage int,status int,startAt string,end
 		sql += " and bill.status = ? "
 		params = append(params, status)
 	}
-	if startAt != "" {
-		sql += " and bill.settled_at >= ? "
-		params = append(params, startAt)
-	}
-	if endAt != "" {
-		sql += " and bill.settled_at <= ? "
-		params = append(params, endAt)
+	if createdAt != "" {
+		sql += " and Date(bill.created_at) = ? "
+		params = append(params, createdAt)
 	}
 	if page == -1 {
 		page = 1
@@ -164,14 +160,14 @@ func  (self *BillService)List(page int,perPage int,status int,startAt string,end
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)
 	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
-	r := common.SodaMngDB_R.Raw(sql, params...).Order(" settled_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&billList)
+	r := common.SodaMngDB_R.Raw(sql, params...).Order(" created_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&billList)
 	if r.Error != nil {
 		return nil,r.Error
 	}
 	return billList,nil
 }
 
-func (self *BillService)Total(page int,perPage int,status int,startAt string,endAt string,userId int) (int,error){
+func (self *BillService)Total(page int,perPage int,status int,createdAt string,userId int) (int,error){
 	type Result struct {
 		Total int
 	}
@@ -182,13 +178,9 @@ func (self *BillService)Total(page int,perPage int,status int,startAt string,end
 		sql += " and bill.status = ? "
 		params = append(params, status)
 	}
-	if startAt != "" {
-		sql += " and bill.settled_at >= ? "
-		params = append(params, startAt)
-	}
-	if endAt != "" {
-		sql += " and bill.settled_at <= ? "
-		params = append(params, endAt)
+	if createdAt != "" {
+		sql += " and Date(bill.created_at) = ? "
+		params = append(params, createdAt)
 	}
 	if page == -1 {
 		page = 1
