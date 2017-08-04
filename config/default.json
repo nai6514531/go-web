@@ -195,5 +195,10 @@
     "smsId": {
       "resetPassword": "SMS_60105709"
     }
+  },
+  "bill":{
+    "cast":200,
+    "rate":1,
+    "borderValue":20000
   }
 }
