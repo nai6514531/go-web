@@ -2,6 +2,7 @@ import api from '../library/request/api'
 
 const Service = {
   list: (data) => {
+    console.log(data)
     return api.get('/api/daily-bill', {
       params: {
         cashAccountType: data.cashAccountType,
@@ -10,7 +11,8 @@ const Service = {
         endAt: data.endAt,
         searchStr: data.userOrBank,
         page: data.page || 1,
-        perPage: data.perPage || 10
+        perPage: data.perPage || 10,
+        id: data.id || ''
       }
     })
   },

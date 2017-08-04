@@ -31,8 +31,10 @@ import {
 import {
   bindActionCreators
 } from 'redux';
+import QRCode from '../../../library/qrcode'
 import * as UserActions from '../../../actions/user';
 import * as regionActions from '../../../actions/region';
+import UserService from '../../../service/user';
 
 
 function mapStateToProps(state) {
@@ -88,10 +90,15 @@ class UserForm extends React.Component {
       unsaved: true,
       passwordDirty: false,
       imgUrl: '',
-      modalVisible: false
+      modalVisible: false,
+      wechat: {
+        key: '',
+        name: '',
+      },
+      keyLoading: false
     }
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.provinceChange = this.provinceChange.bind(this);
+    // this.provinceChange = this.provinceChange.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
     this.checkUserAccount = this.checkUserAccount.bind(this);
     this.checkConfirm = this.checkConfirm.bind(this);
@@ -103,13 +110,11 @@ class UserForm extends React.Component {
   }
   componentWillMount() {
     // 默认北京市东城区
-    this.props.getProvinceList();
-    this.props.getProvinceCityList(110000);
+    // this.props.getProvinceList();
+    // this.props.getProvinceCityList(110000);
     const id = this.props.params.id;
     if (id && id !== 'new') {
       this.props.getUserDetail(id);
-    } else {
-      this.provinceId = 110000;
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -129,10 +134,6 @@ class UserForm extends React.Component {
               this.setState({
                 payType: 3
               });
-              const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-              if (provinceId !== 0) {
-                this.props.getProvinceCityList(provinceId);
-              }
               break;
             default:
               this.setState({
@@ -163,20 +164,20 @@ class UserForm extends React.Component {
       }
     }
   }
-  provinceChange(event) {
-    this.props.getProvinceCityList(event);
-    const {
-      setFieldsValue
-    } = this.props.form;
-    setFieldsValue({
-      'cityId': '-1'
-    });
-    this.provinceHelp = {};
-    this.default = -1;
-  }
-  cityChange(event) {
-    this.cityIdHelp = {};
-  }
+  // provinceChange(event) {
+  //   this.props.getProvinceCityList(event);
+  //   const {
+  //     setFieldsValue
+  //   } = this.props.form;
+  //   setFieldsValue({
+  //     'cityId': '-1'
+  //   });
+  //   this.provinceHelp = {};
+  //   this.default = -1;
+  // }
+  // cityChange(event) {
+  //   this.cityIdHelp = {};
+  // }
   handleSubmit(e) {
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
@@ -184,51 +185,28 @@ class UserForm extends React.Component {
         return;
       }
       let cashAccount = {};
+      const type = parseInt(values.type);
+      const nickName = this.state.wechat.name || this.state.user.nickName;
       const user = {
         "name": values.name,
         "contact": values.contact,
         "mobile": values.mobile,
         "telephone": values.telephone,
         "address": values.address,
-        "email": ""
+        "email": "",
+        "nickName": type ===1 ? '' : nickName
       }
-      if (values.type == 3) {
-        let provinceId = values.provinceId;
-        let cityId = values.cityId;
-        if (!provinceId || provinceId == "请选择省份") {
-          this.provinceHelp = {
-            'help': '必选',
-            'className': 'has-error'
-          };
-          return false;
-        }
-        if (cityId == -1 || !cityId || cityId == "请选择城市") {
-          cityId = 0;
-          this.cityIdHelp = {
-            'help': '必选',
-            'className': 'has-error'
-          };
-          return false;
-        }
+      if (type === 1) {
         cashAccount = {
-          "type": parseInt(values.type),
-          "realName": values.realName,
-          "bankName": values.bankName,
-          "headBankName": values.headBankName,
-          "account": values.account,
-          "mobile": values.bankMobile,
-          "cityId": parseInt(cityId),
-          "provinceId": parseInt(provinceId),
-        }
-      } else if (values.type == 1) {
-        cashAccount = {
-          "type": parseInt(values.type),
+          "type": type,
           "realName": values.alipayName,
           "account": values.alipayAccount,
         }
-      } else {
+      } 
+      if (type === 2) {
         cashAccount = {
-          "type": parseInt(values.type),
+          "type": values.type,
+          "realName": values.wechatName,
         }
       }
       user.cashAccount = cashAccount;
@@ -244,22 +222,52 @@ class UserForm extends React.Component {
   }
 
   handleRadio(select) {
-    switch (select) {
-      case "3":
-        this.setState({
-          payType: 3
-        });
-        break;
-      case "1":
+    const self = this;
+    const type = parseInt(select)
+    const user = this.props.detail.result.data;
+    const wechat = this.state.wechat;
+    switch (type) {
+      case 1:
         this.setState({
           payType: 1
         });
         break;
-      default:
+      case 2:
         this.setState({
-          payType: 0
+          payType: 2
         });
     }
+    // 选择微信支付账户 且用户默认不是微信支付
+    if (type == 2) {
+      // 获取随机key
+      self.setState({keyLoading: true})
+
+      setTimeout(function() {
+        const key = "sadsdfsasdsd"
+        new QRCode(self.refs.qrcode, {
+          text: key,
+          width: 120,
+          height: 120,
+          colorDark : '#fff',
+          colorLight : '#000',
+          correctLevel : QRCode.CorrectLevel.H
+        });
+        self.setState({keyLoading: false, wechat: {...self.state.wechat, key: key}})
+      }, 300)
+     
+
+    }
+  }
+  getRelatedWechatKey() {
+
+  }
+  changeWechatAccount() {
+    const self = this;
+    UserService.getWechatKey().then((res) => {
+      self.setState({wechat: { ...self.state.wechat, key: res.data.key || '' }})
+    }).catch((e) => {
+      console.log(e)
+    })
   }
   handleEnter(event) {
     if (event.keyCode == 13) {
@@ -359,6 +367,7 @@ class UserForm extends React.Component {
   }
   render() {
     let ProvinceNode = [];
+    const wechat = this.state.wechat
     if (this.props.provinceList && this.props.provinceList.fetch == true) {
       ProvinceNode = this.props.provinceList.result.data.map(function(item, key) {
         return <Option key={key} value={item.id.toString()}>{item.name}</Option>
@@ -485,12 +494,29 @@ class UserForm extends React.Component {
             <Button type="primary" className="button-style" onClick={this.showModal.bind(this,'name')}>查看示例</Button>
          </div>
       </div>
-    } else if (this.state.payType == 3) {
+    } 
+    if (this.state.payType == 2) {
       payNode = <div>
+        <FormItem {...formItemLayout} label="扫码验证身份" >
+          <div className="code-tip">
+            <div ref="qrcode" className="code"></div>
+            { 
+              this.state.wechat.name ? <div className="qrcode-tip">
+                <Icon type='heck-circle' />
+                <span>{'关联成功（你将使用昵称为' + this.state.wechat.name + '的微信收款。如需更换账号请重新扫描二维码）'}</span>
+              </div> :
+              <div className="qrcode-tip">
+                <p>请使用你作为收款用途的微信扫描二维码进行关联，申请提现后，
+                款项会在规定时间内打入微信账户。</p>
+                <p>请确保自己的微信已实名认证<span className='check-wechat'>如何认证?</span></p>
+              </div> 
+            }
+            </div>
+        </FormItem>
         <FormItem
           {...formItemLayout}
-          label="收款户名">
-          {getFieldDecorator('realName', {
+          label="微信已验证姓名">
+          {getFieldDecorator('wechatName', {
             rules: [
               {required: true, message: '必填'},
               {max:30, message: '不超过三十个字'},
@@ -500,97 +526,9 @@ class UserForm extends React.Component {
           })(
             <Input placeholder="如：张三"/>
           )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户行所在省"
-          {...this.provinceHelp}
-        >
-          {getFieldDecorator('provinceId', {
-            rules: [
-              {required: true, message: '必填'}
-            ],
-            initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
-          })(
-            <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
-              {ProvinceNode}
-            </Select>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户行所在市"
-          {...this.cityIdHelp}
-        >
-          {getFieldDecorator('cityId', {
-            rules: [
-              {required: true, message: '必填'}
-            ],
-            initialValue: +initialValue.cityId !==0?initialValue.cityId:'请选择城市',
-          })(
-            <Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
-              {cityNode}
-            </Select>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户总行">
-          {getFieldDecorator('headBankName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.headBankName,
-
-          })(
-            <Input placeholder="如：招商银行"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户支行">
-          {getFieldDecorator('bankName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.bankName,
-
-          })(
-            <Input placeholder="总行加支行，如：招商银行深圳科技园支行"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="银行卡号">
-          {getFieldDecorator('account', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十位'},
-              { validator: this.checkNumber },
-            ],
-            initialValue: initialValue.account,
-
-          })(
-            <Input placeholder="请输入银行卡号"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="短信通知手机号">
-          {getFieldDecorator('bankMobile', {
-            rules: [
-              {len: 11, message: '请输入11位短信通知手机号'},
-            ],
-            initialValue: initialValue.bankMobile,
-
-          })(
-            <Input placeholder="请输入短信通知手机号"/>
-          )}
-        </FormItem>
+        </FormItem>  
       </div>
-    }
+    } 
     // const disable = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
@@ -745,17 +683,13 @@ class UserForm extends React.Component {
                 initialValue: initialValue.type!==undefined? initialValue.type: this.state.payType.toString(),
               })(
                 <RadioGroup>
-                  <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
-                    无设备
+                  <Radio value="2" onClick = {this.handleRadio.bind(this, 2)} className="radio-block">
+                    <span>微信收款(最快T+1结算，收取提现金额的1%作为手续费)</span>
                   </Radio>
-                  <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                     <span>支付宝收款(T+1结算，周末照常结算)</span>
-                  </Radio>
-                  <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                    <span>银行卡收款(T+1结算，仅工作日进行)</span>
+                  <Radio value="1" onClick = {this.handleRadio.bind(this, 1)} className="radio-block">
+                     <span>支付宝(收款最快T+1结算，200以下每次提现收取2元手续费，200元及以上收取提现金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
-
               )}
             </FormItem>
             {payNode}

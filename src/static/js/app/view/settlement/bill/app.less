@@ -1,0 +1,95 @@
+.view-settlement-bill {
+	h2 {
+		padding-left: 10px;
+    border-left: 3px solid #49a9ee;
+    margin-bottom: 10px;
+	}
+	.info {
+		margin-bottom: 20px;
+		button {
+			margin: 5px 15px 10px 0;
+		}
+		.amount {
+			font-size: 20px;
+	    font-weight: bold;
+	    width: 90px;
+	    display: inline-block;
+	    color: #000;
+		}
+		.panel-left {
+			border-right: 1px solid #e4e0e0;
+			margin-right: 20px;
+		}
+		.color-blue {
+			color: #49a9ee;
+		}
+		.color-red {
+			color: #de0f0f;
+		}
+		.tip {
+			margin-left: 10px;
+			cursor: pointer;
+			text-decoration: underline;
+		}
+		.cash-account-info {
+			.hidden {
+				display: none;
+			}
+		}
+	}
+	.bill-list {
+		.search-panel {
+			margin-bottom: 10px;
+			.item {
+				margin-right: 10px;
+			}
+		}
+	}
+}
+.view-settlement-modal {
+	.form-wrapper {
+		position: relative;
+		button{
+			position: absolute;
+			right: 20%;
+			top: 0;
+		}
+	}
+	.footer-btn {
+		text-align: center;
+		button {
+			margin: 0 10px;
+		}
+	}
+	.code-tip {
+		border: 1px solid #ccc;
+    padding: 10px;
+    float: left;
+    width: 300px;
+    position: absolute;
+    top: 0;
+    right: 10px;
+		p {
+	    line-height: 1.8;
+	  }
+	  .icon {
+	  	font-size: 18px;
+	  	margin-right: 10px;
+	    &.info {
+	    	color: #108ee9;
+	    }
+	    &.success {
+	    	color: #24ad87;
+	    }
+	    
+	  }
+	  .reset-wechat {
+	  	color: #108ee9;
+	  	text-decoration: underline;;
+	  }
+    .check-wechat {
+      margin-left: 10px;
+      color: #108ee9;
+    }
+	}
+}

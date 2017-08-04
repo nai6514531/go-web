@@ -318,6 +318,8 @@ const App = React.createClass({
 		});
 		DailyBillService.list(data)
 			.then((data) => {
+        console.log(111)
+        console.log(data)
 				self.setState({
 					loading: false,
 				});
