@@ -98,8 +98,6 @@ var (
 
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
-	billService := &service.BillService{}
-	//userRoleRelService := &service.UserRoleRelService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
 	page := functions.StringToInt(params["page"])
@@ -108,13 +106,7 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	searchStr := params["searchStr"]
 	startAt := params["startAt"]
 	endAt := params["endAt"]
-	id,_ := ctx.URLParamInt("id")
-	bill,err := billService.GetById(id)
-	if err != nil {
-		common.Logger.Debugln("dailyBillController billService.GetById error-----",err,id)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01060107",nil,daily_bill_msg["01060107"]})
-		return
-	}
+	billId := params["id"]
 	var status []string
 	userId := -1
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
@@ -129,14 +121,19 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
 		return
 	}
-	total, err := dailyBillService.TotalByAccountType(bill,cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
+	total, err := dailyBillService.TotalByAccountType(billId,cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060102", err.Error(), daily_bill_msg["01060102"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(bill,cashAccountType, status, userId, searchStr, page, perPage, roleId, startAt, endAt)
+	if total == 0 {
+		result = &enity.Result{"01060107", nil, daily_bill_msg["01060107"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	list, err := dailyBillService.ListWithAccountType(billId,cashAccountType, status, userId, searchStr, page, perPage, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060101", err.Error(), daily_bill_msg["01060101"]}
 		common.Log(ctx, result)

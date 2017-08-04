@@ -24,7 +24,7 @@ func (self *DailyBillService) Total() (int, error) {
 	return int(total), nil
 }
 
-func (self *DailyBillService) TotalByAccountType(bill *model.Bill,cashAccounType int, status []string, userId int, searchStr string, roleId int, startAt string, endAt string) (int, error) {
+func (self *DailyBillService) TotalByAccountType(billId string,cashAccounType int, status []string, userId int, searchStr string, roleId int, startAt string, endAt string) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -63,8 +63,10 @@ func (self *DailyBillService) TotalByAccountType(bill *model.Bill,cashAccounType
 		sql += " and bill.bill_at <= ? "
 		params = append(params, endAt)
 	}
-	sql += " and bill.bill_id = ? "
-	params = append(params, bill.BillId)
+	if billId != "" {
+		sql += " and bill.bill_id = ? "
+		params = append(params, billId)
+	}
 	common.Logger.Debugln("params===========", params)
 	r := common.SodaMngDB_R.Raw(sql, params...).Scan(result)
 	if r.Error != nil {
@@ -82,7 +84,7 @@ func (self *DailyBillService) List(page int, perPage int) (*[]*model.DailyBill, 
 	return list, nil
 }
 
-func (self *DailyBillService) ListWithAccountType(bill *model.Bill,cashAccountType int, status []string, userId int, searchStr string, page int, perPage int, roleId int, startAt string, endAt string) (*[]*model.DailyBill, error) {
+func (self *DailyBillService) ListWithAccountType(billId string,cashAccountType int, status []string, userId int, searchStr string, page int, perPage int, roleId int, startAt string, endAt string) (*[]*model.DailyBill, error) {
 	list := []*model.DailyBill{}
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
@@ -120,8 +122,10 @@ func (self *DailyBillService) ListWithAccountType(bill *model.Bill,cashAccountTy
 		sql += " and bill.bill_at <= ? "
 		params = append(params, endAt)
 	}
-	sql += " and bill.bill_id = ? "
-	params = append(params, bill.BillId)
+	if billId != "" {
+		sql += " and bill.bill_id = ? "
+		params = append(params, billId)
+	}
 	sql += " order by bill.has_marked, case " +
 		"when bill.status=4 then 1 " +
 		"when bill.status=3 then 2 " +
