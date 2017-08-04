@@ -75,19 +75,24 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 func (self *BillController) List(ctx *iris.Context) {
 	billService := &service.BillService{}
 	page,perPage,status,startAt,endAt := 1,10,-1,"2006-01-02",time.Now().Local().Format("2006-01-02")
-	page,_ = ctx.ParamInt("page")
-	perPage,_ = ctx.ParamInt("perPage")
-	status,_ = ctx.ParamInt("status")
-	startAt = ctx.Param("startAt")
-	endAt = ctx.Param("endAt")
+	page,_ = ctx.URLParamInt("page")
+	perPage,_ = ctx.URLParamInt("perPage")
+	status,_ = ctx.URLParamInt("status")
+	startAt = ctx.URLParam("startAt")
+	endAt = ctx.URLParam("endAt")
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	total,err := billService.Total(page,perPage,status,startAt,endAt,userId)
+	if err != nil {
+		common.Logger.Debugln("List billService.Total error---------",err)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
+		return
+	}
 	list, err := billService.List(page,perPage,status,startAt,endAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)
 		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
+		return
 	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01100100",map[string]interface{}{
-		"list":list,
-		"total":len(list),
-	},bill_msg["01100100"]} )
+	ctx.JSON(iris.StatusOK,&enity.Result{"01100100",&enity.Pagination{total,list},bill_msg["01100100"]} )
+	return
 }

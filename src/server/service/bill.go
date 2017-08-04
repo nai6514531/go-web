@@ -17,7 +17,7 @@ type BillService struct {
 func (self *BillService)GetById(id int)(*model.Bill,error){
 	bill := &model.Bill{}
 	r := common.SodaMngDB_R.Where("id = ?",id).First(bill)
-	if r.Error != nil {
+	if r.Error != nil && r.Error == gorm.ErrRecordNotFound{
 		return nil,r.Error
 	}
 	return bill,nil
@@ -140,8 +140,8 @@ func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCash
 }
 
 func  (self *BillService)List(page int,perPage int,status int,startAt string,endAt string,userId int) ([]*model.Bill,error) {
-	params := []interface{}{}
 	billList := []*model.Bill{}
+	params := []interface{}{}
 	sql := "select * from bill where ( bill.deleted_at IS NULL "
 	if status > 0 {
 		sql += " and bill.status = ? "
@@ -163,11 +163,45 @@ func  (self *BillService)List(page int,perPage int,status int,startAt string,end
 	}
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)
-	common.Logger.Debugln(params)
 	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
 	r := common.SodaMngDB_R.Raw(sql, params...).Order(" settled_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&billList)
-	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
+	if r.Error != nil {
 		return nil,r.Error
 	}
 	return billList,nil
+}
+
+func (self *BillService)Total(page int,perPage int,status int,startAt string,endAt string,userId int) (int,error){
+	type Result struct {
+		Total int
+	}
+	params := []interface{}{}
+	result := &Result{}
+	sql := "select count(*) as total from bill where bill.deleted_at IS NULL "
+	if status > 0 {
+		sql += " and bill.status = ? "
+		params = append(params, status)
+	}
+	if startAt != "" {
+		sql += " and bill.settled_at >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and bill.settled_at <= ? "
+		params = append(params, endAt)
+	}
+	if page == -1 {
+		page = 1
+	}
+	if perPage == -1 {
+		perPage = 10
+	}
+	sql += " and bill.user_id = ? "
+	params = append(params,userId)
+	common.Logger.Debugln(params)
+	r := common.SodaMngDB_R.Raw(sql, params...).Scan(result)
+	if r.Error != nil {
+		return -1,r.Error
+	}
+	return result.Total,nil
 }

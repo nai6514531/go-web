@@ -29,6 +29,7 @@ var (
 		"01060104": "页数或每页展示条数不大于0",
 		"01060105": "参数异常",
 		"01060106": "查询区间上限为30 天",
+		"01060107": "账单无对应日账单",
 
 		"01060200": "拉取日账单明细列表成功",
 		"01060201": "拉取日账单明细列表失败",
@@ -90,13 +91,14 @@ var (
 		"01060902": "无此账单信息",
 		"01060903": "次账单为非银行结算方式，无法取消",
 
-		"01110000": "拉取结算金额成功",
-		"01110001": "获取结算金额失败",
+		"01061000": "拉取日账单列表成功",
+		"01061001": "拉取日账单列表失败",
 	}
 )
 
 func (self *DailyBillController) List(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
+	billService := &service.BillService{}
 	//userRoleRelService := &service.UserRoleRelService{}
 	result := &enity.Result{}
 	params := ctx.URLParams()
@@ -106,6 +108,13 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	searchStr := params["searchStr"]
 	startAt := params["startAt"]
 	endAt := params["endAt"]
+	id,_ := ctx.URLParamInt("id")
+	bill,err := billService.GetById(id)
+	if err != nil {
+		common.Logger.Debugln("dailyBillController billService.GetById error-----",err,id)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01060107",nil,daily_bill_msg["01060107"]})
+		return
+	}
 	var status []string
 	userId := -1
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断
@@ -120,14 +129,14 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, &enity.Result{"01060104", nil, daily_bill_msg["01060104"]})
 		return
 	}
-	total, err := dailyBillService.TotalByAccountType(cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
+	total, err := dailyBillService.TotalByAccountType(bill,cashAccountType, status, userId, searchStr, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060102", err.Error(), daily_bill_msg["01060102"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := dailyBillService.ListWithAccountType(cashAccountType, status, userId, searchStr, page, perPage, roleId, startAt, endAt)
+	list, err := dailyBillService.ListWithAccountType(bill,cashAccountType, status, userId, searchStr, page, perPage, roleId, startAt, endAt)
 	if err != nil {
 		result = &enity.Result{"01060101", err.Error(), daily_bill_msg["01060101"]}
 		common.Log(ctx, result)
@@ -1008,4 +1017,33 @@ func (self *DailyBillController) Export(ctx *iris.Context) {
 	common.Logger.Debug("=======", sendFile)
 	ctx.JSON(iris.StatusOK, &enity.Result{"01060800", sendFile, daily_bill_msg["01060800"]})
 }
+
+func (self *DailyBillController)ListByBillId(ctx *iris.Context){
+	dailyBillService := &service.DailyBillService{}
+	billService := &service.BillService{}
+	page,_ := ctx.ParamInt("page")
+	perPage,_ := ctx.ParamInt("perPage")
+	status,_ := ctx.ParamInt("status")
+	startAt := ctx.Param("startAt")
+	endAt := ctx.Param("endAt")
+	cashAccountType,_ := ctx.ParamInt("cashAccountType")
+	searchStr := ctx.Param("searchStr")
+	id,_ := ctx.ParamInt("id")
+	bill,err := billService.GetById(id)
+	if err != nil {
+		common.Logger.Debugln("dailyBillController ListByBillId error-----",err,id)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01061001",nil,daily_bill_msg["01061001"]})
+	}
+
+	dailyBillList,err := dailyBillService.ListByBillId(bill,page,perPage,status,cashAccountType,startAt,endAt,searchStr)
+	if err != nil {
+		common.Logger.Debugln("dailyBillController dailyBillService.ListByBillId error-----",err,id)
+		ctx.JSON(iris.StatusOK,&enity.Result{"01061001",nil,daily_bill_msg["01061001"]})
+	}
+	ctx.JSON(iris.StatusOK,&enity.Result{"01061000",map[string]interface{}{
+		"list":dailyBillList,
+	},daily_bill_msg["01061000"]})
+}
+
+
 
