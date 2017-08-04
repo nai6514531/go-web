@@ -31,6 +31,7 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	ctx.ReadJSON(reqeust)
 	id, _ := reqeust.Get("id").Int()
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	//userId = 1
 	userCashAccount,err := userCashAccountService.BasicByUserId(userId)
 	if err != nil {
 		// 用户账号信息有误
@@ -47,8 +48,18 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 		}
 
 	}else{
-		common.Logger.Debugln("发起重新提现")
-		_,err := billService.Update(id,userId,userCashAccount)
+		bill,err := billService.GetById(id)
+		if err != nil {
+			common.Logger.Debugln("账单不存在")
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			return
+		}
+		if bill.UserId != userId {
+			common.Logger.Debugln("用户没有权限")
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			return
+		}
+		_,err = billService.Update(id,userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Update err-----------",err)
 			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )

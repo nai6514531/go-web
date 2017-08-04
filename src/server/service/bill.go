@@ -7,10 +7,20 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/go-errors/errors"
 	"maizuo.com/soda-manager/src/server/kit/functions"
+	"github.com/spf13/viper"
 )
 
 type BillService struct {
 
+}
+
+func (self *BillService)GetById(id int)(*model.Bill,error){
+	bill := &model.Bill{}
+	r := common.SodaMngDB_R.Where("id = ?",id).First(bill)
+	if r.Error != nil {
+		return nil,r.Error
+	}
+	return bill,nil
 }
 
 func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount)(int,error){
@@ -28,7 +38,7 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		return -1,errors.New("用户不存在可提现订单")
 	}
 	tx := common.SodaMngDB_WR.Begin()
-	totalAmount,count,cast,rate := 0,0,200,0
+	totalAmount,count,cast,rate := 0,0,viper.GetInt("bill.cast"),viper.GetInt("bill.rate")
 	billId := functions.GenerateIdByUserId(userId)
 	for _,dailyBill := range dailyBillList {
 		totalAmount += dailyBill.TotalAmount
@@ -40,10 +50,10 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		}
 	}
 
-	if !(totalAmount < 200 && userCashAccount.Type == 1) {
+	if !(totalAmount < viper.GetInt("bill.borderValue") && userCashAccount.Type == 1) {
 		// 如果不是支付宝而且大于200
-		cast = totalAmount/100
-		rate = 1
+		rate = rate
+		cast = totalAmount*rate/100
 	}
 	amount := totalAmount - cast
 
@@ -82,9 +92,6 @@ func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCash
 	r := common.SodaMngDB_R.Where("id = ? and status = 4",id).Find(bill)
 	if r.Error != nil {
 		return -1,r.Error
-	}
-	if bill.UserId != userId {
-		return -2,errors.New("用户没有权限")
 	}
 	tx := common.SodaMngDB_R.Begin()
 	// 更新账单状态
@@ -154,10 +161,10 @@ func  (self *BillService)List(page int,perPage int,status int,startAt string,end
 	if perPage == -1 {
 		perPage = 10
 	}
-	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)
 	common.Logger.Debugln(params)
+	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
 	r := common.SodaMngDB_R.Raw(sql, params...).Order(" settled_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&billList)
 	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
 		return nil,r.Error
