@@ -65,7 +65,6 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		UserId      :userCashAccount.UserId,
 		UserName    :user.Name,
 		UserAccount :user.Account,
-		SettledAt   :time.Now(),
 		TotalAmount :totalAmount,
 		Count       :count,
 		Rate        :rate,// 费率
