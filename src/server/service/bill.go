@@ -3,7 +3,6 @@ package service
 import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
-	"time"
 	"github.com/jinzhu/gorm"
 	"github.com/go-errors/errors"
 	"maizuo.com/soda-manager/src/server/kit/functions"
@@ -159,7 +158,7 @@ func  (self *BillService)List(page int,perPage int,status int,createdAt string,u
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)
 	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
-	r := common.SodaMngDB_R.Raw(sql, params...).Order(" created_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&billList)
+	r := common.SodaMngDB_R.Raw(sql, params...).Order(" created_at desc ").Offset((page-1)*perPage).Limit(perPage).Scan(&billList)
 	if r.Error != nil {
 		return nil,r.Error
 	}
