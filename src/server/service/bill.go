@@ -22,7 +22,16 @@ func (self *BillService)GetById(id int)(*model.Bill,error){
 	return bill,nil
 }
 
-func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount)(int,error){
+func (self *BillService)BasicByBillId(billId string)(*model.Bill,error){
+	bill := &model.Bill{}
+	r := common.SodaMngDB_R.Where(" bill_id = ? ",billId).Find(bill)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return bill, r.Error
+}
+
+func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount)(string,error){
 	user := &model.User{}
 	// 获取到用户
 	common.SodaMngDB_R.Where("id = ?",userId).First(user)
@@ -31,10 +40,10 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 	// 获取到用户的日账单的信息
 	r := common.SodaMngDB_R.Table("daily_bill").Where("user_id = ? and status = 0",userId).Scan(&dailyBillList)
 	if r.Error != nil && r.Error != gorm.ErrRecordNotFound  {
-		return -1,r.Error
+		return "",r.Error
 	}
 	if len(dailyBillList) == 0 {
-		return -1,errors.New("用户不存在可提现订单")
+		return "",errors.New("用户不存在可提现订单")
 	}
 	tx := common.SodaMngDB_WR.Begin()
 	totalAmount,count,cast,rate := 0,0,viper.GetInt("bill.cast"),viper.GetInt("bill.rate")
@@ -45,7 +54,7 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		r = tx.Model(dailyBill).Updates(map[string]interface{}{"billId": billId, "status": 1})
 		if r.Error != nil {
 			tx.Rollback()
-			return -1,r.Error
+			return "",r.Error
 		}
 	}
 
@@ -77,19 +86,19 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 	r = tx.Create(&bill)
 	if r.Error != nil {
 		tx.Rollback()
-		return -1,errors.New("insert bill error")
+		return "",errors.New("insert bill error")
 	}
 
 	tx.Commit()
-	return bill.Id,nil
+	return bill.BillId,nil
 }
 
-func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCashAccount)(int ,error){
+func (self *BillService)Update(billId string,userId int,userCashAccount *model.UserCashAccount)(error){
 	bill := &model.Bill{}
 	// 结账失败的单才可以重新发起结算
-	r := common.SodaMngDB_R.Where("id = ? and status = 4",id).Find(bill)
+	r := common.SodaMngDB_R.Where("bill_id = ? and status = 4",billId).Find(bill)
 	if r.Error != nil {
-		return -1,r.Error
+		return r.Error
 	}
 	tx := common.SodaMngDB_R.Begin()
 	// 更新账单状态
@@ -101,18 +110,18 @@ func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCash
 	})
 	if r.Error != nil {
 		tx.Rollback()
-		return -1,r.Error
+		return r.Error
 	}
 	// 获取到账单对应的日账单的信息
 	dailyBillList := []*model.DailyBill{}
 	r = common.SodaMngDB_R.Table("daily_bill").Where(" bill_id = ? ",bill.BillId).Scan(&dailyBillList)
 	if r.Error != nil && r.Error != gorm.ErrRecordNotFound  {
 		tx.Rollback()
-		return -1,r.Error
+		return r.Error
 	}
 	if len(dailyBillList) == 0 {
 		tx.Rollback()
-		return -1,errors.New("账单号无对应日账单")
+		return errors.New("账单号无对应日账单")
 	}
 	dailyBillAccountName := ""
 	if userCashAccount.Type == 1{
@@ -129,12 +138,12 @@ func (self *BillService)Update(id int,userId int,userCashAccount *model.UserCash
 		})
 		if r.Error != nil {
 			tx.Rollback()
-			return -1,r.Error
+			return r.Error
 		}
 	}
 
 	tx.Commit()
-	return id,nil
+	return nil
 }
 
 func  (self *BillService)List(page int,perPage int,status int,createdAt string,userId int) ([]*model.Bill,error) {

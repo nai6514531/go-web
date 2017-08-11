@@ -15,7 +15,11 @@ var (
 	bill_msg = map[string]string{
 		"01100000":"生成账单成功",
 		"01100001":"生成账单失败",
-		"01100002":"更新账单失败",
+		"01100003":"账单不存在",
+		"01100004":"用户没有权限",
+		"01100005":"更新账单状态失败",
+		"01100006":"获取用户账号信息失败",
+
 
 		"01100100":"拉取账单列表成功",
 		"01100101":"拉取账单列表失败",
@@ -27,18 +31,18 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
 	reqeust := simplejson.New()
 	ctx.ReadJSON(reqeust)
-	id, _ := reqeust.Get("id").Int()
+	billId := reqeust.Get("id").MustString()
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	//userId = 1
 	userCashAccount,err := userCashAccountService.BasicByUserId(userId)
 	if err != nil {
 		// 用户账号信息有误
 		common.Logger.Debugln("InsertOrUpdate userCashAccount err-----------",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01100001",nil,bill_msg["01100001"]} )
+		ctx.JSON(iris.StatusOK,&enity.Result{"01100006",nil,bill_msg["01100006"]} )
 		return
 	}
-	if id == 0 {
-		id,err = billService.Insert(userId,userCashAccount)
+	if billId == "" {
+		billId,err = billService.Insert(userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Insert err:",err)
 			ctx.JSON(iris.StatusOK,&enity.Result{"01100001",nil,bill_msg["01100001"]} )
@@ -46,26 +50,26 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 		}
 
 	}else{
-		bill,err := billService.GetById(id)
+		bill,err := billService.BasicByBillId(billId)
 		if err != nil {
 			common.Logger.Debugln("账单不存在")
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100003",nil,bill_msg["01100003"]} )
 			return
 		}
 		if bill.UserId != userId {
 			common.Logger.Debugln("用户没有权限")
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100004",nil,bill_msg["01100004"]} )
 			return
 		}
-		_,err = billService.Update(id,userId,userCashAccount)
+		err = billService.Update(billId,userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Update err-----------",err)
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100002",nil,bill_msg["01100002"]} )
+			ctx.JSON(iris.StatusOK,&enity.Result{"01100005",nil,bill_msg["01100005"]} )
 			return
 		}
 
 	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01100000",map[string]interface{}{"id":id},bill_msg["01100000"]})
+	ctx.JSON(iris.StatusOK,&enity.Result{"01100000",map[string]interface{}{"id":billId},bill_msg["01100000"]})
 	return
 
 }
