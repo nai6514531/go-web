@@ -19,8 +19,9 @@ func Api() {
 		statis          = &controller.StatisController{}
 		trade           = &controller.TradeController{}
 		sms             = &controller.SmsController{}
-		bill		= &controller.BillController{}
-		settle  	= &controller.SettleController{}
+		bill            = &controller.BillController{}
+		settle          = &controller.SettleController{}
+		auth            = &controller.AuthController{}
 	)
 
 	api := iris.Party("/api", func(ctx *iris.Context) {
@@ -123,8 +124,10 @@ func Api() {
 	api.Get("/chipcard", trade.ChipcardBasic)
 	api.Post("/chipcard/relation", trade.ChangeCBRels)
 
-	api.Get("/settlement/detail",settle.SettlementDetails)
+	api.Get("/settlement/detail", settle.SettlementDetails)
 
-	api.Get("/bill",bill.List)
-	api.Post("/bill",bill.InsertOrUpdate)
+	api.Get("/bill", bill.List)
+	api.Post("/bill", bill.InsertOrUpdate)
+
+	api.Get("/wechat/actions/create/key", auth.CreateKey)
 }

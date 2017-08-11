@@ -200,5 +200,8 @@
     "cast":200,
     "rate":1,
     "borderValue":20000
+  },
+  "auth":{
+    "prefix":"soda-manager:auth:"
   }
 }
