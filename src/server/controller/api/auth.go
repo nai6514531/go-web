@@ -32,7 +32,7 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 	prefix := viper.GetString("auth.prefix")
 	// 加密
 	md5Ctx := md5.New()
-	md5Ctx.Write([]byte(strconv.Itoa(signinUserId)))
+	md5Ctx.Write([]byte(strconv.Itoa(signinUserId)+time.Now().Format("060102150405")))
 	key := hex.EncodeToString(md5Ctx.Sum(nil))
 	// 将key存放
 	common.Redis.Set(prefix+"key:"+strconv.Itoa(signinUserId), key, time.Duration(10*time.Minute))
