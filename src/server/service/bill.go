@@ -158,12 +158,6 @@ func  (self *BillService)List(page int,perPage int,status int,createdAt string,u
 		sql += " and Date(bill.created_at) = ? "
 		params = append(params, createdAt)
 	}
-	if page == -1 {
-		page = 1
-	}
-	if perPage == -1 {
-		perPage = 10
-	}
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)
 	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
@@ -188,12 +182,6 @@ func (self *BillService)Total(page int,perPage int,status int,createdAt string,u
 	if createdAt != "" {
 		sql += " and Date(bill.created_at) = ? "
 		params = append(params, createdAt)
-	}
-	if page == -1 {
-		page = 1
-	}
-	if perPage == -1 {
-		perPage = 10
 	}
 	sql += " and bill.user_id = ? "
 	params = append(params,userId)

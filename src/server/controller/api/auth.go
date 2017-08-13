@@ -85,10 +85,10 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		return
 	}
 	token := params.Get("token").MustString()
-	resp,err := grequests.Get("url",
+	resp,err := grequests.Get("http://api.sodalife.xyz/v1/session/accounts/",
 		&grequests.RequestOptions{
 			Headers:map[string]string{
-				"Origin":"http://m.sodalife.club",
+				"Origin":"http://m.sodalife.club/",
 				"Authorization":"Bearer "+token,
 			},
 		},
