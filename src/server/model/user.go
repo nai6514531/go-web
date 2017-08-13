@@ -21,6 +21,7 @@ type User struct {
 	Menu        interface{} `json:"menu,omitempty" gorm:"-"`
 	DeviceTotal int         `json:"deviceTotal,omitempty" gorm:"-"`
 	CashAccount interface{} `json:"cashAccount,omitempty" gorm:"-"`
+	Extra      string      `json:"extra"`
 }
 
 func (User) TableName() string {
