@@ -49,8 +49,8 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 	md5Ctx := md5.New()
 	md5Ctx.Write([]byte(strconv.Itoa(signinUserId)+time.Now().Format("060102150405")))
 	key := hex.EncodeToString(md5Ctx.Sum(nil))
-	// 将key存放
-	common.Redis.Set(prefix+"key:"+strconv.Itoa(signinUserId), key, time.Duration(5*time.Minute))
+	// 将key和用户id绑定
+	common.Redis.Set(prefix+"key:user:"+key+":", signinUserId, time.Duration(5*time.Minute))
 	result := &enity.Result{"01120000", map[string]string{"key": key}, auth_msg["01120000"]}
 	ctx.JSON(iris.StatusOK, result)
 }
@@ -58,7 +58,7 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	userCashAccountService := &service.UserCashAccountService{}
 	userService := &service.UserService{}
-	paramKey := ctx.Param("key")
+	key := ctx.Param("key")
 	params := simplejson.New()
 	err := ctx.ReadJSON(&params)
 	if err != nil {
@@ -67,28 +67,26 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// 取出当前登录用户的ID
-	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	prefix := viper.GetString("auth.prefix")
-	redisKey := common.Redis.Get(prefix+"key:"+strconv.Itoa(signinUserId))
-	if redisKey.Err() != nil {
-		common.Logger.Debugln("key已过期")
-		result := &enity.Result{"01120102", struct {}{}, auth_msg["01120102"]}
+	isExist := common.Redis.Exists(prefix+"key:user:"+key+":").Val()
+	if !isExist{
+		common.Logger.Debugln("key校验不通过")
+		result := &enity.Result{"01120103", struct {}{}, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	key := redisKey.Val()
-	if paramKey != key {
+	userId,err := common.Redis.Get(prefix+"key:user:"+key+":").Int64()
+	if err != nil {
 		common.Logger.Debugln("key校验不通过")
 		result := &enity.Result{"01120103", struct {}{}, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	token := params.Get("token").MustString()
-	resp,err := grequests.Get("http://api.sodalife.xyz/v1/session/accounts/",
+	resp,err := grequests.Get(viper.GetString("auth.requestUrl"),
 		&grequests.RequestOptions{
 			Headers:map[string]string{
-				"Origin":"http://m.sodalife.club/",
+				"Origin":viper.GetString("auth.origin"),
 				"Authorization":"Bearer "+token,
 			},
 		},
@@ -114,9 +112,10 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	common.Redis.Set(prefix+"user:"+key,string(userInfo),3*time.Minute)
+	common.Redis.Set(prefix+"user:"+key+":",string(userInfo),3*time.Minute)
 	// 将用户信息更新到数据库中
 	data,err := userJson.Get("data").Array()
+
 	if err != nil {
 		common.Logger.Debugln("err------------------------>",err)
 		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
@@ -142,13 +141,14 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		return
 	}
 	userCashAccount := &model.UserCashAccount{
-		UserId:signinUserId,
+		UserId:int(userId),
 		Account:extra["openId"].(string),
 		Type:2,
 	}
+	extraString,_ := json.Marshal(extra)
 	user := &model.User{
-		Extra:userJson.Get("extra").MustString(),
-		Model:model.Model{Id:signinUserId},
+		Extra:string(extraString),
+		Model:model.Model{Id:int(userId)},
 	}
 	// 更新用户信息和账号信息没做到事务性
 	err = userService.UpdateWechatInfo(user)
@@ -166,8 +166,16 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	_user,_ := userService.Basic(int(userId))
 	common.Logger.Debugln("更新用户账号信息成功")
-	result := &enity.Result{"01120100", struct {}{}, auth_msg["01120100"]}
+	result := &enity.Result{Status:"01120100", Data:map[string]interface{}{
+		"id":_user.Id,
+		"name":_user.Name,
+		"wechat":map[string]string{
+			"name":extra["nickname"].(string),
+			"avatorUrl":extra["headImgUrl"].(string),
+		},
+	}, Msg:auth_msg["01120100"]}
 	ctx.JSON(iris.StatusOK, result)
 	return
 
@@ -178,8 +186,8 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 	key := ctx.Param("key")
 	prefix := viper.GetString("auth.prefix")
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	redisKey := common.Redis.Get(prefix+"key:"+strconv.Itoa(signinUserId))
-	userInfo := common.Redis.Get(prefix+"user:"+key)
+	redisKey := common.Redis.Get(prefix+"key:"+strconv.Itoa(signinUserId)+":")
+	userInfo := common.Redis.Get(prefix+"user:"+key+":")
 	common.Logger.Debugln("userInfo-------------val",userInfo.Val())
 	if redisKey.Err() != nil && userInfo.Err() != nil {
 		common.Logger.Debugln("key已过期")
@@ -219,8 +227,16 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+
 	common.Logger.Debugln("绑定用户信息成功")
-	result := &enity.Result{"01120200", userMap["nickname"].(string), auth_msg["01120200"]}
+	result := &enity.Result{Status:"01120200", Data:map[string]interface{}{
+		"id":userCashAccount.Id,
+		"name":userCashAccount.RealName,
+		"wechat":map[string]interface{}{
+			"name":userMap["nickname"],
+			"avatorUrl":userMap["headImgUrl"],
+		},
+	}, Msg:auth_msg["01120200"]}
 	ctx.JSON(iris.StatusOK, result)
 	return
 }

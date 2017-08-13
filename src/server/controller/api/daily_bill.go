@@ -106,7 +106,8 @@ func (self *DailyBillController) List(ctx *iris.Context) {
 	searchStr := params["searchStr"]
 	startAt := params["startAt"]
 	endAt := params["endAt"]
-	billId := params["id"]
+	// billId为bill的billId,而不是id
+	billId := params["billId"]
 	var status []string
 	userId := -1
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id")) //对角色判断

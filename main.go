@@ -24,7 +24,7 @@ func main() {
 
 	//common.SetUpRateLimiter()
 
-	//common.SetUpCors()
+	common.SetupCORS()
 
 	//common.SetUpSecure()
 
