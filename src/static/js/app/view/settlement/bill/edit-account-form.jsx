@@ -9,6 +9,7 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 import QRCode from '../../../library/qrcode'
 import UserService from '../../../service/user';
+import WechatService from '../../../service/wechat';
 
 class Alipay extends React.Component {
   constructor(props, context) {
@@ -195,7 +196,7 @@ class AmountForm extends React.Component {
     this.setState({type: type});
 
     // 选择微信支付账户 且用户默认不是微信支付
-    if (type === 2 && !!wechat.key) {
+    if (type === 2 && this.props.cashAccount.type !== 2) {
       // 获取随机key
       return self.resetWechatKey()
     }
@@ -207,7 +208,10 @@ class AmountForm extends React.Component {
   initQRCode(key) {
     const self = this;
     key = key || '';
-    const url = `http://m.sodalife.xyz/act/#/relate-wechat?key=${key}`;
+    const url = `http://m.sodalife.xyz/act/relate-wechat?key=${key}`;
+    console.log(self.refs.qrcode)
+    console.log(self.refs)
+    self.refs.qrcode.innerText = ''
     setTimeout(()=> {
       new QRCode(self.refs.qrcode, {
         text: url,
@@ -228,7 +232,7 @@ class AmountForm extends React.Component {
       }
       const key = res.data.key
       // 根据key生成二维码
-      self.initQRCode(key)
+      // self.initQRCode(key)
       self.setState({wechat: {name: '', key: key || ''}, keyLoading: false})
       self.checkWechatKey()
     }).catch(() => {
@@ -259,7 +263,11 @@ class AmountForm extends React.Component {
     let user = _.extend(this.props.user, {key: this.state.key})
     user.cashAccount = cashAccount
   }
-  componentDidMount() {
+  componentDidUpdate(nextProps, nextState) {
+    const self = this;
+    if (nextState.wechat.key !== this.state.wechat.key) {
+      self.initQRCode(nextState.wechat.key)
+    }
   }
 	render() {
 		const { getFieldDecorator } = this.props.form;
@@ -294,7 +302,8 @@ class AmountForm extends React.Component {
         )}
       </FormItem>
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> :
-       <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} form={this.props.form} resetWechatKey={this.resetWechatKey} wechat={this.state.wechat} />}
+       <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading}
+       form={this.props.form} resetWechatKey={this.resetWechatKey} wechat={this.state.wechat} />}
       <div className="footer-btn">
 	      <FormItem>
 	        <Button type="ghost" onClick={() => { this.props.handleCashModal}}>取消</Button>

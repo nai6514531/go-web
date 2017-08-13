@@ -132,7 +132,7 @@ const Detail = React.createClass({
       searchStr: "",
       page: pagination.page,
       perPage: pagination.perPage,
-      id: self.props.params.id
+      billId: self.props.params.id
     }).then((res) => {
         self.setState({
           list: res.data.list,
