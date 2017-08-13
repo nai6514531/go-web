@@ -104,15 +104,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	// 将返回的用户信息存放到redis中,轮询时根据key来获取openId从而判断是否绑定成功
-	userInfo,err := userJson.MarshalJSON()
-	if err != nil {
-		common.Logger.Debugln("err------------------------>",err)
-		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	common.Redis.Set(prefix+"user:"+key+":",string(userInfo),3*time.Minute)
+
 	// 将用户信息更新到数据库中
 	data,err := userJson.Get("data").Array()
 
@@ -140,6 +132,15 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	// 将返回的用户信息存放到redis中,轮询时根据key来获取openId从而判断是否绑定成功
+	extraJson,err := json.Marshal(extra)
+	if err != nil {
+		common.Logger.Debugln("extra to json err------------------------>",err)
+		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	common.Redis.Set(prefix+"user:"+key+":",string(extraJson),3*time.Minute)
 	userCashAccount := &model.UserCashAccount{
 		UserId:int(userId),
 		Account:extra["openId"].(string),
@@ -187,9 +188,9 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 	prefix := viper.GetString("auth.prefix")
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	redisKey := common.Redis.Get(prefix+"key:"+strconv.Itoa(signinUserId)+":")
-	userInfo := common.Redis.Get(prefix+"user:"+key+":")
-	common.Logger.Debugln("userInfo-------------val",userInfo.Val())
-	if redisKey.Err() != nil && userInfo.Err() != nil {
+	userExtra := common.Redis.Get(prefix+"user:"+key+":")
+	common.Logger.Debugln("userInfo-------------val",userExtra.Val())
+	if redisKey.Err() != nil && userExtra.Err() != nil {
 		common.Logger.Debugln("key已过期")
 		result := &enity.Result{"01120201", struct {}{}, auth_msg["01120201"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -204,7 +205,7 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		return
 	}
 	userMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(userInfo.Val()),&userMap)
+	err := json.Unmarshal([]byte(userExtra.Val()),&userMap)
 	if err != nil {
 		common.Logger.Debugln("redis中userinfo转json失败",err)
 		result := &enity.Result{"01120205", struct {}{}, auth_msg["01120205"]}

@@ -46,7 +46,8 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		return "",errors.New("用户不存在可提现订单")
 	}
 	tx := common.SodaMngDB_WR.Begin()
-	totalAmount,count,cast,rate := 0,0,viper.GetInt("bill.cast"),viper.GetInt("bill.rate")
+	// 默认值cast为200,rate为0,即为支付宝少于200的情况
+	totalAmount,count,cast,rate := 0,0,viper.GetInt("bill.aliPay.cast"),viper.GetInt("bill.aliPay.rate")
 	billId := functions.GenerateIdByUserId(userId)
 	for _,dailyBill := range dailyBillList {
 		totalAmount += dailyBill.TotalAmount
@@ -57,11 +58,15 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 			return "",r.Error
 		}
 	}
-
-	if !(totalAmount < viper.GetInt("bill.borderValue") && userCashAccount.Type == 1) {
-		// 如果不是支付宝而且大于200
-		rate = rate
-		cast = totalAmount*rate/100
+	if userCashAccount.Type == 1 {
+		// 支付宝大于200的情况
+		if totalAmount > viper.GetInt("bill.aliPay.borderValue") {
+			rate = 1
+			cast = totalAmount * rate / 100
+		}
+	} else {
+		rate = viper.GetInt("bill.wechat.rate")
+		cast = totalAmount * rate / 100
 	}
 	amount := totalAmount - cast
 	if amount <100 {
@@ -85,7 +90,6 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		RealName    :userCashAccount.RealName,
 		Status      :1,
 	}
-	//common.SodaMngDB_R.Create(&bill)
 	r = tx.Create(&bill)
 	if r.Error != nil {
 		tx.Rollback()
