@@ -87,6 +87,12 @@ func (self *BillController) List(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
 		return
 	}
+	if page == -1 {
+		page = 1
+	}
+	if perPage == -1 {
+		perPage = 10
+	}
 	list, err := billService.List(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)

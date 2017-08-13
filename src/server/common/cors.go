@@ -2,16 +2,24 @@ package common
 
 import (
 	"gopkg.in/iris-contrib/middleware.v4/cors"
+	"github.com/spf13/viper"
 )
 
-func SetUpCors() {
+func SetupCORS() {
 
+	isDevelopment := viper.GetBool("isDevelopment")
+	allowedOrigins := viper.GetStringSlice("server.cors.allowedOrigins")
+	allowedHeaders := viper.GetStringSlice("server.cors.allowedHeaders")
+	allowedMethods := viper.GetStringSlice("server.cors.allowedMethods")
+	maxAge := viper.GetInt("server.cors.maxAge")
 	CORS = cors.New(cors.Options{
-		AllowedOrigins: []string{"www.soda.com:8080", "www.maizuo.com"},
-		AllowedMethods:[]string{"GET","POST","OPTIONS"},
-		AllowCredentials:true,
-		OptionsPassthrough:true,
-		Debug:true,
+		MaxAge:             maxAge,
+		AllowedOrigins:     allowedOrigins,
+		AllowedMethods:     allowedMethods,
+		AllowCredentials:   true,
+		OptionsPassthrough: false,
+		AllowedHeaders:     allowedHeaders,
+		Debug:              isDevelopment,
 	})
 
 }
