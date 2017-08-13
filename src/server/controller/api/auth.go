@@ -62,7 +62,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	params := simplejson.New()
 	err := ctx.ReadJSON(&params)
 	if err != nil {
-		common.Logger.Debugln("解析json出错")
+		common.Logger.Debugln("解析json出错,err--->",err)
 		result := &enity.Result{"01120101", struct {}{}, auth_msg["01120101"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -77,7 +77,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	}
 	userId,err := common.Redis.Get(prefix+"key:user:"+key+":").Int64()
 	if err != nil {
-		common.Logger.Debugln("key校验不通过")
+		common.Logger.Debugln("key校验不通过,err--->",err)
 		result := &enity.Result{"01120103", struct {}{}, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -92,14 +92,14 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		},
 	)
 	if err != nil || resp.StatusCode != 200 {
-		common.Logger.Debugln("请求远程服务器出错")
+		common.Logger.Debugln("请求远程服务器出错,err--->",err)
 		result := &enity.Result{"01120104", struct {}{}, auth_msg["01120104"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
 	userJson,err := simplejson.NewJson(resp.Bytes())
 	if err != nil {
-		common.Logger.Debugln("解析远程服务器数据出错")
+		common.Logger.Debugln("解析远程服务器数据出错,err--->",err)
 		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -109,7 +109,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	data,err := userJson.Get("data").Array()
 
 	if err != nil {
-		common.Logger.Debugln("err------------------------>",err)
+		common.Logger.Debugln("远程服务器解析data数据出错,err------------->",err)
 		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -162,7 +162,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	// 更新用户账号信息
 	ok,err := userCashAccountService.UpdateByUserId(userCashAccount)
 	if err != nil && !ok {
-		common.Logger.Debugln("更新用户账号信息出错")
+		common.Logger.Debugln("更新用户账号信息出错,err--->",err)
 		result := &enity.Result{"01120106", struct {}{}, auth_msg["01120106"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -215,7 +215,7 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 	common.Logger.Debugln("userMap------------->",userMap)
 	userCashAccount,err := userCashAccountService.BasicByUserId(signinUserId)
 	if err != nil {
-		common.Logger.Debugln("获取用户信息有误")
+		common.Logger.Debugln("获取用户信息有误,err------------>",err)
 		result := &enity.Result{"01120204", struct {}{}, auth_msg["01120204"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
