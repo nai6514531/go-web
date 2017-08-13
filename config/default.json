@@ -42,7 +42,7 @@
     "port": 8080,
     "cors": {
       "allowedOrigins": [
-        "http://*.sodalife.xyz"
+        "*"
       ],
       "allowedHeaders": [
         "Authorization",
@@ -226,7 +226,7 @@
   },
   "auth":{
     "prefix":"soda-manager:auth:",
-    "requestUrl":"http://api.sodalife.xyz/v1/session/accounts/",
-    "origin":"http://m.sodalife.club/"
+    "requestUrl":"http://api.sodalife.club/v1/session/accounts/",
+    "origin":"http://m.sodalife.club"
   }
 }
