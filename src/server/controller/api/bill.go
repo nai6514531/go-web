@@ -7,6 +7,7 @@ import (
 	"maizuo.com/soda-manager/src/server/service"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
+	"github.com/go-errors/errors"
 )
 
 type BillController struct {
@@ -38,14 +39,18 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	if err != nil {
 		// 用户账号信息有误
 		common.Logger.Debugln("InsertOrUpdate userCashAccount err-----------",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01100006",nil,bill_msg["01100006"]} )
+		result := &enity.Result{"01100006",err,bill_msg["01100006"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result )
 		return
 	}
 	if billId == "" {
 		billId,err = billService.Insert(userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Insert err:",err)
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100001",nil,bill_msg["01100001"]} )
+			result := &enity.Result{"01100001",err,bill_msg["01100001"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK,result )
 			return
 		}
 
@@ -53,23 +58,30 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 		bill,err := billService.BasicByBillId(billId)
 		if err != nil {
 			common.Logger.Debugln("账单不存在")
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100003",nil,bill_msg["01100003"]} )
+			result := &enity.Result{"01100003",err,bill_msg["01100003"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK, result)
 			return
 		}
 		if bill.UserId != userId {
-			common.Logger.Debugln("用户没有权限")
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100004",nil,bill_msg["01100004"]} )
+			result := &enity.Result{"01100004",errors.New("用户没有权限"),bill_msg["01100004"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK,result)
 			return
 		}
 		err = billService.Update(billId,userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Update err-----------",err)
-			ctx.JSON(iris.StatusOK,&enity.Result{"01100005",nil,bill_msg["01100005"]} )
+			result :=&enity.Result{"01100005",err,bill_msg["01100005"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK,result )
 			return
 		}
 
 	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01100000",map[string]interface{}{"id":billId},bill_msg["01100000"]})
+	result := &enity.Result{"01100000",map[string]interface{}{"id":billId},bill_msg["01100000"]}
+	common.Log(ctx,result)
+	ctx.JSON(iris.StatusOK,result)
 	return
 
 }
@@ -84,7 +96,9 @@ func (self *BillController) List(ctx *iris.Context) {
 	total,err := billService.Total(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.Total error---------",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
+		result := &enity.Result{"01100101",nil,bill_msg["01100101"]}
+		ctx.JSON(iris.StatusOK,result)
+		common.Log(ctx,result)
 		return
 	}
 	if page == -1 {
@@ -96,9 +110,13 @@ func (self *BillController) List(ctx *iris.Context) {
 	list, err := billService.List(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01100101",nil,bill_msg["01100101"]} )
+		result := &enity.Result{"01100101",nil,bill_msg["01100101"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
 		return
 	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01100100",&enity.Pagination{total,list},bill_msg["01100100"]} )
+	result := &enity.Result{"01100100",&enity.Pagination{total,list},bill_msg["01100100"]}
+	ctx.JSON(iris.StatusOK,result)
+	common.Log(ctx,result)
 	return
 }

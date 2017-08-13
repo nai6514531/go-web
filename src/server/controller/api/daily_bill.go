@@ -264,6 +264,8 @@ func (self *DailyBillController) DetailList(ctx *iris.Context) {
 	if err != nil {
 		result = &enity.Result{"01060203", err.Error(), daily_bill_msg["01060203"]}
 		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK,result)
+		return
 	}
 	total, err := dailyBillDetailService.TotalByUserIdAndBillAt(userId, billAt, serialNum)
 	if err != nil {
@@ -1029,18 +1031,25 @@ func (self *DailyBillController)ListByBillId(ctx *iris.Context){
 	id,_ := ctx.ParamInt("id")
 	bill,err := billService.GetById(id)
 	if err != nil {
-		common.Logger.Debugln("dailyBillController ListByBillId error-----",err,id)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01061001",nil,daily_bill_msg["01061001"]})
+		result := &enity.Result{"01061001",err,daily_bill_msg["01061001"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
 	}
 
 	dailyBillList,err := dailyBillService.ListByBillId(bill,page,perPage,status,cashAccountType,startAt,endAt,searchStr)
 	if err != nil {
-		common.Logger.Debugln("dailyBillController dailyBillService.ListByBillId error-----",err,id)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01061001",nil,daily_bill_msg["01061001"]})
+		result := &enity.Result{"01061001",err,daily_bill_msg["01061001"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
 	}
-	ctx.JSON(iris.StatusOK,&enity.Result{"01061000",map[string]interface{}{
+	result := &enity.Result{Status:"01061000",Data:map[string]interface{}{
 		"list":dailyBillList,
-	},daily_bill_msg["01061000"]})
+	},Msg:daily_bill_msg["01061000"]}
+	ctx.JSON(iris.StatusOK,result)
+	common.Log(ctx,result)
+	return
 }
 
 
