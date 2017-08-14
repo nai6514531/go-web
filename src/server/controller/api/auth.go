@@ -142,7 +142,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	if !ok || openId == "" {
 		// 代表没用户信息
 		common.Logger.Debugln("远程服务器没有返回用户信息")
-		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
+		result := &enity.Result{"01120105", err, auth_msg["01120105"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -151,7 +151,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	extraJson,err := json.Marshal(extra)
 	if err != nil {
 		common.Logger.Debugln("extra to json err------------------------>",err)
-		result := &enity.Result{"01120105", struct {}{}, auth_msg["01120105"]}
+		result := &enity.Result{"01120105", err, auth_msg["01120105"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -171,7 +171,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	err = userService.UpdateWechatInfo(user)
 	if err != nil {
 		common.Logger.Debugln("更新用户账号信息出错")
-		result := &enity.Result{"01120106", struct {}{}, auth_msg["01120106"]}
+		result := &enity.Result{"01120106", err, auth_msg["01120106"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -180,7 +180,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	ok,err = userCashAccountService.UpdateByUserId(userCashAccount)
 	if err != nil && !ok {
 		common.Logger.Debugln("更新用户账号信息出错,err--->",err)
-		result := &enity.Result{"01120106", struct {}{}, auth_msg["01120106"]}
+		result := &enity.Result{"01120106", err, auth_msg["01120106"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -197,7 +197,6 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	}, Msg:auth_msg["01120100"]}
 	ctx.JSON(iris.StatusOK, result)
 	return
-
 }
 
 func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
@@ -205,30 +204,26 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 	key := ctx.Param("key")
 	prefix := viper.GetString("auth.prefix")
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	redisKey := common.Redis.Get(prefix+"key:"+strconv.Itoa(signinUserId)+":")
+	userId,err := common.Redis.Get(prefix+"key:user:"+key+":").Int64()
 	userExtra := common.Redis.Get(prefix+"user:"+key+":")
 	common.Logger.Debugln("userInfo-------------val",userExtra.Val())
-	if redisKey.Err() != nil && userExtra.Err() != nil {
-		common.Logger.Debugln("key已过期")
-		result := &enity.Result{"01120201", struct {}{}, auth_msg["01120201"]}
+	if userExtra.Err() != nil {
+		result := &enity.Result{"01120205", userExtra.Err(), auth_msg["01120205"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
 	common.Logger.Debugln("key------------------->",key)
-	common.Logger.Debugln("redisKey------------------->",redisKey.String())
-	if key != redisKey.Val(){
-		common.Logger.Debugln("非法key")
-		result := &enity.Result{"01120202", struct {}{}, auth_msg["01120202"]}
+	if int(userId) != signinUserId{
+		result := &enity.Result{"01120202", nil, auth_msg["01120202"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
 	userMap := make(map[string]interface{})
-	err := json.Unmarshal([]byte(userExtra.Val()),&userMap)
+	err = json.Unmarshal([]byte(userExtra.Val()),&userMap)
 	if err != nil {
-		common.Logger.Debugln("redis中userinfo转json失败",err)
-		result := &enity.Result{"01120205", struct {}{}, auth_msg["01120205"]}
+		result := &enity.Result{"01120205", err, auth_msg["01120205"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -236,29 +231,25 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 	common.Logger.Debugln("userMap------------->",userMap)
 	userCashAccount,err := userCashAccountService.BasicByUserId(signinUserId)
 	if err != nil {
-		common.Logger.Debugln("获取用户信息有误,err------------>",err)
-		result := &enity.Result{"01120204", struct {}{}, auth_msg["01120204"]}
+		result := &enity.Result{"01120204", err, auth_msg["01120204"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
-
 	// redis的openId和用户的账号不相等,证明还没
-	if userCashAccount.Account != userMap["openId"].(string) {
-		common.Logger.Debugln("未关联用户信息")
-		result := &enity.Result{"01120205", struct {}{}, auth_msg["01120205"]}
+	if userCashAccount.Account != userMap["openid"].(string) {
+		result := &enity.Result{"01120205", userMap, auth_msg["01120205"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
 
-	common.Logger.Debugln("绑定用户信息成功")
 	result := &enity.Result{Status:"01120200", Data:map[string]interface{}{
 		"id":userCashAccount.Id,
 		"name":userCashAccount.RealName,
 		"wechat":map[string]interface{}{
 			"name":userMap["nickname"],
-			"avatorUrl":userMap["headImgUrl"],
+			"avatorUrl":userMap["headimgurl"],
 		},
 	}, Msg:auth_msg["01120200"]}
 	ctx.JSON(iris.StatusOK, result)
