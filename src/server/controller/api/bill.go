@@ -93,10 +93,14 @@ func (self *BillController) List(ctx *iris.Context) {
 	status,_ := ctx.URLParamInt("status")
 	createdAt := ctx.URLParam("createdAt")
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	if status < 0 {
+		// 默认展示status为1的账单,不然会展示全部
+		status = 1
+	}
 	total,err := billService.Total(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.Total error---------",err)
-		result := &enity.Result{"01100101",nil,bill_msg["01100101"]}
+		result := &enity.Result{"01100101",err,bill_msg["01100101"]}
 		ctx.JSON(iris.StatusOK,result)
 		common.Log(ctx,result)
 		return
@@ -107,10 +111,11 @@ func (self *BillController) List(ctx *iris.Context) {
 	if perPage == -1 {
 		perPage = 10
 	}
+
 	list, err := billService.List(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)
-		result := &enity.Result{"01100101",nil,bill_msg["01100101"]}
+		result := &enity.Result{"01100101",err,bill_msg["01100101"]}
 		common.Log(ctx,result)
 		ctx.JSON(iris.StatusOK,result)
 		return

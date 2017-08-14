@@ -28,13 +28,13 @@ func (self *SettleController) SettlementDetails(ctx *iris.Context){
 	amount,count,err := dailyBillService.CountAllocatableMoneyByUserId(userId)
 	if err != nil  {
 		common.Logger.Debugln("CountAllocatableMoney CountAllocatableMoneyByUserId error",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01110001", nil, daily_bill_msg["01110001"]})
+		ctx.JSON(iris.StatusOK,&enity.Result{"01110001", err, daily_bill_msg["01110001"]})
 		return
 	}
 	accountMap,err := userCashAccountService.BasicMapByUserId(userId)
 	if err != nil {
 		common.Logger.Debugln("CountAllocatableMoney BasicMapByUserId error",err)
-		ctx.JSON(iris.StatusOK,&enity.Result{"01110001", nil, daily_bill_msg["01110001"]})
+		ctx.JSON(iris.StatusOK,&enity.Result{"01110001", err, daily_bill_msg["01110001"]})
 		return
 	}
 	cast := viper.GetInt("bill.cast")

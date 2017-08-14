@@ -64,7 +64,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	err := ctx.ReadJSON(&params)
 	if err != nil {
 		common.Logger.Debugln("解析json出错,err--->",err)
-		result := &enity.Result{"01120101", struct {}{}, auth_msg["01120101"]}
+		result := &enity.Result{"01120101", err, auth_msg["01120101"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -73,7 +73,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	isExist := common.Redis.Exists(prefix+"key:user:"+key+":").Val()
 	if !isExist{
 		common.Logger.Debugln("key校验不通过")
-		result := &enity.Result{"01120103", struct {}{}, auth_msg["01120103"]}
+		result := &enity.Result{"01120103", nil, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -81,7 +81,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	userId,err := common.Redis.Get(prefix+"key:user:"+key+":").Int64()
 	if err != nil {
 		common.Logger.Debugln("key校验不通过,err--->",err)
-		result := &enity.Result{"01120103", struct {}{}, auth_msg["01120103"]}
+		result := &enity.Result{"01120103", err, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -99,7 +99,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	common.Logger.Debugln(resp.StatusCode)
 	if err != nil || resp.StatusCode != 200 {
 		common.Logger.Debugln("请求远程服务器出错,err--->",err)
-		result := &enity.Result{"01120104", struct {}{}, auth_msg["01120104"]}
+		result := &enity.Result{"01120104", err, auth_msg["01120104"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
