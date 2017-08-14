@@ -3,11 +3,11 @@ import Promise from 'bluebird'
 import _ from 'underscore';
 import moment from 'moment';
 
-import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form } from 'antd';
+import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form, Spin } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-import QRCode from '../../../library/qrcode'
+import QRCode from 'qrcode'
 import UserService from '../../../service/user';
 import WechatService from '../../../service/wechat';
 
@@ -80,42 +80,48 @@ class Wechat extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      showIdentification: false
+      showIdentification: false,
+      qrCodeUrl: ''
     }
   }
   initQRCode() {
     const self = this;
     const key = self.props.wechat.key || '';
-    const url = `http://m.sodalife.xyz/act/#/relate-wechat?key=${key}`;
-    setTimeout(()=> {
-      new QRCode(self.refs.qrcode, {
-        text: url,
-        width: 120,
-        height: 120,
-        colorDark : '#fff',
-        colorLight : '#000',
-        correctLevel : QRCode.CorrectLevel.H
-      });
-    }, 0)
+    const url = `http://m.sodalife.xyz/act/relate-wechat?key=${key}`;
+    QRCode.toDataURL(url, function (err, url) {
+      self.setState({qrCodeUrl: url})
+    })
   }
   identification() {
     this.setState({ showIdentification: true })
+  }
+  componentUpdate(nextProps, nextState) {
+    const self = this;
+    if (nextProps.key !== this.props.key) {
+      self.initQRCode()
+    }
+  }
+  componentDidMount() {
+    this.initQRCode()
   }
   render() {
     const wechat = this.props.wechat;
     const cashAccount = this.props.cashAccount;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = this.props.formItemLayout;
-    this.initQRCode()
+    
     return <div>
       <div className="form-wrapper">
         <FormItem {...formItemLayout} label="扫码验证身份" >
-          <div ref="qrcode" className="code"></div> 
+          <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
+            <img src={this.state.qrCodeUrl} />
+            { this.props.keyLoading ? <Spin className='key-loading' /> : null }
+          </div> 
         </FormItem>
         { 
           !!wechat.name ? <div className="code-tip">
-            <Icon type='heck-circle' className='icon success' />
-            <span>{'关联成功（你将使用昵称为' + wechat.name + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatAccount}>刷新</i>二维码，用新微信号扫描）}</span>
+            <Icon type='check-circle' className='icon success' /> 
+            <span>{'关联成功（你将使用昵称为' + wechat.name + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
           </div> :
           <div className="code-tip">
             <Icon type='exclamation-circle' className='icon info' />
@@ -151,22 +157,22 @@ class Wechat extends React.Component {
 }
 
 class AmountForm extends React.Component {
-	constructor(props, context) {
+  constructor(props, context) {
     super(props, context);
-		this.state = {
+    this.state = {
       keyLoading: false,
       wechat: {
         name: '',
         key: '',
       },
-			type: ''
-		}
+      type: ''
+    }
     this.handleSubmit = this.handleSubmit.bind(this);
 
-	}
-	handleSubmit() {
-		const self = this;
-		this.props.form.validateFields((errors, values) => {
+  }
+  handleSubmit() {
+    const self = this;
+    this.props.form.validateFields((errors, values) => {
       if (errors) {
         return;
       }
@@ -183,12 +189,12 @@ class AmountForm extends React.Component {
           "type": type
         }
       }
-	    UserService.edit(window.USER.id, {cashAccount: cashAccount}).then((data) => {
-	    	console.log(data)
-	    	self.props.handleCashModal(data);
-			})
+      UserService.edit(window.USER.id, {cashAccount: cashAccount}).then((data) => {
+        console.log(data)
+        self.props.handleCashModal(data);
+      })
     });
-	}
+  }
   changePayTye(type) {
     const self = this;
     type = type;
@@ -205,28 +211,11 @@ class AmountForm extends React.Component {
     //   // self.initQRCode()
     // }
   }
-  initQRCode(key) {
-    const self = this;
-    key = key || '';
-    const url = `http://m.sodalife.xyz/act/relate-wechat?key=${key}`;
-    console.log(self.refs.qrcode)
-    console.log(self.refs)
-    self.refs.qrcode.innerText = ''
-    setTimeout(()=> {
-      new QRCode(self.refs.qrcode, {
-        text: url,
-        width: 120,
-        height: 120,
-        colorDark : '#fff',
-        colorLight : '#000',
-        correctLevel : QRCode.CorrectLevel.H
-      });
-    }, 0)
-  }
   resetWechatKey() {
     const self = this;
     self.setState({keyLoading: true})
     WechatService.create().then((res) => {
+      console.log(res)
       if (res.status !== 0) {
         return new Promise.reject()
       }
@@ -236,7 +225,7 @@ class AmountForm extends React.Component {
       self.setState({wechat: {name: '', key: key || ''}, keyLoading: false})
       self.checkWechatKey()
     }).catch(() => {
-      self.setState({keyLoading: true})
+      self.setState({keyLoading: false})
     })
   }
   checkWechatKey() {
@@ -245,8 +234,12 @@ class AmountForm extends React.Component {
     self.timer = null;
     self.timer = setInterval(() => {
       WechatService.getKeyDetail(key).then((res) => {
+        console.log(res)
         const status = res.status;
-        if (status !== 0) {
+        if (status === 1) {
+          console.log(1111)
+          clearInterval(self.timer);
+          self.timer = null;
           return new Promise.reject()
         }
         if (status === 0) {
@@ -254,27 +247,24 @@ class AmountForm extends React.Component {
           self.timer = null;
           self.setState({wechat: {...self.state.wechat, name: res.data.nickName}})
         }
-      }).catch(() => {
+      }).catch((error) => {
+        clearInterval(self.timer);
+        self.timer = null;
+        console.log(error)
       })
-    }, 1000)
+    }, 3000)
   }
   updateUserAccount({ ...options }) {
     const cashAccount = _.extend(this.props.cashAccount, {realName: options.realName, account: options.account || '', nickName: options.nickName || ''})
     let user = _.extend(this.props.user, {key: this.state.key})
     user.cashAccount = cashAccount
   }
-  componentDidUpdate(nextProps, nextState) {
-    const self = this;
-    if (nextState.wechat.key !== this.state.wechat.key) {
-      self.initQRCode(nextState.wechat.key)
-    }
-  }
-	render() {
-		const { getFieldDecorator } = this.props.form;
+  render() {
+    const { getFieldDecorator } = this.props.form;
     const cashAccount = this.props.cashAccount
     const type = this.state.type || cashAccount.type  
 
-		const formItemLayout = {
+    const formItemLayout = {
       labelCol: {
         span: 5
       },
@@ -282,8 +272,8 @@ class AmountForm extends React.Component {
         span: 8
       },
     };
-		return (<Form onSubmit={this.handleSubmit}>
-    	<FormItem {...formItemLayout} label="收款方式">
+    return (<Form onSubmit={this.handleSubmit}>
+      <FormItem {...formItemLayout} label="收款方式">
         {getFieldDecorator('type', {
           rules: [
             {  message: '请选择收款方式' },
@@ -303,15 +293,15 @@ class AmountForm extends React.Component {
       </FormItem>
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> :
        <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading}
-       form={this.props.form} resetWechatKey={this.resetWechatKey} wechat={this.state.wechat} />}
+       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />}
       <div className="footer-btn">
-	      <FormItem>
-	        <Button type="ghost" onClick={() => { this.props.handleCashModal}}>取消</Button>
-	        <Button type="primary" htmlType="submit">保存</Button>
-	      </FormItem>
-	     </div>
+        <FormItem>
+          <Button type="ghost" onClick={() => { this.props.handleCashModal}}>取消</Button>
+          <Button type="primary" htmlType="submit">保存</Button>
+        </FormItem>
+       </div>
     </Form>);
-	}
+  }
 };
 
 AmountForm = createForm()(AmountForm);
