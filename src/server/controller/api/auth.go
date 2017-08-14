@@ -87,16 +87,18 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		return
 	}
 	token := params.Get("token").MustString()
+	headers := map[string]string{
+		"Origin":viper.GetString("auth.origin"),
+		"Authorization":"Bearer "+token,
+	}
+	common.Logger.Debugln("gRequests headers --------------->",headers)
 	resp,err := grequests.Get(viper.GetString("auth.requestUrl"),
 		&grequests.RequestOptions{
-			Headers:map[string]string{
-				"Origin":viper.GetString("auth.origin"),
-				"Authorization":"Bearer "+token,
-			},
+			Headers:headers,
 		},
 	)
-	common.Logger.Debugln(resp.String())
-	common.Logger.Debugln(resp.StatusCode)
+	common.Logger.Debugln("resp.String() ---------------->",resp.String())
+	common.Logger.Debugln("resp.StatusCode() ---------------->",resp.StatusCode)
 	if err != nil || resp.StatusCode != 200 {
 		common.Logger.Debugln("请求远程服务器出错,err--->",err)
 		result := &enity.Result{"01120104", err, auth_msg["01120104"]}
