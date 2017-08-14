@@ -42,7 +42,8 @@
     "port": 8080,
     "cors": {
       "allowedOrigins": [
-        "*"
+        "https://m.sodalife.xyz",
+        "http://m.sodalife.xyz"
       ],
       "allowedHeaders": [
         "Authorization",

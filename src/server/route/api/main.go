@@ -29,8 +29,9 @@ func Api() {
 	})
 
 	//api.Use(common.CORS)
-	api.UseFunc(common.CORS.Serve)
-	api.Options("/*anything", common.CORS.Serve)
+	//api.UseFunc(common.CORS.Serve)
+	api.Options("/wechat/key/:key", common.CORS.Serve)
+
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
 	api.Post("/user/reset", user.ForgetPassword)
