@@ -31,7 +31,7 @@ import {
 import {
   bindActionCreators
 } from 'redux';
-import QRCode from '../../../library/qrcode'
+// import QRCode from '../../../library/qrcode'
 import * as UserActions from '../../../actions/user';
 import * as regionActions from '../../../actions/region';
 import UserService from '../../../service/user';
