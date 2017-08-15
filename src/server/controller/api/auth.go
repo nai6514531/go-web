@@ -180,7 +180,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 }
 
 func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
-	userCashAccountService := &service.UserCashAccountService{}
+	userService := &service.UserService{}
 	key := ctx.Param("key")
 	prefix := viper.GetString("auth.prefix")
 	signinUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
@@ -207,24 +207,17 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	userCashAccount,err := userCashAccountService.BasicByUserId(signinUserId)
+	user,err := userService.Basic(signinUserId)
 	if err != nil {
 		result := &enity.Result{"01120204", err, auth_msg["01120204"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
-	// redis的openId和用户的账号不相等,证明还没绑定成功
-	if userCashAccount.Account != userMap["openid"].(string) {
-		result := &enity.Result{"01120205", userMap, auth_msg["01120205"]}
-		ctx.JSON(iris.StatusOK, result)
-		common.Log(ctx,result)
-		return
-	}
 
 	result := &enity.Result{Status:"01120200", Data:map[string]interface{}{
-		"id":userCashAccount.Id,
-		"name":userCashAccount.RealName,
+		"id":user.Id,
+		"name":user.Name,
 		"wechat":map[string]interface{}{
 			"name":userMap["nickname"],
 			"avatorUrl":userMap["headimgurl"],
