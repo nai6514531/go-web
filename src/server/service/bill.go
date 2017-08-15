@@ -69,9 +69,9 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		cast = totalAmount * rate / 100
 	}
 	amount := totalAmount - cast
-	if amount <100 {
+	if amount < 200 {
 		tx.Rollback()
-		return "",errors.New("提现金额不可少于1元")
+		return "",errors.New("提现金额不可少于2元")
 	}
 	accountName := ""
 	if userCashAccount.Type == 1 {
