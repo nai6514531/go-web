@@ -715,21 +715,23 @@ func (self *UserController) Update(ctx *iris.Context) {
 	if cashAccount.Type == 2 {
 		// 微信支付,从redis取信息
 		key := user.Key
-		prefix := viper.GetString("auth.prefix")
-		// json字符串,将json转成map
-		userExtra := common.Redis.Get(prefix+"user:"+key+":")
-		userExtraMap := make(map[string]interface{})
-		err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
-		// 将微信获取到的信息存到user中
-		user.Extra = userExtra.Val()
-		err := userService.UpdateWechatInfo(&user)
-		if err != nil {
-			result = &enity.Result{"01010525", err.Error(), user_msg["01010525"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, result)
-			return
+		if key != "" {
+			prefix := viper.GetString("auth.prefix")
+			// json字符串,将json转成map
+			userExtra := common.Redis.Get(prefix+"user:"+key+":")
+			userExtraMap := make(map[string]interface{})
+			err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
+			// 将微信获取到的信息存到user中
+			user.Extra = userExtra.Val()
+			err := userService.UpdateWechatInfo(&user)
+			if err != nil {
+				result = &enity.Result{"01010525", err.Error(), user_msg["01010525"]}
+				common.Log(ctx, result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+			cashAccount.Account = userExtraMap["openid"].(string)
 		}
-		cashAccount.Account = userExtraMap["openid"].(string)
 	}
 	//修改直接前端传什么type就保存什么
 	_, err = userCashAccountService.UpdateByUserId(cashAccount)

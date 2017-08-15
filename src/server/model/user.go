@@ -25,7 +25,7 @@ type User struct {
 	CashAccount interface{} `json:"cashAccount,omitempty" gorm:"-"`
 	Key         string      `json:"key,omitempty" gorm:"-"`
 	Extra       string      `json:"extra,omitempty"`
-	Nickname    string 	`json:"nickname" gorm:"-"`
+	Nickname    string 	`json:"nickName" gorm:"-"`
 	HeadImgUrl  string 	`json:"headImgUrl" gorm:"-"`
 }
 
@@ -38,7 +38,7 @@ func (user *User) Mapping() *User{
 		return user
 	}else{
 		extra,_ := simplejson.NewJson([]byte(user.Extra))
-		user.Nickname = extra.Get("nickName").MustString()
+		user.Nickname = extra.Get("nickname").MustString()
 		user.HeadImgUrl = extra.Get("headimgurl").MustString()
 		user.Extra = ""
 		return user
