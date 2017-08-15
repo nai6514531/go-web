@@ -93,10 +93,6 @@ func (self *BillController) List(ctx *iris.Context) {
 	status,_ := ctx.URLParamInt("status")
 	createdAt := ctx.URLParam("createdAt")
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	if status < 0 {
-		// 默认展示status为1的账单,不然会展示全部
-		status = 1
-	}
 	total,err := billService.Total(page,perPage,status,createdAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.Total error---------",err)
