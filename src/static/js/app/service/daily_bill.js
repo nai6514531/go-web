@@ -12,7 +12,7 @@ const Service = {
         searchStr: data.userOrBank,
         page: data.page || 1,
         perPage: data.perPage || 10,
-        id: data.id || ''
+        billId: data.billId || ''
       }
     })
   },

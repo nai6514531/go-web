@@ -35,24 +35,56 @@
     line-height: 22px;
   }
 }
-.code-tip {
-  p {
-    line-height: 1.8;
-  }
+.view-user-list {
   .code {
-    float: left;
-    margin-right: 20px;
-    margin-bottom: 20px;
+    position: relative;
+    width: 180px;
+    &.loading {
+      img {
+        opacity: 0.3
+      }
+    }
+    .key-loading {
+      position: absolute;
+      top: 35%;
+      left: 35%;
+      font-size: 28px;
+      zoom: 1.5;
+    }
   }
-  .qrcode-tip {
+  .code-tip {
     border: 1px solid #ccc;
-    padding: 5px;
+    padding: 10px;
     float: left;
-    width: 350px;
+    width: 280px;
+    position: absolute;
+    top: 20px;
+    left: 180px;
+    p {
+      line-height: 1.8;
+    }
+    .icon {
+      font-size: 18px;
+      margin-right: 10px;
+      &.info {
+        color: #108ee9;
+      }
+      &.success {
+        color: #24ad87;
+      }
+      
+    }
+    .reset-wechat {
+      color: #108ee9;
+      text-decoration: underline;
+      font-style: normal;
+      cursor: pointer;
+    }
     .check-wechat {
       margin-left: 10px;
       color: #108ee9;
     }
   }
 }
+
 

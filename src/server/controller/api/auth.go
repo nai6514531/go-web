@@ -90,6 +90,9 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		"Authorization":"Bearer "+token,
 	}
 	common.Logger.Debugln("gRequests headers --------------->",headers)
+	common.Logger.Debugln("origin----",viper.GetString("auth.origin"))
+	common.Logger.Debugln("origin----",token)
+	common.Logger.Debugln("url-------", viper.GetString("auth.requestUrl"))
 	resp,err := grequests.Get(viper.GetString("auth.requestUrl"),
 		&grequests.RequestOptions{
 			Headers:headers,

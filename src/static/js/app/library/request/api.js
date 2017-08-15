@@ -8,6 +8,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
   },
+  withCredentials: true,
   timeout: 1000 * 60 * 5,
   transformRequest: [(data) => {
     NProgress.start();

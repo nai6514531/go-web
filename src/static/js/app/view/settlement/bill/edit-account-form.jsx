@@ -2,6 +2,7 @@ import React from 'react';
 import Promise from 'bluebird'
 import _ from 'underscore';
 import moment from 'moment';
+import op from 'object-path';
 
 import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form, Spin } from 'antd';
 const createForm = Form.create;
@@ -10,6 +11,9 @@ const RadioGroup = Radio.Group;
 import QRCode from 'qrcode'
 import UserService from '../../../service/user';
 import WechatService from '../../../service/wechat';
+
+import { isProduction } from '../../../library/debug'
+const defaultUrl = isProduction ? 'http://m.sodalife.xyz/act/relate-wechat' : 'http://m.sodalife.club/act/relate-wechat';
 
 class Alipay extends React.Component {
   constructor(props, context) {
@@ -33,7 +37,7 @@ class Alipay extends React.Component {
               {required: true,  message: '必填'},
               { max:30, message: '不超过三十个字'},
             ],
-            initialValue: cashAccount.account,
+            initialValue: cashAccount.type === 1 ? cashAccount.account : '',
 
           })(
           <Input placeholder="需要确认是邮箱还是手机号"/>
@@ -84,10 +88,10 @@ class Wechat extends React.Component {
       qrCodeUrl: ''
     }
   }
-  initQRCode() {
+  initQRCode(key) {
     const self = this;
-    const key = self.props.wechat.key || '';
-    const url = `http://m.sodalife.xyz/act/relate-wechat?key=${key}`;
+    key = key || '';
+    const url = defaultUrl + `?key=${key}`;
     QRCode.toDataURL(url, function (err, url) {
       self.setState({qrCodeUrl: url})
     })
@@ -95,33 +99,34 @@ class Wechat extends React.Component {
   identification() {
     this.setState({ showIdentification: true })
   }
-  componentUpdate(nextProps, nextState) {
+  componentWillUpdate(nextProps, nextState) {
     const self = this;
-    if (nextProps.key !== this.props.key) {
-      self.initQRCode()
+    if (nextProps.wechat.key !== this.props.wechat.key) {
+      self.initQRCode(nextProps.wechat.key)
     }
   }
   componentDidMount() {
     this.initQRCode()
   }
   render() {
-    const wechat = this.props.wechat;
+    const { wechat, user } = this.props;
     const cashAccount = this.props.cashAccount;
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = this.props.formItemLayout;
-    
+    const nickName = wechat.name || user.nickName;
+
     return <div>
       <div className="form-wrapper">
         <FormItem {...formItemLayout} label="扫码验证身份" >
           <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
-            <img src={this.state.qrCodeUrl} />
+            <img src={this.state.qrCodeUrl} width='160' />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
           </div> 
         </FormItem>
         { 
-          !!wechat.name ? <div className="code-tip">
+          !!wechat.name || (!wechat.key && cashAccount.type === 2) ? <div className="code-tip">
             <Icon type='check-circle' className='icon success' /> 
-            <span>{'关联成功（你将使用昵称为' + wechat.name + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
+            <span>{'关联成功（你将使用昵称为' + nickName || ' ' + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
           </div> :
           <div className="code-tip">
             <Icon type='exclamation-circle' className='icon info' />
@@ -165,14 +170,14 @@ class AmountForm extends React.Component {
         name: '',
         key: '',
       },
-      type: ''
+      type: '',
     }
     this.handleSubmit = this.handleSubmit.bind(this);
-
   }
-  handleSubmit() {
+  handleSubmit(e) {
+    e.preventDefault()
     const self = this;
-    this.props.form.validateFields((errors, values) => {
+    self.props.form.validateFields((errors, values) => {
       if (errors) {
         return;
       }
@@ -184,32 +189,31 @@ class AmountForm extends React.Component {
           "realName": values.alipayName,
           "account": values.alipayAccount
         }
-      } else {
+      } 
+       // 当前为修改微信账号状态，且未关联微信
+      if (!this.state.wechat.name && !!this.state.wechat.key) {
+        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
+      }
+      if (type === 2) {
         cashAccount = {
-          "type": type
+          "type": type,
+          "realName": values.wechatName
         }
       }
-      UserService.edit(window.USER.id, {cashAccount: cashAccount}).then((data) => {
-        console.log(data)
-        self.props.handleCashModal(data);
-      })
+      self.updateUserAccount(cashAccount)  
     });
   }
   changePayTye(type) {
     const self = this;
-    type = type;
     const wechat = this.state.wechat;
-    this.setState({type: type});
-
+    clearInterval(self.timer);
+    self.timer = null;
+    this.setState({type: type, wechat: {name: '', key: ''}});
     // 选择微信支付账户 且用户默认不是微信支付
     if (type === 2 && this.props.cashAccount.type !== 2) {
       // 获取随机key
       return self.resetWechatKey()
     }
-    // 默认微信支付账户，渲染二维码
-    // if (type === 2 && this.props.cashAccount.type) {
-    //   // self.initQRCode()
-    // }
   }
   resetWechatKey() {
     const self = this;
@@ -231,13 +235,13 @@ class AmountForm extends React.Component {
   checkWechatKey() {
     const self = this;
     const key = self.state.wechat.key;
+    clearInterval(self.timer);
     self.timer = null;
     self.timer = setInterval(() => {
       WechatService.getKeyDetail(key).then((res) => {
         console.log(res)
         const status = res.status;
         if (status === 1) {
-          console.log(1111)
           clearInterval(self.timer);
           self.timer = null;
           return new Promise.reject()
@@ -245,7 +249,7 @@ class AmountForm extends React.Component {
         if (status === 0) {
           clearInterval(self.timer);
           self.timer = null;
-          self.setState({wechat: {...self.state.wechat, name: res.data.nickName}})
+          self.setState({wechat: {...self.state.wechat, name: res.data.wechat.name}})
         }
       }).catch((error) => {
         clearInterval(self.timer);
@@ -255,15 +259,39 @@ class AmountForm extends React.Component {
     }, 3000)
   }
   updateUserAccount({ ...options }) {
-    const cashAccount = _.extend(this.props.cashAccount, {realName: options.realName, account: options.account || '', nickName: options.nickName || ''})
-    let user = _.extend(this.props.user, {key: this.state.key})
+    const self = this
+    let cashAccount = _.chain(this.props.cashAccount).clone().extendOwn({realName: options.realName, account: options.account, type: options.type}).value()
+    cashAccount = _.pick(cashAccount, 'type', 'realName', 'account')
+    // 微信用户 补充key nickName 
+    let user = options.type === 2 ? _.chain(this.props.user).clone().extendOwn({key: this.state.wechat.key, nickName: this.state.wechat.name}).value() : this.props.user
+    user = _.pick(user, 'name', 'contact', 'mobile', 'telephone', 'address', 'email', 'key')
     user.cashAccount = cashAccount
+    UserService.edit(window.USER.id, user).then((res) => {
+      console.log(res)
+      if (res.status !== 0) {
+        return new Promise.reject(new Error(res.msg))
+      }
+      self.props.handleCashModal();
+    }, (res) => {
+      return new Promise.reject(new Error(res.msg))
+    }).catch((err) => {
+      message.error(err.message || '更新失败，请重试~')
+    })
+  }
+  handleCashModal() {
+    clearInterval(this.timer);
+    this.timer = null;
+    this.props.handleCashModal()
+  }
+  componentWillUnmount () {
+    clearInterval(this.timer)
+    this.timer = null
   }
   render() {
     const { getFieldDecorator } = this.props.form;
     const cashAccount = this.props.cashAccount
+    const user = this.props.user
     const type = this.state.type || cashAccount.type  
-
     const formItemLayout = {
       labelCol: {
         span: 5
@@ -272,6 +300,7 @@ class AmountForm extends React.Component {
         span: 8
       },
     };
+
     return (<Form onSubmit={this.handleSubmit}>
       <FormItem {...formItemLayout} label="收款方式">
         {getFieldDecorator('type', {
@@ -291,12 +320,12 @@ class AmountForm extends React.Component {
           </RadioGroup>
         )}
       </FormItem>
-      { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> :
-       <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading}
-       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />}
+      { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> : type === 2 ?
+       <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={user}
+       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} /> : null} 
       <div className="footer-btn">
         <FormItem>
-          <Button type="ghost" onClick={() => { this.props.handleCashModal}}>取消</Button>
+          <Button type="ghost" onClick={this.handleCashModal.bind(this)}>取消</Button>
           <Button type="primary" htmlType="submit">保存</Button>
         </FormItem>
        </div>
