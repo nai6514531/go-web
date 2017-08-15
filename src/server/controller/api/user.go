@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"encoding/json"
 )
 
 /**
@@ -155,6 +156,7 @@ var (
 		"01010522": "省份不能为空",
 		"01010523": "城市不能为空",
 		"01010524": "开户总行不能为空",
+		"01010525": "绑定用户信息出错",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -571,7 +573,6 @@ func (self *UserController) Create(ctx *iris.Context) {
 	}
 */
 func (self *UserController) Update(ctx *iris.Context) {
-	/*获取请求参数*/
 	var user model.User
 	userId, _ := ctx.ParamInt("id")
 	//parentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
@@ -711,7 +712,25 @@ func (self *UserController) Update(ctx *iris.Context) {
 			return
 		}
 	}
-
+	if cashAccount.Type == 2 {
+		// 微信支付,从redis取信息
+		key := user.Key
+		prefix := viper.GetString("auth.prefix")
+		// json字符串,将json转成map
+		userExtra := common.Redis.Get(prefix+"user:"+key+":")
+		userExtraMap := make(map[string]interface{})
+		err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
+		// 将微信获取到的信息存到user中
+		user.Extra = userExtra.Val()
+		err := userService.UpdateWechatInfo(&user)
+		if err != nil {
+			result = &enity.Result{"01010525", err.Error(), user_msg["01010525"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		cashAccount.Account = userExtraMap["openid"].(string)
+	}
 	//修改直接前端传什么type就保存什么
 	_, err = userCashAccountService.UpdateByUserId(cashAccount)
 	if err != nil {
@@ -725,6 +744,106 @@ func (self *UserController) Update(ctx *iris.Context) {
 	ctx.JSON(iris.StatusOK, &result)
 	common.Log(ctx, nil)
 }
+
+/*换成simplejson的实现方法*/
+/*func (self *UserController) Update(ctx *iris.Context) {
+	userId, _ := ctx.ParamInt("id")
+	userService := &service.UserService{}
+	userCashAccountService := &service.UserCashAccountService{}
+	result := &enity.Result{}
+	userMap := simplejson.New()
+	ctx.ReadJSON(&userMap)
+
+	//user信息校验
+	//判断登录名是否已经存在,不能对account进行更新
+	if userMap.Get("account").MustString() != "" {
+		//如果有登录账号传入
+		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//判断手机号码是否已经存在
+	//if user.Mobile != "" {
+	if userMap.Get("mobile").MustString() != "" {
+		//判断手机号是否为11位
+		if len(userMap.Get("mobile").MustString()) != 11 {
+			result = &enity.Result{"01010513", nil, user_msg["01010513"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+	}
+
+	var user model.User
+	user.Id = userId
+	user.Name = userMap.Get("name").MustString()
+	user.Contact = userMap.Get("contact").MustString()
+	user.Mobile = userMap.Get("mobile").MustString()
+	user.Telephone = userMap.Get("telephone").MustString()
+	user.Address = userMap.Get("address").MustString()
+	user.Email = userMap.Get("email").MustString()
+	//更新到user表
+	_, err := userService.Update(&user)
+	if err != nil {
+		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	//cashAccount
+	cashAccountMap := userMap.Get("cashAccount").MustMap()
+	common.Logger.Debugln(cashAccountMap)
+	//校验cashAccount
+	cashAccount := &model.UserCashAccount{}
+	if cashAccountMap["type"].(int) == 1 {
+
+		if cashAccount.Account == "" {
+			result = &enity.Result{"01010517", nil, user_msg["01010517"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		if cashAccount.RealName == "" {
+			result = &enity.Result{"01010518", nil, user_msg["01010518"]}
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		cashAccount.Account = cashAccountMap["account"].(string)
+	}
+	if cashAccountMap["type"].(int) == 2 {
+		// 微信支付,从redis取信息
+		key := userMap.Get("key").MustString()
+		prefix := viper.GetString("auth.prefix")
+		// json字符串,将json转成map
+		userExtra := common.Redis.Get(prefix+"user:"+key+":")
+		userExtraMap := make(map[string]interface{})
+		err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
+		// 将微信获取到的信息存到user中
+		user.Extra = userExtra.Val()
+		err := userService.UpdateWechatInfo(&user)
+		if err != nil {
+			result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
+		cashAccount.Account = userExtraMap["openid"].(string)
+	}
+	cashAccount.RealName = cashAccountMap["realName"].(string)
+	cashAccount.UserId = userId
+	cashAccount.Type = cashAccountMap["type"].(int)
+	//修改直接前端传什么type就保存什么
+	_, err = userCashAccountService.UpdateByUserId(cashAccount)
+	if err != nil {
+		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+
+	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
+	ctx.JSON(iris.StatusOK, &result)
+	common.Log(ctx, nil)
+}*/
 
 /**
 	@api {get} /api/user/:id 用户详情
@@ -797,7 +916,7 @@ func (self *UserController) Basic(ctx *iris.Context) {
 		return
 	}
 	user.DeviceTotal = deviceTotal
-	result = &enity.Result{"01010600", user, user_msg["01010600"]}
+	result = &enity.Result{"01010600", user.Mapping(), user_msg["01010600"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx, nil)
 }
