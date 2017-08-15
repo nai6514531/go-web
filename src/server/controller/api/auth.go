@@ -12,7 +12,6 @@ import (
 	"github.com/bitly/go-simplejson"
 	"github.com/levigross/grequests"
 	"maizuo.com/soda-manager/src/server/service"
-	"maizuo.com/soda-manager/src/server/model"
 	"encoding/json"
 )
 
@@ -50,14 +49,13 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 	md5Ctx.Write([]byte(strconv.Itoa(signinUserId)+time.Now().Format("060102150405")))
 	key := hex.EncodeToString(md5Ctx.Sum(nil))
 	// 将key和用户id绑定
-	common.Redis.Set(prefix+"key:user:"+key+":", signinUserId, time.Duration(5*time.Minute))
+	common.Redis.Set(prefix+"key:user:"+key+":", signinUserId, time.Duration(10*time.Minute))
 	result := &enity.Result{"01120000", map[string]string{"key": key}, auth_msg["01120000"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx,result)
 }
 
 func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
-	userCashAccountService := &service.UserCashAccountService{}
 	userService := &service.UserService{}
 	key := ctx.Param("key")
 	params := simplejson.New()
@@ -99,7 +97,8 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	)
 	common.Logger.Debugln("resp.String() ---------------->",resp.String())
 	common.Logger.Debugln("resp.StatusCode() ---------------->",resp.StatusCode)
-	if err != nil || resp.StatusCode != 200 {
+
+	if err != nil {
 		common.Logger.Debugln("请求远程服务器出错,err--->",err)
 		result := &enity.Result{"01120104", err, auth_msg["01120104"]}
 		ctx.JSON(iris.StatusOK, result)
@@ -107,7 +106,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		return
 	}
 
-	userJson,err := simplejson.NewJson(resp.Bytes())
+	respMap,err := simplejson.NewJson(resp.Bytes())
 	if err != nil {
 		common.Logger.Debugln("解析远程服务器数据出错,err--->",err)
 		result := &enity.Result{"01120105", err, auth_msg["01120105"]}
@@ -115,10 +114,17 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-
-	// 将用户信息更新到数据库中
-	data,err := userJson.Get("data").Array()
-
+	// 将请求到的错误信息原样返回
+	if respMap.Get("status").MustString() != "OK" {
+		result := &enity.Result{
+			Status:respMap.Get("status").MustString(),
+			Data:respMap.Get("msg").MustString(),
+			Msg:respMap.Get("msg").MustString()}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx,result)
+		return
+	}
+	data,err := respMap.Get("data").Array()
 	if err != nil {
 		common.Logger.Debugln("远程服务器解析data数据出错,err------------->",err)
 		result := &enity.Result{"01120105", err, auth_msg["01120105"]}
@@ -158,37 +164,9 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	common.Redis.Set(prefix+"user:"+key+":",string(extraJson),3*time.Minute)
-	userCashAccount := &model.UserCashAccount{
-		UserId:int(userId),
-		Account:openId,
-		Type:2,
-	}
-	extraString,_ := json.Marshal(extra)
-	user := &model.User{
-		Extra:string(extraString),
-		Model:model.Model{Id:int(userId)},
-	}
-	// 更新用户信息和账号信息没做到事务性
-	err = userService.UpdateWechatInfo(user)
-	if err != nil {
-		common.Logger.Debugln("更新用户账号信息出错")
-		result := &enity.Result{"01120106", err, auth_msg["01120106"]}
-		ctx.JSON(iris.StatusOK, result)
-		common.Log(ctx,result)
-		return
-	}
-	// 更新用户账号信息
-	ok,err = userCashAccountService.UpdateByUserId(userCashAccount)
-	if err != nil && !ok {
-		common.Logger.Debugln("更新用户账号信息出错,err--->",err)
-		result := &enity.Result{"01120106", err, auth_msg["01120106"]}
-		ctx.JSON(iris.StatusOK, result)
-		common.Log(ctx,result)
-		return
-	}
+	common.Redis.Set(prefix+"user:"+key+":",string(extraJson),5*time.Minute)
+
 	_user,_ := userService.Basic(int(userId))
-	common.Logger.Debugln("更新用户账号信息成功")
 	result := &enity.Result{Status:"01120100", Data:map[string]interface{}{
 		"id":_user.Id,
 		"name":_user.Name,
@@ -215,9 +193,8 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	common.Logger.Debugln("key------------------->",key)
 	if int(userId) != signinUserId{
-		result := &enity.Result{"01120202", nil, auth_msg["01120202"]}
+		result := &enity.Result{"01120202", userId, auth_msg["01120202"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
@@ -230,7 +207,6 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	common.Logger.Debugln("userMap------------->",userMap)
 	userCashAccount,err := userCashAccountService.BasicByUserId(signinUserId)
 	if err != nil {
 		result := &enity.Result{"01120204", err, auth_msg["01120204"]}
@@ -238,7 +214,7 @@ func (self *AuthController)CheckKeyStatus(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	// redis的openId和用户的账号不相等,证明还没
+	// redis的openId和用户的账号不相等,证明还没绑定成功
 	if userCashAccount.Account != userMap["openid"].(string) {
 		result := &enity.Result{"01120205", userMap, auth_msg["01120205"]}
 		ctx.JSON(iris.StatusOK, result)
