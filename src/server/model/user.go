@@ -38,7 +38,7 @@ func (user *User) Mapping() *User{
 		return user
 	}else{
 		extra,_ := simplejson.NewJson([]byte(user.Extra))
-		user.Nickname = extra.Get("nickname").MustString()
+		user.Nickname = extra.Get("nickName").MustString()
 		user.HeadImgUrl = extra.Get("headimgurl").MustString()
 		user.Extra = ""
 		return user
