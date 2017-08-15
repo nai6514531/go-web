@@ -73,11 +73,19 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		tx.Rollback()
 		return "",errors.New("提现金额不可少于1元")
 	}
+	accountName := ""
+	if userCashAccount.Type == 1 {
+		accountName = "支付宝"
+	}else if userCashAccount.Type == 2 {
+		accountName = "微信"
+	}else if userCashAccount.Type == 3 {
+		accountName = "银行"
+	}
 	bill := model.Bill{
 		BillId      :billId,
 		Account     :userCashAccount.Account,
 		AccountType :userCashAccount.Type,
-		AccountName :userCashAccount.RealName,
+		AccountName :accountName,
 		UserId      :userCashAccount.UserId,
 		UserName    :user.Name,
 		UserAccount :user.Account,
