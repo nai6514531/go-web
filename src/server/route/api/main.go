@@ -29,9 +29,8 @@ func Api() {
 	})
 
 	//api.Use(common.CORS)
-	//api.UseFunc(common.CORS.Serve)
+	// api.UseFunc(common.CORS.Serve)
 	api.Options("/wechat/key/:key", common.CORS.Serve)
-
 	api.Post("/signin", user.Signin)
 	api.Get("/signout", user.Signout)
 	api.Post("/user/reset", user.ForgetPassword)
@@ -39,7 +38,7 @@ func Api() {
 	api.Post("/reset-sms", sms.ResetSmsCodes)
 
 	api.Post("/daily-bill/alipay/notification", dailyBill.Notification)
-	api.Post("/wechat/key/:key",auth.UpdateWechatKey)
+	api.Post("/wechat/key/:key", common.CORS.Serve, auth.UpdateWechatKey)
 
 	api.UseFunc(common.RequireSignin)
 

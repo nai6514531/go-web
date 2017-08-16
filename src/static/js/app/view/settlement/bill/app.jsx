@@ -2,6 +2,8 @@ import React from 'react';
 import Promise from 'bluebird'
 import _ from 'underscore';
 import moment from 'moment';
+import op from 'object-path';
+
 import { hashHistory } from 'react-router';
 
 import { Button, Input, Table, Icon, Breadcrumb, message, Modal, Row, Col, Form } from 'antd';
@@ -71,8 +73,8 @@ const App = React.createClass({
 		const self = this;
 		let { totalAmount, count, cast } = this.state;
 		let cashAccountType = this.state.cashAccount.type || 0;
-		if (totalAmount <= 1) {
-			return message.info("可结算金额必须超过1元才可提现")
+		if (totalAmount <= 200) {
+			return message.info("可结算金额必须超过2元才可提现")
 		}
 		if (cashAccountType === 0) {
 			return message.info("你当前未设定收款方式，请修改收款方式再进行提现操作。")
@@ -102,7 +104,6 @@ const App = React.createClass({
       		self.setState({totalAmount: 0, count: 0, cast:0, settlementLoading: false})
 					message.info("申请提现成功！请等待结算");
 					self.getSettlementAmount()
-	      	
 				}).catch((e) => {
 					console.log(e)
 					self.setState({ settlementLoading: false })
@@ -135,8 +136,8 @@ const App = React.createClass({
 	},
 	getBillsList({ ...options }) {
 		const self = this;
-    const pagination = _.extend(this.state.pagination, options.pagination || {})
-    const search = _.extend({ status: '', createdAt: '' }, options.search || {})
+    const pagination = _.extendOwn(this.state.pagination, options.pagination || {})
+    const search = _.extendOwn({ status: '', createdAt: '' }, options.search || {})
 		this.setState({ bills: { ...this.state.bills, loading: true }, pagination: pagination });
 		BillService.list({
       status: search.status,
@@ -160,9 +161,10 @@ const App = React.createClass({
 		})
 	},
 	dailyBillDetail(e) {
-		hashHistory.replace(`/settlement?cashAccountType=0&endAt=&page=1&perPage=10&startAt=&status=1`)
+		hashHistory.replace(`/settlement?cashAccountType=0&endAt=&page=1&perPage=10&startAt=&status=0`)
 	},
-	handleCashModal(data) {
+	handleCashModal() {
+    this.getUserDetail()
 		this.setState({ cashModalVisible: false });
 	},
   componentDidMount() {
@@ -170,7 +172,8 @@ const App = React.createClass({
     this.getUserDetail()
   },
 	render() {
-		const cashAccount = this.state.cashAccount
+		const { cashAccount, user } = this.state
+
 		return (<section className="view-settlement-bill">
 			<header>
         <Breadcrumb>
@@ -183,7 +186,7 @@ const App = React.createClass({
       		<Col span={8} className="panel-left">
       			<p>可结算金额（元）</p>
       			<div>
-      				<span className="amount">{this.state.totalAmount/100}</span> 
+      				<span className="amount">{(this.state.totalAmount/100).toFixed(2)}</span> 
       				<Button type="primary" onClick={this.handleSettlement} loading={this.state.settlementLoading}>申请提现</Button>
       				{this.state.totalAmount !== 0 ? <Button type="dashed" onClick={this.dailyBillDetail}>明细</Button> : null}
       			</div>
@@ -191,26 +194,25 @@ const App = React.createClass({
       		</Col>
       		<Col span={10} className='cash-account-info'>
       			<Row className={cashAccount.type === 3 ? '' : 'hidden'}>
-      				<Col span={10}>银行卡<span className='color-red'>（不支持提现！）</span></Col>
+      				<Col span={4}>收款方式：</Col>
+      				<Col span={10}>银行卡 <span className='color-red'>（不支持提现！）</span></Col>
       			</Row>
-      			<div className={cashAccount.type !== 3 ? '' : 'hidden'}>
-      				<Row>
-	      				<Col span={4}>收款方式：</Col>
-	      				<Col span={8}>{CONSTANT_PAY[cashAccount.type]}<span className="color-blue tip" onClick={this.castInfo}>手续费收取规则</span></Col>
-	      			</Row>
-	      			<Row className={cashAccount.type === 1 ? '' : 'hidden'}>
-	      				<Col span={4}>帐号：</Col>
-	      				<Col span={8}>{cashAccount.account}</Col>
-	      			</Row>
-	      			<Row>
-	      				<Col span={4}>姓名：</Col>
-	      				<Col span={8}>{cashAccount.realName}</Col>
-	      			</Row>
-	      			<Row className={cashAccount.type === 2 ? '' : 'hidden'}>
-	      				<Col span={4}>微信昵称：</Col>
-	      				<Col span={8}>{cashAccount.nickName || ''}</Col>
-	      			</Row>
-      			</div>
+    				<Row className={cashAccount.type === 3 ? 'hidden' : ''}>
+      				<Col span={4}>收款方式：</Col>
+      				<Col span={8}>{CONSTANT_PAY[cashAccount.type] || '无'}<span className="color-blue tip" onClick={this.castInfo}>手续费收取规则</span></Col>
+      			</Row>
+      			<Row className={cashAccount.type === 2 ? 'hidden' : ''}>
+      				<Col span={4}>帐号：</Col>
+      				<Col span={8}>{cashAccount.account || '无'}</Col>
+      			</Row>
+      			<Row>
+      				<Col span={4}>姓名：</Col>
+      				<Col span={8}>{cashAccount.realName || '无'}</Col>
+      			</Row>
+      			<Row className={cashAccount.type === 2 ? '' : 'hidden'}>
+      				<Col span={4}>微信昵称：</Col>
+      				<Col span={8}>{op.get(user, 'nickName') || ''}</Col>
+      			</Row>
       			<Row>
       				<Col span={24}><Button type="primary" onClick={() => {this.setState({ cashModalVisible:true })}}>修改收款方式</Button></Col>
       			</Row>

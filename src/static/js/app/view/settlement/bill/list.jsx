@@ -23,7 +23,7 @@ import DailyBillService from '../../../service/daily_bill';
 import BillService from '../../../service/bill';
 const confirm = Modal.confirm;
 
-const BILLS_STATUS = {0: '未结账', 1:'等待结算', 2:'结账成功', 3:'结账中', 4:'结账失败'}
+const BILLS_STATUS = {0: '未结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
 
 const App = React.createClass({
 	getInitialState() {
@@ -45,28 +45,31 @@ const App = React.createClass({
 				width: 50,
 			}, {
 				title: '收款方式',
-				dataIndex: 'accountName',
-				width: 60
+				dataIndex: 'accountType',
+				width: 60,
+				render: (type) => {
+					return type === 1 ? '支付宝' : type === 2 ? '微信' : '-'
+				}
 			}, {
 				title: '结算金额',
 				dataIndex: 'totalAmount',
 				width: 90,
 				render: (total_amount) => {
-					return <p className="bigger">{total_amount / 100}</p>;
+					return <p className="bigger">{(total_amount / 100).toFixed(2)}</p>;
 				}
 			}, {
 				title: '手续费',
 				dataIndex: 'cast',
 				width: 60,
 				render: (cast) => {
-					return <p className="bigger">{cast / 100}</p>;
+					return <p className="bigger">{(cast / 100).toFixed(2)}</p>;
 				}
 			},{
 				title: '入账金额',
 				dataIndex: 'amount',
 				width: 90,
 				render: (amount) => {
-					return <p className="bigger">{amount / 100}</p>;
+					return <p className="bigger">{(amount / 100).toFixed(2)}</p>;
 				}
 			}, {
 				title: '状态',
@@ -173,7 +176,7 @@ const App = React.createClass({
 					defaultValue={this.state.search.status}
 					style={{width: 120 }}
 					onChange={(value) => { this.setState({search: {...this.state.search, status: value}})}}>
-					<Option value="">请选择结账状态</Option>
+					<Option value="">请选择结算状态</Option>
 					<Option value="1">等待结算</Option>
 					<Option value="2">结算成功</Option>
 					<Option value="3">结算中</Option>

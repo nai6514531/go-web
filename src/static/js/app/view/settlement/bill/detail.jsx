@@ -104,7 +104,7 @@ const Detail = React.createClass({
         width: 100,
         render: (id, record) => {
           return <span>
-            <a href={`#settlement/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`} target='_blank'>明细</a>
+            <a href={`#settlement/bill/${record.billId}/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
           </span>
         }
       }],
@@ -122,7 +122,7 @@ const Detail = React.createClass({
   },
   getDailyBill({ ...options }) {
     var self = this;
-    const pagination = _.extend(options.pagination || {}, this.state.pagination);
+    const pagination = _.extendOwn(options.pagination || {}, this.state.pagination);
     self.setState({ loading: true, pagination: pagination });
     DailyBillService.list({
       cashAccountType: "0",

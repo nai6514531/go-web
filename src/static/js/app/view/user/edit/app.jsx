@@ -1,4 +1,8 @@
 import React from 'react';
+import Promise from 'bluebird'
+import op from 'object-path'
+import _ from 'underscore';
+
 import './app.less';
 import {
   Button,
@@ -31,11 +35,11 @@ import {
 import {
   bindActionCreators
 } from 'redux';
-// import QRCode from '../../../library/qrcode'
+import { Wechat, Alipay, Test } from './pay-form.jsx'
 import * as UserActions from '../../../actions/user';
 import * as regionActions from '../../../actions/region';
 import UserService from '../../../service/user';
-
+import WechatService from '../../../service/wechat';
 
 function mapStateToProps(state) {
   const {
@@ -85,8 +89,7 @@ class UserForm extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      type: "3",
-      payType: 1,
+      payType: 0,
       unsaved: true,
       passwordDirty: false,
       imgUrl: '',
@@ -123,24 +126,7 @@ class UserForm extends React.Component {
       if (nextProps.detail.result.data.cashAccount) {
         const type = nextProps.detail.result.data.cashAccount.type;
         // type 1 for alipay,3 for bank,0 for none
-        if (type !== undefined) {
-          switch (type) {
-            case 1:
-              this.setState({
-                payType: 1
-              });
-              break;
-            case 3:
-              this.setState({
-                payType: 3
-              });
-              break;
-            default:
-              this.setState({
-                payType: 0
-              });
-          }
-        }
+        this.setState({payType: type || 0});
       }
     }
     if (self.saveDetail == 1) {
@@ -164,20 +150,6 @@ class UserForm extends React.Component {
       }
     }
   }
-  // provinceChange(event) {
-  //   this.props.getProvinceCityList(event);
-  //   const {
-  //     setFieldsValue
-  //   } = this.props.form;
-  //   setFieldsValue({
-  //     'cityId': '-1'
-  //   });
-  //   this.provinceHelp = {};
-  //   this.default = -1;
-  // }
-  // cityChange(event) {
-  //   this.cityIdHelp = {};
-  // }
   handleSubmit(e) {
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
@@ -186,7 +158,6 @@ class UserForm extends React.Component {
       }
       let cashAccount = {};
       const type = parseInt(values.type);
-      const nickName = this.state.wechat.name || this.state.user.nickName;
       const user = {
         "name": values.name,
         "contact": values.contact,
@@ -194,7 +165,7 @@ class UserForm extends React.Component {
         "telephone": values.telephone,
         "address": values.address,
         "email": "",
-        "nickName": type ===1 ? '' : nickName
+        "key": this.state.wechat.key || ''
       }
       if (type === 1) {
         cashAccount = {
@@ -202,10 +173,14 @@ class UserForm extends React.Component {
           "realName": values.alipayName,
           "account": values.alipayAccount,
         }
-      } 
+      }
+      // 当前为修改微信账号状态，且未关联微信
+      if (!this.state.wechat.name && !!this.state.wechat.key) {
+        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
+      }
       if (type === 2) {
         cashAccount = {
-          "type": values.type,
+          "type": type,
           "realName": values.wechatName,
         }
       }
@@ -221,54 +196,74 @@ class UserForm extends React.Component {
     });
   }
 
-  handleRadio(select) {
+  changePayTye(type) {
     const self = this;
-    const type = parseInt(select)
-    const user = this.props.detail.result.data;
+    const isEdit = this.props.params.id !== 'new'
+    let user = {};
+
+    
     const wechat = this.state.wechat;
-    switch (type) {
-      case 1:
-        this.setState({
-          payType: 1
-        });
-        break;
-      case 2:
-        this.setState({
-          payType: 2
-        });
+    clearInterval(self.timer);
+    self.timer = null;
+    this.setState({payType: type, wechat: {name: '', key: ''}});
+
+    // 当前状态为修改用户信息
+    if (isEdit) {
+      user = this.props.detail.result.data;
+      // 选择微信支付账户 且用户默认不是微信支付
+      if (type === 2 && user.cashAccount.type !== 2) {
+        // 获取随机key
+        return self.resetWechatKey()
+      }
     }
-    // 选择微信支付账户 且用户默认不是微信支付
-    if (type == 2) {
+    if (!isEdit && type === 2) {
       // 获取随机key
-      self.setState({keyLoading: true})
-
-      setTimeout(function() {
-        const key = "sadsdfsasdsd"
-        new QRCode(self.refs.qrcode, {
-          text: key,
-          width: 120,
-          height: 120,
-          colorDark : '#fff',
-          colorLight : '#000',
-          correctLevel : QRCode.CorrectLevel.H
-        });
-        self.setState({keyLoading: false, wechat: {...self.state.wechat, key: key}})
-      }, 300)
-     
-
+      return self.resetWechatKey()
     }
   }
-  getRelatedWechatKey() {
-
-  }
-  changeWechatAccount() {
+  resetWechatKey() {
     const self = this;
-    UserService.getWechatKey().then((res) => {
-      self.setState({wechat: { ...self.state.wechat, key: res.data.key || '' }})
-    }).catch((e) => {
-      console.log(e)
+    self.setState({keyLoading: true})
+    WechatService.create().then((res) => {
+      console.log(res)
+      if (res.status !== 0) {
+        return new Promise.reject()
+      }
+      const key = res.data.key
+      // 根据key生成二维码
+      // self.initQRCode(key)
+      self.setState({wechat: {name: '', key: key || ''}, keyLoading: false})
+      self.checkWechatKey()
+    }).catch(() => {
+      self.setState({keyLoading: false})
     })
   }
+  checkWechatKey() {
+    const self = this;
+    const key = self.state.wechat.key;
+    clearInterval(self.timer);
+    self.timer = null;
+    self.timer = setInterval(() => {
+      WechatService.getKeyDetail(key).then((res) => {
+        const status = res.status;
+        if (status === 1) {
+          clearInterval(self.timer);
+          self.timer = null;
+          return new Promise.reject()
+        }
+        if (status === 0) {
+          clearInterval(self.timer);
+          self.timer = null;
+          self.setState({wechat: {...self.state.wechat, name: res.data.wechat.name}})
+        }
+      }).catch((error) => {
+        clearInterval(self.timer);
+        self.timer = null;
+        console.log(error)
+      })
+    }, 3000)
+  }
+
   handleEnter(event) {
     if (event.keyCode == 13) {
       this.handleSubmit(event);
@@ -365,6 +360,10 @@ class UserForm extends React.Component {
       modalVisible: false,
     });
   }
+  componentWillUnmount () {
+    clearInterval(this.timer)
+    this.timer = null
+  }
   render() {
     let ProvinceNode = [];
     const wechat = this.state.wechat
@@ -423,10 +422,16 @@ class UserForm extends React.Component {
           } else if (type == 1) {
             cashValues = {
               type: data.cashAccount.type.toString(),
-              alipayAccount: data.cashAccount.account,
-              alipayName: data.cashAccount.realName,
+              account: data.cashAccount.account,
+              realName: data.cashAccount.realName,
             }
-          } else if (type == 0) {
+          } else if (type == 2) {
+            cashValues = {
+              type: data.cashAccount.type.toString(),
+              account: data.cashAccount.account,
+              realName: data.cashAccount.realName,
+            }
+          } else {
             cashValues = {
               type: "0",
             }
@@ -457,83 +462,20 @@ class UserForm extends React.Component {
     // if(!this.cityIdHelp){
     //   this.cityIdHelp = {};
     // }
-    if (this.state.payType == 1) {
-      payNode = <div>
-        <div className="form-wrapper">
-          <FormItem
-            {...formItemLayout}
-            label="支付宝账号">
-            {getFieldDecorator('alipayAccount', {
-              rules: [
-                {required: true,  message: '必填'},
-                { max:30, message: '不超过三十个字'},
-              ],
-              initialValue: initialValue.alipayAccount,
-
-            })(
-            <Input placeholder="需要确认是邮箱还是手机号"/>
-            )}
-          </FormItem>
-          <Button className="button-style" type="primary" onClick={this.showModal.bind(this,'account')}>查看示例</Button> 
-        </div>
-        <div className="form-wrapper">
-            <FormItem
-              {...formItemLayout}
-              label="真实姓名">
-              {getFieldDecorator('alipayName', {
-                rules: [
-                  {required: true, message: '必填'},
-                  {max:30, message: '不超过三十个字'},
-                ],
-                initialValue: initialValue.alipayName,
-
-              })(
-                <Input placeholder="必须为实名认证过的姓名"/>
-              )}
-            </FormItem>
-            <Button type="primary" className="button-style" onClick={this.showModal.bind(this,'name')}>查看示例</Button>
-         </div>
-      </div>
-    } 
-    if (this.state.payType == 2) {
-      payNode = <div>
-        <FormItem {...formItemLayout} label="扫码验证身份" >
-          <div className="code-tip">
-            <div ref="qrcode" className="code"></div>
-            { 
-              this.state.wechat.name ? <div className="qrcode-tip">
-                <Icon type='heck-circle' />
-                <span>{'关联成功（你将使用昵称为' + this.state.wechat.name + '的微信收款。如需更换账号请重新扫描二维码）'}</span>
-              </div> :
-              <div className="qrcode-tip">
-                <p>请使用你作为收款用途的微信扫描二维码进行关联，申请提现后，
-                款项会在规定时间内打入微信账户。</p>
-                <p>请确保自己的微信已实名认证<span className='check-wechat'>如何认证?</span></p>
-              </div> 
-            }
-            </div>
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="微信已验证姓名">
-          {getFieldDecorator('wechatName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.realName,
-
-          })(
-            <Input placeholder="如：张三"/>
-          )}
-        </FormItem>  
-      </div>
-    } 
+    const type = this.state.payType || +initialValue.type
+    if (type == 1) {
+      payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
+    } else if (type == 2) {
+      payNode = <Wechat cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={op.get(detail, 'result.data') || {}}
+       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />
+    } else {
+      payNode = ''
+    }
     // const disable = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
         <header>
-          {userId == id?
+          {userId == id ?
             <Breadcrumb >
               <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
@@ -561,7 +503,7 @@ class UserForm extends React.Component {
               })(
                 <Input disabled placeholder="请输入登录账号" />
               )}
-            </FormItem>:
+            </FormItem> :
               <div>
                 <FormItem
                   {...formItemLayout}
@@ -603,7 +545,7 @@ class UserForm extends React.Component {
                   )}
                 </FormItem>
               </div>
-              }
+            }
             <FormItem
               {...formItemLayout}
               label="运营商名称" >
@@ -680,14 +622,14 @@ class UserForm extends React.Component {
                 rules: [
                   {  message: '请选择收款方式' },
                 ],
-                initialValue: initialValue.type!==undefined? initialValue.type: this.state.payType.toString(),
+                initialValue: initialValue.type || ''
               })(
                 <RadioGroup>
-                  <Radio value="2" onClick = {this.handleRadio.bind(this, 2)} className="radio-block">
-                    <span>微信收款(最快T+1结算，收取提现金额的1%作为手续费)</span>
+                  <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
+                    <span>微信(最快T+1结算，收取提现金额的1%作为手续费)</span>
                   </Radio>
-                  <Radio value="1" onClick = {this.handleRadio.bind(this, 1)} className="radio-block">
-                     <span>支付宝(收款最快T+1结算，200以下每次提现收取2元手续费，200元及以上收取提现金额的1%作为手续费)</span>
+                  <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
+                     <span>支付宝(最快T+1结算，200元以下每次提现收取2元手续费，200元及以上收取提现金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
               )}
