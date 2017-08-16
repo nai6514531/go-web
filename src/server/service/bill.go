@@ -49,10 +49,25 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 	// 默认值cast为200,rate为0,即为支付宝少于200的情况
 	totalAmount,count,cast,rate := 0,0,viper.GetInt("bill.aliPay.cast"),viper.GetInt("bill.aliPay.rate")
 	billId := functions.GenerateIdByUserId(userId)
+	accountName := ""
+	if userCashAccount.Type == 1 {
+		accountName = "支付宝"
+	}else if userCashAccount.Type == 2 {
+		accountName = "微信"
+	}else if userCashAccount.Type == 3 {
+		accountName = "银行"
+	}
 	for _,dailyBill := range dailyBillList {
 		totalAmount += dailyBill.TotalAmount
 		count += 1
-		r = tx.Model(dailyBill).Updates(map[string]interface{}{"billId": billId, "status": 1})
+		r = tx.Model(dailyBill).Updates(map[string]interface{}{
+			"billId": billId,
+			"status": 1,
+			"account_type":userCashAccount.Type,
+			"account_name":accountName,
+			"account":userCashAccount.Account,
+			"real_name":userCashAccount.RealName,
+		})
 		if r.Error != nil {
 			tx.Rollback()
 			return "",r.Error
@@ -73,14 +88,7 @@ func (self *BillService)Insert(userId int,userCashAccount *model.UserCashAccount
 		tx.Rollback()
 		return "",errors.New("提现金额不可少于2元")
 	}
-	accountName := ""
-	if userCashAccount.Type == 1 {
-		accountName = "支付宝"
-	}else if userCashAccount.Type == 2 {
-		accountName = "微信"
-	}else if userCashAccount.Type == 3 {
-		accountName = "银行"
-	}
+
 	bill := model.Bill{
 		BillId      :billId,
 		Account     :userCashAccount.Account,
@@ -115,13 +123,20 @@ func (self *BillService)Update(billId string,userId int,userCashAccount *model.U
 	if r.Error != nil {
 		return r.Error
 	}
+	accountName := ""
+	if userCashAccount.Type == 1{
+		accountName = "支付宝"
+	}else if userCashAccount.Type == 2 {
+		accountName = "微信"
+	}
 	tx := common.SodaMngDB_R.Begin()
 	// 更新账单状态
 	r = tx.Model(bill).Updates(map[string]interface{}{
 		"status":1,
 		"account":userCashAccount.Account,
-		"accountType" :userCashAccount.Type,
-		"accountName" :userCashAccount.RealName,
+		"account_type" :userCashAccount.Type,
+		"account_ame" :accountName,
+		"real_name":userCashAccount.RealName,
 	})
 	if r.Error != nil {
 		tx.Rollback()
@@ -138,18 +153,14 @@ func (self *BillService)Update(billId string,userId int,userCashAccount *model.U
 		tx.Rollback()
 		return errors.New("账单号无对应日账单")
 	}
-	dailyBillAccountName := ""
-	if userCashAccount.Type == 1{
-		dailyBillAccountName = "支付宝"
-	}else if userCashAccount.Type == 2 {
-		dailyBillAccountName = "微信"
-	}
+
 	for _,dailyBill := range dailyBillList {
 		r = tx.Model(dailyBill).Updates(map[string]interface{}{
-			"status": 1,
-			"account_type":userCashAccount.Type,
-			"account_name":dailyBillAccountName,
-			"account":userCashAccount.Account,
+			"status":       1,
+			"account_type": userCashAccount.Type,
+			"account_name": accountName,
+			"account":      userCashAccount.Account,
+			"real_name":userCashAccount.RealName,
 		})
 		if r.Error != nil {
 			tx.Rollback()
