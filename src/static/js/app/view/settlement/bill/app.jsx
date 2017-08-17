@@ -163,7 +163,12 @@ const App = React.createClass({
 	dailyBillDetail(e) {
 		hashHistory.replace(`/settlement?cashAccountType=0&endAt=&page=1&perPage=10&startAt=&status=0`)
 	},
-	handleCashModal() {
+	handleCashModal(val) {
+		const self = this;
+		if (val === 'success') {
+    	self.getUserDetail()
+    	self.getSettlementAmount()
+		}
     this.getUserDetail()
 		this.setState({ cashModalVisible: false });
 	},

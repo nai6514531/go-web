@@ -277,17 +277,17 @@ class AmountForm extends React.Component {
       if (res.status !== 0) {
         return new Promise.reject(new Error(res.msg))
       }
-      self.props.handleCashModal();
+      self.props.handleCashModal('success');
     }, (res) => {
       return new Promise.reject(new Error(res.msg))
     }).catch((err) => {
       message.error(err.message || '更新失败，请重试~')
     })
   }
-  handleCashModal() {
+  handleCashModal(val) {
     clearInterval(this.timer);
     this.timer = null;
-    this.props.handleCashModal()
+    this.props.handleCashModal(val)
   }
   componentWillUnmount () {
     clearInterval(this.timer)
