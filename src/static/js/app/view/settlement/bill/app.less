@@ -64,10 +64,10 @@
 				margin-left: 10px;
 			}
 			@media (max-width: 1200px) {
-			button {
-				margin: 10px 0 0 15px;
+				button {
+					margin: 10px 0 0 15px;
+				}
 			}
-		}
 		}
 	}
 	.tip-bottom {
@@ -75,26 +75,33 @@
 	}
 }
 .view-settlement-modal {
+	@media (min-width: 768px) {
+		.ant-modal {
+	    width: 600px!important;
+		}
+	}
 	.form-wrapper {
 		position: relative;
 		input {
-			width: 90%;
+			width: 70%;
 			height: 32px;
     	padding: 6px 7px;
 		}
-		button{
-			position: absolute;
-	    top: 2px;
-	    left: 98%;
+		&.form-input {
+			button {
+				position: absolute;
+		    top: 2px;
+		    right: 100px;
+			}
 		}
 		@media (max-width: 1200px) { 
 			input {
 				width: 60%;
 			}
 			button{
-				position: absolute;
-		    top: 2px;
-		    left: 70%;
+				position: absolute!important;
+		    top: 28px!important;
+    		right: 10px!important;
 			}
 		}
 	}

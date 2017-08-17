@@ -12,10 +12,7 @@
   width: 100%;
 }
 .input-wrapper {
-  input {
-    height: 32px;
-    padding: 6px 7px;
-  }
+  
   @media (min-width: 1200px) {
     input {
       width: 75%
@@ -114,3 +111,22 @@
 }
 
 
+.view-user-list {
+  @media (min-width: 1200px) { 
+    .form-input {
+      button {
+        right: 10%
+      }
+    }
+  }
+  @media (max-width: 500px) { 
+    .form-input {
+      button {
+        right: 10px
+      }
+      input {
+        width: 60%
+      }
+    }
+  }
+}

@@ -78,6 +78,12 @@ const router = (
             callback(null, require('./view/settlement/bill/app.jsx').default);
           });
         }} />
+        <Route path="/settlement/bill/detail" getComponent={(location, callback) => {
+          require.ensure([], (require) => {
+          // 结算管理列表
+            callback(null, require('./view/settlement/bill/detail.jsx').default);
+          });
+        }} />
         <Route path="/settlement/bill/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
           // 结算管理列表

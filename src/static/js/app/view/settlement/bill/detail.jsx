@@ -124,15 +124,16 @@ const Detail = React.createClass({
     var self = this;
     const pagination = _.extendOwn(options.pagination || {}, this.state.pagination);
     self.setState({ loading: true, pagination: pagination });
+    const isBillsDetail = !!~this.props.location.pathname.indexOf('detail')
     DailyBillService.list({
       cashAccountType: "0",
-      status: '',
+      status: isBillsDetail ? 0 : '',
       startAt: "",
       endAt: "",
       searchStr: "",
       page: pagination.page,
       perPage: pagination.perPage,
-      billId: self.props.params.id
+      billId: self.props.params.id || ''
     }).then((res) => {
         self.setState({
           list: res.data.list,

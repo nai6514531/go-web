@@ -95,7 +95,9 @@ const App = React.createClass({
 					const status = record.status;
 					if (!!~[4].indexOf(status)) {
 						return <span>
-							<a onClick={this.handleSettlemenet.bind(this, billId)}>重新结算</a>
+							<Popconfirm title='结算当前账单?' onConfirm={this.handleSettlemenet.bind(this, billId)}>
+	              <a href='#'>重新结算</a>
+	            </Popconfirm>
 		          <span className="ant-divider" />
 		          <a href={`#settlement/bill/${billId}`}>明细</a>
 		        </span>
@@ -131,12 +133,12 @@ const App = React.createClass({
 		const self = this;
 		BillService.create(id).then((res) => {
 			if (res.status !== 0) {
-    		return new Promise.reject()
+    		return new Promise.reject(new Error(res.msg))
     	}
 			message.info("申请提现成功！请等待结算");
     	self.props.getBillsList({search: {...this.state.search}});
-		}).catch((e) => {
-			message.error("申请重新提现失败！请重试");
+		}).catch((err) => {
+			message.error(err.message || "申请提现失败！请重试");
 		})
 	},
   changeDate(value) {

@@ -99,15 +99,14 @@ const App = React.createClass({
 	    	self.setState({settlementLoading: true})
 	      BillService.create().then((res) => {
 	      	if (res.status !== 0) {
-	      		return new Promise.reject()
+	      		return new Promise.reject(new Error(res.msg))
 	      	}
       		self.setState({totalAmount: 0, count: 0, cast:0, settlementLoading: false})
 					message.info("申请提现成功！请等待结算");
 					self.getSettlementAmount()
-				}).catch((e) => {
-					console.log(e)
+				}).catch((err) => {
 					self.setState({ settlementLoading: false })
-					message.info("申请提现失败！请重试");
+					message.error(err.message);
 				})
 	    },
 	    onCancel() {
@@ -119,7 +118,7 @@ const App = React.createClass({
 		const self = this;
 		SettlementService.getAmount().then((res) => {
 			const data = res.data
-			self.setState({totalAmount: data.totalAmount, count: data.count, cast: data.cast})
+			self.setState({totalAmount: data.totalAmount || 0, count: data.count || 0, cast: data.cast || 0})
 			self.getBillsList()
 		}).catch(() => {
 		})
@@ -161,7 +160,7 @@ const App = React.createClass({
 		})
 	},
 	dailyBillDetail(e) {
-		hashHistory.replace(`/settlement?cashAccountType=0&endAt=&page=1&perPage=10&startAt=&status=0`)
+		hashHistory.replace(`/settlement/bill/detail`)
 	},
 	handleCashModal(val) {
 		const self = this;
@@ -230,7 +229,6 @@ const App = React.createClass({
       		wrapClassName='view-settlement-modal'
         	footer={null}
           style={{ top: 20 }}
-          width="600"
           visible={this.state.cashModalVisible}
           onCancel={() => {this.setState({ cashModalVisible:false })}}
         >

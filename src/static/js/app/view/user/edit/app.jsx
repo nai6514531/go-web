@@ -8,6 +8,7 @@ import {
   Button,
   Form,
   Input,
+  Checkbox,
   Radio,
   Select,
   Cascader,
@@ -98,7 +99,8 @@ class UserForm extends React.Component {
         key: '',
         name: '',
       },
-      keyLoading: false
+      keyLoading: false,
+      isMode: true
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     // this.provinceChange = this.provinceChange.bind(this);
@@ -165,7 +167,8 @@ class UserForm extends React.Component {
         "telephone": values.telephone,
         "address": values.address,
         "email": "",
-        "key": this.state.wechat.key || ''
+        "key": this.state.wechat.key || '',
+        "mode": this.state.isMode 
       }
       // 当前为修改微信账号状态，且未关联微信
       if (!this.state.wechat.name && !!this.state.wechat.key) {
@@ -364,6 +367,15 @@ class UserForm extends React.Component {
       modalVisible: false,
     });
   }
+  onChangeAutoBill () {
+    this.setState({isMode: !this.state.isMode})
+  }
+  componentWillUpdate(nextProps, nextState) {
+    const self = this;
+    // if (nextProps.detail.result.data.cashAccount !== this.props.wechat.key) {
+    //   self.initQRCode(nextProps.wechat.key)
+    // }
+  }
   componentWillUnmount () {
     clearInterval(this.timer)
     this.timer = null
@@ -407,6 +419,7 @@ class UserForm extends React.Component {
           address: data.address,
           mobile: data.mobile,
           telephone: data.telephone,
+          mode: data.mode
         }
         self.account = data.account;
         let cashValues = {};
@@ -639,6 +652,9 @@ class UserForm extends React.Component {
                   </Radio>
                 </RadioGroup>
               )}
+            </FormItem>
+            <FormItem {...formItemLayout} label="是否自动生成账单">
+              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>200块自动生成账单（文案待定~~~~~！！！）</Checkbox>
             </FormItem>
             {payNode}
             <FormItem className="button-wrapper">
