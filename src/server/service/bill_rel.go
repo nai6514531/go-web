@@ -11,12 +11,12 @@ type BillRelService struct {
 }
 
 func (self *BillRelService) Baisc(billIds ...interface{}) (*[]*model.BillRel, error) {
-  list := &[]*model.BillRel{}
-  r := common.SodaMngDB_R.Where("bill_id in (?)", billIds...).Find(&list)
-  if r.Error != nil {
-    return nil, r.Error
-  }
-  return list, nil
+	list := &[]*model.BillRel{}
+	r := common.SodaMngDB_R.Where("bill_id in (?)", billIds...).Find(&list)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return list, nil
 }
 
 func (self *BillRelService) Create(billRelList ...*model.BillRel) (int, error) {
