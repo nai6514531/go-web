@@ -1,0 +1,143 @@
+.view-settlement-list {
+  .top-fix {
+      position: fixed;
+      width: 100%;
+      padding-left: 0px;
+      background: white;
+      z-index: 100;
+      top: 50px;
+    header {
+      border-bottom: 1px solid #ddd;
+      height: 67px;
+      line-height: 84px;
+      padding-left: 15px;
+      margin-bottom: 15px;
+    }
+  }
+  .table {
+    margin-top: 132px;
+      @media (max-width: 768px) {
+        margin-top: 285px;
+      }
+  }
+  .ant-checkbox-inner{
+    height: 18px;
+    width: 18px;
+  }
+  .ant-checkbox-checked .ant-checkbox-inner:after{
+      left: 5px;
+      top: 3px;
+  }
+  .ant-checkbox-indeterminate .ant-checkbox-inner:after {
+    left: 4px;
+    top: 7px;
+  }
+  .highlight {
+	color: red;
+  }
+  .filter {
+		margin-bottom: 15px;
+    line-height: 50px;
+    .item {
+		  margin: 4px 4px;
+		}
+    .filter-select {
+      //margin-left: 100px;
+    }
+  }
+  .ant-table-footer{
+ 		overflow: hidden;
+ 		.multiSettleBtn{
+	  	float: right;
+	  	margin-right: 50px;
+	  }
+ 	}
+  .info {
+    overflow: hidden;
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+  .marked {
+    background: rgba(255, 0, 0, 0.30);
+    //color: white;
+  }
+  .checked {
+    background: #ddd;
+  }
+  .bigger {
+    font-size: 16px;
+  }
+  .unfinished {
+    color: red;
+  }
+  .done {
+    color: green;
+  }
+  //.calculate {
+  //  position: fixed;
+  //  z-index: 100;
+  //  top: 138px;
+  //  @media (max-width: 768px) {
+  //    top: 78px;
+  //    right: 20px;
+  //  }
+  //}
+  .update-bill-button {
+    background: #ed9d51;
+    border-color: #ed9d51;
+  }
+}
+
+
+.playModal{
+	text-align: right;
+	.ant-modal-title{
+		text-align: left;
+	}
+	.ant-modal-footer{
+		display: none;
+	}
+  .form-text {
+    display: block;
+    text-align: center;
+    height: 36px;
+  }
+  #body{
+		display: none;
+	}
+	#submit{
+		margin-right: 8px;
+    margin-bottom: 12px;
+    color: #fff;
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1.5;
+    padding: 4px 15px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: #2db7f5;
+    color: #fff;
+	}
+	#cancel{
+		margin-right: 8px;
+    margin-bottom: 12px;
+    color: #fff;
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1.5;
+    padding: 4px 15px;
+    font-size: 12px;
+    border-radius: 6px;
+    background: #d9534f;
+    color: #fff;
+
+	}
+}

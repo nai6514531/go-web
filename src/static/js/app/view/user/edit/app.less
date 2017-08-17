@@ -11,16 +11,33 @@
   text-align: center;
   width: 100%;
 }
+.input-wrapper {
+  input {
+    height: 32px;
+    padding: 6px 7px;
+  }
+  @media (min-width: 1200px) {
+    input {
+      width: 75%
+    }
+  }
+  @media (max-width: 1200px) {
+    input {
+      width: 60%
+    }
+  }
+}
+
 .button-style {
   background-color: #108ee9 !important;
   position: absolute;
   top: 0px;
-  right: 10%;
-  @media (max-width: 320px) {
-    right: -25px;
+  right: 0;
+  @media (max-width: 1200px) {
+    right: -10px;
   }
-  @media (min-width: 320px) and (max-width: 768px) {
-    right: -14px;
+  @media (max-width: 320px) {
+    zoom: 0.8;
   }
 }
 .tips {
@@ -85,6 +102,15 @@
       color: #108ee9;
     }
   }
+  @media (max-width: 1200px) { 
+    .code-tip {
+      position: relative;
+      left: 0;
+      top: 0px;
+      width: 160px;
+    }
+  }
+ 
 }
 
 

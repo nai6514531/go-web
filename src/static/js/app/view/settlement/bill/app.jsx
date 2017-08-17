@@ -183,7 +183,7 @@ const App = React.createClass({
       <section className="info">
       	<h2>结算操作</h2>
       	<Row>
-      		<Col span={8} className="panel-left">
+      		<Col xs={24} lg={{span: 8}} className="panel-left">
       			<p>可结算金额（元）</p>
       			<div>
       				<span className="amount">{(this.state.totalAmount/100).toFixed(2)}</span> 
@@ -192,26 +192,26 @@ const App = React.createClass({
       			</div>
       			<p>申请提现才可进行结算，超过200元系统将自动帮你申请，详情请查看下方结算记录<span className="color-blue tip" onClick={this.settlementInfo}>结算时间</span></p>
       		</Col>
-      		<Col span={10} className='cash-account-info'>
+      		<Col xs={24} lg={{span: 10}} className='cash-account-info'>
       			<Row className={cashAccount.type === 3 ? '' : 'hidden'}>
-      				<Col span={4}>收款方式：</Col>
-      				<Col span={10}>银行卡 <span className='color-red'>（不支持提现！）</span></Col>
+      				<Col xs={8} lg={{span: 4}}  span={4}>收款方式：</Col>
+      				<Col xs={16} lg={{span: 10}} span={10}>银行卡 <span className='color-red'>（不支持提现！）</span></Col>
       			</Row>
     				<Row className={cashAccount.type === 3 ? 'hidden' : ''}>
-      				<Col span={4}>收款方式：</Col>
-      				<Col span={8}>{CONSTANT_PAY[cashAccount.type] || '无'}<span className="color-blue tip" onClick={this.castInfo}>手续费收取规则</span></Col>
+      				<Col xs={8} lg={{span: 4}}>收款方式：</Col>
+      				<Col  xs={16} lg={{span: 10}}>{CONSTANT_PAY[cashAccount.type] || '无'}<span className="color-blue tip" onClick={this.castInfo}>手续费收取规则</span></Col>
       			</Row>
       			<Row className={cashAccount.type === 2 ? 'hidden' : ''}>
-      				<Col span={4}>帐号：</Col>
-      				<Col span={8}>{cashAccount.account || '无'}</Col>
+      				<Col xs={8} lg={{span: 4}}>帐号：</Col>
+      				<Col  xs={16} lg={{span: 10}}>{cashAccount.account || '无'}</Col>
       			</Row>
       			<Row>
-      				<Col span={4}>姓名：</Col>
-      				<Col span={8}>{cashAccount.realName || '无'}</Col>
+      				<Col xs={8} lg={{span: 4}}>姓名：</Col>
+      				<Col  xs={16} lg={{span: 10}}>{cashAccount.realName || '无'}</Col>
       			</Row>
       			<Row className={cashAccount.type === 2 ? '' : 'hidden'}>
-      				<Col span={4}>微信昵称：</Col>
-      				<Col span={8}>{op.get(user, 'nickName') || ''}</Col>
+      				<Col xs={8} lg={{span: 4}}>微信昵称：</Col>
+      				<Col  xs={16} lg={{span: 10}}>{op.get(user, 'nickName') || ''}</Col>
       			</Row>
       			<Row>
       				<Col span={24}><Button type="primary" onClick={() => {this.setState({ cashModalVisible:true })}}>修改收款方式</Button></Col>

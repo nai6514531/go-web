@@ -55,21 +55,21 @@ const App = React.createClass({
 				dataIndex: 'totalAmount',
 				width: 90,
 				render: (total_amount) => {
-					return <p className="bigger">{(total_amount / 100).toFixed(2)}</p>;
+					return (total_amount / 100).toFixed(2)
 				}
 			}, {
 				title: '手续费',
 				dataIndex: 'cast',
 				width: 60,
 				render: (cast) => {
-					return <p className="bigger">{(cast / 100).toFixed(2)}</p>;
+					return (cast / 100).toFixed(2)
 				}
 			},{
 				title: '入账金额',
 				dataIndex: 'amount',
 				width: 90,
 				render: (amount) => {
-					return <p className="bigger">{(amount / 100).toFixed(2)}</p>;
+					return (amount / 100).toFixed(2)
 				}
 			}, {
 				title: '状态',
@@ -164,7 +164,7 @@ const App = React.createClass({
       <h2>结算记录</h2>
       <div className="search-panel">
       	<DatePicker
-          style={{width:120,marginLeft:4}}
+          style={{width:120}}
           disabledDate={this.disabledStartDate}
           placeholder="申请时间"
           onChange={this.changeDate}
@@ -191,6 +191,7 @@ const App = React.createClass({
         pagination={pagination}
         loading={this.props.bills.loading}
       />
+      <p className='tip-bottom'>注意：1. 入账金额=结算金额-手续费；2. 若有结账失败记录很有可能是收款账号和姓名不匹配，请检查后修改收款方式；</p>
 		</section>);
 	}
 });

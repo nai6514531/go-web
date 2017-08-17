@@ -56,19 +56,19 @@ const Detail = React.createClass({
         }
       }, {
         title: '账户信息',
-        dataIndex: 'settledAt',
-        key: 'settledAt',
+        dataIndex: 'mobile',
+        key: 'mobile',
         width: 250,
-        render: (settled_at, record) => {
+        render: (mobile, record) => {
           if (!!~[1, 2].indexOf(record.accountType)) {
             return _.template([
-              '<%- account %>',
               '<%- realName %>',
-              '<%- mobile %>'
-              ].join(''))({
-                account: record.account,
-                realName: record.realName ? ' | ' + record.realName : '',
-                mobile: record.mobile ? ' | ' + record.mobile : ''
+              '账号：<%- account %>',
+              '手机号：<%- mobile %>'
+              ].join(' | '))({
+                realName: record.realName,
+                account: record.account || '-',
+                mobile: record.mobile || '-'
               })
           } 
           if (!!~[3].indexOf(record.accountType)) {

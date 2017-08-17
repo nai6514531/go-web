@@ -16,9 +16,20 @@
 	    display: inline-block;
 	    color: #000;
 		}
-		.panel-left {
-			border-right: 1px solid #e4e0e0;
+		.panel-left {	
 			margin-right: 20px;
+			padding: 20px;
+		}
+		@media (min-width: 1200px) {
+			.panel-left {
+				border-right: 1px #e4e0e0 dashed;
+			}
+		}
+		@media (max-width: 1200px) {
+			.panel-left {
+				border-bottom: 1px #e4e0e0 dashed;
+    		padding-bottom: 10px;
+			}
 		}
 		.color-blue {
 			color: #49a9ee;
@@ -36,23 +47,55 @@
 				display: none;
 			}
 		}
+		@media (max-width: 1200px) {
+			.cash-account-info {
+    		padding-top: 10px;
+    		padding-left: 20px;
+			}
+		}
 	}
 	.bill-list {
 		.search-panel {
 			margin-bottom: 10px;
 			.item {
-				margin-right: 10px;
+				margin: 0 0 0 15px;
+			}
+			button{
+				margin-left: 10px;
+			}
+			@media (max-width: 1200px) {
+			button {
+				margin: 10px 0 0 15px;
 			}
 		}
+		}
+	}
+	.tip-bottom {
+		margin-top: 20px;
 	}
 }
 .view-settlement-modal {
 	.form-wrapper {
 		position: relative;
+		input {
+			width: 90%;
+			height: 32px;
+    	padding: 6px 7px;
+		}
 		button{
 			position: absolute;
-			right: 25%;
-			top: 0;
+	    top: 2px;
+	    left: 98%;
+		}
+		@media (max-width: 1200px) { 
+			input {
+				width: 60%;
+			}
+			button{
+				position: absolute;
+		    top: 2px;
+		    left: 70%;
+			}
 		}
 	}
 	.footer-btn {
@@ -109,4 +152,22 @@
 	    zoom: 1.5;
 		}
 	}
+	@media (max-width: 500px) {
+		.ant-radio, .ant-radio-wrapper {
+	    white-space: initial;
+		}
+		.code {
+			margin-bottom: 20px;
+			img {
+				width: 50%;
+			}
+		}
+		.code-tip {
+	    width: 50%;
+	    top: 30px;
+	    right: 0px;
+	    margin-bottom: 20px;
+		}
+	}
+	
 }

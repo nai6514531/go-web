@@ -177,6 +177,7 @@ const App = React.createClass({
              columns={columns} pagination={pagination}
              bordered loading={this.state.loading}
              rowClassName={this.rowClassName}
+             rowKey={record => record.id}
       />
     </section>);
   }

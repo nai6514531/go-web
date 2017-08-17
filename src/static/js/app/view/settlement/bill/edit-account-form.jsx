@@ -40,10 +40,13 @@ class Alipay extends React.Component {
             initialValue: cashAccount.type === 1 ? cashAccount.account : '',
 
           })(
-          <Input placeholder="需要确认是邮箱还是手机号"/>
+          <div>
+            <Input placeholder="需要确认是邮箱还是手机号" />
+            <Button className="button-style" type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button> 
+          </div> 
           )}
         </FormItem>
-        <Button className="button-style" type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button> 
+        
       </div>
       <div className="form-wrapper">
         <FormItem
@@ -57,10 +60,13 @@ class Alipay extends React.Component {
             initialValue: cashAccount.type === 1 ? cashAccount.realName : '',
 
           })(
-            <Input placeholder="必须为实名认证过的姓名"/>
+          <div>
+            <Input placeholder="必须为实名认证过的姓名" />
+            <Button type="primary" className="button-style" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>    
+          </div>
           )}
         </FormItem>
-        <Button type="primary" className="button-style" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
+        
       </div>
       <Modal title="示例图片"
         footer={null}
@@ -294,10 +300,12 @@ class AmountForm extends React.Component {
     const type = this.state.type || cashAccount.type  
     const formItemLayout = {
       labelCol: {
-        span: 5
+        xs: { span: 24 },
+        sm: { span: 5 },
       },
       wrapperCol: {
-        span: 8
+        xs: { span: 24 },
+        sm: { span: 8 },
       },
     };
 

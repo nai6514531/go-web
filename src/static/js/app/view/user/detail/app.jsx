@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Button,Input, Breadcrumb,message } from 'antd';
 import { Link } from 'react-router';
-
+import './app.less';
 import UserService from '../../../service/user';
 import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'
 

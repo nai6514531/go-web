@@ -167,16 +167,20 @@ class UserForm extends React.Component {
         "email": "",
         "key": this.state.wechat.key || ''
       }
+      // 当前为修改微信账号状态，且未关联微信
+      if (!this.state.wechat.name && !!this.state.wechat.key) {
+        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
+      }
+       // 未选任何结算方式
+      if (!~[1, 2].indexOf(type)) {
+        return message.error('请选择收款方式')
+      }
       if (type === 1) {
         cashAccount = {
           "type": type,
           "realName": values.alipayName,
           "account": values.alipayAccount,
         }
-      }
-      // 当前为修改微信账号状态，且未关联微信
-      if (!this.state.wechat.name && !!this.state.wechat.key) {
-        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
       }
       if (type === 2) {
         cashAccount = {
@@ -447,10 +451,12 @@ class UserForm extends React.Component {
     } = this.props.form;
     const formItemLayout = {
       labelCol: {
-        span: 9
+        xs: { span: 9 },
+        sm: { span: 9 }
       },
       wrapperCol: {
-        span: 10
+        xs: { span: 15 },
+        sm: { span: 10 },
       },
     };
     let breadcrumb = '添加运营商';
