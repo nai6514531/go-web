@@ -49,44 +49,40 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 	totalAmount, count, cast, rate := 0, 0, viper.GetInt("bill.aliPay.cast"), viper.GetInt("bill.aliPay.rate")
 	billId := functions.GenerateIdByUserId(userId)
 	accountName := ""
-	if userCashAccount.Type == 1 {
-		accountName = "支付宝"
-	} else if userCashAccount.Type == 2 {
-		accountName = "微信"
-	} else if userCashAccount.Type == 3 {
-		accountName = "银行"
-	}
+
+	var dailyBillIds []int
+
 	for _, dailyBill := range dailyBillList {
+		dailyBillIds = append(dailyBillIds, dailyBill.Id)
 		totalAmount += dailyBill.TotalAmount
-		count += 1
-		r = tx.Model(dailyBill).Updates(map[string]interface{}{
-			"billId":       billId,
-			"status":       1,
-			"account_type": userCashAccount.Type,
-			"account_name": accountName,
-			"account":      userCashAccount.Account,
-			"real_name":    userCashAccount.RealName,
-		})
-		if r.Error != nil {
-			tx.Rollback()
-			return "", r.Error
-		}
 	}
+
+	if totalAmount < viper.GetInt("bill.min") {
+		return "", errors.New("提现金额不可少于2元")
+	}
+
+	dailyBillIds = functions.Uniq(dailyBillIds)
+
+	count = len(dailyBillList)
+
 	if userCashAccount.Type == 1 {
 		// 支付宝大于200的情况
 		if totalAmount > viper.GetInt("bill.aliPay.borderValue") {
 			rate = 1
 			cast = totalAmount * rate / 100
 		}
-	} else {
+		accountName = "支付宝"
+	} else if userCashAccount.Type == 2 {
 		rate = viper.GetInt("bill.wechat.rate")
 		cast = totalAmount * rate / 100
+		accountName = "微信"
+	} else {
+		return "", errors.New("不支持的提现方式，请检查提现账单设置")
 	}
+
 	amount := totalAmount - cast
-	if amount < 200 {
-		tx.Rollback()
-		return "", errors.New("提现金额不可少于2元")
-	}
+
+	status := 1
 
 	bill := model.Bill{
 		BillId:      billId,
@@ -103,13 +99,29 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 		Amount:      amount, // 真正收入的钱
 		Mobile:      user.Mobile,
 		RealName:    userCashAccount.RealName,
-		Status:      1,
+		Status:      status,
 		Mode:        1,
 	}
 	r = tx.Create(&bill)
 	if r.Error != nil {
 		tx.Rollback()
-		return "", errors.New("insert bill error")
+		return "", r.Error
+	}
+
+	updateData := map[string]interface{}{
+		"bill_id":      billId,
+		"status":       status,
+		"account_type": userCashAccount.Type,
+		"account_name": accountName,
+		"account":      userCashAccount.Account,
+		"real_name":    userCashAccount.RealName,
+	}
+
+	r = tx.Model(&model.DailyBill{}).Where("id in (?)", dailyBillIds).Where("status = 0 and bill_id = ''").Updates(updateData)
+
+	if r.Error != nil {
+		tx.Rollback()
+		return "", r.Error
 	}
 
 	tx.Commit()
@@ -123,15 +135,18 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 	if r.Error != nil {
 		return r.Error
 	}
+
 	accountName := ""
 	if userCashAccount.Type == 1 {
 		accountName = "支付宝"
 	} else if userCashAccount.Type == 2 {
 		accountName = "微信"
+	} else {
+		return errors.New("不支持的提现方式，请检查提现账单设置")
 	}
+
 	cast, rate := viper.GetInt("bill.aliPay.cast"), viper.GetInt("bill.aliPay.rate")
 	if userCashAccount.Type == 1 {
-
 		// 支付宝大于200的情况
 		if bill.TotalAmount > viper.GetInt("bill.aliPay.borderValue") {
 			rate = 1
@@ -141,46 +156,39 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 		rate = viper.GetInt("bill.wechat.rate")
 		cast = bill.TotalAmount * rate / 100
 	}
+
+	amount := bill.TotalAmount - cast
+
+	status := 1
+
 	tx := common.SodaMngDB_R.Begin()
 	// 更新账单状态
-	r = tx.Model(bill).Updates(map[string]interface{}{
-		"status":       1,
+	r = tx.Model(&model.Bill{}).Where("bill_id = ?", billId).Updates(map[string]interface{}{
+		"status":       status,
 		"account":      userCashAccount.Account,
 		"account_type": userCashAccount.Type,
 		"account_name": accountName,
 		"real_name":    userCashAccount.RealName,
 		"cast":         cast,
 		"rate":         rate,
-		"amount":       bill.TotalAmount - cast,
+		"amount":       amount,
 	})
+
 	if r.Error != nil {
 		tx.Rollback()
 		return r.Error
 	}
-	// 获取到账单对应的日账单的信息
-	dailyBillList := []*model.DailyBill{}
-	r = common.SodaMngDB_R.Table("daily_bill").Where(" bill_id = ? ", bill.BillId).Scan(&dailyBillList)
-	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
+
+	r = tx.Model(&model.DailyBill{}).Where("bill_id = ?", billId).Updates(map[string]interface{}{
+		"status":       status,
+		"account_type": userCashAccount.Type,
+		"account_name": accountName,
+		"account":      userCashAccount.Account,
+		"real_name":    userCashAccount.RealName,
+	})
+	if r.Error != nil {
 		tx.Rollback()
 		return r.Error
-	}
-	if len(dailyBillList) == 0 {
-		tx.Rollback()
-		return errors.New("账单号无对应日账单")
-	}
-
-	for _, dailyBill := range dailyBillList {
-		r = tx.Model(dailyBill).Updates(map[string]interface{}{
-			"status":       1,
-			"account_type": userCashAccount.Type,
-			"account_name": accountName,
-			"account":      userCashAccount.Account,
-			"real_name":    userCashAccount.RealName,
-		})
-		if r.Error != nil {
-			tx.Rollback()
-			return r.Error
-		}
 	}
 
 	tx.Commit()
@@ -202,7 +210,7 @@ func (self *BillService) List(page int, perPage int, status int, createdAt strin
 	sql += " and bill.user_id = ? "
 	params = append(params, userId)
 	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
-	r := common.SodaMngDB_R.Raw(sql, params...).Order(" created_at desc ").Offset((page - 1) * perPage).Limit(perPage).Scan(&billList)
+	r := common.SodaMngDB_R.Raw(sql, params...).Order(" id desc ").Offset((page - 1) * perPage).Limit(perPage).Scan(&billList)
 	if r.Error != nil {
 		return nil, r.Error
 	}
