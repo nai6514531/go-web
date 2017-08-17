@@ -8,6 +8,7 @@ type BillRel struct {
 	IsSuccessed bool   `json:"isSuccessed"`
 	Reason      string `json:"reason"`
 	OuterNo     string `json:"outerNo"`
+	ErrCode     string `json:"errCode"`
 }
 
 func (BillRel) TableName() string {
