@@ -20,6 +20,7 @@ var (
 		"01100004":"用户没有权限",
 		"01100005":"更新账单状态失败",
 		"01100006":"获取用户账号信息失败",
+		"01100007":"删除账单批次号失败",
 
 
 		"01100100":"拉取账单列表成功",
@@ -30,6 +31,8 @@ var (
 func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	billService := &service.BillService{}
 	userCashAccountService := &service.UserCashAccountService{}
+	billBatchNoService := &service.BillBatchNoService{}
+	billRelService := &service.BillRelService{}
 	reqeust := simplejson.New()
 	ctx.ReadJSON(reqeust)
 	billId := reqeust.Get("id").MustString()
@@ -69,9 +72,26 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK,result)
 			return
 		}
+		// 还要删除批次的相关表,避免再次结算的时候结算失败
+		_,err = billBatchNoService.Delete(billId)
+		if err != nil {
+			// 删除账单批次号记录失败
+			result :=&enity.Result{"01100007",err,bill_msg["01100007"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK,result )
+			return
+		}
+		_,err = billRelService.Delete(billId)
+		if err != nil {
+			// 删除账单批次号记录失败
+			result :=&enity.Result{"01100007",err,bill_msg["01100007"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK,result )
+			return
+		}
+
 		err = billService.Update(billId,userId,userCashAccount)
 		if err != nil {
-			common.Logger.Debugln("InsertOrUpdate Update err-----------",err)
 			result :=&enity.Result{"01100005",err,bill_msg["01100005"]}
 			common.Log(ctx,result)
 			ctx.JSON(iris.StatusOK,result )
