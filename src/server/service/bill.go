@@ -129,6 +129,18 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 	} else if userCashAccount.Type == 2 {
 		accountName = "微信"
 	}
+	cast, rate := viper.GetInt("bill.aliPay.cast"), viper.GetInt("bill.aliPay.rate")
+	if userCashAccount.Type == 1 {
+
+		// 支付宝大于200的情况
+		if bill.TotalAmount > viper.GetInt("bill.aliPay.borderValue") {
+			rate = 1
+			cast = bill.TotalAmount * rate / 100
+		}
+	} else {
+		rate = viper.GetInt("bill.wechat.rate")
+		cast = bill.TotalAmount * rate / 100
+	}
 	tx := common.SodaMngDB_R.Begin()
 	// 更新账单状态
 	r = tx.Model(bill).Updates(map[string]interface{}{
@@ -137,6 +149,9 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 		"account_type": userCashAccount.Type,
 		"account_name": accountName,
 		"real_name":    userCashAccount.RealName,
+		"cast":         cast,
+		"rate":         rate,
+		"amount":       bill.TotalAmount - cast,
 	})
 	if r.Error != nil {
 		tx.Rollback()
