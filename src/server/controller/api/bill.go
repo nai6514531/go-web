@@ -31,7 +31,6 @@ var (
 func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	billService := &service.BillService{}
 	userCashAccountService := &service.UserCashAccountService{}
-	billBatchNoService := &service.BillBatchNoService{}
 	billRelService := &service.BillRelService{}
 	reqeust := simplejson.New()
 	ctx.ReadJSON(reqeust)
@@ -59,6 +58,24 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 
 	}else{
 		bill,err := billService.BasicByBillId(billId)
+		if bill.AccountType == 2 { // 如果是微信
+			// 判断是不是因为SystemError引起的,是的话不能结算
+			billRels,err := billRelService.Baisc(billId)
+			if err != nil {
+				// 获取微信账单批次号信息失败
+				result := &enity.Result{"01100003",err,bill_msg["01100003"]}
+				common.Log(ctx,result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+			if (*billRels)[0].ErrCode == "SYSTEMERROR" {
+				// 不允许用户发起提现
+				result := &enity.Result{"01100003",err,bill_msg["01100003"]}
+				common.Log(ctx,result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+		}
 		if err != nil {
 			common.Logger.Debugln("账单不存在")
 			result := &enity.Result{"01100003",err,bill_msg["01100003"]}
@@ -70,23 +87,6 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 			result := &enity.Result{"01100004",errors.New("用户没有权限"),bill_msg["01100004"]}
 			common.Log(ctx,result)
 			ctx.JSON(iris.StatusOK,result)
-			return
-		}
-		// 还要删除批次的相关表,避免再次结算的时候结算失败
-		_,err = billBatchNoService.Delete(billId)
-		if err != nil {
-			// 删除账单批次号记录失败
-			result :=&enity.Result{"01100007",err,bill_msg["01100007"]}
-			common.Log(ctx,result)
-			ctx.JSON(iris.StatusOK,result )
-			return
-		}
-		_,err = billRelService.Delete(billId)
-		if err != nil {
-			// 删除账单批次号记录失败
-			result :=&enity.Result{"01100007",err,bill_msg["01100007"]}
-			common.Log(ctx,result)
-			ctx.JSON(iris.StatusOK,result )
 			return
 		}
 
