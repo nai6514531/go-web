@@ -76,12 +76,13 @@ const App = React.createClass({
 		if (totalAmount <= 200) {
 			return message.info("可结算金额必须超过2元才可提现")
 		}
-		if (cashAccountType === 0) {
-			return message.info("你当前未设定收款方式，请修改收款方式再进行提现操作。")
-		}
 		if (cashAccountType === 3) {
 			return message.info("你当前收款方式为银行卡，不支持提现，请修改收款方式再进行提现操作。")
 		}
+		if (!!~[1, 2, 3].indexOf(cashAccountType)) {
+			return message.info("你当前未设定收款方式，请修改收款方式再进行提现操作。")
+		}
+		
 		let confirmMessage = _.template([
 			'共有<%- count %>天账单结算',
 			'结算金额为<%- totalAmount %>元',
@@ -99,14 +100,14 @@ const App = React.createClass({
 	    	self.setState({settlementLoading: true})
 	      BillService.create().then((res) => {
 	      	if (res.status !== 0) {
-	      		return new Promise.reject(new Error(res.msg))
+	      		throw new Error(res.msg)
 	      	}
       		self.setState({totalAmount: 0, count: 0, cast:0, settlementLoading: false})
 					message.info("申请提现成功！请等待结算");
 					self.getSettlementAmount()
 				}).catch((err) => {
 					self.setState({ settlementLoading: false })
-					message.error(err.message);
+					message.error(err.message || '申请提现失败！请重试');
 				})
 	    },
 	    onCancel() {
@@ -146,7 +147,7 @@ const App = React.createClass({
 		}).then((res) => {
 			const data = res.data;
 			if (res.status !== 0) {
-				return new Promise.reject()
+				throw new Error(res.msg)
 			}
 			self.setState({
 				bills: {

@@ -270,11 +270,11 @@ class AmountForm extends React.Component {
     UserService.edit(window.USER.id, user).then((res) => {
       console.log(res)
       if (res.status !== 0) {
-        return new Promise.reject(new Error(res.msg))
+        return new Error(res.msg)
       }
       self.props.handleCashModal('success');
     }, (res) => {
-      return new Promise.reject(new Error(res.msg))
+      return new Error(res.msg)
     }).catch((err) => {
       message.error(err.message || '更新失败，请重试~')
     })

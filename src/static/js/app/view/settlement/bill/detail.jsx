@@ -39,7 +39,7 @@ const Detail = React.createClass({
         key: 'totalAmount',
         width: 90,
         render: (total_amount) => {
-          return <p className="bigger">{total_amount / 100}</p>;
+          return (total_amount / 100).toFixed(2)
         }
       }, {
         title: '收款方式',
@@ -136,7 +136,7 @@ const Detail = React.createClass({
       billId: self.props.params.id || ''
     }).then((res) => {
         self.setState({
-          list: res.data.list,
+          list: res.data.list || [],
           loading: false,
           pagination: {
             ...pagination,

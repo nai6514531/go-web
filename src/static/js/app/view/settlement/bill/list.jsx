@@ -95,9 +95,7 @@ const App = React.createClass({
 					const status = record.status;
 					if (!!~[4].indexOf(status)) {
 						return <span>
-							<Popconfirm title='结算当前账单?' onConfirm={this.handleSettlemenet.bind(this, billId)}>
-	              <a href='#'>重新结算</a>
-	            </Popconfirm>
+	            <a onClick={this.handleSettlemenet.bind(this, billId)}>重新申请</a>
 		          <span className="ant-divider" />
 		          <a href={`#settlement/bill/${billId}`}>明细</a>
 		        </span>
@@ -131,15 +129,27 @@ const App = React.createClass({
 	},
 	handleSettlemenet(id) {
 		const self = this;
-		BillService.create(id).then((res) => {
-			if (res.status !== 0) {
-    		return new Promise.reject(new Error(res.msg))
-    	}
-			message.info("申请提现成功！请等待结算");
-    	self.props.getBillsList({search: {...this.state.search}});
-		}).catch((err) => {
-			message.error(err.message || "申请提现失败！请重试");
-		})
+		const bill = _.findWhere(this.props.bills.list, {billId: id}); 
+		const confirmMessage = `请先确认账号信息无误，共有${bill.count}天账单结算，结算金额为${bill.totalAmount/100}元，本次提现将收取${bill.cast/100}元手续费，是否确认提现？`
+		confirm({
+	    title: '确认重新申请提现',
+	    content: confirmMessage,
+	    onOk() {
+	    	BillService.create(id).then((res) => {
+					if (res.status !== 0) {
+						throw new Error(res.msg)
+		    	}
+					message.info("申请提现成功！请等待结算");
+		    	self.props.getBillsList({search: {...self.state.search}});
+				}).catch((err) => {
+					message.error(err.message || "申请提现失败！请重试");
+				})
+	    },
+	    onCancel() {
+	      console.log('Cancel');
+	    },
+	  });
+		
 	},
   changeDate(value) {
   	const date = value ? moment(value).format('YYYY-MM-DD') : ''
