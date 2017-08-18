@@ -29,6 +29,7 @@ var (
 		"01120104": "请求远程服务器出错",
 		"01120105": "解析远程服务器数据出错",
 		"01120106": "更新用户账号信息出错",
+		"01120107": "key已绑定用户",
 
 		"01120200": "更新用户信息成功",
 		"01120201": "key已过期",
@@ -61,16 +62,20 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 	params := simplejson.New()
 	err := ctx.ReadJSON(&params)
 	if err != nil {
-		common.Logger.Debugln("解析json出错,err--->",err)
 		result := &enity.Result{"01120101", err, auth_msg["01120101"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
 	}
 	prefix := viper.GetString("auth.prefix")
+	if common.Redis.Exists(prefix+"user:"+key+":").Val() == true {
+		result := &enity.Result{"01120107", nil, auth_msg["01120107"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx,result)
+		return
+	}
 	isExist := common.Redis.Exists(prefix+"key:user:"+key+":").Val()
 	if !isExist{
-		common.Logger.Debugln("key校验不通过")
 		result := &enity.Result{"01120103", nil, auth_msg["01120103"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
