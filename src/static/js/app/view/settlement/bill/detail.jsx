@@ -39,7 +39,7 @@ const Detail = React.createClass({
         key: 'totalAmount',
         width: 90,
         render: (total_amount) => {
-          return {(total_amount / 100).toFixed(2)}
+          return (total_amount / 100).toFixed(2)
         }
       }, {
         title: '收款方式',
