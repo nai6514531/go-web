@@ -50,7 +50,7 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 	md5Ctx.Write([]byte(strconv.Itoa(signinUserId)+time.Now().Format("060102150405")))
 	key := hex.EncodeToString(md5Ctx.Sum(nil))
 	// 将key和用户id绑定
-	common.Redis.Set(prefix+"key:user:"+key+":", signinUserId, time.Duration(10*time.Minute))
+	common.Redis.Set(prefix+"key:user:"+key+":", signinUserId, time.Duration(24*time.Hour))
 	result := &enity.Result{"01120000", map[string]string{"key": key}, auth_msg["01120000"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx,result)
@@ -172,7 +172,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		common.Log(ctx,result)
 		return
 	}
-	common.Redis.Set(prefix+"user:"+key+":",string(extraJson),5*time.Minute)
+	common.Redis.Set(prefix+"user:"+key+":",string(extraJson),24*time.Hour)
 
 	_user,_ := userService.Basic(int(userId))
 	result := &enity.Result{Status:"01120100", Data:map[string]interface{}{
