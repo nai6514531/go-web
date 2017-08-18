@@ -23,7 +23,7 @@ import DailyBillService from '../../../service/daily_bill';
 import BillService from '../../../service/bill';
 const confirm = Modal.confirm;
 
-const BILLS_STATUS = {0: '未结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
+const BILLS_STATUS = {0: '未申请结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
 
 const App = React.createClass({
 	getInitialState() {
@@ -44,11 +44,29 @@ const App = React.createClass({
 				dataIndex: 'count',
 				width: 50,
 			}, {
-				title: '收款方式',
+				title: '收款账号',
 				dataIndex: 'accountType',
 				width: 60,
-				render: (type) => {
-					return type === 1 ? '支付宝' : type === 2 ? '微信' : '-'
+				render: (type, record) => {
+					if (!!~[1].indexOf(type)) {
+            return _.template([
+            	'支付宝 | ',
+              '<%- realName %>',
+              '账号：<%- name %>'
+              ].join(''))({
+                realName: record.realName ? record.realName + ' | ' : '',
+                name: record.name || '-'
+              })
+          } 
+          if (!!~[2].indexOf(type)) {
+            return _.template([
+            	'微信 | ',
+              '<%- realName %>',
+              ].join(''))({
+                realName: record.realName || ''
+              })
+          } 
+          return '-'
 				}
 			}, {
 				title: '结算金额',
@@ -76,7 +94,10 @@ const App = React.createClass({
 				dataIndex: 'status',
 				width: 80,
 				render: (status, record) => {
-					return <div className="status">{BILLS_STATUS[status]}</div>
+					if (status === 4) {
+            return <p className='fail'><span>{BILLS_STATUS[status]}</span><Icon type='question-circle' onClick={this.showFailInfo} /></p>
+          }
+					return BILLS_STATUS[status]
 				}
 			}, {
 				title: '结算时间',
@@ -90,7 +111,7 @@ const App = React.createClass({
 				dataIndex: 'mode',
 				width: 60,
 				render: (mode) => {
-					return mode === 0 ? '是' : '否'
+					return mode === 0 ? '自动结算' : '手动结算'
 				}
 			}, {
 				title: '操作',
@@ -134,11 +155,20 @@ const App = React.createClass({
 		}
 		return dateRange;
 	},
+	showFailInfo() {
+    Modal.info({
+      content: (
+        <div>
+          <p>有结账失败记录很有可能是收款账号和姓名不匹配，请检查后修改收款方式。</p>
+        </div>
+      ),
+      onOk() {},
+    });
+  },
 	handleSettlemenet(id) {
 		const self = this;
 		let cashAccountType = this.props.cashAccount.type || 0;
 		const bill = _.findWhere(this.props.bills.list, {billId: id}); 
-		const confirmMessage = `请先确认账号信息无误，共有${bill.count}天账单结算，结算金额为${bill.totalAmount/100}元，本次结算将收取${bill.cast/100}元手续费，是否确认申请？`
 		if (cashAccountType === 3) {
 			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
 		}
@@ -147,13 +177,13 @@ const App = React.createClass({
 		}
 		confirm({
 	    title: '确认重新申请结算',
-	    content: confirmMessage,
+	    content: <p>共有<span className='color-red'>{bill.count}</span>天账单结算，结算金额为<span className='color-red'>{bill.totalAmount/100}</span>元，本次结算将收取<span className='color-red'>{bill.cast/100}</span>元手续费，是否确认结算？</p>,
 	    onOk() {
 	    	BillService.create(id).then((res) => {
 					if (res.status !== 0) {
 						throw new Error(res.msg)
 		    	}
-					message.info("申请结算成功！请等待结算");
+					message.info("申请成功！财务将在1日内结算");
 		    	self.props.getBillsList({search: {...self.state.search}});
 				}).catch((err) => {
 					message.error(err.message || "申请结算失败！请重试");
@@ -204,8 +234,8 @@ const App = React.createClass({
 					onChange={(value) => { this.setState({search: {...this.state.search, status: value}})}}>
 					<Option value="">请选择结算状态</Option>
 					<Option value="1">等待结算</Option>
-					<Option value="2">结算成功</Option>
 					<Option value="3">结算中</Option>
+					<Option value="2">结算成功</Option>
 					<Option value="4">结算失败</Option>
 				</Select>
       	<Button type="primary" onClick={this.search}>查询</Button>

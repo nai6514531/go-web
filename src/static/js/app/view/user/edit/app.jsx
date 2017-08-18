@@ -129,7 +129,7 @@ class UserForm extends React.Component {
         const type = nextProps.detail.result.data.cashAccount.type;
         const mode = nextProps.detail.result.data.cashAccount.mode;
         // type 1 for alipay,3 for bank,0 for none
-        this.setState({payType: type || 0, isMode: mode || true});
+        this.setState({payType: type || 0, isMode: mode === 0 ? true : false});
       }
     }
     if (self.saveDetail == 1) {
@@ -168,7 +168,8 @@ class UserForm extends React.Component {
         "telephone": values.telephone,
         "address": values.address,
         "email": "",
-        "key": this.state.wechat.key || ''      }
+        "key": this.state.wechat.key || ''      
+      }
       // 当前为修改微信账号状态，且未关联微信
       if (!this.state.wechat.name && !!this.state.wechat.key) {
         return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
@@ -190,7 +191,7 @@ class UserForm extends React.Component {
           "realName": values.wechatName,
         }
       }
-      cashAccount.mode = this.state.isMode 
+      cashAccount.mode = this.state.isMode ? 0 : 1
       user.cashAccount = cashAccount;
       if (this.props.params.id == 'new') {
         user.password = md5(values.password);
@@ -639,22 +640,23 @@ class UserForm extends React.Component {
             >
               {getFieldDecorator('type', {
                 rules: [
-                  {  message: '请选择收款方式' },
+                  { required: true, message: '请选择收款方式' },
                 ],
                 initialValue: initialValue.type || ''
               })(
                 <RadioGroup>
                   <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-                    <span>微信(最快T+1结算，收取提现金额的1%作为手续费)</span>
+                    <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
                   </Radio>
                   <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-                     <span>支付宝(最快T+1结算，200元以下每次提现收取2元手续费，200元及以上收取提现金额的1%作为手续费)</span>
+                     <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="是否自动生成账单">
-              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>200块自动生成账单（文案待定~~~~~！！！）</Checkbox>
+            <FormItem {...formItemLayout} label="是否自动结算">
+              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
+              结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
             </FormItem>
             {payNode}
             <FormItem className="button-wrapper">

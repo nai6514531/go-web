@@ -100,11 +100,11 @@ const App = React.createClass({
 				render: (status, record) => {
 					switch (status) {
 						case 0:
-							return <div className="status unfinished">未结算</div>
+							return <div className="status unfinished">未申请结算</div>
 							break;
 						case 1:
 							if (this.state.roleId == 3 || record.accountType == 1) {
-								return <div className="status unfinished">未结算</div>
+								return <div className="status unfinished">未申请结算</div>
 							} else {
 								return <div className="status">等待结算</div>
 							}
@@ -954,7 +954,7 @@ const App = React.createClass({
 				style={{width: 120 }}
 				onChange={this.handleStatusChange}>
 				<Option value="">请选择结算状态</Option>
-				<Option value="0">未结算</Option>
+				<Option value="0">未申请结算</Option>
 				<Option value="1">等待结算</Option>
 				<Option value="2">结算成功</Option>
 				<Option value="3">结算中</Option>

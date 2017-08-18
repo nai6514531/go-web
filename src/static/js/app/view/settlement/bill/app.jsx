@@ -73,29 +73,19 @@ const App = React.createClass({
 		const self = this;
 		let { totalAmount, count, cast } = this.state;
 		let cashAccountType = this.state.cashAccount.type || 0;
-		if (totalAmount <= 200) {
-			return message.info("可结算金额必须超过2元才可结算")
-		}
-		if (cashAccountType === 3) {
-			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
-		}
-		if (!~[1, 2, 3].indexOf(cashAccountType)) {
-			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
-		}
+		// if (totalAmount <= 200) {
+		// 	return message.info("可结算金额必须超过2元才可结算")
+		// }
+		// if (cashAccountType === 3) {
+		// 	return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
+		// }
+		// if (!~[1, 2, 3].indexOf(cashAccountType)) {
+		// 	return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
+		// }
 		
-		let confirmMessage = _.template([
-			'共有<%- count %>天账单结算',
-			'结算金额为<%- totalAmount %>元',
-			'本次结算将收取<%- cast %>元手续费',
-			'是否确认结算？'
-			].join(','))({
-				count: count,
-				totalAmount: totalAmount/100,
-				cast: cast/100
-			})
 		confirm({
 	    title: '确认申请结算',
-	    content: confirmMessage,
+	    content: <p>共有<span className='color-red'>{count}</span>天账单结算,结算金额为<span className='color-red'>{totalAmount}</span>元,本次结算将收取<span className='color-red'>{cast/100}</span>元手续费,是否确认结算？</p>,
 	    onOk() {
 	    	self.setState({settlementLoading: true})
 	      BillService.create().then((res) => {
@@ -103,7 +93,7 @@ const App = React.createClass({
 	      		throw new Error(res.msg)
 	      	}
       		self.setState({totalAmount: 0, count: 0, cast:0, settlementLoading: false})
-					message.info("申请结算成功！请等待结算");
+					message.info("申请成功！财务将在1日内结算");
 					self.getSettlementAmount()
 				}).catch((err) => {
 					self.setState({ settlementLoading: false })
@@ -166,7 +156,6 @@ const App = React.createClass({
 	handleCashModal(val) {
 		const self = this;
 		if (val === 'success') {
-    	self.getUserDetail()
     	self.getSettlementAmount()
 		}
     this.getUserDetail()
@@ -195,7 +184,7 @@ const App = React.createClass({
       				<Button type="primary" onClick={this.handleSettlement} loading={this.state.settlementLoading}>申请结算</Button>
       				{this.state.totalAmount !== 0 ? <Button onClick={this.dailyBillDetail}>明细</Button> : null}
       			</div>
-      			<p>申请结算才可进行结算，超过200元系统将自动帮你申请，详情请查看下方结算记录<span className="color-blue tip" onClick={this.settlementInfo}>结算时间</span></p>
+      			<p>如已选择“自动结算”，结算金额超过200元系统将自动申请结算，详情请查看下方结算记录。</p>
       		</Col>
       		<Col xs={24} lg={{span: 13}} className='cash-account-info'>
       			<Row className={cashAccount.type === 3 ? '' : 'hidden'}>
@@ -210,7 +199,7 @@ const App = React.createClass({
       				</Col>
       			</Row>
       			<Row className={cashAccount.type === 2 ? 'hidden' : ''}>
-      				<Col xs={8} lg={{span: 5}}>帐号：</Col>
+      				<Col xs={8} lg={{span: 5}}>账号：</Col>
       				<Col  xs={16} lg={{span: 12}}>{cashAccount.account || '无'}</Col>
       			</Row>
       			<Row className={cashAccount.type === 2 ? '' : 'hidden'}>

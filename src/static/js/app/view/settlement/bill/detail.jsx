@@ -42,11 +42,6 @@ const Detail = React.createClass({
           return (total_amount / 100).toFixed(2)
         }
       }, {
-        title: '收款方式',
-        dataIndex: 'accountName',
-        key: 'accountName',
-        width: 60
-      }, {
         title: '账期',
         dataIndex: 'billAt',
         key: 'billAt',

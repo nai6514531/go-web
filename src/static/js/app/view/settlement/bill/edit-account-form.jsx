@@ -117,7 +117,7 @@ class Wechat extends React.Component {
 
     return <div>
       <div className="form-wrapper">
-        <FormItem {...formItemLayout} label="扫码验证身份" >
+        <FormItem {...formItemLayout} label={( <span className='label'>扫码验证身份</span>)} >
           <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
             <img src={this.state.qrCodeUrl} width='160' />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
@@ -145,7 +145,6 @@ class Wechat extends React.Component {
             {max:30, message: '不超过三十个字'},
           ],
           initialValue: cashAccount.get('type') === 2 ? cashAccount.get('realName') : '',
-
         })(
           <Input placeholder="如：张三" />
         )}
@@ -222,7 +221,7 @@ class AmountForm extends React.Component {
     WechatService.create().then((res) => {
       console.log(res)
       if (res.status !== 0) {
-        return new Promise.reject()
+        throw new Error()
       }
       const key = res.data.key
       // 根据key生成二维码
@@ -245,7 +244,7 @@ class AmountForm extends React.Component {
         if (status === 1) {
           clearInterval(self.timer);
           self.timer = null;
-          return new Promise.reject()
+          throw new Error()
         }
         if (status === 0) {
           clearInterval(self.timer);
@@ -261,7 +260,7 @@ class AmountForm extends React.Component {
   }
   updateUserAccount({ ...options }) {
     const self = this
-    let cashAccount = _.chain(this.props.cashAccount).clone().extendOwn({realName: options.realName, account: options.account, type: options.type, mode: this.state.isMode}).value()
+    let cashAccount = _.chain(this.props.cashAccount).clone().extendOwn({realName: options.realName, account: options.account, type: options.type, mode: this.state.isMode ? 0 : 1}).value()
     cashAccount = _.pick(cashAccount, 'type', 'realName', 'account', 'mode')
     // 微信用户 补充key nickName 
     let user = options.type === 2 ? _.chain(this.props.user).clone().extendOwn({key: this.state.wechat.key, nickName: this.state.wechat.name}).value() : this.props.user
@@ -270,12 +269,15 @@ class AmountForm extends React.Component {
     UserService.edit(window.USER.id, user).then((res) => {
       console.log(res)
       if (res.status !== 0) {
-        return new Error(res.msg)
+        throw new Error(res.msg)
       }
       self.props.handleCashModal('success');
     }, (res) => {
-      return new Error(res.msg)
+      console.log(res)
+      
+      throw new Error(res.msg)
     }).catch((err) => {
+      console.log(err)
       message.error(err.message || '更新失败，请重试~')
     })
   }
@@ -288,7 +290,7 @@ class AmountForm extends React.Component {
     this.setState({isMode: !this.state.isMode})
   }
   componentDidMount() {
-    this.setState({isMode: this.props.cashAccount.mode || true})
+    this.setState({isMode: this.props.cashAccount.mode === 0 ? true : false})
   }
   componentWillUnmount () {
     clearInterval(this.timer)
@@ -314,16 +316,16 @@ class AmountForm extends React.Component {
       <FormItem {...formItemLayout} label="收款方式">
         {getFieldDecorator('type', {
           rules: [
-            {  message: '请选择收款方式' },
+            {required: true, message: '请选择收款方式'},
           ],
           initialValue: !!type ? type.toString() : '',
         })(
           <RadioGroup>
             <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-               <span>微信(最快T+1结算，收取结算金额的1%作为手续费)</span>
+               <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
             </Radio>
             <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-               <span>支付宝(最快T+1结算，200以下每次结算收取2元手续费，</span><br/>
+               <span>支付宝(T+1结算，200以下每次结算收取2元手续费，</span><br/>
                <span>200元及以上收取结算金额的1%作为手续费)</span>
             </Radio>
           </RadioGroup>
@@ -331,7 +333,7 @@ class AmountForm extends React.Component {
       </FormItem>
       <FormItem {...formItemLayout} label='是否自动结算'>
         <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
-        结算时需手动点击结算查询的”申请结算“按钮，财务才会进行结算）</Checkbox>
+        结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
       </FormItem>
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> : type === 2 ?
        <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={user}

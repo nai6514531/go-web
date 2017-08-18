@@ -112,7 +112,7 @@ class Wechat extends React.Component {
     const nickName = wechat.name || user.nickName;
     return <div>
       <div className="form-wrapper">
-        <FormItem {...formItemLayout} label="扫码验证身份" >
+        <FormItem {...formItemLayout} label={( <span className='label'>扫码验证身份</span>)} >
           <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
             <img src={this.state.qrCodeUrl} width='160' />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
@@ -124,7 +124,7 @@ class Wechat extends React.Component {
             </div> :
             <div className="code-tip">
               <Icon type='exclamation-circle' className='icon info' />
-              <span>请使用你作为收款用途的微信扫描二维码进行关联，申请提现后，
+              <span>请使用你作为收款用途的微信扫描二维码进行关联，申请结算后，
               款项会在规定时间内打入微信账户。</span>
               <p>请确保自己的微信已实名认证<span className='check-wechat' onClick={this.identification.bind(this)}>如何认证?</span></p>
             </div> 
