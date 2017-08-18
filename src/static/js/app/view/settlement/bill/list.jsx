@@ -80,10 +80,17 @@ const App = React.createClass({
 				}
 			}, {
 				title: '结算时间',
-				dataIndex: 'billAt',
+				dataIndex: 'settledAt',
 				width: 60,
-				render: (date) => {
-					return date ? moment(date).format('YYYY-MM-DD HH:mm') : '-'
+				render: (date, record) => {
+					return date && record.status === 2 ? moment(date).format('YYYY-MM-DD HH:mm') : '-'
+				}
+			}, {
+				title: '是否自动结算',
+				dataIndex: 'mode',
+				width: 60,
+				render: (mode) => {
+					return mode === 0 ? '是' : '否'
 				}
 			}, {
 				title: '操作',
@@ -129,20 +136,27 @@ const App = React.createClass({
 	},
 	handleSettlemenet(id) {
 		const self = this;
+		let cashAccountType = this.props.cashAccount.type || 0;
 		const bill = _.findWhere(this.props.bills.list, {billId: id}); 
-		const confirmMessage = `请先确认账号信息无误，共有${bill.count}天账单结算，结算金额为${bill.totalAmount/100}元，本次提现将收取${bill.cast/100}元手续费，是否确认提现？`
+		const confirmMessage = `请先确认账号信息无误，共有${bill.count}天账单结算，结算金额为${bill.totalAmount/100}元，本次结算将收取${bill.cast/100}元手续费，是否确认申请？`
+		if (cashAccountType === 3) {
+			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
+		}
+		if (!~[1, 2, 3].indexOf(cashAccountType)) {
+			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
+		}
 		confirm({
-	    title: '确认重新申请提现',
+	    title: '确认重新申请结算',
 	    content: confirmMessage,
 	    onOk() {
 	    	BillService.create(id).then((res) => {
 					if (res.status !== 0) {
 						throw new Error(res.msg)
 		    	}
-					message.info("申请提现成功！请等待结算");
+					message.info("申请结算成功！请等待结算");
 		    	self.props.getBillsList({search: {...self.state.search}});
 				}).catch((err) => {
-					message.error(err.message || "申请提现失败！请重试");
+					message.error(err.message || "申请结算失败！请重试");
 				})
 	    },
 	    onCancel() {

@@ -2,7 +2,6 @@ import api from '../library/request/api'
 
 const Service = {
   list: (data) => {
-    console.log(data)
     return api.get('/api/daily-bill', {
       params: {
         cashAccountType: data.cashAccountType,

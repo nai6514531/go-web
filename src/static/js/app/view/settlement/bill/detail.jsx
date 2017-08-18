@@ -60,15 +60,21 @@ const Detail = React.createClass({
         key: 'mobile',
         width: 250,
         render: (mobile, record) => {
-          if (!!~[1, 2].indexOf(record.accountType)) {
+          if (!!~[1].indexOf(record.accountType)) {
             return _.template([
               '<%- realName %>',
-              '账号：<%- account %>',
-              '手机号：<%- mobile %>'
+              '账号：<%- account %>'
               ].join(' | '))({
                 realName: record.realName,
-                account: record.account || '-',
-                mobile: record.mobile || '-'
+                account: record.account || '-'
+              })
+          } 
+          if (!!~[2].indexOf(record.accountType)) {
+            return _.template([
+              '<%- realName %>',
+              ].join(' | '))({
+                realName: record.realName,
+                nickName: record.nickName || '-'
               })
           } 
           if (!!~[3].indexOf(record.accountType)) {
