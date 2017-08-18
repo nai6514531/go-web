@@ -78,6 +78,7 @@ func (self *UserCashAccountService) UpdateByUserId(userCashAccount *model.UserCa
 	value_zero["province_id"] = userCashAccount.ProvinceId
 	value_zero["city_id"] = userCashAccount.CityId
 	value_zero["mobile"] = userCashAccount.Mobile
+	value_zero["mode"] = userCashAccount.Mode
 
 	//再单独更新一次type避免为0时更新不了
 	r = transAction.Model(&model.UserCashAccount{}).Where("user_id = ?", userCashAccount.UserId).Updates(value_zero)
