@@ -127,8 +127,9 @@ class UserForm extends React.Component {
     if (this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true) {
       if (nextProps.detail.result.data.cashAccount) {
         const type = nextProps.detail.result.data.cashAccount.type;
+        const mode = nextProps.detail.result.data.cashAccount.mode;
         // type 1 for alipay,3 for bank,0 for none
-        this.setState({payType: type || 0});
+        this.setState({payType: type || 0, isMode: mode || true});
       }
     }
     if (self.saveDetail == 1) {
@@ -167,9 +168,7 @@ class UserForm extends React.Component {
         "telephone": values.telephone,
         "address": values.address,
         "email": "",
-        "key": this.state.wechat.key || '',
-        "mode": this.state.isMode 
-      }
+        "key": this.state.wechat.key || ''      }
       // 当前为修改微信账号状态，且未关联微信
       if (!this.state.wechat.name && !!this.state.wechat.key) {
         return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
@@ -191,6 +190,7 @@ class UserForm extends React.Component {
           "realName": values.wechatName,
         }
       }
+      cashAccount.mode = this.state.isMode 
       user.cashAccount = cashAccount;
       if (this.props.params.id == 'new') {
         user.password = md5(values.password);

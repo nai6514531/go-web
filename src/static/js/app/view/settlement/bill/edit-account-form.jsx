@@ -130,7 +130,7 @@ class Wechat extends React.Component {
           </div> :
           <div className="code-tip">
             <Icon type='exclamation-circle' className='icon info' />
-            <span>请使用你作为收款用途的微信扫描二维码进行关联，申请提现后，
+            <span>请使用你作为收款用途的微信扫描二维码进行关联，申请结算后，
             款项会在规定时间内打入微信账户。</span>
             <p>请确保自己的微信已实名认证<span className='check-wechat' onClick={this.identification.bind(this)}>如何认证?</span></p>
           </div> 
@@ -320,17 +320,18 @@ class AmountForm extends React.Component {
         })(
           <RadioGroup>
             <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-               <span>微信收款(最快T+1结算，收取提现金额的1%作为手续费)</span>
+               <span>微信(最快T+1结算，收取结算金额的1%作为手续费)</span>
             </Radio>
             <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-               <span>支付宝(收款最快T+1结算，200以下每次提现收取2元手续费，</span><br/>
-               <span>200元及以上收取提现金额的1%作为手续费)</span>
+               <span>支付宝(最快T+1结算，200以下每次结算收取2元手续费，</span><br/>
+               <span>200元及以上收取结算金额的1%作为手续费)</span>
             </Radio>
           </RadioGroup>
         )}
       </FormItem>
-      <FormItem {...formItemLayout} label="是否自动生成账单">
-        <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>200块自动生成账单（文案待定~~~~~！！！）</Checkbox>
+      <FormItem {...formItemLayout} label='是否自动结算'>
+        <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
+        结算时需手动点击结算查询的”申请结算“按钮，财务才会进行结算）</Checkbox>
       </FormItem>
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> : type === 2 ?
        <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={user}

@@ -73,7 +73,7 @@ const App = React.createClass({
 	            {record.mobile?<span className="info">手机号: {record.mobile}</span>:''}
           </div>
 					} else if (record.accountType == 2) {
-						return <div>{`${record.realName} | 手机号：${record.mobile}`}</div>
+						return <div>{`${record.realName}`}</div>
 					} else if (record.accountType == 3) {
 						return <div>
 	            {record.realName?<span>户名: {record.realName}</span>:''}
@@ -110,7 +110,7 @@ const App = React.createClass({
 							}
 							break;
 						case 2:
-							return <div className="status done">已结算</div>
+							return <div className="status done">结算成功</div>
 							break;
 						case 3:
 							return <div className="status">结算中</div>
@@ -956,7 +956,7 @@ const App = React.createClass({
 				<Option value="">请选择结算状态</Option>
 				<Option value="0">未结算</Option>
 				<Option value="1">等待结算</Option>
-				<Option value="2">已结算</Option>
+				<Option value="2">结算成功</Option>
 				<Option value="3">结算中</Option>
 				<Option value="4">结算失败</Option>
 			</Select>
