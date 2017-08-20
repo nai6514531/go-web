@@ -1,13 +1,14 @@
 package service
 
 import (
+	"time"
+
 	"github.com/go-errors/errors"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
-	"time"
 )
 
 type BillService struct {
@@ -160,7 +161,7 @@ func (self *BillService) ReWithDraw(billId string, userId int, userCashAccount *
 
 	status := 1
 
-	tx := common.SodaMngDB_R.Begin()
+	tx := common.SodaMngDB_WR.Begin()
 	// 更新账单状态
 	r = tx.Model(&model.Bill{}).Where("bill_id = ?", billId).Updates(map[string]interface{}{
 		"status":       status,

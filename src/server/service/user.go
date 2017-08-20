@@ -76,14 +76,14 @@ func (self *UserService) ListOfSignIn(format string) (*[]*muniu.SignInUser, erro
 	list := []*muniu.SignInUser{}
 	sql := ""
 	if format == "month" {
-		sql=`
+		sql = `
 		select date_format(date,'%Y-%m-%d') as 'date',sum(total_new_user) as 'count'
 		from daily_operate
 		group by date_format(date,'%Y-%m')
 		order by created_timestamp desc
 		`
-	}else {
-		sql=`
+	} else {
+		sql = `
 		select date_format(date,'%Y-%m-%d') as 'date',total_new_user as 'count'
 		from daily_operate
 		order by created_timestamp desc
@@ -102,7 +102,7 @@ func (self *UserService) ListOfSignIn(format string) (*[]*muniu.SignInUser, erro
 	return &list, nil
 }
 
-func (self *UserService) Create(user *model.User) (bool,error) {
+func (self *UserService) Create(user *model.User) (bool, error) {
 	//对明文密码md5
 	//user.Password = fmt.Sprintf("%x", md5.Sum([]byte(user.Password)))
 	transAction := common.SodaMngDB_WR.Begin()
@@ -112,7 +112,7 @@ func (self *UserService) Create(user *model.User) (bool,error) {
 		return false, r.Error
 	}
 	transAction.Commit()
-	return true,nil
+	return true, nil
 }
 
 func (self *UserService) Update(user *model.User) (bool, error) {
@@ -129,16 +129,16 @@ func (self *UserService) Update(user *model.User) (bool, error) {
 	if r.Error != nil {
 		common.Logger.Warningln("Save model.User:", r.Error.Error())
 		transAction.Rollback()
-		return false,r.Error
+		return false, r.Error
 	}
 	transAction.Commit()
-	return true,nil
+	return true, nil
 }
-func (self *UserService)  UpdateWechatInfo(user *model.User) (error) {
+func (self *UserService) UpdateWechatInfo(user *model.User) error {
 	_user := map[string]interface{}{
-		"extra":      user.Extra,
+		"extra": user.Extra,
 	}
-	r := common.SodaMngDB_R.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user)
+	r := common.SodaMngDB_WR.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user)
 	if r.Error != nil {
 		common.Logger.Warningln("Save model.User:", r.Error.Error())
 		return r.Error
