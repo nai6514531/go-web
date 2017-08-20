@@ -68,12 +68,7 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		return
 	}
 	prefix := viper.GetString("auth.prefix")
-	if common.Redis.Exists(prefix+"user:"+key+":").Val() == true {
-		result := &enity.Result{"01120107", nil, auth_msg["01120107"]}
-		ctx.JSON(iris.StatusOK, result)
-		common.Log(ctx,result)
-		return
-	}
+
 	isExist := common.Redis.Exists(prefix+"key:user:"+key+":").Val()
 	if !isExist{
 		result := &enity.Result{"01120103", nil, auth_msg["01120103"]}
@@ -162,6 +157,23 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
 		return
+	}
+	if common.Redis.Exists(prefix+"user:"+key+":").Val() == true {
+		userExtra := common.Redis.Get(prefix+"user:"+key+":")
+		userMap := make(map[string]interface{})
+		err = json.Unmarshal([]byte(userExtra.Val()),&userMap)
+		if err != nil {
+			result := &enity.Result{"01120205", err, auth_msg["01120205"]}
+			ctx.JSON(iris.StatusOK, result)
+			common.Log(ctx,result)
+			return
+		}
+		if userMap["openid"].(string) != extra["openid"].(string) {
+			result := &enity.Result{"01120107", nil, auth_msg["01120107"]}
+			ctx.JSON(iris.StatusOK, result)
+			common.Log(ctx,result)
+			return
+		}
 	}
 	// 将返回的用户信息存放到redis中,轮询时根据key来获取openId从而判断是否绑定成功
 	extraJson,err := json.Marshal(extra)
