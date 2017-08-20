@@ -40,6 +40,26 @@
     "domain": "mng.huacetech.cn",
     "host": "0.0.0.0",
     "port": 8080,
+    "cors": {
+      "allowedOrigins": [
+        "https://m.sodalife.xyz",
+        "http://m.sodalife.xyz",
+        "http://m.sodalife.club"
+      ],
+      "allowedHeaders": [
+        "Authorization",
+        "Cookie",
+        "Origin",
+        "Content-Type",
+        "*"
+      ],
+      "allowedMethods": [
+        "GET",
+        "POST",
+        "OPTIONS"
+      ],
+      "maxAge": 3600
+    },
     "captcha": {
       "key": "CAPTCHA",
       "fontPath": "./resource/font/comic.ttf"
@@ -195,5 +215,21 @@
     "smsId": {
       "resetPassword": "SMS_60105709"
     }
+  },
+  "bill":{
+    "min":200,
+    "wechat":{
+      "rate":1
+    },
+    "aliPay":{
+      "cast":200,
+      "rate":0,
+      "borderValue":20000
+    }
+  },
+  "auth":{
+    "prefix":"soda-manager:auth:",
+    "requestUrl":"http://api.sodalife.club/v1/session/accounts",
+    "origin":"http://m.sodalife.club"
   }
 }

@@ -11,16 +11,30 @@
   text-align: center;
   width: 100%;
 }
+.input-wrapper {
+  
+  @media (min-width: 1200px) {
+    input {
+      width: 75%
+    }
+  }
+  @media (max-width: 1200px) {
+    input {
+      width: 60%
+    }
+  }
+}
+
 .button-style {
   background-color: #108ee9 !important;
   position: absolute;
   top: 0px;
-  right: 10%;
-  @media (max-width: 320px) {
-    right: -25px;
+  right: 0;
+  @media (max-width: 1200px) {
+    right: -10px;
   }
-  @media (min-width: 320px) and (max-width: 768px) {
-    right: -14px;
+  @media (max-width: 320px) {
+    zoom: 0.8;
   }
 }
 .tips {
@@ -33,5 +47,99 @@
     max-width: 150px;
     overflow: auto;
     line-height: 22px;
+  }
+}
+.view-user-list {
+  .code {
+    position: relative;
+    width: 180px;
+    &.loading {
+      img {
+        opacity: 0.3
+      }
+    }
+    .key-loading {
+      position: absolute;
+      top: 35%;
+      left: 35%;
+      font-size: 28px;
+      zoom: 1.5;
+    }
+  }
+  .code-tip {
+    border: 1px solid #ccc;
+    padding: 10px;
+    float: left;
+    width: 280px;
+    position: absolute;
+    top: 20px;
+    left: 180px;
+    p {
+      line-height: 1.8;
+    }
+    .icon {
+      font-size: 18px;
+      margin-right: 10px;
+      &.info {
+        color: #108ee9;
+      }
+      &.success {
+        color: #24ad87;
+      }
+      
+    }
+    .reset-wechat {
+      color: #108ee9;
+      text-decoration: underline;
+      font-style: normal;
+      cursor: pointer;
+    }
+    .check-wechat {
+      margin-left: 10px;
+      color: #108ee9;
+    }
+  }
+  @media (max-width: 1200px) { 
+    .code-tip {
+      position: relative;
+      left: 0;
+      top: 0px;
+      width: 160px;
+    }
+  }
+  .label:before {
+    display: inline-block;
+    margin-right: 4px;
+    content: "*";
+    font-family: SimSun;
+    line-height: 1;
+    font-size: 12px;
+    color: #f04134;
+  }
+  @media (min-width: 1200px) { 
+    .form-input {
+      button {
+        right: 10%
+      }
+    }
+  }
+  @media (max-width: 500px) { 
+    .form-input {
+      button {
+        right: -10px
+      }
+      input {
+        width: 60%
+      }
+    }
+  }
+  .toolbar {
+    line-height: 28px;
+  }
+  .ant-form-item-control  {
+    line-height: initial;
+  }
+  .radio-line {
+    line-height: 38px;
   }
 }

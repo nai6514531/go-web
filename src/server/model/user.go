@@ -1,5 +1,7 @@
 package model
 
+import "github.com/bitly/go-simplejson"
+
 /**
   用户信息
 */
@@ -21,8 +23,24 @@ type User struct {
 	Menu        interface{} `json:"menu,omitempty" gorm:"-"`
 	DeviceTotal int         `json:"deviceTotal,omitempty" gorm:"-"`
 	CashAccount interface{} `json:"cashAccount,omitempty" gorm:"-"`
+	Key         string      `json:"key,omitempty" gorm:"-"`
+	Extra       string      `json:"extra,omitempty"`
+	Nickname    string 	`json:"nickName" gorm:"-"`
+	HeadImgUrl  string 	`json:"headImgUrl" gorm:"-"`
 }
 
 func (User) TableName() string {
 	return "user"
+}
+
+func (user *User) Mapping() *User{
+	if user.Extra == "" {
+		return user
+	}else{
+		extra,_ := simplejson.NewJson([]byte(user.Extra))
+		user.Nickname = extra.Get("nickname").MustString()
+		user.HeadImgUrl = extra.Get("headimgurl").MustString()
+		user.Extra = ""
+		return user
+	}
 }

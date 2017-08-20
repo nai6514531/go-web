@@ -2,8 +2,8 @@ package model
 
 type BillBatchNo struct {
 	Model
-	BillId int   `json:"billId"`
-	BatchNo string  `json:"batchNo"`
+	BillId  string `json:"billId"`
+	BatchNo string `json:"batchNo"`
 }
 
 func (BillBatchNo) TableName() string {

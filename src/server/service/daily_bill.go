@@ -24,7 +24,7 @@ func (self *DailyBillService) Total() (int, error) {
 	return int(total), nil
 }
 
-func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []string, userId int, searchStr string, roleId int, startAt string, endAt string) (int, error) {
+func (self *DailyBillService) TotalByAccountType(billId string,cashAccounType int, status []string, userId int, searchStr string, roleId int, startAt string, endAt string) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -55,9 +55,17 @@ func (self *DailyBillService) TotalByAccountType(cashAccounType int, status []st
 		//财务角色过滤掉测试账号的账单
 		sql += " and bill.user_id !=1 "
 	}
-	if startAt != "" && endAt != "" {
-		sql += " and bill.bill_at between ? and ? "
-		params = append(params, startAt, endAt)
+	if startAt != "" {
+		sql += " and bill.bill_at >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and bill.bill_at <= ? "
+		params = append(params, endAt)
+	}
+	if billId != "" {
+		sql += " and bill.bill_id = ? "
+		params = append(params, billId)
 	}
 	common.Logger.Debugln("params===========", params)
 	r := common.SodaMngDB_R.Raw(sql, params...).Scan(result)
@@ -76,7 +84,7 @@ func (self *DailyBillService) List(page int, perPage int) (*[]*model.DailyBill, 
 	return list, nil
 }
 
-func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []string, userId int, searchStr string, page int, perPage int, roleId int, startAt string, endAt string) (*[]*model.DailyBill, error) {
+func (self *DailyBillService) ListWithAccountType(billId string,cashAccountType int, status []string, userId int, searchStr string, page int, perPage int, roleId int, startAt string, endAt string) (*[]*model.DailyBill, error) {
 	list := []*model.DailyBill{}
 	params := make([]interface{}, 0)
 	_offset := strconv.Itoa((page - 1) * perPage)
@@ -113,6 +121,10 @@ func (self *DailyBillService) ListWithAccountType(cashAccountType int, status []
 	if endAt != "" {
 		sql += " and bill.bill_at <= ? "
 		params = append(params, endAt)
+	}
+	if billId != "" {
+		sql += " and bill.bill_id = ? "
+		params = append(params, billId)
 	}
 	sql += " order by bill.has_marked, case " +
 		"when bill.status=4 then 1 " +
@@ -540,4 +552,64 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 		status = append(status, []string{"1", "2", "3", "4"}...)
 	}
 	return status, userId, roleId, nil
+}
+
+
+// 根据用户ID获取用户的可提现金额
+func (self *DailyBillService) CountAllocatableMoneyByUserId(userId int) (int,int, error){
+	type Result struct {
+		Amount int
+		Count int
+	}
+	result := &Result{}
+	r := common.SodaMngDB_R.Table("daily_bill").
+		Select("sum(total_amount) as 'amount', count(id) as `count` ").
+		Where("user_id = ? and status = 0",userId).Scan(result)
+	if r.Error != nil && r.Error != gorm.ErrRecordNotFound {
+		return -1,-1,r.Error
+	}
+	return result.Amount,result.Count,nil
+
+}
+
+func (self *DailyBillService) ListByBillId(bill *model.Bill,page,perPage,status,cashAccountType int,startAt, endAt, searchStr string)([]*model.DailyBill,error){
+	params := []interface{}{}
+	dailyBillList := []*model.DailyBill{}
+	sql := "select * from daily_bill as bill where ( bill.deleted_at IS NULL and bill.bill_id = ? "
+	params = append(params,bill.BillId)
+	if status > 0 {
+		sql += " and bill.status = ? "
+		params = append(params, status)
+	}
+	if startAt != "" {
+		sql += " and bill.settled_at >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and bill.settled_at <= ? "
+		params = append(params, endAt)
+	}
+	if cashAccountType > 0 {
+		sql += " and bill.account_type = ? "
+		params = append(params, cashAccountType)
+	}
+	if searchStr != "" {
+		sql += " and (bill.bank_name like ? or bill.user_name like ? or bill.real_name like ?) "
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
+		params = append(params, "%"+searchStr+"%")
+	}
+	if page == -1 {
+		page = 1
+	}
+	if perPage == -1 {
+		perPage = 10
+	}
+	common.Logger.Debugln(params)
+	// 排序规则：按申请时间先后排列，最新提交的提现申请排在最前面
+	r := common.SodaMngDB_R.Raw(sql, params...).Order(" settled_at desc ").Offset((page-1)*page).Limit(perPage).Scan(&dailyBillList)
+	if r.Error != nil {
+		return nil,r.Error
+	}
+	return dailyBillList,nil
 }

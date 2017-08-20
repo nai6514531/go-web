@@ -8,3 +8,5 @@ import 'nprogress/nprogress.css';
 ReactDOM.render(router, document.getElementById('main'));
 import 'antd/dist/antd.min.css';
 
+import './library/debug'
+

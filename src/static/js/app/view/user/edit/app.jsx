@@ -1,9 +1,14 @@
 import React from 'react';
+import Promise from 'bluebird'
+import op from 'object-path'
+import _ from 'underscore';
+
 import './app.less';
 import {
   Button,
   Form,
   Input,
+  Checkbox,
   Radio,
   Select,
   Cascader,
@@ -31,9 +36,11 @@ import {
 import {
   bindActionCreators
 } from 'redux';
+import { Wechat, Alipay, Test } from './pay-form.jsx'
 import * as UserActions from '../../../actions/user';
 import * as regionActions from '../../../actions/region';
-
+import UserService from '../../../service/user';
+import WechatService from '../../../service/wechat';
 
 function mapStateToProps(state) {
   const {
@@ -83,15 +90,20 @@ class UserForm extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      type: "3",
-      payType: 1,
+      payType: 0,
       unsaved: true,
       passwordDirty: false,
       imgUrl: '',
-      modalVisible: false
+      modalVisible: false,
+      wechat: {
+        key: '',
+        name: '',
+      },
+      keyLoading: false,
+      isMode: true
     }
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.provinceChange = this.provinceChange.bind(this);
+    // this.provinceChange = this.provinceChange.bind(this);
     this.checkNumber = this.checkNumber.bind(this);
     this.checkUserAccount = this.checkUserAccount.bind(this);
     this.checkConfirm = this.checkConfirm.bind(this);
@@ -103,13 +115,11 @@ class UserForm extends React.Component {
   }
   componentWillMount() {
     // 默认北京市东城区
-    this.props.getProvinceList();
-    this.props.getProvinceCityList(110000);
+    // this.props.getProvinceList();
+    // this.props.getProvinceCityList(110000);
     const id = this.props.params.id;
     if (id && id !== 'new') {
       this.props.getUserDetail(id);
-    } else {
-      this.provinceId = 110000;
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -117,29 +127,9 @@ class UserForm extends React.Component {
     if (this.props.detail !== nextProps.detail && nextProps.detail && nextProps.detail.fetch == true) {
       if (nextProps.detail.result.data.cashAccount) {
         const type = nextProps.detail.result.data.cashAccount.type;
+        const mode = nextProps.detail.result.data.cashAccount.mode;
         // type 1 for alipay,3 for bank,0 for none
-        if (type !== undefined) {
-          switch (type) {
-            case 1:
-              this.setState({
-                payType: 1
-              });
-              break;
-            case 3:
-              this.setState({
-                payType: 3
-              });
-              const provinceId = nextProps.detail.result.data.cashAccount.provinceId;
-              if (provinceId !== 0) {
-                this.props.getProvinceCityList(provinceId);
-              }
-              break;
-            default:
-              this.setState({
-                payType: 0
-              });
-          }
-        }
+        this.setState({payType: type || 0, isMode: mode === 0 ? true : false});
       }
     }
     if (self.saveDetail == 1) {
@@ -163,20 +153,6 @@ class UserForm extends React.Component {
       }
     }
   }
-  provinceChange(event) {
-    this.props.getProvinceCityList(event);
-    const {
-      setFieldsValue
-    } = this.props.form;
-    setFieldsValue({
-      'cityId': '-1'
-    });
-    this.provinceHelp = {};
-    this.default = -1;
-  }
-  cityChange(event) {
-    this.cityIdHelp = {};
-  }
   handleSubmit(e) {
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
@@ -184,53 +160,38 @@ class UserForm extends React.Component {
         return;
       }
       let cashAccount = {};
+      const type = parseInt(values.type);
       const user = {
         "name": values.name,
         "contact": values.contact,
         "mobile": values.mobile,
         "telephone": values.telephone,
         "address": values.address,
-        "email": ""
+        "email": "",
+        "key": this.state.wechat.key || ''      
       }
-      if (values.type == 3) {
-        let provinceId = values.provinceId;
-        let cityId = values.cityId;
-        if (!provinceId || provinceId == "请选择省份") {
-          this.provinceHelp = {
-            'help': '必选',
-            'className': 'has-error'
-          };
-          return false;
-        }
-        if (cityId == -1 || !cityId || cityId == "请选择城市") {
-          cityId = 0;
-          this.cityIdHelp = {
-            'help': '必选',
-            'className': 'has-error'
-          };
-          return false;
-        }
+      // 当前为修改微信账号状态，且未关联微信
+      if (!this.state.wechat.name && !!this.state.wechat.key) {
+        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
+      }
+       // 未选任何结算方式
+      if (!~[1, 2].indexOf(type)) {
+        return message.error('请选择收款方式')
+      }
+      if (type === 1) {
         cashAccount = {
-          "type": parseInt(values.type),
-          "realName": values.realName,
-          "bankName": values.bankName,
-          "headBankName": values.headBankName,
-          "account": values.account,
-          "mobile": values.bankMobile,
-          "cityId": parseInt(cityId),
-          "provinceId": parseInt(provinceId),
-        }
-      } else if (values.type == 1) {
-        cashAccount = {
-          "type": parseInt(values.type),
+          "type": type,
           "realName": values.alipayName,
           "account": values.alipayAccount,
         }
-      } else {
+      }
+      if (type === 2) {
         cashAccount = {
-          "type": parseInt(values.type),
+          "type": type,
+          "realName": values.wechatName,
         }
       }
+      cashAccount.mode = this.state.isMode ? 0 : 1
       user.cashAccount = cashAccount;
       if (this.props.params.id == 'new') {
         user.password = md5(values.password);
@@ -243,24 +204,74 @@ class UserForm extends React.Component {
     });
   }
 
-  handleRadio(select) {
-    switch (select) {
-      case "3":
-        this.setState({
-          payType: 3
-        });
-        break;
-      case "1":
-        this.setState({
-          payType: 1
-        });
-        break;
-      default:
-        this.setState({
-          payType: 0
-        });
+  changePayTye(type) {
+    const self = this;
+    const isEdit = this.props.params.id !== 'new'
+    let user = {};
+
+    
+    const wechat = this.state.wechat;
+    clearInterval(self.timer);
+    self.timer = null;
+    this.setState({payType: type, wechat: {name: '', key: ''}});
+
+    // 当前状态为修改用户信息
+    if (isEdit) {
+      user = this.props.detail.result.data;
+      // 选择微信支付账户 且用户默认不是微信支付
+      if (type === 2 && user.cashAccount.type !== 2) {
+        // 获取随机key
+        return self.resetWechatKey()
+      }
+    }
+    if (!isEdit && type === 2) {
+      // 获取随机key
+      return self.resetWechatKey()
     }
   }
+  resetWechatKey() {
+    const self = this;
+    self.setState({keyLoading: true})
+    WechatService.create().then((res) => {
+      console.log(res)
+      if (res.status !== 0) {
+        return new Promise.reject()
+      }
+      const key = res.data.key
+      // 根据key生成二维码
+      // self.initQRCode(key)
+      self.setState({wechat: {name: '', key: key || ''}, keyLoading: false})
+      self.checkWechatKey()
+    }).catch(() => {
+      self.setState({keyLoading: false})
+    })
+  }
+  checkWechatKey() {
+    const self = this;
+    const key = self.state.wechat.key;
+    clearInterval(self.timer);
+    self.timer = null;
+    self.timer = setInterval(() => {
+      WechatService.getKeyDetail(key).then((res) => {
+        const status = res.status;
+        if (status === 1) {
+          clearInterval(self.timer);
+          self.timer = null;
+          return new Promise.reject()
+        }
+        if (status === 0) {
+          clearInterval(self.timer);
+          self.timer = null;
+          self.setState({wechat: {...self.state.wechat, name: res.data.wechat.name}})
+        }
+      }).catch((error) => {
+        clearInterval(self.timer);
+        self.timer = null;
+        console.log(error)
+      })
+    }, 3000)
+  }
+
   handleEnter(event) {
     if (event.keyCode == 13) {
       this.handleSubmit(event);
@@ -357,8 +368,22 @@ class UserForm extends React.Component {
       modalVisible: false,
     });
   }
+  onChangeAutoBill () {
+    this.setState({isMode: !this.state.isMode})
+  }
+  componentWillUpdate(nextProps, nextState) {
+    const self = this;
+    // if (nextProps.detail.result.data.cashAccount !== this.props.wechat.key) {
+    //   self.initQRCode(nextProps.wechat.key)
+    // }
+  }
+  componentWillUnmount () {
+    clearInterval(this.timer)
+    this.timer = null
+  }
   render() {
     let ProvinceNode = [];
+    const wechat = this.state.wechat
     if (this.props.provinceList && this.props.provinceList.fetch == true) {
       ProvinceNode = this.props.provinceList.result.data.map(function(item, key) {
         return <Option key={key} value={item.id.toString()}>{item.name}</Option>
@@ -395,6 +420,7 @@ class UserForm extends React.Component {
           address: data.address,
           mobile: data.mobile,
           telephone: data.telephone,
+          mode: data.mode
         }
         self.account = data.account;
         let cashValues = {};
@@ -414,10 +440,16 @@ class UserForm extends React.Component {
           } else if (type == 1) {
             cashValues = {
               type: data.cashAccount.type.toString(),
-              alipayAccount: data.cashAccount.account,
-              alipayName: data.cashAccount.realName,
+              account: data.cashAccount.account,
+              realName: data.cashAccount.realName,
             }
-          } else if (type == 0) {
+          } else if (type == 2) {
+            cashValues = {
+              type: data.cashAccount.type.toString(),
+              account: data.cashAccount.account,
+              realName: data.cashAccount.realName,
+            }
+          } else {
             cashValues = {
               type: "0",
             }
@@ -433,10 +465,12 @@ class UserForm extends React.Component {
     } = this.props.form;
     const formItemLayout = {
       labelCol: {
-        span: 9
+        xs: { span: 9 },
+        sm: { span: 9 }
       },
       wrapperCol: {
-        span: 10
+        xs: { span: 15 },
+        sm: { span: 10 },
       },
     };
     let breadcrumb = '添加运营商';
@@ -448,154 +482,20 @@ class UserForm extends React.Component {
     // if(!this.cityIdHelp){
     //   this.cityIdHelp = {};
     // }
-    if (this.state.payType == 1) {
-      payNode = <div>
-        <div className="form-wrapper">
-          <FormItem
-            {...formItemLayout}
-            label="支付宝账号">
-            {getFieldDecorator('alipayAccount', {
-              rules: [
-                {required: true,  message: '必填'},
-                { max:30, message: '不超过三十个字'},
-              ],
-              initialValue: initialValue.alipayAccount,
-
-            })(
-            <Input placeholder="需要确认是邮箱还是手机号"/>
-            )}
-          </FormItem>
-          <Button className="button-style" type="primary" onClick={this.showModal.bind(this,'account')}>查看示例</Button> 
-        </div>
-        <div className="form-wrapper">
-            <FormItem
-              {...formItemLayout}
-              label="真实姓名">
-              {getFieldDecorator('alipayName', {
-                rules: [
-                  {required: true, message: '必填'},
-                  {max:30, message: '不超过三十个字'},
-                ],
-                initialValue: initialValue.alipayName,
-
-              })(
-                <Input placeholder="必须为实名认证过的姓名"/>
-              )}
-            </FormItem>
-            <Button type="primary" className="button-style" onClick={this.showModal.bind(this,'name')}>查看示例</Button>
-         </div>
-      </div>
-    } else if (this.state.payType == 3) {
-      payNode = <div>
-        <FormItem
-          {...formItemLayout}
-          label="收款户名">
-          {getFieldDecorator('realName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.realName,
-
-          })(
-            <Input placeholder="如：张三"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户行所在省"
-          {...this.provinceHelp}
-        >
-          {getFieldDecorator('provinceId', {
-            rules: [
-              {required: true, message: '必填'}
-            ],
-            initialValue: +initialValue.provinceId !== 0?initialValue.provinceId:'请选择省份',
-          })(
-            <Select placeholder="请选择省份" onChange={this.provinceChange.bind(this)}>
-              {ProvinceNode}
-            </Select>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户行所在市"
-          {...this.cityIdHelp}
-        >
-          {getFieldDecorator('cityId', {
-            rules: [
-              {required: true, message: '必填'}
-            ],
-            initialValue: +initialValue.cityId !==0?initialValue.cityId:'请选择城市',
-          })(
-            <Select placeholder="请选择城市" onChange={this.cityChange.bind(this)}>
-              {cityNode}
-            </Select>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户总行">
-          {getFieldDecorator('headBankName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.headBankName,
-
-          })(
-            <Input placeholder="如：招商银行"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="开户支行">
-          {getFieldDecorator('bankName', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
-            ],
-            initialValue: initialValue.bankName,
-
-          })(
-            <Input placeholder="总行加支行，如：招商银行深圳科技园支行"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="银行卡号">
-          {getFieldDecorator('account', {
-            rules: [
-              {required: true, message: '必填'},
-              {max:30, message: '不超过三十位'},
-              { validator: this.checkNumber },
-            ],
-            initialValue: initialValue.account,
-
-          })(
-            <Input placeholder="请输入银行卡号"/>
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="短信通知手机号">
-          {getFieldDecorator('bankMobile', {
-            rules: [
-              {len: 11, message: '请输入11位短信通知手机号'},
-            ],
-            initialValue: initialValue.bankMobile,
-
-          })(
-            <Input placeholder="请输入短信通知手机号"/>
-          )}
-        </FormItem>
-      </div>
+    const type = this.state.payType || +initialValue.type
+    if (type == 1) {
+      payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
+    } else if (type == 2) {
+      payNode = <Wechat cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={op.get(detail, 'result.data') || {}}
+       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />
+    } else {
+      payNode = ''
     }
     // const disable = id !== 'new'?{disabled:true}:{};
     return (
       <section className="view-user-list" onKeyDown={this.handleEnter.bind(this)}>
         <header>
-          {userId == id?
+          {userId == id ?
             <Breadcrumb >
               <Breadcrumb.Item><Link to="/user">运营商管理</Link></Breadcrumb.Item>
               <Breadcrumb.Item>{breadcrumb}</Breadcrumb.Item>
@@ -623,7 +523,7 @@ class UserForm extends React.Component {
               })(
                 <Input disabled placeholder="请输入登录账号" />
               )}
-            </FormItem>:
+            </FormItem> :
               <div>
                 <FormItem
                   {...formItemLayout}
@@ -665,7 +565,7 @@ class UserForm extends React.Component {
                   )}
                 </FormItem>
               </div>
-              }
+            }
             <FormItem
               {...formItemLayout}
               label="运营商名称" >
@@ -734,28 +634,28 @@ class UserForm extends React.Component {
                 <Input placeholder="请输入服务电话" />
               )}
             </FormItem>
+            <FormItem {...formItemLayout} label="是否自动结算">
+              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
+              结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
+            </FormItem>
             <FormItem
               {...formItemLayout}
               label="收款方式"
             >
               {getFieldDecorator('type', {
                 rules: [
-                  {  message: '请选择收款方式' },
+                  { required: true, message: '请选择收款方式' },
                 ],
-                initialValue: initialValue.type!==undefined? initialValue.type: this.state.payType.toString(),
+                initialValue: initialValue.type || ''
               })(
-                <RadioGroup>
-                  <Radio value="0" onClick = {this.handleRadio.bind(this, '0')} className="radio-block radio-small">
-                    无设备
+                <RadioGroup className='radio-line'>
+                  <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
+                    <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
                   </Radio>
-                  <Radio value="1" onClick = {this.handleRadio.bind(this, '1')} className="radio-block">
-                     <span>支付宝收款(T+1结算，周末照常结算)</span>
-                  </Radio>
-                  <Radio value="3" onClick = {this.handleRadio.bind(this, '3')} className="radio-block">
-                    <span>银行卡收款(T+1结算，仅工作日进行)</span>
+                  <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
+                     <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
-
               )}
             </FormItem>
             {payNode}

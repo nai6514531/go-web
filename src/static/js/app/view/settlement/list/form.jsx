@@ -31,7 +31,7 @@ const FormList = React.createClass({
 					<input onChange={this.inputChange} value={payList.account_name} name="account_name" />
 					<input onChange={this.inputChange} value={payList.detail_data} name="detail_data" />
 					<input onChange={this.inputChange} value={payList.batch_no} name="batch_no" />
-					<input onChange={this.inputChange} value={payList.batch_num} name="batch_num" />
+					<input onChange={this.inputChange} value={payList.batch_num} name="batch_no" />
 					<input onChange={this.inputChange} value={payList.batch_fee} name="batch_fee" />
 					<input onChange={this.inputChange} value={payList.email} name="email" />
 					<input onChange={this.inputChange} value={payList.pay_date} name="pay_date" />

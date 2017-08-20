@@ -125,7 +125,7 @@ func (self *UserService) Update(user *model.User) (bool, error) {
 		"address":   user.Address,
 		"email":     user.Email,
 	}
-	r := transAction.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user).Scan(user)
+	r := transAction.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user)
 	if r.Error != nil {
 		common.Logger.Warningln("Save model.User:", r.Error.Error())
 		transAction.Rollback()
@@ -134,7 +134,17 @@ func (self *UserService) Update(user *model.User) (bool, error) {
 	transAction.Commit()
 	return true,nil
 }
-
+func (self *UserService)  UpdateWechatInfo(user *model.User) (error) {
+	_user := map[string]interface{}{
+		"extra":      user.Extra,
+	}
+	r := common.SodaMngDB_R.Model(&model.User{}).Where("id = ?", user.Id).Updates(_user)
+	if r.Error != nil {
+		common.Logger.Warningln("Save model.User:", r.Error.Error())
+		return r.Error
+	}
+	return nil
+}
 func (self *UserService) Password(userId int, password string) (bool, error) {
 	tx := common.SodaMngDB_WR.Begin()
 	var r *gorm.DB

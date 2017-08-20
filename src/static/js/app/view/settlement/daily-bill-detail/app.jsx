@@ -12,8 +12,8 @@ const filter = {
 }
 const App = React.createClass({
   propTypes: {
-    user_id: React.PropTypes.string,
-    bill_at: React.PropTypes.string
+    userId: React.PropTypes.string,
+    billAt: React.PropTypes.string
   },
   getInitialState() {
     return {
@@ -131,15 +131,20 @@ const App = React.createClass({
   remove(id) {
 
   },
+  toBillDetail(e) {
+    e.preventDefault();
+    history.go(-1);
+  },
   componentWillMount() {
-    const {user_id, bill_at}=this.props.params;
-    const pager = {page:1,perPage:10}
-    this.list(user_id, bill_at,'',pager);
+    const {userId, billAt, billId} = this.props.params;
+    const pager = {page:1, perPage:10}
+    this.list(userId, billAt, '', pager);
   },
   render() {
     var self = this;
     const {list, total, columns} = this.state;
-    const {user_id, bill_at}=this.props.params;
+    const {userId, billAt, billId} = this.props.params;
+    const isDetailByBills = !!billId
     const pagination = {
       total: total,
       showSizeChanger: true,
@@ -147,25 +152,32 @@ const App = React.createClass({
         return <span>总计 {total} 条</span>
       },
       onShowSizeChange(current, pageSize) {
-        const pager = {page:current,perPage: pageSize}
-        self.list(user_id, bill_at, '',pager);
+        const pager = {page: current, perPage: pageSize}
+        self.list(userId, billAt, '', pager);
       },
       onChange(current) {
-        const pager = {page: current, perPage:this.pageSize};
-        self.list(user_id, bill_at, '', pager);
+        const pager = {page: current, perPage: this.pageSize};
+        self.list(userId, billAt, '', pager);
       }
     };
     return (<section className="view-daily-bill-detail">
       <header>
-        <Breadcrumb>
-          <Breadcrumb.Item><a href="/#/settlement/">结算管理</a></Breadcrumb.Item>
-          <Breadcrumb.Item>明细</Breadcrumb.Item>
-        </Breadcrumb>
+        {
+          isDetailByBills ? <Breadcrumb>
+            <Breadcrumb.Item><a href="/#/settlement/bill">提现管理</a></Breadcrumb.Item>
+            <Breadcrumb.Item><a href="#" onClick={this.toBillDetail}>账单明细</a></Breadcrumb.Item>
+            <Breadcrumb.Item>明细</Breadcrumb.Item>
+          </Breadcrumb> : <Breadcrumb>
+            <Breadcrumb.Item><a href="/#/settlement/">结算管理</a></Breadcrumb.Item>
+            <Breadcrumb.Item>明细</Breadcrumb.Item>
+          </Breadcrumb>
+        }
       </header>
       <Table scroll={{ x: 500 }} dataSource={list}
              columns={columns} pagination={pagination}
              bordered loading={this.state.loading}
              rowClassName={this.rowClassName}
+             rowKey={record => record.id}
       />
     </section>);
   }
