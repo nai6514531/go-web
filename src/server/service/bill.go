@@ -195,7 +195,7 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 	return nil
 }
 
-func (self *BillService) List(page int, perPage int, status int, createdAt string, userId int) ([]*model.Bill, error) {
+func (self *BillService) List(page int, perPage int, status int, startAt string,endAt string, userId int) ([]*model.Bill, error) {
 	billList := []*model.Bill{}
 	params := []interface{}{}
 	sql := "select * from bill where ( bill.deleted_at IS NULL "
@@ -203,9 +203,13 @@ func (self *BillService) List(page int, perPage int, status int, createdAt strin
 		sql += " and bill.status = ? "
 		params = append(params, status)
 	}
-	if createdAt != "" {
-		sql += " and Date(bill.created_at) = ? "
-		params = append(params, createdAt)
+	if startAt != "" {
+		sql += " and Date(bill.created_at) >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and Date(bill.created_at) <= ? "
+		params = append(params, endAt)
 	}
 	sql += " and bill.user_id = ? "
 	params = append(params, userId)
@@ -217,7 +221,7 @@ func (self *BillService) List(page int, perPage int, status int, createdAt strin
 	return billList, nil
 }
 
-func (self *BillService) Total(page int, perPage int, status int, createdAt string, userId int) (int, error) {
+func (self *BillService) Total(page int, perPage int, status int, startAt string,endAt string, userId int) (int, error) {
 	type Result struct {
 		Total int
 	}
@@ -228,9 +232,13 @@ func (self *BillService) Total(page int, perPage int, status int, createdAt stri
 		sql += " and bill.status = ? "
 		params = append(params, status)
 	}
-	if createdAt != "" {
-		sql += " and Date(bill.created_at) = ? "
-		params = append(params, createdAt)
+	if startAt != "" {
+		sql += " and Date(bill.created_at) >= ? "
+		params = append(params, startAt)
+	}
+	if endAt != "" {
+		sql += " and Date(bill.created_at) <= ? "
+		params = append(params, endAt)
 	}
 	sql += " and bill.user_id = ? "
 	params = append(params, userId)

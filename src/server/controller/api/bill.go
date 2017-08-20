@@ -111,9 +111,10 @@ func (self *BillController) List(ctx *iris.Context) {
 	page,_ := ctx.URLParamInt("page")
 	perPage,_ := ctx.URLParamInt("perPage")
 	status,_ := ctx.URLParamInt("status")
-	createdAt := ctx.URLParam("createdAt")
+	startAt := ctx.URLParam("startAt")
+	endAt := ctx.URLParam("endAt")
 	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	total,err := billService.Total(page,perPage,status,createdAt,userId)
+	total,err := billService.Total(page,perPage,status,startAt,endAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.Total error---------",err)
 		result := &enity.Result{"01100101",err,bill_msg["01100101"]}
@@ -128,7 +129,7 @@ func (self *BillController) List(ctx *iris.Context) {
 		perPage = 10
 	}
 
-	list, err := billService.List(page,perPage,status,createdAt,userId)
+	list, err := billService.List(page,perPage,status,startAt,endAt,userId)
 	if err != nil {
 		common.Logger.Debugln("List billService.List error---------",err)
 		result := &enity.Result{"01100101",err,bill_msg["01100101"]}
