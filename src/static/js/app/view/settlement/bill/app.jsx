@@ -85,7 +85,7 @@ const App = React.createClass({
 		
 		confirm({
 	    title: '确认申请结算',
-	    content: <p>共有<span className='color-red'>{count}</span>天账单结算,结算金额为<span className='color-red'>{totalAmount}</span>元,本次结算将收取<span className='color-red'>{cast/100}</span>元手续费,是否确认结算？</p>,
+	    content: <p>共有<span className='color-red'>{count}</span>天账单结算,结算金额为<span className='color-red'>{totalAmount/100}</span>元,本次结算将收取<span className='color-red'>{cast/100}</span>元手续费,是否确认结算？</p>,
 	    onOk() {
 	    	self.setState({settlementLoading: true})
 	      BillService.create().then((res) => {
@@ -171,7 +171,7 @@ const App = React.createClass({
 		return (<section className="view-settlement-bill">
 			<header>
         <Breadcrumb>
-          <Breadcrumb.Item>结算管理</Breadcrumb.Item>
+          <Breadcrumb.Item>结算查询</Breadcrumb.Item>
         </Breadcrumb>
       </header>
       <section className="info">

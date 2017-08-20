@@ -979,7 +979,7 @@ const App = React.createClass({
 			<div className="top-fix">
         <header>
           <Breadcrumb>
-            <Breadcrumb.Item>结算管理</Breadcrumb.Item>
+            <Breadcrumb.Item>每日账单</Breadcrumb.Item>
           </Breadcrumb>
         </header>
         <div className="filter">

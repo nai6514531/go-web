@@ -634,8 +634,9 @@ class UserForm extends React.Component {
                 <Input placeholder="请输入服务电话" />
               )}
             </FormItem>
-            <FormItem {...formItemLayout} label="是否自动结算">
-              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
+            <FormItem {...formItemLayout} label="是否自动结算" >
+              <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)} className='label-margin'>
+                结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
               结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
             </FormItem>
             <FormItem
