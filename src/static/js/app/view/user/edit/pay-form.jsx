@@ -150,7 +150,7 @@ class Wechat extends React.Component {
         visible={this.state.showIdentification}
         onCancel={() => { this.setState({ showIdentification: false })}}
         style={{textAlign:'center'}}>
-        <img src={require("../../../../../img/app/name_demo.png")} width="70%"/>
+        <p>通过微信内选择【我】-> 【钱包】 -> 【···】 -> 【支付管理】 -> 【实名认证】-> 上传身份证进行实名。</p>
      </Modal>
     </div>
   }
