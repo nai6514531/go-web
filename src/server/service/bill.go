@@ -7,6 +7,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
+	"time"
 )
 
 type BillService struct {
@@ -85,22 +86,23 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 	status := 1
 
 	bill := model.Bill{
-		BillId:      billId,
-		Account:     userCashAccount.Account,
-		AccountType: userCashAccount.Type,
-		AccountName: accountName,
-		UserId:      userCashAccount.UserId,
-		UserName:    user.Name,
-		UserAccount: user.Account,
-		TotalAmount: totalAmount,
-		Count:       count,
-		Rate:        rate,   // 费率
-		Cast:        cast,   // 手续费
-		Amount:      amount, // 真正收入的钱
-		Mobile:      user.Mobile,
-		RealName:    userCashAccount.RealName,
-		Status:      status,
-		Mode:        1,
+		BillId:           billId,
+		Account:          userCashAccount.Account,
+		AccountType:      userCashAccount.Type,
+		AccountName:      accountName,
+		UserId:           userCashAccount.UserId,
+		UserName:         user.Name,
+		UserAccount:      user.Account,
+		TotalAmount:      totalAmount,
+		Count:            count,
+		Rate:             rate,   // 费率
+		Cast:             cast,   // 手续费
+		Amount:           amount, // 真正收入的钱
+		Mobile:           user.Mobile,
+		RealName:         userCashAccount.RealName,
+		Status:           status,
+		Mode:             1,
+		CreatedTimestamp: time.Now().Local().Unix(),
 	}
 	r = tx.Create(&bill)
 	if r.Error != nil {
@@ -195,7 +197,7 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 	return nil
 }
 
-func (self *BillService) List(page int, perPage int, status int, startAt string,endAt string, userId int) ([]*model.Bill, error) {
+func (self *BillService) List(page int, perPage int, status int, startAt string, endAt string, userId int) ([]*model.Bill, error) {
 	billList := []*model.Bill{}
 	params := []interface{}{}
 	sql := "select * from bill where ( bill.deleted_at IS NULL "
@@ -221,7 +223,7 @@ func (self *BillService) List(page int, perPage int, status int, startAt string,
 	return billList, nil
 }
 
-func (self *BillService) Total(page int, perPage int, status int, startAt string,endAt string, userId int) (int, error) {
+func (self *BillService) Total(page int, perPage int, status int, startAt string, endAt string, userId int) (int, error) {
 	type Result struct {
 		Total int
 	}
