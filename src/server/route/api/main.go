@@ -15,7 +15,6 @@ func Api() {
 		school          = &controller.SchoolController{}
 		referenceDevice = &controller.ReferenceDeviceController{}
 		dailyBill       = &controller.DailyBillController{}
-		sync            = &controller.SyncController{}
 		statis          = &controller.StatisController{}
 		trade           = &controller.TradeController{}
 		sms             = &controller.SmsController{}
@@ -47,14 +46,14 @@ func Api() {
 	api.Get("/stat/daily-bill", dailyBill.SumByDate)
 	api.Get("/stat/signin-user", user.SignInUser)
 
-	api.Get("/sync/user", sync.SyncUser)
-	api.Get("/sync/user-role", sync.SyncUserRole)
-	api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
-	api.Get("/sync/device", sync.SyncDevice)
-	api.Get("/sync/daily-bill", sync.SyncDailyBill)
-	api.Get("/sync/daily-bill-manual", sync.SyncDailyBillManual)
-	api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
-	api.Get("/sync/user-all", sync.SyncAllUserAndRel)
+	// api.Get("/sync/user", sync.SyncUser)
+	// api.Get("/sync/user-role", sync.SyncUserRole)
+	// api.Get("/sync/user-cash-account", sync.SyncUserCashAccount)
+	// api.Get("/sync/device", sync.SyncDevice)
+	// api.Get("/sync/daily-bill", sync.SyncDailyBill)
+	// api.Get("/sync/daily-bill-manual", sync.SyncDailyBillManual)
+	// api.Get("/sync/daily-bill-detail", sync.SyncDailyBillDetail)
+	// api.Get("/sync/user-all", sync.SyncAllUserAndRel)
 
 	api.Get("/user", user.ListByParent)
 	api.Get("/user/:id/device-total", user.BasicWithDeviceTotal)
@@ -103,11 +102,11 @@ func Api() {
 
 	api.Get("/daily-bill", dailyBill.List)
 	api.Get("/daily-bill-detail", dailyBill.DetailList)
-	api.Put("/daily-bill/set-paid-up", dailyBill.SetPaidUp)
-	api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
-	api.Put("/daily-bill/bank-bill/:id/cancel", dailyBill.CancelBankBill)
+	// api.Put("/daily-bill/set-paid-up", dailyBill.SetPaidUp)
+	// api.Put("/daily-bill/batch-pay", dailyBill.BatchPay)
+	// api.Put("/daily-bill/bank-bill/:id/cancel", dailyBill.CancelBankBill)
 	// api.Post("/daily-bill/cancel", dailyBill.CancelBatchAliPay)
-	api.Get("/daily-bill/mark", dailyBill.Mark)
+	// api.Get("/daily-bill/mark", dailyBill.Mark)
 	api.Get("/daily-bill/device/:serialNumber", device.DailyBill)
 	api.Get("/daily-bill/export", dailyBill.Export)
 
@@ -132,5 +131,5 @@ func Api() {
 	api.Post("/bill", bill.InsertOrUpdate)
 
 	api.Get("/wechat/actions/create/key", auth.CreateKey)
-	api.Get("/wechat/key/:key",auth.CheckKeyStatus)
+	api.Get("/wechat/key/:key", auth.CheckKeyStatus)
 }
