@@ -52,10 +52,10 @@ const App = React.createClass({
             return _.template([
             	'支付宝 | ',
               '<%- realName %>',
-              '账号：<%- name %>'
+              '账号：<%- account %>'
               ].join(''))({
                 realName: record.realName ? record.realName + ' | ' : '',
-                name: record.name || '-'
+                account: record.account || '-'
               })
           } 
           if (!!~[2].indexOf(type)) {

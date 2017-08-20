@@ -138,7 +138,7 @@ class Wechat extends React.Component {
       </div>
       <FormItem
         {...formItemLayout}
-        label="微信已验证姓名">
+        label="微信已认证姓名">
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
