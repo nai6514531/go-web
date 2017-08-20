@@ -170,7 +170,8 @@ class AmountForm extends React.Component {
         key: '',
       },
       type: '',
-      isMode: true
+      isMode: true,
+      userLoading:false
     }
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -219,7 +220,6 @@ class AmountForm extends React.Component {
     const self = this;
     self.setState({keyLoading: true})
     WechatService.create().then((res) => {
-      console.log(res)
       if (res.status !== 0) {
         throw new Error()
       }
@@ -239,7 +239,6 @@ class AmountForm extends React.Component {
     self.timer = null;
     self.timer = setInterval(() => {
       WechatService.getKeyDetail(key).then((res) => {
-        console.log(res)
         const status = res.status;
         if (status === 1) {
           clearInterval(self.timer);
@@ -254,7 +253,6 @@ class AmountForm extends React.Component {
       }).catch((error) => {
         clearInterval(self.timer);
         self.timer = null;
-        console.log(error)
       })
     }, 3000)
   }
@@ -266,18 +264,17 @@ class AmountForm extends React.Component {
     let user = options.type === 2 ? _.chain(this.props.user).clone().extendOwn({key: this.state.wechat.key, nickName: this.state.wechat.name}).value() : this.props.user
     user = _.pick(user, 'name', 'contact', 'mobile', 'telephone', 'address', 'email', 'key')
     user.cashAccount = cashAccount
+    self.setState({userLoading: true})
     UserService.edit(window.USER.id, user).then((res) => {
-      console.log(res)
       if (res.status !== 0) {
         throw new Error(res.msg)
       }
+      self.setState({userLoading: false})
       self.props.handleCashModal('success');
-    }, (res) => {
-      console.log(res)
-      
+    }, (res) => {    
       throw new Error(res.msg)
     }).catch((err) => {
-      console.log(err)
+      self.setState({userLoading: false})
       message.error(err.message || '更新失败，请重试~')
     })
   }
@@ -313,6 +310,10 @@ class AmountForm extends React.Component {
     };
 
     return (<Form onSubmit={this.handleSubmit}>
+      <FormItem {...formItemLayout} label='是否自动结算'>
+        <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
+        结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
+      </FormItem>
       <FormItem {...formItemLayout} label="收款方式">
         {getFieldDecorator('type', {
           rules: [
@@ -331,17 +332,13 @@ class AmountForm extends React.Component {
           </RadioGroup>
         )}
       </FormItem>
-      <FormItem {...formItemLayout} label='是否自动结算'>
-        <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
-        结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
-      </FormItem>
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> : type === 2 ?
        <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={user}
        form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} /> : null} 
       <div className="footer-btn">
         <FormItem>
           <Button type="ghost" onClick={this.handleCashModal.bind(this)}>取消</Button>
-          <Button type="primary" htmlType="submit">保存</Button>
+          <Button type="primary" htmlType="submit" loading={this.state.userLoading}>保存</Button>
         </FormItem>
        </div>
     </Form>);

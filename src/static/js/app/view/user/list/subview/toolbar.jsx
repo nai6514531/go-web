@@ -2,7 +2,6 @@ import React from 'react';
 import { Table, Button,Input, Breadcrumb, message } from 'antd';
 import { Link, hashHistory } from 'react-router';
 
-
 class App extends React.Component {
   constructor(props) {
     super(props);

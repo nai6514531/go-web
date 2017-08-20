@@ -73,15 +73,15 @@ const App = React.createClass({
 		const self = this;
 		let { totalAmount, count, cast } = this.state;
 		let cashAccountType = this.state.cashAccount.type || 0;
-		// if (totalAmount <= 200) {
-		// 	return message.info("可结算金额必须超过2元才可结算")
-		// }
-		// if (cashAccountType === 3) {
-		// 	return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
-		// }
-		// if (!~[1, 2, 3].indexOf(cashAccountType)) {
-		// 	return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
-		// }
+		if (totalAmount <= 200) {
+			return message.info("可结算金额必须超过2元才可结算")
+		}
+		if (cashAccountType === 3) {
+			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
+		}
+		if (!~[1, 2, 3].indexOf(cashAccountType)) {
+			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
+		}
 		
 		confirm({
 	    title: '确认申请结算',
@@ -101,7 +101,6 @@ const App = React.createClass({
 				})
 	    },
 	    onCancel() {
-	      console.log('Cancel');
 	    },
 	  });
 	},
@@ -126,12 +125,13 @@ const App = React.createClass({
 	},
 	getBillsList({ ...options }) {
 		const self = this;
-    const pagination = _.extendOwn(this.state.pagination, options.pagination || {})
-    const search = _.extendOwn({ status: '', createdAt: '' }, options.search || {})
+    const pagination = _.extendOwn(this.state.pagination, options.pagination || {});
+    const search = _.extendOwn({ status: '', startAt: '' , endAt: ''}, options.search || {});
 		this.setState({ bills: { ...this.state.bills, loading: true }, pagination: pagination });
 		BillService.list({
       status: search.status,
-      createdAt: search.createdAt,
+      startAt: search.startAt,
+      endAt: search.endAt,
       page: pagination.page,
       perPage: pagination.perPage
 		}).then((res) => {

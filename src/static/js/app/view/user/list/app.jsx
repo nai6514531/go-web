@@ -3,7 +3,7 @@ import './app.less';
 import { Table, Button,Input, message } from 'antd';
 import { Link, hashHistory } from 'react-router';
 const _ = require('lodash');
-
+import './app.less'
 import UserService from '../../../service/user';
 import Toolbar from './subview/toolbar.jsx';
 import SodaBreadcrumb from '../../common/breadcrumb/breadcrumb.jsx'

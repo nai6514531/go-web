@@ -39,7 +39,7 @@ func (self *MenuService) ListByUserId(userId int) (*[]*model.Menu, error) {
 		"where rpr.role_id in (" +
 		"select r.id from role r,user_role_rel urr where urr.user_id =" + _userId + " and r.id=urr.role_id" +
 		") " +
-		"and rpr.permission_id =pmr.permission_id and pmr.menu_id = m.id"
+		"and rpr.permission_id =pmr.permission_id and pmr.menu_id = m.id order by m.position"
 	rows, err := common.SodaMngDB_R.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {

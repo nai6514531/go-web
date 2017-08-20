@@ -5,7 +5,8 @@ const Service = {
     return api.get('/api/bill', {
       params: {
         status: data.status,
-        createdAt: data.createdAt,
+        startAt: data.startAt,
+        endAt: data.endAt,
         page: data.page || 1,
         perPage: data.perPage || 10
       }

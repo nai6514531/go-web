@@ -22,7 +22,7 @@ import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import BillService from '../../../service/bill';
 const confirm = Modal.confirm;
-
+const { RangePicker } = DatePicker;
 const BILLS_STATUS = {0: '未申请结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
 
 const App = React.createClass({
@@ -137,7 +137,8 @@ const App = React.createClass({
 			roleId: window.USER.role.id,
 			search: {
 				status: '', //搜索账单状态
-				createdAt: ''	
+				startAt: '',
+				endAt: ''
 			}
 		};
 	},
@@ -147,13 +148,8 @@ const App = React.createClass({
   search() {
     this.props.getBillsList({search: {...this.state.search}});
   },
-	disabledStartDate(startAt) {
-		const endAt = new Date(this.state.endAt ? this.state.endAt : null).getTime();
-    let dateRange = startAt && startAt.valueOf() > Date.now();
-		if (!startAt || !endAt) {
-			return dateRange;
-		}
-		return dateRange;
+	disabledDate(current) {
+		return current && current.valueOf() > Date.now();
 	},
 	showFailInfo() {
     Modal.info({
@@ -190,14 +186,14 @@ const App = React.createClass({
 				})
 	    },
 	    onCancel() {
-	      console.log('Cancel');
 	    },
 	  });
 		
 	},
   changeDate(value) {
-  	const date = value ? moment(value).format('YYYY-MM-DD') : ''
-  	this.setState({ search: { ...this.state.search, createdAt:  date}})
+  	const startAt = moment(value[0]).format('YYYY-MM-DD') || ''
+  	const endAt = moment(value[1]).format('YYYY-MM-DD') || ''
+  	this.setState({ search: { ...this.state.search, startAt: startAt, endAt: endAt}})
   },
 	render() {
 		const self = this;
@@ -219,14 +215,12 @@ const App = React.createClass({
 		return (<section className="bill-list">
       <h2>结算记录</h2>
       <div className="search-panel">
-      	<DatePicker
-          style={{width:120}}
-          disabledDate={this.disabledStartDate}
-          placeholder="申请时间"
-          onChange={this.changeDate}
-          className="item"
-          locale={zhCN}
-        />
+        <RangePicker
+        	disabledDate={this.disabledDate}
+		      format="YYYY-MM-DD"
+		      placeholder={['开始时间', '结束时间']}
+		      onChange={this.changeDate}
+		    />
       	<Select
 					className="item"
 					defaultValue={this.state.search.status}
