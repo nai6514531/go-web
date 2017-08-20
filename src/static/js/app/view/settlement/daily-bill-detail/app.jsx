@@ -143,8 +143,10 @@ const App = React.createClass({
   render() {
     var self = this;
     const {list, total, columns} = this.state;
+    console.log(this.props)
+    console.log(this.props.location.pathname)
     const {userId, billAt, billId} = this.props.params;
-    const isDetailByBills = !!billId
+    const isDetailByBills = !!~this.props.location.pathname.indexOf('bill/detail')
     const pagination = {
       total: total,
       showSizeChanger: true,
@@ -164,11 +166,11 @@ const App = React.createClass({
       <header>
         {
           isDetailByBills ? <Breadcrumb>
-            <Breadcrumb.Item><a href="/#/settlement/bill">提现管理</a></Breadcrumb.Item>
+            <Breadcrumb.Item><a href="/#/settlement/bill">结算查询</a></Breadcrumb.Item>
             <Breadcrumb.Item><a href="#" onClick={this.toBillDetail}>账单明细</a></Breadcrumb.Item>
             <Breadcrumb.Item>明细</Breadcrumb.Item>
           </Breadcrumb> : <Breadcrumb>
-            <Breadcrumb.Item><a href="/#/settlement/">结算管理</a></Breadcrumb.Item>
+            <Breadcrumb.Item><a href="/#/settlement/">每日账单</a></Breadcrumb.Item>
             <Breadcrumb.Item>明细</Breadcrumb.Item>
           </Breadcrumb>
         }

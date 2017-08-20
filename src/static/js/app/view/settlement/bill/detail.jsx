@@ -17,7 +17,7 @@ import DailyBillService from '../../../service/daily_bill';
 import moment from 'moment';
 const confirm = Modal.confirm;
 
-const BILLS_STATUS = {0: '未结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
+const BILLS_STATUS = {0: '未申请结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
 
 const Detail = React.createClass({
   getInitialState() {
@@ -105,7 +105,7 @@ const Detail = React.createClass({
         width: 100,
         render: (id, record) => {
           return <span>
-            <a href={`#settlement/bill/${record.billId}/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
+            <a href={`#settlement/bill/detail/daily-bill-detail/${record.userId}/${moment(record.billAt).format('YYYY-MM-DD')}`}>明细</a>
           </span>
         }
       }],
@@ -113,7 +113,7 @@ const Detail = React.createClass({
       loading: false,
       pagination: {
         total: 0,
-        perPage: 50,
+        perPage: 10,
         page:1
       }
     };
@@ -123,7 +123,7 @@ const Detail = React.createClass({
   },
   getDailyBill({ ...options }) {
     var self = this;
-    const pagination = _.extendOwn(options.pagination || {}, this.state.pagination);
+    const pagination = _.extendOwn(this.state.pagination, options || {});
     self.setState({ loading: true, pagination: pagination });
     const isBillsDetail = !!~this.props.location.pathname.indexOf('detail')
     DailyBillService.list({
@@ -158,7 +158,6 @@ const Detail = React.createClass({
     const self = this;
     const pagination = {
       total: this.state.pagination.total,
-      pageSize: 50,
       showSizeChanger: true,
       showTotal (total) {
         return <span>总计 {total} 条</span>
@@ -175,7 +174,7 @@ const Detail = React.createClass({
     return (<section className="view-settlement-list">
       <header>
         <Breadcrumb>
-          <Breadcrumb.Item><a href="/#/settlement/bill">提现管理</a></Breadcrumb.Item>
+          <Breadcrumb.Item><a href="/#/settlement/bill">结算查询</a></Breadcrumb.Item>
           <Breadcrumb.Item>账单明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>

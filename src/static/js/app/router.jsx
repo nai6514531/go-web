@@ -90,7 +90,7 @@ const router = (
             callback(null, require('./view/settlement/bill/detail.jsx').default);
           });
         }} />
-        <Route path="/settlement/bill/:billId/daily-bill-detail/:userId/:billAt" getComponent={(location, callback) => {
+        <Route path="/settlement/bill/detail/daily-bill-detail/:userId/:billAt" getComponent={(location, callback) => {
           require.ensure([], (require) => {
           // 结算管理列表
             callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
