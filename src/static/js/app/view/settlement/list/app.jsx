@@ -309,6 +309,10 @@ const App = React.createClass({
 						})
 					});
 				} else {
+					this.setState({
+						total: 0,
+						list: []
+					});
 					message.info(data.msg);
 				}
 			})
