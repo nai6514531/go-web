@@ -137,7 +137,9 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 	if r.Error != nil {
 		return r.Error
 	}
-
+	if bill.TotalAmount < 200 {
+		return errors.New("提现金额不可少于2元")
+	}
 	accountName := ""
 	if userCashAccount.Type == 1 {
 		accountName = "支付宝"
