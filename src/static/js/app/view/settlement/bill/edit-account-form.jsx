@@ -35,7 +35,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayAccount', {
             rules: [
               {required: true,  message: '必填'},
-              { max:30, message: '不超过三十个字'},
+              { max:20, message: '不超过二十个字'},
             ],
             initialValue: cashAccount.get('type') === 1 ? cashAccount.get('account') : '',
 
@@ -52,7 +52,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
+              {max:20, message: '不超过二十个字'},
             ],
             initialValue: cashAccount.get('type') === 1 ? cashAccount.get('realName') : '',
 
@@ -126,7 +126,7 @@ class Wechat extends React.Component {
         { 
           !!wechat.name || (!wechat.key && cashAccount.get('type') === 2) ? <div className="code-tip">
             <Icon type='check-circle' className='icon success' /> 
-            <span>{'关联成功（你将使用昵称为' + nickName + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
+            <span>关联成功（你将使用昵称为<span className='color-red'>{nickName}</span>的微信收款。如需更换账号请'<i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
           </div> :
           <div className="code-tip">
             <Icon type='exclamation-circle' className='icon info' />
@@ -142,7 +142,7 @@ class Wechat extends React.Component {
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
-            {max:30, message: '不超过三十个字'},
+            {max:20, message: '不超过二十个字'},
           ],
           initialValue: cashAccount.get('type') === 2 ? cashAccount.get('realName') : '',
         })(
@@ -154,7 +154,7 @@ class Wechat extends React.Component {
         visible={this.state.showIdentification}
         onCancel={() => { this.setState({ showIdentification: false })}}
         style={{textAlign:'center'}}>
-        <img src={require("../../../../../img/app/name_demo.png")} width="70%"/>
+        <p>通过微信内选择【我】-> 【钱包】 -> 【···】 -> 【支付管理】 -> 【实名认证】-> 上传身份证进行实名。</p>
      </Modal>
     </div>
   }
@@ -326,7 +326,7 @@ class AmountForm extends React.Component {
                <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
             </Radio>
             <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-               <span>支付宝(T+1结算，200以下每次结算收取2元手续费，</span><br/>
+               <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，</span><br/>
                <span>200元及以上收取结算金额的1%作为手续费)</span>
             </Radio>
           </RadioGroup>

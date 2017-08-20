@@ -165,12 +165,16 @@ const App = React.createClass({
 		const self = this;
 		let cashAccountType = this.props.cashAccount.type || 0;
 		const bill = _.findWhere(this.props.bills.list, {billId: id}); 
+		if (bill.totalAmount <= 200) {
+			return message.info("可结算金额必须超过2元才可结算")
+		}
 		if (cashAccountType === 3) {
 			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
 		}
 		if (!~[1, 2, 3].indexOf(cashAccountType)) {
 			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
 		}
+
 		confirm({
 	    title: '确认重新申请结算',
 	    content: <p>共有<span className='color-red'>{bill.count}</span>天账单结算，结算金额为<span className='color-red'>{bill.totalAmount/100}</span>元，本次结算将收取<span className='color-red'>{bill.cast/100}</span>元手续费，是否确认结算？</p>,
@@ -232,7 +236,7 @@ const App = React.createClass({
 					<Option value="2">结算成功</Option>
 					<Option value="4">结算失败</Option>
 				</Select>
-      	<Button type="primary" onClick={this.search}>查询</Button>
+      	<Button type="primary" icon='search' onClick={this.search}>筛选</Button>
       </div>
       <Table columns={this.state.columns}
       	scroll={{ x: 500 }}

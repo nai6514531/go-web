@@ -31,7 +31,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayAccount', {
             rules: [
               {required: true,  message: '必填'},
-              { max:30, message: '不超过三十个字'},
+              {max:20, message: '不超过二十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.account : '',
 
@@ -48,7 +48,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
-              {max:30, message: '不超过三十个字'},
+              {max:20, message: '不超过二十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.realName : '',
 
@@ -137,7 +137,7 @@ class Wechat extends React.Component {
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
-            {max:30, message: '不超过三十个字'},
+            {max:20, message: '不超过二十个字'},
           ],
           initialValue: cashAccount.type === 2 ? cashAccount.realName : '',
 
