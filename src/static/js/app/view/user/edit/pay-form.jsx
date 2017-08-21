@@ -39,7 +39,7 @@ class Alipay extends React.Component {
             <Input placeholder="需要确认是邮箱还是手机号" />
           )}
         </FormItem>
-        <Button className="button-style" type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
+        <Button type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
       </div>
       <div className="form-wrapper form-input">
         <FormItem
@@ -56,7 +56,7 @@ class Alipay extends React.Component {
             <Input placeholder="必须为实名认证过的姓名" />
           )}
         </FormItem> 
-        <Button type="primary" className="button-style" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
+        <Button type="primary" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
       </div>
       <Modal title="示例图片"
         footer={null}
@@ -150,7 +150,7 @@ class Wechat extends React.Component {
         visible={this.state.showIdentification}
         onCancel={() => { this.setState({ showIdentification: false })}}
         style={{textAlign:'center'}}>
-        <img src={require("../../../../../img/app/name_demo.png")} width="70%"/>
+        <p>通过微信内选择【我】-> 【钱包】 -> 【···】 -> 【支付管理】 -> 【实名认证】-> 上传身份证进行实名。</p>
      </Modal>
     </div>
   }
