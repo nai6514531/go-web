@@ -78,6 +78,34 @@ const App = React.createClass({
           return Math.round(totalConsume)/100 + "元";
         }
       },{
+        title: '微信消费',
+        dataIndex: 'totalWechatConsume',
+        key: 'totalWechatConsume',
+        render: (totalWechatConsume) => {
+          return Math.round(totalWechatConsume)/100 + "元";
+        }
+      },{
+        title: '支付宝消费',
+        dataIndex: 'totalAlipayConsume',
+        key: 'totalAlipayConsume',
+        render: (totalAlipayConsume) => {
+          return Math.round(totalAlipayConsume)/100 + "元";
+        }
+      },{
+        title: '余额消费',
+        dataIndex: 'totalWalletConsume',
+        key: 'totalWalletConsume',
+        render: (totalWalletConsume) => {
+          return Math.round(totalWalletConsume)/100 + "元";
+        }
+      },{
+        title: 'IC卡消费',
+        dataIndex: 'totalChipcardConsume',
+        key: 'totalChipcardConsume',
+        render: (totalChipcardConsume) => {
+          return Math.round(totalChipcardConsume)/100 + "元";
+        }
+      },{
         title: '微信充值金额',
         dataIndex: 'totalWechatRecharge',
         key: 'totalWechatRecharge',
@@ -113,6 +141,10 @@ const App = React.createClass({
           // const totalNewUser = list.reduce((total,item)=>{return total+item.totalNewUser},0);
 
           const totalConsume = Math.round(list.reduce((total,item)=>{return total+item.totalConsume},0)*100)/100;
+          const totalWechatConsume = Math.round(list.reduce((total,item)=>{return total+item.totalWechatConsume},0)*100)/100;
+          const totalAlipayConsume = Math.round(list.reduce((total,item)=>{return total+item.totalAlipayConsume},0)*100)/100;
+          const totalWalletConsume = Math.round(list.reduce((total,item)=>{return total+item.totalWalletConsume},0)*100)/100;
+          const totalChipcardConsume = Math.round(list.reduce((total,item)=>{return total+item.totalChipcardConsume},0)*100)/100;
           const totalRecharge = Math.round(list.reduce((total,item)=>{return total+item.totalRecharge},0)*100)/100;
           const totalWechatRecharge = Math.round(list.reduce((total,item)=>{return total+item.totalWechatRecharge},0)*100)/100;
           const totalAlipayRecharge = Math.round(list.reduce((total,item)=>{return total+item.totalAlipayRecharge},0)*100)/100;
@@ -120,6 +152,10 @@ const App = React.createClass({
           const total = {
             "totalRecharge": totalRecharge,
             "totalConsume": totalConsume,
+            "totalWechatConsume": totalWechatConsume,
+            "totalAlipayConsume": totalAlipayConsume,
+            "totalWalletConsume": totalWalletConsume,
+            "totalChipcardConsume": totalChipcardConsume,
             "totalWechatRecharge": totalWechatRecharge,
             "totalAlipayRecharge": totalAlipayRecharge,
           };
