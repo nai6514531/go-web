@@ -103,11 +103,7 @@ const App = React.createClass({
 							return <div className="status unfinished">未申请结算</div>
 							break;
 						case 1:
-							if (this.state.roleId == 3 || record.accountType == 1) {
-								return <div className="status unfinished">未申请结算</div>
-							} else {
-								return <div className="status">等待结算</div>
-							}
+							return <div className="status">等待结算</div>
 							break;
 						case 2:
 							return <div className="status done">结算成功</div>
