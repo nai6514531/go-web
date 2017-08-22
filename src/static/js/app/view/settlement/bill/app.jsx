@@ -74,13 +74,13 @@ const App = React.createClass({
 		let { totalAmount, count, cast } = this.state;
 		let cashAccountType = this.state.cashAccount.type || 0;
 		if (totalAmount <= 200) {
-			return message.info("可结算金额必须超过2元才可结算")
+			return message.info('可结算金额必须超过2元才可结算')
 		}
 		if (cashAccountType === 3) {
-			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
+			return message.info('你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。')
 		}
 		if (!~[1, 2, 3].indexOf(cashAccountType)) {
-			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
+			return message.info('你当前未设定收款方式，请修改收款方式再进行结算操作。')
 		}
 		
 		confirm({
@@ -92,8 +92,8 @@ const App = React.createClass({
 	      	if (res.status !== 0) {
 	      		throw new Error(res.msg)
 	      	}
-      		self.setState({totalAmount: 0, count: 0, cast:0, settlementLoading: false})
-					message.info("申请成功！财务将在1日内结算");
+      		self.setState({totalAmount: 0, count: 0, cast: 0, settlementLoading: false})
+					message.info('申请成功！财务将在1日内结算');
 					self.getSettlementAmount()
 				}).catch((err) => {
 					self.setState({ settlementLoading: false })
@@ -168,20 +168,20 @@ const App = React.createClass({
 	render() {
 		const { cashAccount, user } = this.state
 
-		return (<section className="view-settlement-bill">
+		return (<section className='view-settlement-bill'>
 			<header>
         <Breadcrumb>
           <Breadcrumb.Item>结算查询</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <section className="info">
+      <section className='info'>
       	<h2>结算操作</h2>
       	<Row>
-      		<Col xs={24} lg={{span: 9}} className="panel-left">
+      		<Col xs={24} lg={{span: 9}} className='panel-left'>
       			<p>可结算金额（元）</p>
       			<div>
-      				<span className="amount">{(this.state.totalAmount/100).toFixed(2)}</span> 
-      				<Button type="primary" onClick={this.handleSettlement} loading={this.state.settlementLoading}>申请结算</Button>
+      				<span className='amount'>{(this.state.totalAmount/100).toFixed(2)}</span> 
+      				<Button type='primary' onClick={this.handleSettlement} loading={this.state.settlementLoading}>申请结算</Button>
       				{this.state.totalAmount !== 0 ? <Button onClick={this.dailyBillDetail}>明细</Button> : null}
       			</div>
       			<p>如已选择“自动结算”，结算金额超过200元系统将自动申请结算，详情请查看下方结算记录。</p>
@@ -211,7 +211,7 @@ const App = React.createClass({
       				<Col  xs={16} lg={{span: 12}}>{cashAccount.realName || '无'}</Col>
       			</Row>
       			<Row>
-      				<Col span={24}><Button type="primary" onClick={() => {this.setState({ cashModalVisible:true })}}>修改收款方式</Button></Col>
+      				<Col span={24}><Button type='primary' onClick={() => {this.setState({ cashModalVisible:true })}}>修改收款方式</Button></Col>
       			</Row>
       		</Col>
       	</Row>

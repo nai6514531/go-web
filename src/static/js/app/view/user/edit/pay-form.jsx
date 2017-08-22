@@ -8,7 +8,7 @@ const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 import QRCode from 'qrcode'
-import { isProduction } from '../../../library/debug'
+import { isProduction, isStaging, isDevelopment } from '../../../library/debug'
 const defaultUrl = isProduction ? 'http://m.sodalife.xyz/act/relate-wechat' : 'http://m.sodalife.club/act/relate-wechat';
 
 class Alipay extends React.Component {
@@ -120,7 +120,10 @@ class Wechat extends React.Component {
           { 
             !!wechat.name || (!wechat.key && cashAccount.type === 2) ? <div className="code-tip">
               <Icon type='check-circle' className='icon success' /> 
-              <span>{'关联成功（你将使用昵称为' + nickName + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
+              <span>
+                关联成功（你将使用昵称为<span className='color-red'>{nickName}</span>的微信收款。如需更换账号请
+                <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）
+              </span>
             </div> :
             <div className="code-tip">
               <Icon type='exclamation-circle' className='icon info' />

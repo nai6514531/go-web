@@ -1,5 +1,4 @@
 import React from 'react';
-import Promise from 'bluebird'
 import _ from 'underscore';
 import moment from 'moment';
 import {
@@ -8,22 +7,19 @@ import {
 	Input,
 	Table,
 	Icon,
-	Popconfirm,
 	Select,
 	DatePicker,
 	Breadcrumb,
 	message,
 	Modal
 } from 'antd';
-const Option = Select.Option;
-import zhCN from 'antd/lib/date-picker/locale/zh_CN';
+const { Option } = Select;
+const { RangePicker } = DatePicker;
+const { confirm } = Modal;
 
-import './app.less';
 import DailyBillService from '../../../service/daily_bill';
 import BillService from '../../../service/bill';
-const confirm = Modal.confirm;
-const { RangePicker } = DatePicker;
-const BILLS_STATUS = {0: '未申请结算', 1:'等待结算', 2:'结算成功', 3:'结算中', 4:'结算失败'}
+const BILLS_STATUS = { 0: '未申请结算', 1: '等待结算', 2: '结算成功', 3: '结算中', 4: '结算失败' }
 
 const App = React.createClass({
 	getInitialState() {
@@ -72,8 +68,8 @@ const App = React.createClass({
 				title: '结算金额',
 				dataIndex: 'totalAmount',
 				width: 90,
-				render: (total_amount) => {
-					return (total_amount / 100).toFixed(2)
+				render: (totalAmount) => {
+					return (totalAmount / 100).toFixed(2)
 				}
 			}, {
 				title: '手续费',
@@ -124,7 +120,7 @@ const App = React.createClass({
 					if (!!~[4].indexOf(status)) {
 						return <span>
 	            <a onClick={this.handleSettlemenet.bind(this, billId)}>重新申请</a>
-		          <span className="ant-divider" />
+		          <span className='ant-divider' />
 		          <a href={`#settlement/bill/${billId}`}>明细</a>
 		        </span>
 					} else {
@@ -139,18 +135,21 @@ const App = React.createClass({
 				status: '', //搜索账单状态
 				startAt: '',
 				endAt: ''
-			}
+			},
+			endOpen: false,
+			defaultEndAt: null
 		};
 	},
 	handleTableChange(pagination) {
     this.props.getBillsList({pagination: pagination, search: { ...this.state.search}});
   },
   search() {
-    this.props.getBillsList({search: {...this.state.search}});
+  	const { search } = this.state
+    if (!!search.startAt && !search.extend) {
+      return message.info('请选择时间')
+    }
+    this.props.getBillsList({search: {...search}});
   },
-	disabledDate(current) {
-		return current && current.valueOf() > Date.now();
-	},
 	showFailInfo() {
     Modal.info({
       content: (
@@ -166,13 +165,13 @@ const App = React.createClass({
 		let cashAccountType = this.props.cashAccount.type || 0;
 		const bill = _.findWhere(this.props.bills.list, {billId: id}); 
 		if (bill.totalAmount <= 200) {
-			return message.info("可结算金额必须超过2元才可结算")
+			return message.info('可结算金额必须超过2元才可结算')
 		}
 		if (cashAccountType === 3) {
-			return message.info("你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。")
+			return message.info('你当前收款方式为银行卡，不支持结算，请修改收款方式再进行结算操作。')
 		}
 		if (!~[1, 2, 3].indexOf(cashAccountType)) {
-			return message.info("你当前未设定收款方式，请修改收款方式再进行结算操作。")
+			return message.info('你当前未设定收款方式，请修改收款方式再进行结算操作。')
 		}
 
 		confirm({
@@ -183,10 +182,10 @@ const App = React.createClass({
 					if (res.status !== 0) {
 						throw new Error(res.msg)
 		    	}
-					message.info("申请成功！财务将在1日内结算");
+					message.info('申请成功！财务将在1日内结算');
 		    	self.props.getBillsList({search: {...self.state.search}});
 				}).catch((err) => {
-					message.error(err.message || "申请结算失败！请重试");
+					message.error(err.message || '申请结算失败！请重试');
 				})
 	    },
 	    onCancel() {
@@ -194,11 +193,45 @@ const App = React.createClass({
 	  });
 		
 	},
-  changeDate(value) {
-  	const startAt = moment(value[0]).format('YYYY-MM-DD') || ''
-  	const endAt = moment(value[1]).format('YYYY-MM-DD') || ''
-  	this.setState({ search: { ...this.state.search, startAt: startAt, endAt: endAt}})
+  onChangeDate(field, value) {
+    this.setState({
+    	defaultEndAt: value,
+    	search: {
+    		...this.state.search,
+      	[field]: !!value ? moment(value).format('YYYY-MM-DD') : ''
+    	}
+    });
   },
+  onStartChange(value) {
+    this.onChangeDate('startAt', value);
+  },
+  onEndChange(value) {
+    this.onChangeDate('endAt', value);
+  },
+  disabledStartDate(current) {
+		return current && current.valueOf() > Date.now();
+	},
+	disabledEndDate(current) {
+    const second = 30 * 24 * 60 * 60 * 1000;
+    const { search } = this.state;
+		const startAt = !!search.startAt ? moment(search.startAt).valueOf() : '';
+    if (!startAt) {
+      return true;
+    }
+    return current.valueOf() < startAt || current.valueOf() > Date.now();
+	},
+	handleStartOpenChange(open) {
+		if (!open) {
+			this.setState({
+				endOpen: true
+			});
+		}
+	},
+	handleEndOpenChange(open) {
+		this.setState({
+			endOpen: open
+		});
+	},
 	render() {
 		const self = this;
 		const pagination = {
@@ -216,27 +249,41 @@ const App = React.createClass({
         self.handleTableChange(pager);
       }
     };
-		return (<section className="bill-list">
+		return (<section className='bill-list'>
       <h2>结算记录</h2>
-      <div className="search-panel">
-        <RangePicker
-        	disabledDate={this.disabledDate}
-		      format="YYYY-MM-DD"
-		      placeholder={['开始时间', '结束时间']}
-		      onChange={this.changeDate}
-		    />
+      <div className='search-panel'>
+		    <DatePicker
+          style={{width:120,marginLeft:4}}
+          disabledDate={this.disabledStartDate}
+          placeholder="开始日期"
+          onChange={this.onStartChange}
+          onOpenChange={this.handleStartOpenChange}
+          className='item'
+        />
+        -
+        <DatePicker
+          style={{width:120,marginRight:4}}
+          disabledDate={this.disabledEndDate}
+          placeholder="结束日期"
+          format="YYYY-MM-DD"
+          value={this.state.defaultEndAt}
+          onChange={this.onEndChange}
+          open={this.state.endOpen}
+          onOpenChange={this.handleEndOpenChange}
+          className='item'
+        />
       	<Select
-					className="item"
+					className='item'
 					defaultValue={this.state.search.status}
 					style={{width: 120 }}
 					onChange={(value) => { this.setState({search: {...this.state.search, status: value}})}}>
-					<Option value="">请选择结算状态</Option>
-					<Option value="1">等待结算</Option>
-					<Option value="3">结算中</Option>
-					<Option value="2">结算成功</Option>
-					<Option value="4">结算失败</Option>
+					<Option value=''>请选择结算状态</Option>
+					<Option value='1'>等待结算</Option>
+					<Option value='3'>结算中</Option>
+					<Option value='2'>结算成功</Option>
+					<Option value='4'>结算失败</Option>
 				</Select>
-      	<Button type="primary" icon='search' onClick={this.search}>筛选</Button>
+      	<Button type='primary' icon='search' onClick={this.search}>筛选</Button>
       </div>
       <Table columns={this.state.columns}
       	scroll={{ x: 500 }}
