@@ -7,7 +7,7 @@ import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form, Spin } from
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-import QRCode from 'qrcode'
+import QRCode from 'qrcode.react'
 import { isProduction, isStaging, isDevelopment } from '../../../library/debug'
 const defaultUrl = isProduction ? 'http://m.sodalife.xyz/act/relate-wechat' : 'http://m.sodalife.club/act/relate-wechat';
 
@@ -88,9 +88,7 @@ class Wechat extends React.Component {
     const self = this;
     key = key || '';
     const url = defaultUrl + `?key=${key}`;
-    QRCode.toDataURL(url, function (err, url) {
-      self.setState({qrCodeUrl: url})
-    })
+    self.setState({qrCodeUrl: url})
   }
   identification() {
     this.setState({ showIdentification: true })
@@ -113,8 +111,8 @@ class Wechat extends React.Component {
     return <div>
       <div className="form-wrapper">
         <FormItem {...formItemLayout} label={( <span className='label'>扫码验证身份</span>)} >
-          <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
-            <img src={this.state.qrCodeUrl} width='160' />
+          <div className={this.props.keyLoading ? 'code loading' : 'code' } >
+            <QRCode value={this.state.qrCodeUrl} />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
           </div> 
           { 

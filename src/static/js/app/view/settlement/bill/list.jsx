@@ -145,7 +145,7 @@ const App = React.createClass({
   },
   search() {
   	const { search } = this.state
-    if (!!search.startAt && !search.extend) {
+    if (!!search.startAt && !search.endAt) {
       return message.info('请选择时间')
     }
     this.props.getBillsList({search: {...search}});
@@ -212,8 +212,6 @@ const App = React.createClass({
 		return current && current.valueOf() > Date.now();
 	},
 	disabledEndDate(current) {
-    console.log(current)
-
     const second = 31 * 24 * 60 * 60 * 1000;
     const { search } = this.state;
 		const startAt = !!search.startAt ? moment(search.startAt).valueOf() : '';
