@@ -212,13 +212,19 @@ const App = React.createClass({
 		return current && current.valueOf() > Date.now();
 	},
 	disabledEndDate(current) {
-    const second = 30 * 24 * 60 * 60 * 1000;
+    console.log(current)
+
+    const second = 31 * 24 * 60 * 60 * 1000;
     const { search } = this.state;
 		const startAt = !!search.startAt ? moment(search.startAt).valueOf() : '';
     if (!startAt) {
       return true;
     }
-    return current.valueOf() < startAt || current.valueOf() > Date.now();
+    
+    // 结束时间和开始时间跨度　大于等于３1天
+    // 获取截至结束时间
+    const endDate =  Date.now() < startAt + second ? Date.now() : startAt + second
+    return current && current.valueOf() < startAt || current.valueOf() > endDate;
 	},
 	handleStartOpenChange(open) {
 		if (!open) {

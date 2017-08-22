@@ -31,7 +31,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayAccount', {
             rules: [
               {required: true,  message: '必填'},
-              {max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.account : '',
 
@@ -39,7 +39,7 @@ class Alipay extends React.Component {
             <Input placeholder="需要确认是邮箱还是手机号" />
           )}
         </FormItem>
-        <Button type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
+        <Button type="primary" className='form-wrapper-btn' onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
       </div>
       <div className="form-wrapper form-input">
         <FormItem
@@ -48,7 +48,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
-              {max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.realName : '',
 
@@ -56,7 +56,7 @@ class Alipay extends React.Component {
             <Input placeholder="必须为实名认证过的姓名" />
           )}
         </FormItem> 
-        <Button type="primary" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
+        <Button type="primary" className='form-wrapper-btn' onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
       </div>
       <Modal title="示例图片"
         footer={null}
@@ -140,7 +140,7 @@ class Wechat extends React.Component {
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
-            {max:20, message: '不超过二十个字'},
+            {max:30, message: '不超过三十个字'},
           ],
           initialValue: cashAccount.type === 2 ? cashAccount.realName : '',
 

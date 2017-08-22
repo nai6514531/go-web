@@ -233,8 +233,8 @@ class UserForm extends React.Component {
   resetWechatKey() {
     const self = this;
     self.setState({keyLoading: true})
-    WechatService.create().then((res) => {
-      console.log(res)
+
+    WechatService.create(this.props.params.id || window.USER.id).then((res) => {
       if (res.status !== 0) {
         return new Promise.reject()
       }
@@ -484,7 +484,7 @@ class UserForm extends React.Component {
     //   this.cityIdHelp = {};
     // }
 
-    if (id !== 'new'){
+    if (id !== 'new') {
       const type = this.state.payType || +initialValue.type
       if (type == 1) {
         payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
@@ -512,7 +512,7 @@ class UserForm extends React.Component {
 
         </header>
         <article>
-          <Form layout="horizontal">
+          <Form>
             {id !== 'new'? <FormItem
               {...formItemLayout}
               label="登录账号" >
