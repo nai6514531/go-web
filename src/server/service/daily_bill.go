@@ -533,7 +533,7 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 				status = append(status, s)
 				break
 			case 3:
-				if s == "1" || s == "2" || s == "3" || s == "4" {
+				if s == "0" || s == "1" || s == "2" || s == "3" || s == "4" {
 					//1:银行已申请的账单, 2:银行和支付宝已结账的订单, 3:支付宝结账中的订单, 4:支付宝结算失败的订单
 					status = append(status, s)
 				}
