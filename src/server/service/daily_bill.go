@@ -549,7 +549,7 @@ func (self *DailyBillService) Permission(s string, signinUserId int) ([]string, 
 		}
 	}
 	if roleId == 3 && len(status) <= 0 {
-		status = append(status, []string{"1", "2", "3", "4"}...)
+		status = append(status, []string{"0","1", "2", "3", "4"}...)
 	}
 	return status, userId, roleId, nil
 }
