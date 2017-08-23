@@ -155,49 +155,50 @@ class UserForm extends React.Component {
   }
   handleSubmit(e) {
     e.preventDefault();
+    const isEdit = this.props.params.id !== 'new'
     this.props.form.validateFields((errors, values) => {
       if (errors) {
         return;
       }
-      let cashAccount = {};
-      const type = parseInt(values.type);
       const user = {
         "name": values.name,
         "contact": values.contact,
         "mobile": values.mobile,
         "telephone": values.telephone,
         "address": values.address,
-        "email": "",
-        "key": this.state.wechat.key || ''      
+        "email": ""
       }
-      // 当前为修改微信账号状态，且未关联微信
-      if (!this.state.wechat.name && !!this.state.wechat.key) {
-        return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
-      }
-       // 未选任何结算方式
-      if (!~[1, 2].indexOf(type)) {
-        return message.error('请选择收款方式')
-      }
-      if (type === 1) {
-        cashAccount = {
-          "type": type,
-          "realName": values.alipayName,
-          "account": values.alipayAccount,
-        }
-      }
-      if (type === 2) {
-        cashAccount = {
-          "type": type,
-          "realName": values.wechatName,
-        }
-      }
-      cashAccount.mode = this.state.isMode ? 0 : 1
-      user.cashAccount = cashAccount;
-      if (this.props.params.id == 'new') {
+      if (!isEdit) {
         user.password = md5(values.password);
         user.account = values.userAccount;
         this.props.postUserDetail(user);
       } else {
+        let cashAccount = {};
+        const type = parseInt(values.type);
+        // 当前为修改微信账号状态，且未关联微信
+        if (!this.state.wechat.name && !!this.state.wechat.key) {
+          return message.error('请使用你作为收款用途的微信扫描二维码进行关联')
+        }
+         // 未选任何结算方式
+        if (!~[1, 2].indexOf(type)) {
+          return message.error('请选择收款方式')
+        }
+        if (type === 1) {
+          cashAccount = {
+            "type": type,
+            "realName": values.alipayName,
+            "account": values.alipayAccount,
+          }
+        }
+        if (type === 2) {
+          cashAccount = {
+            "type": type,
+            "realName": values.wechatName,
+          }
+        }
+        cashAccount.mode = this.state.isMode ? 0 : 1
+        user.cashAccount = cashAccount;
+        user.key=this.state.wechat.key ||''
         this.props.putUserDetail(this.props.params.id, user);
       }
       this.saveDetail = 1;
@@ -209,7 +210,7 @@ class UserForm extends React.Component {
     const isEdit = this.props.params.id !== 'new'
     let user = {};
 
-    
+
     const wechat = this.state.wechat;
     clearInterval(self.timer);
     self.timer = null;
@@ -482,14 +483,15 @@ class UserForm extends React.Component {
     // if(!this.cityIdHelp){
     //   this.cityIdHelp = {};
     // }
-    const type = this.state.payType || +initialValue.type
-    if (type == 1) {
-      payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
-    } else if (type == 2) {
-      payNode = <Wechat cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={op.get(detail, 'result.data') || {}}
-       form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />
-    } else {
-      payNode = ''
+
+    if (id !== 'new'){
+      const type = this.state.payType || +initialValue.type
+      if (type == 1) {
+        payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
+      } else if (type == 2) {
+        payNode = <Wechat cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={op.get(detail, 'result.data') || {}}
+        form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} />
+      }
     }
     // const disable = id !== 'new'?{disabled:true}:{};
     return (
@@ -634,11 +636,15 @@ class UserForm extends React.Component {
                 <Input placeholder="请输入服务电话" />
               )}
             </FormItem>
+            { id!=='new'?
             <FormItem {...formItemLayout} label="是否自动结算" >
               <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)} className='label-margin'>
                 结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
               结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
             </FormItem>
+            :''
+            }
+            { id!=='new'?
             <FormItem
               {...formItemLayout}
               label="收款方式"
@@ -659,6 +665,8 @@ class UserForm extends React.Component {
                 </RadioGroup>
               )}
             </FormItem>
+            :''
+            }
             {payNode}
             <FormItem className="button-wrapper">
               <Button type="ghost" onClick={this.goBack.bind(this)}>取消</Button>
@@ -666,7 +674,7 @@ class UserForm extends React.Component {
             </FormItem>
           </Form>
           <div>
-             <Modal title="示例图片" 
+             <Modal title="示例图片"
                     visible={this.state.modalVisible}
                     footer={null}
                     onCancel={this.handleCancel.bind(this)}

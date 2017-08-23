@@ -115,6 +115,29 @@ func (self *UserService) Create(user *model.User) (bool, error) {
 	return true, nil
 }
 
+func (self *UserService) CreateWithCashAccountAndRole(user *model.User, cashAccount *model.UserCashAccount, userRoleRel *model.UserRoleRel) (bool, error) {
+	transAction := common.SodaMngDB_WR.Begin()
+	r := transAction.Create(user)
+	if r.Error != nil {
+		transAction.Rollback()
+		return false, r.Error
+	}
+	cashAccount.UserId = user.Id
+	r = transAction.Create(cashAccount)
+	if r.Error != nil {
+		transAction.Rollback()
+		return false, r.Error
+	}
+	userRoleRel.UserId = user.Id
+	r = transAction.Create(userRoleRel)
+	if r.Error != nil {
+		transAction.Rollback()
+		return false, r.Error
+	}
+	transAction.Commit()
+	return true, nil
+}
+
 func (self *UserService) Update(user *model.User) (bool, error) {
 	transAction := common.SodaMngDB_WR.Begin()
 	_user := map[string]interface{}{
