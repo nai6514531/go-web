@@ -3,6 +3,11 @@ package controller
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/bitly/go-simplejson"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
@@ -12,10 +17,6 @@ import (
 	"maizuo.com/soda-manager/src/server/model"
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/service/soda"
-	"regexp"
-	"strconv"
-	"strings"
-	"encoding/json"
 )
 
 /**
@@ -157,6 +158,8 @@ var (
 		"01010523": "城市不能为空",
 		"01010524": "开户总行不能为空",
 		"01010525": "绑定用户信息出错",
+		"01010526": "用户不存在",
+		"01010527": "非法操作，只能修改自己账号或下级商家账户",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -394,13 +397,8 @@ func (self *UserController) Create(ctx *iris.Context) {
 	/*获取请求参数*/
 	var user model.User
 	userService := &service.UserService{}
-	userCashAccountService := &service.UserCashAccountService{}
 	result := &enity.Result{}
 	ctx.ReadJSON(&user)
-
-	//获取cashAccount
-	cashAccount := &model.UserCashAccount{}
-	mapstructure.Decode(user.CashAccount, cashAccount)
 
 	//user信息校验
 	if user.Account == "" {
@@ -414,7 +412,6 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 	//账号信息必须为11位数字(手机)
-	//match, _ := regexp.MatchString(`^\d{11}$`, user.Account)
 	match, _ := regexp.MatchString(`^\w{5,15}$`, user.Account)
 	if !match {
 		result = &enity.Result{"01010416", nil, user_msg["01010416"]}
@@ -451,87 +448,15 @@ func (self *UserController) Create(ctx *iris.Context) {
 		return
 	}
 
-	//校验cashAccount
-
-	if cashAccount.Type == 1 {
-		if cashAccount.Account == "" {
-			result = &enity.Result{"01010417", nil, user_msg["01010417"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.RealName == "" {
-			result = &enity.Result{"01010418", nil, user_msg["01010418"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-	}
-	if cashAccount.Type == 3 {
-		if cashAccount.Account == "" {
-			result = &enity.Result{"01010421", nil, user_msg["01010421"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.RealName == "" {
-			result = &enity.Result{"01010419", nil, user_msg["01010419"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.HeadBankName == "" {
-			result = &enity.Result{"01010424", nil, user_msg["01010424"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.BankName == "" {
-			result = &enity.Result{"01010420", nil, user_msg["01010420"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.ProvinceId == 0 {
-			result = &enity.Result{"01010422", nil, user_msg["01010422"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.CityId == 0 {
-			result = &enity.Result{"01010423", nil, user_msg["01010423"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-	}
-
 	//插入user到user表
 	user.ParentId, _ = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
-	_, err := userService.Create(&user)
+	//插入一条用户角色记录（暂时所有调用此的api都是运营商角色）
+	cashAccount := &model.UserCashAccount{}
+	userRoleRel := &model.UserRoleRel{}
+	userRoleRel.RoleId = 2 //统一为用户角色
+	_, err := userService.CreateWithCashAccountAndRole(&user, cashAccount, userRoleRel)
 	if err != nil {
 		result = &enity.Result{"01010410", err.Error(), user_msg["01010410"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	//插入结算账号信息，type为0也新建
-	userNew, err := userService.FindByAccount(user.Account) //得到新插入的条目
-	if err != nil {
-		result = &enity.Result{"01010415", err.Error(), user_msg["01010415"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	cashAccount.UserId = userNew.Id //cash记录的userid设置为新插入条目的id
-	_, err = userCashAccountService.Create(cashAccount)
-	if err != nil {
-		result = &enity.Result{"01010411", err.Error(), user_msg["01010411"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-
-	//插入一条用户角色记录（暂时所有调用此的api都是运营商角色）
-	userRoleRel := &model.UserRoleRel{}
-	userRoleRel.UserId = user.Id
-	userRoleRel.RoleId = 2 //统一为用户角色
-	userRoleRelSevice := &service.UserRoleRelService{}
-	_, err = userRoleRelSevice.Create(userRoleRel)
-	if err != nil {
-		result = &enity.Result{"01010412", err.Error(), user_msg["01010412"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -575,26 +500,30 @@ func (self *UserController) Create(ctx *iris.Context) {
 func (self *UserController) Update(ctx *iris.Context) {
 	var user model.User
 	userId, _ := ctx.ParamInt("id")
-	//parentId = ctx.Session().GetInt(viper.GetString("server.session.user.id")) //设置session userId作为parentid
 	userService := &service.UserService{}
 	userCashAccountService := &service.UserCashAccountService{}
 	result := &enity.Result{}
 	ctx.ReadJSON(&user)
-	user.Id = userId
 	//user信息校验
+	_user, err := userService.Basic(userId)
+	if err != nil {
+		result = &enity.Result{"01010526", nil, user_msg["01010526"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	currentUserId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	if _user.ParentId != currentUserId && _user.Id != currentUserId {
+		result = &enity.Result{"01010527", nil, user_msg["01010527"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	user.Id = userId
 	//判断登录名是否已经存在,不能对account进行更新
 	if user.Account != "" {
 		//如果有登录账号传入
 		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-		// currentUser, _ := userService.FindByAccount(user.Account)
-		// if (currentUser != nil) && (currentUser.Id != userId) {
-		// 	//可以找到,并且不为将要修改的那一条记录
-		// 	result = &enity.Result{"01010507", nil, user_msg["01010507"]}
-		// 	ctx.JSON(iris.StatusOK, result)
-		// 	return
-		// }
 	}
 	//判断手机号码是否已经存在
 	if user.Mobile != "" {
@@ -604,14 +533,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		//判断手机号是否已被别人使用
-		/*currentUser, _ := userService.FindByMobile(user.Mobile)
-		if (currentUser != nil) && (currentUser.Id != userId) {
-			//可以找到,并且不为将要修改的那一条记录
-			result = &enity.Result{"01010508", nil, user_msg["01010508"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}*/
+
 	}
 
 	//cashAccount
@@ -619,52 +541,15 @@ func (self *UserController) Update(ctx *iris.Context) {
 	mapstructure.Decode(user.CashAccount, cashAccount)
 	cashAccount.UserId = userId
 	common.Logger.Debugln(cashAccount)
-	// //cash内容判断
-	// if (cashAccount.Type != 1) && (cashAccount.Type != 2) && (cashAccount.Type != 3) {
-	// 	//1-实时分账，2-财务结算
-	// 	result = &enity.Result{"01010509", nil, user_msg["01010509"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
-	// if cashAccount.Account == "" {
-	// 	result = &enity.Result{"01010510", nil, user_msg["01010510"]}
-	// 	ctx.JSON(iris.StatusOK, result)
-	// 	return
-	// }
 
 	//更新到user表
-	_, err := userService.Update(&user)
+	_, err = userService.Update(&user)
 	if err != nil {
 		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//更新结算账号信息,如果传的不是0就直接更新
-	// if cashAccount.Type != 0 {
-	// 	ok = userCashAccountService.UpdateByUserId(cashAccount)
-	// 	if !ok {
-	// 		result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-	// 		common.Log(ctx, result)
-	// 		ctx.JSON(iris.StatusOK, result)
-	// 		return
-	// 	}
-	// } else { //如果传的是0，如果本来的记录是type为1的话就改为-1,2的话改为-2,原来是-1的话还是-1，方便还原上一条历史记录
-	// 	current, err := userCashAccountService.BasicByUserId(userId)
-	// 	if err == nil { //可以找到
-	// 		if current.Type > 0 {
-	// 			//把该记录的type值取反
-	// 			current.Type = -current.Type
-	// 		}
-	// 		ok = userCashAccountService.UpdateByUserId(current)
-	// 		if !ok {
-	// 			result = &enity.Result{"01010512", nil, user_msg["01010512"]}
-	// 			common.Log(ctx, result)
-	// 			ctx.JSON(iris.StatusOK, result)
-	// 			return
-	// 		}
-	// 	} //没有记录的不做处理
-	// }
 
 	//校验cashAccount
 
@@ -718,9 +603,9 @@ func (self *UserController) Update(ctx *iris.Context) {
 		if key != "" {
 			prefix := viper.GetString("auth.prefix")
 			// json字符串,将json转成map
-			userExtra := common.Redis.Get(prefix+"user:"+key+":")
+			userExtra := common.Redis.Get(prefix + "user:" + key + ":")
 			userExtraMap := make(map[string]interface{})
-			err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
+			err = json.Unmarshal([]byte(userExtra.Val()), &userExtraMap)
 			// 将微信获取到的信息存到user中
 			user.Extra = userExtra.Val()
 			err := userService.UpdateWechatInfo(&user)
@@ -747,149 +632,6 @@ func (self *UserController) Update(ctx *iris.Context) {
 	common.Log(ctx, nil)
 }
 
-/*换成simplejson的实现方法*/
-/*func (self *UserController) Update(ctx *iris.Context) {
-	userId, _ := ctx.ParamInt("id")
-	userService := &service.UserService{}
-	userCashAccountService := &service.UserCashAccountService{}
-	result := &enity.Result{}
-	userMap := simplejson.New()
-	ctx.ReadJSON(&userMap)
-
-	//user信息校验
-	//判断登录名是否已经存在,不能对account进行更新
-	if userMap.Get("account").MustString() != "" {
-		//如果有登录账号传入
-		result = &enity.Result{"01010515", nil, user_msg["01010515"]}
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-	//判断手机号码是否已经存在
-	//if user.Mobile != "" {
-	if userMap.Get("mobile").MustString() != "" {
-		//判断手机号是否为11位
-		if len(userMap.Get("mobile").MustString()) != 11 {
-			result = &enity.Result{"01010513", nil, user_msg["01010513"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-	}
-
-	var user model.User
-	user.Id = userId
-	user.Name = userMap.Get("name").MustString()
-	user.Contact = userMap.Get("contact").MustString()
-	user.Mobile = userMap.Get("mobile").MustString()
-	user.Telephone = userMap.Get("telephone").MustString()
-	user.Address = userMap.Get("address").MustString()
-	user.Email = userMap.Get("email").MustString()
-	//更新到user表
-	_, err := userService.Update(&user)
-	if err != nil {
-		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-
-	//cashAccount
-	cashAccountMap := userMap.Get("cashAccount").MustMap()
-	common.Logger.Debugln(cashAccountMap)
-	//校验cashAccount
-	cashAccount := &model.UserCashAccount{}
-	if cashAccountMap["type"].(int) == 1 {
-
-		if cashAccount.Account == "" {
-			result = &enity.Result{"01010517", nil, user_msg["01010517"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		if cashAccount.RealName == "" {
-			result = &enity.Result{"01010518", nil, user_msg["01010518"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		cashAccount.Account = cashAccountMap["account"].(string)
-	}
-	if cashAccountMap["type"].(int) == 2 {
-		// 微信支付,从redis取信息
-		key := userMap.Get("key").MustString()
-		prefix := viper.GetString("auth.prefix")
-		// json字符串,将json转成map
-		userExtra := common.Redis.Get(prefix+"user:"+key+":")
-		userExtraMap := make(map[string]interface{})
-		err = json.Unmarshal([]byte(userExtra.Val()),&userExtraMap)
-		// 将微信获取到的信息存到user中
-		user.Extra = userExtra.Val()
-		err := userService.UpdateWechatInfo(&user)
-		if err != nil {
-			result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
-			common.Log(ctx, result)
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-		cashAccount.Account = userExtraMap["openid"].(string)
-	}
-	cashAccount.RealName = cashAccountMap["realName"].(string)
-	cashAccount.UserId = userId
-	cashAccount.Type = cashAccountMap["type"].(int)
-	//修改直接前端传什么type就保存什么
-	_, err = userCashAccountService.UpdateByUserId(cashAccount)
-	if err != nil {
-		result = &enity.Result{"01010512", err.Error(), user_msg["01010512"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
-
-	result = &enity.Result{"01010500", nil, user_msg["01010500"]}
-	ctx.JSON(iris.StatusOK, &result)
-	common.Log(ctx, nil)
-}*/
-
-/**
-	@api {get} /api/user/:id 用户详情
-	@apiName Detail
-	@apiGroup User
-	@apiSuccessExample Success-Response:
-	HTTP/1.1 200 OK
-	{
-		"status": "01010600",
-		"data": {
-		    "id": 1,
-		    "createdAt": "2016-10-17T16:21:10+08:00",
-		    "updatedAt": "2016-10-10T22:51:25+08:00",
-		    "deletedAt": null,
-		    "name": "系统管理员",
-		    "contact": "",
-		    "address": "",
-		    "mobile": "",
-		    "account": "admin",
-		    "password": "e10adc3949ba59abbe56e057f20f883e",
-		    "telephone": "",
-		    "email": "",
-		    "parentId": 1,
-		    "gender": 0,
-		    "age": 0,
-		    "status": 0,
-		    "cashAccount": {
-			    "id": 626,
-			    "createdAt": "2016-10-13T13:34:48+08:00",
-			    "updatedAt": "2016-10-13T13:34:48+08:00",
-			    "deletedAt": null,
-			    "userId": 1,
-			    "type": 1,
-			    "realName": "",
-			    "bankName": "",
-			    "account": "",
-			    "mobile": "",
-			    "cityId": 0,
-			    "provinceId": 0
-		    }
-	    },
-	  	"msg": "拉取用户详情成功!"
-	}
-**/
 func (self *UserController) Basic(ctx *iris.Context) {
 	id, _ := ctx.ParamInt("id")
 	userService := &service.UserService{}
@@ -1460,11 +1202,11 @@ func (self *UserController) Permission(ctx *iris.Context) {
 
 func (self *UserController) ChipcardOper(ctx *iris.Context) {
 	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
-	permissionService :=  service.PermissionService{}
+	permissionService := service.PermissionService{}
 	common.Logger.Debug(userId)
 	boo := permissionService.ChipcardOper(userId)
-	result := &enity.Result{"01011300",boo,user_msg["01011300"]}
-	ctx.JSON(iris.StatusOK,result)
+	result := &enity.Result{"01011300", boo, user_msg["01011300"]}
+	ctx.JSON(iris.StatusOK, result)
 }
 
 func (self *UserController) Password(ctx *iris.Context) {
