@@ -47,7 +47,8 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 		return
 	}
 	if billId == "" {
-		billId,err = billService.Insert(userId,userCashAccount)
+		// 提现操作
+		billId,err = billService.Withdraw(userId,userCashAccount)
 		if err != nil {
 			common.Logger.Debugln("InsertOrUpdate Insert err:",err)
 			result := &enity.Result{"01100001",err,bill_msg["01100001"]}
@@ -57,6 +58,7 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 		}
 
 	}else{
+		// 重新发起结算
 		bill,err := billService.BasicByBillId(billId)
 		if bill.AccountType == 2 { // 如果是微信
 			// 判断是不是因为SystemError引起的,是的话不能结算
@@ -90,7 +92,7 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 			return
 		}
 
-		err = billService.Update(billId,userId,userCashAccount)
+		err = billService.ReWithDraw(billId,userId,userCashAccount)
 		if err != nil {
 			result :=&enity.Result{"01100005",err,bill_msg["01100005"]}
 			common.Log(ctx,result)

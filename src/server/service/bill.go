@@ -31,7 +31,7 @@ func (self *BillService) BasicByBillId(billId string) (*model.Bill, error) {
 	return bill, r.Error
 }
 
-func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccount) (string, error) {
+func (self *BillService) Withdraw(userId int, userCashAccount *model.UserCashAccount) (string, error) {
 	user := &model.User{}
 	// 获取到用户
 	common.SodaMngDB_R.Where("id = ?", userId).First(user)
@@ -130,7 +130,7 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 	return bill.BillId, nil
 }
 
-func (self *BillService) Update(billId string, userId int, userCashAccount *model.UserCashAccount) error {
+func (self *BillService) ReWithDraw(billId string, userId int, userCashAccount *model.UserCashAccount) error {
 	bill := &model.Bill{}
 	// 结账失败的单才可以重新发起结算
 	r := common.SodaMngDB_R.Where("bill_id = ? and status = 4", billId).Find(bill)
