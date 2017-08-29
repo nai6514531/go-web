@@ -175,6 +175,9 @@ func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
 			return
 		}
 	}
+	if extra["nickname"] == "" {
+		extra["nickname"] = "运营商微信昵称"
+	}
 	// 将返回的用户信息存放到redis中,轮询时根据key来获取openId从而判断是否绑定成功
 	extraJson,err := json.Marshal(extra)
 	if err != nil {
