@@ -68,37 +68,37 @@ const router = (
         }} />
         <Route path="/settlement" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理列表
+          // 每日账单
             callback(null, require('./view/settlement/list/app.jsx').default);
           });
         }} />
         <Route path="/settlement/bill" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理列表
+          // 结算查询
             callback(null, require('./view/settlement/bill/app.jsx').default);
           });
         }} />
         <Route path="/settlement/bill/detail" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理列表
+          // 结算日账单列表
             callback(null, require('./view/settlement/bill/detail.jsx').default);
           });
         }} />
         <Route path="/settlement/bill/:id" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理列表
+          // 结算日账单列表
             callback(null, require('./view/settlement/bill/detail.jsx').default);
           });
         }} />
         <Route path="/settlement/bill/detail/daily-bill-detail/:userId/:billAt" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理列表
+          // 日账单详情
             callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
           });
         }} />
         <Route path="/settlement/daily-bill-detail/:userId/:billAt" getComponent={(location, callback) => {
           require.ensure([], (require) => {
-          // 结算管理详情
+          // 日账单详情
             callback(null, require('./view/settlement/daily-bill-detail/app.jsx').default);
           });
         }} />

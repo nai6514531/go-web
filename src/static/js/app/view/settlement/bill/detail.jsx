@@ -76,11 +76,11 @@ const Detail = React.createClass({
             return <div>
               {record.realName?<span>户名: {record.realName}</span>:''}
               {record.realName && record.bankName ?' | ':''}
-              {record.bankName?<span className="info">{record.bankName}</span>:''}
+              {record.bankName?<span className='info'>{record.bankName}</span>:''}
               {record.bankName && record.account ?' | ':''}
-              {record.account?<span className="info">{record.account}</span>:''}
+              {record.account?<span className='info'>{record.account}</span>:''}
               {record.account && record.mobile ?' | ':''}
-              {record.mobile?<span className="info">{record.mobile}</span>:''}
+              {record.mobile?<span className='info'>{record.mobile}</span>:''}
             </div>
           }
           return '-'
@@ -96,7 +96,7 @@ const Detail = React.createClass({
         key: 'status',
         width: 80,
         render: (status, record) => {
-          return <div className="status">{BILLS_STATUS[status]}</div>
+          return <div className='status'>{BILLS_STATUS[status]}</div>
         }
       }, {
         title: '操作',
@@ -127,11 +127,11 @@ const Detail = React.createClass({
     self.setState({ loading: true, pagination: pagination });
     const isBillsDetail = !!~this.props.location.pathname.indexOf('detail')
     DailyBillService.list({
-      cashAccountType: "0",
+      cashAccountType: '0',
       status: isBillsDetail ? 0 : '',
-      startAt: "",
-      endAt: "",
-      searchStr: "",
+      startAt: '',
+      endAt: '',
+      searchStr: '',
       page: pagination.page,
       perPage: pagination.perPage,
       billId: self.props.params.id || ''
@@ -171,10 +171,10 @@ const Detail = React.createClass({
         self.handleTableChange(pager);
       }
     };
-    return (<section className="view-settlement-list">
+    return (<section className='view-settlement-list'>
       <header>
         <Breadcrumb>
-          <Breadcrumb.Item><a href="/#/settlement/bill">结算查询</a></Breadcrumb.Item>
+          <Breadcrumb.Item><a href='/#/settlement/bill'>结算查询</a></Breadcrumb.Item>
           <Breadcrumb.Item>账单明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>

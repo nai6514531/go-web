@@ -651,10 +651,10 @@ class UserForm extends React.Component {
               })(
                 <RadioGroup className='radio-line'>
                   <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-                    <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
+                    <span>微信(申请后T+1结算，收取结算金额的1%作为手续费)</span>
                   </Radio>
                   <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-                     <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
+                     <span>支付宝(申请后T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
               )}
