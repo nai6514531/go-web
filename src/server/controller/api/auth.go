@@ -51,6 +51,7 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 		result := &enity.Result{"01120001", err, auth_msg["01120001"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
+		return
 	}
 
 	userId := params.Get("id").MustInt()
@@ -58,6 +59,7 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 		result := &enity.Result{"01120002", userId, auth_msg["01120002"]}
 		ctx.JSON(iris.StatusOK, result)
 		common.Log(ctx,result)
+		return
 	}
 	prefix := viper.GetString("auth.prefix")
 	// 加密
@@ -69,6 +71,8 @@ func (self *AuthController) CreateKey(ctx *iris.Context) {
 	result := &enity.Result{"01120000", map[string]string{"key": key}, auth_msg["01120000"]}
 	ctx.JSON(iris.StatusOK, result)
 	common.Log(ctx,result)
+	return
+
 }
 
 func (self *AuthController)UpdateWechatKey(ctx *iris.Context) {
