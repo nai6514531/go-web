@@ -54,14 +54,14 @@
     position: relative;
     width: 180px;
     &.loading {
-      img {
+      canvas {
         opacity: 0.3
       }
     }
     .key-loading {
       position: absolute;
       top: 35%;
-      left: 35%;
+      left: 30%;
       font-size: 28px;
       zoom: 1.5;
     }
@@ -124,9 +124,10 @@
       }
     }
   }
-  @media (max-width: 500px) { 
+  @media (max-width: 1000px) { 
     .form-input {
       button {
+        zoom: 0.6;
         right: -10px
       }
       input {
@@ -145,5 +146,15 @@
   }
   .label-margin {
     margin-top: 8px;
+  }
+  .color-red {
+    color: #ea1304!important;
+    font-style: normal;
+    margin: 0 3px;
+  }
+  .form-wrapper-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 }

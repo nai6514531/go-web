@@ -727,7 +727,7 @@ const App = React.createClass({
 	},
 	disabledEndDate(endAt) {
 		const startAt = new Date(this.state.startAt ? this.state.startAt : null).getTime();
-    let second = 30 * 24 * 60 * 60 * 1000;
+    let second = 31 * 24 * 60 * 60 * 1000;
     let dateRange = (endAt && endAt.valueOf() >= startAt.valueOf() + second) || ( endAt && endAt.valueOf() > Date.now());
 		if (!endAt || !startAt) {
       return dateRange;

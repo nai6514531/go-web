@@ -32,7 +32,7 @@ func (self *BillService) BasicByBillId(billId string) (*model.Bill, error) {
 	return bill, r.Error
 }
 
-func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccount) (string, error) {
+func (self *BillService) Withdraw(userId int, userCashAccount *model.UserCashAccount) (string, error) {
 	user := &model.User{}
 	// 获取到用户
 	common.SodaMngDB_R.Where("id = ?", userId).First(user)
@@ -71,21 +71,19 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 		// 支付宝大于200的情况
 		if totalAmount > viper.GetInt("bill.aliPay.borderValue") {
 			rate = 1
-			cast = totalAmount * rate / 100
+			cast = int(functions.Round(float64(totalAmount * rate)/100.00,0))//四舍五入
 		}
 		accountName = "支付宝"
 	} else if userCashAccount.Type == 2 {
 		rate = viper.GetInt("bill.wechat.rate")
-		cast = totalAmount * rate / 100
+		cast = int(functions.Round(float64(totalAmount * rate)/100.00,0))//四舍五入
 		accountName = "微信"
 	} else {
 		return "", errors.New("不支持的提现方式，请检查提现账单设置")
 	}
-
+	// 做一次四舍五入的操作,因为是分作单位,所以不需要保留分之后的小数位,所以n=0
 	amount := totalAmount - cast
-
 	status := 1
-
 	bill := model.Bill{
 		BillId:           billId,
 		Account:          userCashAccount.Account,
@@ -131,7 +129,7 @@ func (self *BillService) Insert(userId int, userCashAccount *model.UserCashAccou
 	return bill.BillId, nil
 }
 
-func (self *BillService) Update(billId string, userId int, userCashAccount *model.UserCashAccount) error {
+func (self *BillService) ReWithDraw(billId string, userId int, userCashAccount *model.UserCashAccount) error {
 	bill := &model.Bill{}
 	// 结账失败的单才可以重新发起结算
 	r := common.SodaMngDB_R.Where("bill_id = ? and status = 4", billId).Find(bill)
@@ -142,26 +140,23 @@ func (self *BillService) Update(billId string, userId int, userCashAccount *mode
 		return errors.New("提现金额不可少于2元")
 	}
 	accountName := ""
+	cast, rate := viper.GetInt("bill.aliPay.cast"), viper.GetInt("bill.aliPay.rate")
 	if userCashAccount.Type == 1 {
 		accountName = "支付宝"
+		// 支付宝大于200的情况
+		if bill.TotalAmount > viper.GetInt("bill.aliPay.borderValue") {
+			rate = 1
+			cast = int(functions.Round(float64(bill.TotalAmount * rate)/100.00,0))//四舍五入
+		}
 	} else if userCashAccount.Type == 2 {
 		accountName = "微信"
+		rate = viper.GetInt("bill.wechat.rate")
+		cast = int(functions.Round(float64(bill.TotalAmount * rate)/100.00,0))//四舍五入
 	} else {
 		return errors.New("不支持的提现方式，请检查提现账单设置")
 	}
 
-	cast, rate := viper.GetInt("bill.aliPay.cast"), viper.GetInt("bill.aliPay.rate")
-	if userCashAccount.Type == 1 {
-		// 支付宝大于200的情况
-		if bill.TotalAmount > viper.GetInt("bill.aliPay.borderValue") {
-			rate = 1
-			cast = bill.TotalAmount * rate / 100
-		}
-	} else {
-		rate = viper.GetInt("bill.wechat.rate")
-		cast = bill.TotalAmount * rate / 100
-	}
-
+	// 做一次四舍五入的操作,因为是分作单位,所以不需要保留分之后的小数位,所以n=0
 	amount := bill.TotalAmount - cast
 
 	status := 1

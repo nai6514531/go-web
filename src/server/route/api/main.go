@@ -130,6 +130,6 @@ func Api() {
 	api.Get("/bill", bill.List)
 	api.Post("/bill", bill.InsertOrUpdate)
 
-	api.Get("/wechat/actions/create/key", auth.CreateKey)
-	api.Get("/wechat/key/:key", auth.CheckKeyStatus)
+	api.Post("/wechat/actions/create/key", auth.CreateKey)
+	api.Get("/wechat/key/:key",auth.CheckKeyStatus)
 }

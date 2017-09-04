@@ -6,6 +6,7 @@ import (
 	"time"
 	"math/rand"
 	"fmt"
+	"math"
 )
 
 //int数组去重
@@ -111,4 +112,9 @@ func GenerateIdByUserId(userId int) string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	code := fmt.Sprintf("%06v", rnd.Int31n(1000000))
 	return ymd + prefix + code
+}
+
+func Round(f float64, n int) float64 {
+	pow10_n := math.Pow10(n)
+	return math.Trunc((f+0.5/pow10_n)*pow10_n) / pow10_n
 }

@@ -233,8 +233,8 @@ class UserForm extends React.Component {
   resetWechatKey() {
     const self = this;
     self.setState({keyLoading: true})
-    WechatService.create().then((res) => {
-      console.log(res)
+
+    WechatService.create(this.props.params.id || window.USER.id).then((res) => {
       if (res.status !== 0) {
         return new Promise.reject()
       }
@@ -484,7 +484,7 @@ class UserForm extends React.Component {
     //   this.cityIdHelp = {};
     // }
 
-    if (id !== 'new'){
+    if (id !== 'new') {
       const type = this.state.payType || +initialValue.type
       if (type == 1) {
         payNode = <Alipay form={this.props.form} cashAccount={op.get(detail, 'result.data.cashAccount') || {}} formItemLayout={formItemLayout} />
@@ -512,7 +512,7 @@ class UserForm extends React.Component {
 
         </header>
         <article>
-          <Form layout="horizontal">
+          <Form>
             {id !== 'new'? <FormItem
               {...formItemLayout}
               label="登录账号" >
@@ -657,10 +657,10 @@ class UserForm extends React.Component {
               })(
                 <RadioGroup className='radio-line'>
                   <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-                    <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
+                    <span>微信(申请后T+1结算，收取结算金额的1%作为手续费)</span>
                   </Radio>
                   <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-                     <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
+                     <span>支付宝(申请后T+1结算，200元以下每次结算收取2元手续费，200元及以上收取结算金额的1%作为手续费)</span>
                   </Radio>
                 </RadioGroup>
               )}

@@ -6,6 +6,7 @@ import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/service"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type SettleController struct {
@@ -36,12 +37,12 @@ func (self *SettleController) SettlementDetails(ctx *iris.Context) {
 		// 支付宝大于200的情况
 		if amount > viper.GetInt("bill.aliPay.borderValue") {
 			rate = 1
-			cast = amount * rate / 100
+			cast = int(functions.Round(float64(amount * rate)/100.00,0))//四舍五入
 		}
 	} else {
 		// 微信
 		rate = viper.GetInt("bill.wechat.rate")
-		cast = amount * rate / 100
+		cast = int(functions.Round(float64(amount * rate)/100.00,0))//四舍五入
 	}
 	result := &enity.Result{Status: "01110000", Data: map[string]interface{}{
 		"totalAmount": amount,

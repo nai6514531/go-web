@@ -1,5 +1,6 @@
 import axios from "axios";
 import NProgress from "nprogress";
+import { isProduction, isStaging, isDevelopment } from "../debug"
 import {Modal, message} from "antd";
 const confirm = Modal.confirm;
 
@@ -10,6 +11,8 @@ const api = axios.create({
   },
   withCredentials: true,
   timeout: 1000 * 60 * 5,
+  baseURL: isProduction ? '//mng.huacetech.cn' : 
+           isStaging ? '//mng.huacetech.cn' : '//mng.huacetech.cn',
   transformRequest: [(data) => {
     NProgress.start();
     if (!data) {

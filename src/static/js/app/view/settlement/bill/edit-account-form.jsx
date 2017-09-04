@@ -8,7 +8,8 @@ import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form, Spin, Check
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-import QRCode from 'qrcode'
+
+import QRCode from 'qrcode.react'
 import UserService from '../../../service/user';
 import WechatService from '../../../service/wechat';
 
@@ -28,53 +29,53 @@ class Alipay extends React.Component {
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = this.props.formItemLayout
     return <div>
-      <div className="form-wrapper form-input">
+      <div className='form-wrapper form-input'>
         <FormItem
           {...formItemLayout}
-          label="支付宝账号">
+          label='支付宝账号'>
           {getFieldDecorator('alipayAccount', {
             rules: [
               {required: true,  message: '必填'},
-              { max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.get('type') === 1 ? cashAccount.get('account') : '',
 
           })(
-            <Input placeholder="需要确认是邮箱还是手机号" /> 
+            <Input placeholder='需要确认是邮箱还是手机号' /> 
           )}
         </FormItem>
-        <Button type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button> 
+        <Button type='primary' onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button> 
       </div>
-      <div className="form-wrapper form-input">
+      <div className='form-wrapper form-input'>
         <FormItem
           {...formItemLayout}
-          label="真实姓名">
+          label='真实姓名'>
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
-              {max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.get('type') === 1 ? cashAccount.get('realName') : '',
 
           })(
-            <Input placeholder="必须为实名认证过的姓名" />
+            <Input placeholder='必须为实名认证过的姓名' />
           )}
         </FormItem>
-        <Button type="primary" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>  
+        <Button type='primary' onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>  
       </div>
-      <Modal title="示例图片"
+      <Modal title='示例图片'
         footer={null}
         visible={this.state.showAccountTip}
         onCancel={() => { this.setState({ showAccountTip: false })}}
         style={{textAlign:'center'}}>
-        <img src={require("../../../../../img/app/account_demo.png")} width="70%"/>
+        <img src={require('../../../../../img/app/account_demo.png')} width='70%'/>
      </Modal>
-     <Modal title="示例图片" 
+     <Modal title='示例图片' 
         footer={null}
         visible={this.state.showAccountNameTip}
         onCancel={() => { this.setState({ showAccountNameTip: false })}}
         style={{textAlign:'center'}}>
-        <img src={require("../../../../../img/app/name_demo.png")} width="70%"/>
+        <img src={require('../../../../../img/app/name_demo.png')} width='70%'/>
      </Modal>
     </div>
   }
@@ -92,9 +93,8 @@ class Wechat extends React.Component {
     const self = this;
     key = key || '';
     const url = defaultUrl + `?key=${key}`;
-    QRCode.toDataURL(url, function (err, url) {
-      self.setState({qrCodeUrl: url})
-    })
+
+    self.setState({qrCodeUrl: url})
   }
   identification() {
     this.setState({ showIdentification: true })
@@ -116,19 +116,19 @@ class Wechat extends React.Component {
     const nickName = wechat.name || user.get('nickName');
 
     return <div>
-      <div className="form-wrapper">
+      <div className='form-wrapper'>
         <FormItem {...formItemLayout} label={( <span className='label'>扫码验证身份</span>)} >
-          <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
-            <img src={this.state.qrCodeUrl} width='160' />
+          <div className={this.props.keyLoading ? 'code loading' : 'code' } >
+            <QRCode value={this.state.qrCodeUrl} />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
           </div> 
         </FormItem>
         { 
-          !!wechat.name || (!wechat.key && cashAccount.get('type') === 2) ? <div className="code-tip">
+          wechat.isRelate || (!wechat.key && cashAccount.get('type') === 2) ? <div className='code-tip'>
             <Icon type='check-circle' className='icon success' /> 
-            <span>关联成功（你将使用昵称为<span className='color-red'>{nickName}</span>的微信收款。如需更换账号请'<i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
+            <span>关联成功（你将使用昵称为<span className='color-red'>{nickName}</span>的微信收款。如需更换账号请<i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
           </div> :
-          <div className="code-tip">
+          <div className='code-tip'>
             <Icon type='exclamation-circle' className='icon info' />
             <span>请使用你作为收款用途的微信扫描二维码进行关联，申请结算后，
             款项会在规定时间内打入微信账户。</span>
@@ -138,18 +138,18 @@ class Wechat extends React.Component {
       </div>
       <FormItem
         {...formItemLayout}
-        label="微信已认证姓名">
+        label='微信已认证姓名'>
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
-            {max:20, message: '不超过二十个字'},
+            {max:30, message: '不超过三十个字'},
           ],
           initialValue: cashAccount.get('type') === 2 ? cashAccount.get('realName') : '',
         })(
-          <Input placeholder="如：张三" />
+          <Input placeholder='如：张三' />
         )}
       </FormItem>
-      <Modal title="如何认证" 
+      <Modal title='如何认证' 
         footer={null}
         visible={this.state.showIdentification}
         onCancel={() => { this.setState({ showIdentification: false })}}
@@ -168,6 +168,7 @@ class AmountForm extends React.Component {
       wechat: {
         name: '',
         key: '',
+        isRelate: false
       },
       type: '',
       isMode: true,
@@ -186,9 +187,9 @@ class AmountForm extends React.Component {
       const type = parseInt(values.type);
       if (type === 1) {
         cashAccount = {
-          "type": type,
-          "realName": values.alipayName,
-          "account": values.alipayAccount
+          'type': type,
+          'realName': values.alipayName,
+          'account': values.alipayAccount
         }
       } 
        // 当前为修改微信账号状态，且未关联微信
@@ -197,8 +198,8 @@ class AmountForm extends React.Component {
       }
       if (type === 2) {
         cashAccount = {
-          "type": type,
-          "realName": values.wechatName
+          'type': type,
+          'realName': values.wechatName
         }
       }
       self.updateUserAccount(cashAccount)  
@@ -219,14 +220,14 @@ class AmountForm extends React.Component {
   resetWechatKey() {
     const self = this;
     self.setState({keyLoading: true})
-    WechatService.create().then((res) => {
+    WechatService.create(window.USER.id).then((res) => {
       if (res.status !== 0) {
         throw new Error()
       }
       const key = res.data.key
       // 根据key生成二维码
       // self.initQRCode(key)
-      self.setState({wechat: {name: '', key: key || ''}, keyLoading: false})
+      self.setState({wechat: {name: '', key: key || '', isRelate: false}, keyLoading: false})
       self.checkWechatKey()
     }).catch(() => {
       self.setState({keyLoading: false})
@@ -248,7 +249,7 @@ class AmountForm extends React.Component {
         if (status === 0) {
           clearInterval(self.timer);
           self.timer = null;
-          self.setState({wechat: {...self.state.wechat, name: res.data.wechat.name}})
+          self.setState({wechat: {...self.state.wechat, name: res.data.wechat.name, isRelate: true}})
         }
       }).catch((error) => {
         clearInterval(self.timer);
@@ -314,7 +315,7 @@ class AmountForm extends React.Component {
         <Checkbox checked={this.state.isMode} onChange={this.onChangeAutoBill.bind(this)}>结算金额一旦超过200元，系统自动提交结算申请（若不勾选，
         结算时需手动点击结算查询的"申请结算"按钮，财务才会进行结算）</Checkbox>
       </FormItem>
-      <FormItem {...formItemLayout} label="收款方式">
+      <FormItem {...formItemLayout} label='收款方式'>
         {getFieldDecorator('type', {
           rules: [
             {required: true, message: '请选择收款方式'},
@@ -322,11 +323,11 @@ class AmountForm extends React.Component {
           initialValue: !!type ? type.toString() : '',
         })(
           <RadioGroup>
-            <Radio value="2" onClick = {this.changePayTye.bind(this, 2)} className="radio-block">
-               <span>微信(T+1结算，收取结算金额的1%作为手续费)</span>
+            <Radio value='2' onClick = {this.changePayTye.bind(this, 2)} className='radio-block'>
+               <span>微信(申请后T+1结算，收取结算金额的1%作为手续费)</span>
             </Radio>
-            <Radio value="1" onClick = {this.changePayTye.bind(this, 1)} className="radio-block">
-               <span>支付宝(T+1结算，200元以下每次结算收取2元手续费，</span><br/>
+            <Radio value='1' onClick = {this.changePayTye.bind(this, 1)} className='radio-block'>
+               <span>支付宝(申请后T+1结算，200元以下每次结算收取2元手续费，</span><br/>
                <span>200元及以上收取结算金额的1%作为手续费)</span>
             </Radio>
           </RadioGroup>
@@ -335,10 +336,10 @@ class AmountForm extends React.Component {
       { type === 1 ? <Alipay form={this.props.form} cashAccount={cashAccount} formItemLayout={formItemLayout} /> : type === 2 ?
        <Wechat cashAccount={cashAccount} formItemLayout={formItemLayout} keyLoading={this.state.keyLoading} user={user}
        form={this.props.form} resetWechatKey={this.resetWechatKey.bind(this)} wechat={this.state.wechat} /> : null} 
-      <div className="footer-btn">
+      <div className='footer-btn'>
         <FormItem>
-          <Button type="ghost" onClick={this.handleCashModal.bind(this)}>取消</Button>
-          <Button type="primary" htmlType="submit" loading={this.state.userLoading}>保存</Button>
+          <Button type='ghost' onClick={this.handleCashModal.bind(this)}>取消</Button>
+          <Button type='primary' htmlType='submit' loading={this.state.userLoading}>保存</Button>
         </FormItem>
        </div>
     </Form>);

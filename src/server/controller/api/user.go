@@ -160,6 +160,7 @@ var (
 		"01010525": "绑定用户信息出错",
 		"01010526": "用户不存在",
 		"01010527": "非法操作，只能修改自己账号或下级商家账户",
+		"01010528": "不支持的收款账号类型",
 
 		"01010600": "拉取用户详情成功!",
 		"01010601": "拉取用户详情失败!",
@@ -525,15 +526,11 @@ func (self *UserController) Update(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	//判断手机号码是否已经存在
-	if user.Mobile != "" {
-		//判断手机号是否为11位
-		if len(user.Mobile) != 11 {
-			result = &enity.Result{"01010513", nil, user_msg["01010513"]}
-			ctx.JSON(iris.StatusOK, result)
-			return
-		}
-
+	//判断手机号是否为11位
+	if len(user.Mobile) != 11 {
+		result = &enity.Result{"01010513", nil, user_msg["01010513"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 
 	//cashAccount
@@ -542,17 +539,10 @@ func (self *UserController) Update(ctx *iris.Context) {
 	cashAccount.UserId = userId
 	common.Logger.Debugln(cashAccount)
 
-	//更新到user表
-	_, err = userService.Update(&user)
-	if err != nil {
-		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
-	}
+	cashAccount.RealName = strings.Trim(cashAccount.RealName, " ")
+	cashAccount.Account = strings.Trim(cashAccount.Account, " ")
 
 	//校验cashAccount
-
 	if cashAccount.Type == 1 {
 		if cashAccount.Account == "" {
 			result = &enity.Result{"01010517", nil, user_msg["01010517"]}
@@ -564,8 +554,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-	}
-	if cashAccount.Type == 3 {
+	} else if cashAccount.Type == 3 {
 		if cashAccount.Account == "" {
 			result = &enity.Result{"01010521", nil, user_msg["01010521"]}
 			ctx.JSON(iris.StatusOK, result)
@@ -596,8 +585,7 @@ func (self *UserController) Update(ctx *iris.Context) {
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-	}
-	if cashAccount.Type == 2 {
+	} else if cashAccount.Type == 2 {
 		// 微信支付,从redis取信息
 		key := user.Key
 		if key != "" {
@@ -617,6 +605,19 @@ func (self *UserController) Update(ctx *iris.Context) {
 			}
 			cashAccount.Account = userExtraMap["openid"].(string)
 		}
+	} else {
+		result = &enity.Result{"01010528", nil, user_msg["01010528"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	//更新到user表
+	_, err = userService.Update(&user)
+	if err != nil {
+		result = &enity.Result{"01010511", err.Error(), user_msg["01010511"]}
+		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	//修改直接前端传什么type就保存什么
 	_, err = userCashAccountService.UpdateByUserId(cashAccount)

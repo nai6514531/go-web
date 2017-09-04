@@ -7,8 +7,8 @@ import { Button, Radio, Input, Icon, message, Modal, Row, Col, Form, Spin } from
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-import QRCode from 'qrcode'
-import { isProduction } from '../../../library/debug'
+import QRCode from 'qrcode.react'
+import { isProduction, isStaging, isDevelopment } from '../../../library/debug'
 const defaultUrl = isProduction ? 'http://m.sodalife.xyz/act/relate-wechat' : 'http://m.sodalife.club/act/relate-wechat';
 
 class Alipay extends React.Component {
@@ -31,7 +31,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayAccount', {
             rules: [
               {required: true,  message: '必填'},
-              {max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.account : '',
 
@@ -39,7 +39,7 @@ class Alipay extends React.Component {
             <Input placeholder="需要确认是邮箱还是手机号" />
           )}
         </FormItem>
-        <Button type="primary" onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
+        <Button type="primary" className='form-wrapper-btn' onClick={() => { this.setState({ showAccountTip: true })}}>查看示例</Button>     
       </div>
       <div className="form-wrapper form-input">
         <FormItem
@@ -48,7 +48,7 @@ class Alipay extends React.Component {
           {getFieldDecorator('alipayName', {
             rules: [
               {required: true, message: '必填'},
-              {max:20, message: '不超过二十个字'},
+              {max:30, message: '不超过三十个字'},
             ],
             initialValue: cashAccount.type === 1 ? cashAccount.realName : '',
 
@@ -56,7 +56,7 @@ class Alipay extends React.Component {
             <Input placeholder="必须为实名认证过的姓名" />
           )}
         </FormItem> 
-        <Button type="primary" onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
+        <Button type="primary" className='form-wrapper-btn' onClick={() => { this.setState({ showAccountNameTip: true })}}>查看示例</Button>
       </div>
       <Modal title="示例图片"
         footer={null}
@@ -88,9 +88,7 @@ class Wechat extends React.Component {
     const self = this;
     key = key || '';
     const url = defaultUrl + `?key=${key}`;
-    QRCode.toDataURL(url, function (err, url) {
-      self.setState({qrCodeUrl: url})
-    })
+    self.setState({qrCodeUrl: url})
   }
   identification() {
     this.setState({ showIdentification: true })
@@ -113,14 +111,17 @@ class Wechat extends React.Component {
     return <div>
       <div className="form-wrapper">
         <FormItem {...formItemLayout} label={( <span className='label'>扫码验证身份</span>)} >
-          <div ref="qrcode" className={this.props.keyLoading ? 'code loading' : 'code' } id="canvas">
-            <img src={this.state.qrCodeUrl} width='160' />
+          <div className={this.props.keyLoading ? 'code loading' : 'code' } >
+            <QRCode value={this.state.qrCodeUrl} />
             { this.props.keyLoading ? <Spin className='key-loading' /> : null }
           </div> 
           { 
             !!wechat.name || (!wechat.key && cashAccount.type === 2) ? <div className="code-tip">
               <Icon type='check-circle' className='icon success' /> 
-              <span>{'关联成功（你将使用昵称为' + nickName + '的微信收款。如需更换账号请'} <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）</span>
+              <span>
+                关联成功（你将使用昵称为<span className='color-red'>{nickName}</span>的微信收款。如需更换账号请
+                <i className='reset-wechat' onClick={this.props.resetWechatKey}>刷新</i>二维码，用新微信号扫描）
+              </span>
             </div> :
             <div className="code-tip">
               <Icon type='exclamation-circle' className='icon info' />
@@ -137,7 +138,7 @@ class Wechat extends React.Component {
         {getFieldDecorator('wechatName', {
           rules: [
             {required: true, message: '必填'},
-            {max:20, message: '不超过二十个字'},
+            {max:30, message: '不超过三十个字'},
           ],
           initialValue: cashAccount.type === 2 ? cashAccount.realName : '',
 
