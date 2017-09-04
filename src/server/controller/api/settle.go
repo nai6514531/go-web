@@ -37,7 +37,7 @@ func (self *SettleController) SettlementDetails(ctx *iris.Context) {
 		// 支付宝大于200的情况
 		if amount > viper.GetInt("bill.aliPay.borderValue") {
 			rate = 1
-			cast = int(functions.Round(float64(amount * rate)/100.00,0)*100)//四舍五入
+			cast = int(functions.Round(float64(amount * rate)/100.00,0))//四舍五入
 		}
 	} else {
 		// 微信
