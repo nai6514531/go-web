@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/enity"
 	"github.com/go-errors/errors"
+	"github.com/jinzhu/gorm"
 )
 
 type BillController struct {
@@ -25,6 +26,14 @@ var (
 
 		"01100100":"拉取账单列表成功",
 		"01100101":"拉取账单列表失败",
+
+		"01100200":"拉取账单详情成功",
+		"01100201":"拉取账单详情失败",
+		"01100202":"无此账单",
+
+		"01100300":"拉取账单手续费详情成功",
+		"01100301":"拉取账单详情失败",
+		"01100302":"无此账单",
 	}
 )
 // 根据id是否为空来新增或者修改bill
@@ -108,7 +117,7 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 
 }
 // 获取账单列表
-func (self *BillController) List(ctx *iris.Context) {
+func (self *BillController) List(ctx *iris.Context) { // TODO 返回值要多加period字段
 	billService := &service.BillService{}
 	page,_ := ctx.URLParamInt("page")
 	perPage,_ := ctx.URLParamInt("perPage")
@@ -140,6 +149,57 @@ func (self *BillController) List(ctx *iris.Context) {
 		return
 	}
 	result := &enity.Result{"01100100",&enity.Pagination{total,list},bill_msg["01100100"]}
+	ctx.JSON(iris.StatusOK,result)
+	common.Log(ctx,result)
+	return
+}
+
+func (self *BillController) DetailsByBillId(ctx *iris.Context) {
+	billService := &service.BillService{}
+	billId := ctx.Param("billId")
+	bill,err := billService.BasicByBillId(billId)
+	if err != nil && err != gorm.ErrRecordNotFound{
+		result := &enity.Result{Status:"01100201",Data:err,Msg:bill_msg["01100201"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
+	}
+	if err == gorm.ErrRecordNotFound{
+		result := &enity.Result{Status:"01100202",Data:err,Msg:bill_msg["01100202"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
+	}
+
+	result := &enity.Result{Status:"01100200",Data: map[string]interface{}{
+		"totalAmount":bill.TotalAmount,
+		"count":bill.Count,
+	},Msg:bill_msg["01100100"]}
+
+	ctx.JSON(iris.StatusOK,result)
+	common.Log(ctx,result)
+	return
+}
+
+func (self *BillController) CastByBillId(ctx *iris.Context) {
+	billService := &service.BillService{}
+	billId := ctx.Param("billId")
+	bill,err := billService.BasicByBillId(billId)
+	if err != nil && err != gorm.ErrRecordNotFound{
+		result := &enity.Result{Status:"01100201",Data:err,Msg:bill_msg["01100201"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
+	}
+	if err == gorm.ErrRecordNotFound{
+		result := &enity.Result{Status:"01100202",Data:err,Msg:bill_msg["01100202"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
+	}
+	result := &enity.Result{Status:"01100200",Data: map[string]interface{}{
+		"cast":bill.Cast,
+	},Msg:bill_msg["01100100"]}
 	ctx.JSON(iris.StatusOK,result)
 	common.Log(ctx,result)
 	return
