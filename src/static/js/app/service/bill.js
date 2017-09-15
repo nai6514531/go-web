@@ -17,6 +17,12 @@ const Service = {
       id: id || ''
     })
   },
+  get: (id) => {
+    return api.get(`/api/bill/${id}`)
+  },
+  getCast: (id) => {
+    return api.get(`/api/bill/${id}/cast`)
+  },
 };
 
 export default Service;

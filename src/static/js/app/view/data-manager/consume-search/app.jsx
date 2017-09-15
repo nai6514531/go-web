@@ -1,5 +1,5 @@
 import React from "react";
-import {Input, Button, Table, Popconfirm, Breadcrumb, message, Form} from "antd";
+import {Input, Button, Table, Popconfirm, Breadcrumb, message, Form, Modal} from "antd";
 import StatisWashService from "../../../service/consume_search";
 import RefundService from "../../../service/refund";
 import DeviceService from "../../../service/device";
@@ -10,6 +10,7 @@ import moment from "moment";
 const _ = require('lodash');
 const FormItem = Form.Item;
 const today = moment(new Date()).format('YYYY/MM/DD');
+const { confirm } = Modal;
 
 const App = React.createClass({
   propTypes: {
@@ -104,11 +105,7 @@ const App = React.createClass({
             let reacordDate = moment(record.createdAt).format('YYYY/MM/DD')
             if (USER.role.id == 4) {
               if (record.status == 7 || record.status == 6 ) {
-                return <div>
-                  <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
-                    <p><a href="#">退款</a></p>
-                  </Popconfirm>
-                </div>
+                return <span onClick={this.refund.bind(this, record.account, text)}><a>退款</a></span>
               } else if (record.status == 4) {
                 return <span>已退款</span>
               } else {
@@ -116,11 +113,7 @@ const App = React.createClass({
               }
             } else if (USER.role.id == 2) {
               if ((record.status == 7 || record.status == 6) && record.paymentId != 4 && record.ownerId == USER.id && reacordDate == today) {
-                return <div>
-                  <Popconfirm title="确认退款吗?" onConfirm={self.refund.bind(this, record.account ,text)}>
-                    <p><a href="#">退款</a></p>
-                  </Popconfirm>
-                </div>
+                return <span onClick={this.refund.bind(this, record.account, text)}><a>退款</a></span>
               } else if (record.status == 4) {
                 return <span>已退款</span>
               } else {
@@ -180,18 +173,25 @@ const App = React.createClass({
   },
   refund(account, washId) {
     // 退款操作
-    var self = this;
+    const self = this;
     const pager = {page: this.state.page, perPage: this.state.perPage}
-    RefundService.refund(account, washId)
-      .then((data) => {
-        if (data && data.status == '00') {
-          message.success('退款成功', 3);
-          // 成功后重新拉取数据,退款情况下可能搜索的是 serialNumber
-          self.list(this.state.account, this.state.serialNumber, pager);
-        } else {
-          message.info(data.msg);
-        }
-      })
+
+    confirm({
+      title: '款项将退到消费用户的苏打生活账户余额，确认退款吗？',
+      onOk() {
+        RefundService.refund(account, washId).then((data) => {
+          if (data && data.status == '00') {
+            message.success('退款成功', 3);
+            // 成功后重新拉取数据,退款情况下可能搜索的是 serialNumber
+            self.list(self.state.account, self.state.serialNumber, pager);
+          } else {
+            message.info(data.msg);
+          }
+        })
+      },
+      onCancel() {
+      },
+    });
   },
   unlockDevice(serialNumber, status) {
     // 解除占用

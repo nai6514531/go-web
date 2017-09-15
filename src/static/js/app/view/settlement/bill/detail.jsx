@@ -13,6 +13,7 @@ import {
 const Option = Select.Option;
 import './app.less';
 import DailyBillService from '../../../service/daily_bill';
+import BillService from '../../../service/bill';
 
 import moment from 'moment';
 const confirm = Modal.confirm;
@@ -110,6 +111,8 @@ const Detail = React.createClass({
         }
       }],
       list: [],
+      count: 0,
+      totalAmount: 0,
       loading: false,
       pagination: {
         total: 0,
@@ -120,6 +123,7 @@ const Detail = React.createClass({
   },
   componentDidMount() {
     this.getDailyBill();
+    this.getBillDetail()
   },
   getDailyBill({ ...options }) {
     var self = this;
@@ -136,26 +140,43 @@ const Detail = React.createClass({
       perPage: pagination.perPage,
       billId: self.props.params.id || ''
     }).then((res) => {
-        self.setState({
-          list: res.data.list || [],
-          loading: false,
-          pagination: {
-            ...pagination,
-            total: res.data.total
-          }
-        });
+      if (res.status !== 0) {
+        throw new Error(res.msg)
+      }
+      self.setState({
+        list: res.data.list || [],
+        loading: false,
+        pagination: {
+          ...pagination,
+          total: res.data.total
+        }
+      });
+    }).catch((e) => {
+      self.setState({
+        list: [],
+        loading: false,
+      });
+    })
+  },
+  getBillDetail() {
+    BillService.get(this.props.params.id || '').then((res) => {
+      if (res.status !== 0) {
+        throw new Error(res.msg)
+      }
+      this.setState({
+        count: res.data.count || 0,
+        totalAmount: res.data.totalAmount || 0
       })
-      .catch((e) => {
-        self.setState({
-          loading: false,
-        });
-      })
+    }).catch((error) => {
+
+    })
   },
   handleTableChange(pagination) {
     this.getDailyBill(pagination)
   },
   render() {
     const self = this;
+    const { count, totalAmount } = this.state
     const pagination = {
       total: this.state.pagination.total,
       showSizeChanger: true,
@@ -171,13 +192,14 @@ const Detail = React.createClass({
         self.handleTableChange(pager);
       }
     };
-    return (<section className='view-settlement-list'>
+    return (<section className='view-settlement-detail'>
       <header>
         <Breadcrumb>
           <Breadcrumb.Item><a href='/#/settlement/bill'>结算查询</a></Breadcrumb.Item>
           <Breadcrumb.Item>账单明细</Breadcrumb.Item>
         </Breadcrumb>
       </header>
+      {count !== 0 ? <p className='tip'>共包含<span>{count}</span>天账单，结算金额总计<span>{(totalAmount / 100).toFixed(2)}</span>元</p> : null}
       <Table scroll={{ x: 900 }}  
         dataSource={this.state.list} 
         columns={this.state.columns} 

@@ -25,20 +25,12 @@ const App = React.createClass({
 	getInitialState() {
 		return {
 			columns: [{
-				title: '申请时间',
-				dataIndex: 'createdAt',
-				width: 80,
-				render: (date) => {
-					return moment(date).format('YYYY-MM-DD HH:mm')
-				}
-			}, {
-				title: '结算单号',
-				dataIndex: 'billId',
-				width: 80,
-			}, {
 				title: '账单天数',
 				dataIndex: 'count',
 				width: 50,
+				render: (count, record) => {
+					return <a href={`#settlement/bill/${record.billId}`}>{count}</a>
+				}
 			}, {
 				title: '收款账号',
 				dataIndex: 'accountType',
@@ -101,13 +93,6 @@ const App = React.createClass({
 				width: 60,
 				render: (date, record) => {
 					return date && record.status === 2 ? moment(date).format('YYYY-MM-DD HH:mm') : '-'
-				}
-			}, {
-				title: '是否自动结算',
-				dataIndex: 'mode',
-				width: 60,
-				render: (mode) => {
-					return mode === 0 ? '自动结算' : '手动结算'
 				}
 			}, {
 				title: '操作',
@@ -174,24 +159,29 @@ const App = React.createClass({
 			return message.info('你当前未设定收款方式，请修改收款方式再进行结算操作。')
 		}
 
-		confirm({
-	    title: '确认重新申请结算',
-	    content: <p>共有<span className='color-red'>{bill.count}</span>天账单结算，结算金额为<span className='color-red'>{bill.totalAmount/100}</span>元，本次结算将收取<span className='color-red'>{bill.cast/100}</span>元手续费，是否确认结算？</p>,
-	    onOk() {
-	    	BillService.create(id).then((res) => {
-					if (res.status !== 0) {
-						throw new Error(res.msg)
-		    	}
-					message.info('申请成功！财务将在1日内结算');
-		    	self.props.getBillsList({search: {...self.state.search}});
-				}).catch((err) => {
-					message.error(err.message || '申请结算失败！请重试');
-				})
-	    },
-	    onCancel() {
-	    },
-	  });
-		
+		BillService.getCast(id).then((res) => {
+			if (res.status !== 0) {
+				throw new Error(res.msg)
+    	}
+    	let cast = res.data.cast;
+    	confirm({
+		    title: '确认重新申请结算',
+		    content: <p>共有<span className='color-red'>{bill.count}</span>天账单结算，结算金额为<span className='color-red'>{bill.totalAmount/100}</span>元，本次结算将收取<span className='color-red'>{cast/100}</span>元手续费，是否确认结算？</p>,
+		    onOk() {
+		    	BillService.create(id).then((res) => {
+						if (res.status !== 0) {
+							throw new Error(res.msg)
+			    	}
+						message.info('申请成功！财务将在1日内结算');
+			    	self.props.getBillsList({search: {...self.state.search}});
+					})
+		    },
+		    onCancel() {
+		    },
+		  });
+		}).catch((err) => {
+			message.error(err.message || '申请结算失败！请重试');
+		})
 	},
   onChangeDate(field, value) {
     this.setState({
