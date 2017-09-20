@@ -183,6 +183,7 @@ func (self *BillController) DetailsByBillId(ctx *iris.Context) {
 	return
 }
 
+/* 用于重新提现时计算账单的手续费 */
 func (self *BillController) CastByBillId(ctx *iris.Context) {
 	billService := &service.BillService{}
 	userCashAccountService := service.UserCashAccountService{}
