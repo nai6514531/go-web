@@ -9,6 +9,7 @@ import (
 	"maizuo.com/soda-manager/src/server/enity"
 	"github.com/go-errors/errors"
 	"github.com/jinzhu/gorm"
+	"maizuo.com/soda-manager/src/server/kit/functions"
 )
 
 type BillController struct {
@@ -34,6 +35,7 @@ var (
 		"01100300":"拉取账单手续费详情成功",
 		"01100301":"拉取账单详情失败",
 		"01100302":"无此账单",
+		"01100303":"拉取用户账号信息失败",
 	}
 )
 // 根据id是否为空来新增或者修改bill
@@ -183,6 +185,7 @@ func (self *BillController) DetailsByBillId(ctx *iris.Context) {
 
 func (self *BillController) CastByBillId(ctx *iris.Context) {
 	billService := &service.BillService{}
+	userCashAccountService := service.UserCashAccountService{}
 	billId := ctx.Param("billId")
 	bill,err := billService.BasicByBillId(billId)
 	if err != nil && err != gorm.ErrRecordNotFound{
@@ -197,8 +200,33 @@ func (self *BillController) CastByBillId(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK,result)
 		return
 	}
+	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	cashAccount,err := userCashAccountService.BasicByUserId(userId)
+	if err != nil {
+		result := &enity.Result{Status:"01100203",Data:err,Msg:bill_msg["01100203"]}
+		common.Log(ctx,result)
+		ctx.JSON(iris.StatusOK,result)
+		return
+	}
+	cast := bill.Cast
+	if bill.AccountType != cashAccount.Type { // 更换了收款账号类型,重新计算手续费的东西
+		rate :=  viper.GetInt("bill.aliPay.rate")
+		alipay,wechat := 1,2
+		if cashAccount.Type == alipay { // 支付宝
+			if bill.TotalAmount > viper.GetInt("bill.aliPay.borderValue") {
+				rate = 1
+				cast = int(functions.Round(float64(bill.TotalAmount * rate)/100.00,0))//四舍五入
+			} else {
+				cast = viper.GetInt("bill.aliPay.cast")
+			}
+		}else if cashAccount.Type == wechat {
+			rate = viper.GetInt("bill.wechat.rate")
+			cast = int(functions.Round(float64(bill.TotalAmount * rate)/100.00,0))//四舍五入
+		}
+
+	}
 	result := &enity.Result{Status:"01100200",Data: map[string]interface{}{
-		"cast":bill.Cast,
+		"cast":cast,
 	},Msg:bill_msg["01100100"]}
 	ctx.JSON(iris.StatusOK,result)
 	common.Log(ctx,result)
