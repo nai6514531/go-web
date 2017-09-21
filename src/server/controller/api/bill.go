@@ -21,9 +21,9 @@ var (
 		"01100003":"账单不存在",
 		"01100004":"用户没有权限",
 		"01100005":"更新账单状态失败",
-		"01100006":"获取用户账号信息失败",
-		"01100007":"删除账单批次号失败",
-
+		"01100006":"账单状态异常，请联系管理员进行修改",
+		"01100007":"获取微信账单批次号信息失败",
+		"01100008":"获取账单信息失败",
 
 		"01100100":"拉取账单列表成功",
 		"01100101":"拉取账单列表失败",
@@ -71,31 +71,38 @@ func (self *BillController) InsertOrUpdate(ctx *iris.Context) {
 	}else{
 		// 重新发起结算
 		bill,err := billService.BasicByBillId(billId)
-		if bill.AccountType == 2 { // 如果是微信
-			// 判断是不是因为SystemError引起的,是的话不能结算
-			billRels,err := billRelService.Baisc(billId)
-			if err != nil {
-				// 获取微信账单批次号信息失败
-				result := &enity.Result{"01100003",err,bill_msg["01100003"]}
-				common.Log(ctx,result)
-				ctx.JSON(iris.StatusOK, result)
-				return
-			}
-			if (*billRels)[0].ErrCode == "SYSTEMERROR" {
-				// 不允许用户发起提现
-				result := &enity.Result{"01100003",err,bill_msg["01100003"]}
-				common.Log(ctx,result)
-				ctx.JSON(iris.StatusOK, result)
-				return
-			}
+		if err != nil && err != gorm.ErrRecordNotFound {
+			result := &enity.Result{"01100008",err,bill_msg["01100008"]}
+			common.Log(ctx,result)
+			ctx.JSON(iris.StatusOK, result)
+			return
 		}
-		if err != nil {
+		if err == gorm.ErrRecordNotFound {
 			common.Logger.Debugln("账单不存在")
 			result := &enity.Result{"01100003",err,bill_msg["01100003"]}
 			common.Log(ctx,result)
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
+		if bill.AccountType == 2 { // 如果是微信
+			// 判断是不是因为SystemError引起的,是的话不能结算
+			billRels,err := billRelService.Baisc(billId)
+			if err != nil || len(*billRels) == 0{
+				// 获取微信账单批次号信息失败
+				result := &enity.Result{"01100007",err,bill_msg["01100007"]}
+				common.Log(ctx,result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+			if (*billRels)[0].ErrCode == "SYSTEMERROR" {
+				// 不允许用户发起提现
+				result := &enity.Result{"01100006",err,bill_msg["01100006"]}
+				common.Log(ctx,result)
+				ctx.JSON(iris.StatusOK, result)
+				return
+			}
+		}
+
 		if bill.UserId != userId {
 			result := &enity.Result{"01100004",errors.New("用户没有权限"),bill_msg["01100004"]}
 			common.Log(ctx,result)
