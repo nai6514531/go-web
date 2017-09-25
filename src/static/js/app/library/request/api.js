@@ -11,8 +11,7 @@ const api = axios.create({
   },
   withCredentials: true,
   timeout: 1000 * 60 * 5,
-  baseURL: isProduction ? '//mng.huacetech.cn' : 
-           isStaging ? '//mng.huacetech.cn' : '//mng.huacetech.cn',
+  baseURL: '/',
   transformRequest: [(data) => {
     NProgress.start();
     if (!data) {
