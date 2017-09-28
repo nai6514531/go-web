@@ -174,6 +174,8 @@ const App = React.createClass({
 			    	}
 						message.info('申请成功！财务将在1日内结算');
 			    	self.props.getBillsList({search: {...self.state.search}});
+					}).catch((err) => {
+						message.error(err.message || '申请结算失败！请重试');
 					})
 		    },
 		    onCancel() {
