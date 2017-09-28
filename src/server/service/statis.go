@@ -312,7 +312,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string, 
 		where
 		owner_id=` + strconv.Itoa(userId) + `
 		and
-		device_serial=` + serialNumber + `
+		device_serial='` + serialNumber + `'
 		and
 		created_timestamp >=unix_timestamp(cast(date_format('` + date + `-01', '%Y-%m-01') as date))
 		and
@@ -356,7 +356,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string, 
 		where
 		owner_id=` + strconv.Itoa(userId) + `
 		and
-		device_serial=` + serialNumber + `
+		device_serial='` + serialNumber + `'
 		and
 		created_timestamp >= unix_timestamp(` + date + `)
 		and
