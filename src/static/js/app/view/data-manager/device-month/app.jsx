@@ -98,12 +98,13 @@ const App = React.createClass({
         });
         if (data && data.status == '00') {
           const total = data.data.length;
-          let _list=data.data.map((item, key) => {
+          let _list= data.data;
+          _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
+          _list= _.reverse(_list);
+          _list=_list.map((item, key) => {
             item.key = key + 1;
             return item;
           })
-          _list= _.sortBy(_list, ['date','address'], ['asc', 'desc']);
-          _list= _.reverse(_list);
           this.setState({
             total: total,
             list:_list
