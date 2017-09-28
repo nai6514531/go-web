@@ -1,14 +1,15 @@
 package service
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hoisie/mustache"
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
-	"maizuo.com/soda-manager/src/server/kit/functions"
 	"maizuo.com/soda-manager/src/server/model"
-	"strings"
-	"time"
 )
 
 type StatisService struct {
@@ -293,14 +294,13 @@ func (self *StatisService) MonthlyOperate() (*[]*model.MonthlyOperate, error) {
 	return list, nil
 }
 
-func (self *StatisService) Device(userId int, serialNumber string, date string) (*[]*map[string]interface{}, error) {
+func (self *StatisService) Device(userId int, serialNumber string, date string, groupBy string) (*[]*map[string]interface{}, error) {
 	list := make([]*map[string]interface{}, 0)
-	param := make([]interface{}, 0)
 	var err error
 
 	var sql string = ""
 
-	if len(date) == 7 {
+	if len(date) == 7 && groupBy == "date" {
 		sql = `
 		select device_serial, from_unixtime(created_timestamp,'%Y-%m-%d') _date,
 		sum(value) totalAmount,
@@ -308,26 +308,21 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		sum(case when device_mode=2 then 1 else 0 end) totalMode2,
 		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
 		sum(case when device_mode=4 then 1 else 0 end) totalMode4
-		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m')=?
+		from ticket
+		where
+		owner_id=` + strconv.Itoa(userId) + `
+		and
+		device_serial=` + serialNumber + `
+		and
+		created_timestamp >=unix_timestamp(cast(date_format('` + date + `-01', '%Y-%m-01') as date))
+		and
+		created_timestamp <= unix_timestamp(last_day(date_add('` + date + `-01', interval 0 month)))
 		and
 		status = 7
 		group by from_unixtime(created_timestamp,'%Y-%m-%d')
 		order by created_timestamp desc;
 		`
-	} else if len(date) == 10 {
-		sql = `
-		select device_serial, from_unixtime(created_timestamp,'%Y-%m-%d') _date,
-		value ,
-		(case when device_mode=1 then 1 else 0 end),
-		(case when device_mode=2 then 1 else 0 end),
-		(case when device_mode=3 then 1 else 0 end),
-		(case when device_mode=4 then 1 else 0 end)
-		from ticket where owner_id=? and device_serial=? and from_unixtime(created_timestamp,'%Y-%m-%d')=?
-		and
-		status = 7
-		order by created_timestamp desc;
-		`
-	} else {
+	} else if len(date) == 7 && groupBy == "month" {
 		sql = `
 		select device_serial, from_unixtime(created_timestamp,'%Y-%m') _month,
 		sum(value) totalAmount,
@@ -335,32 +330,44 @@ func (self *StatisService) Device(userId int, serialNumber string, date string) 
 		sum(case when device_mode=2 then 1 else 0 end) totalMode2,
 		sum(case when device_mode=3 then 1 else 0 end) totalMode3,
 		sum(case when device_mode=4 then 1 else 0 end) totalMode4
-		from ticket where owner_id=?
+		from ticket
+		where
+		owner_id=` + strconv.Itoa(userId) + `
 		and
 		status = 7
+		and
+		created_timestamp >=unix_timestamp(cast(date_format('` + date + `-01', '%Y-%m-01') as date))
+		and
+		created_timestamp <= unix_timestamp(last_day(date_add('` + date + `-01', interval 0 month)))
 		group by from_unixtime(created_timestamp,'%Y-%m'),device_serial
 		order by created_timestamp desc
 		`
+	} else if len(date) == 10 {
+		t, _ := time.Parse("2006-01-02", date)
+		tomorrow := t.Local().AddDate(0, 0, 1).Format("2006-01-02")
+		sql = `
+		select device_serial, from_unixtime(created_timestamp,'%Y-%m-%d') _date,
+		value ,
+		(case when device_mode=1 then 1 else 0 end),
+		(case when device_mode=2 then 1 else 0 end),
+		(case when device_mode=3 then 1 else 0 end),
+		(case when device_mode=4 then 1 else 0 end)
+		from ticket
+		where
+		owner_id=` + strconv.Itoa(userId) + `
+		and
+		device_serial=` + serialNumber + `
+		and
+		created_timestamp >= unix_timestamp(` + date + `)
+		and
+		created_timestamp < unix_timestamp(` + tomorrow + `)
+		and
+		status = 7
+		order by created_timestamp desc;
+		`
 	}
 
-	param = append(param, userId)
-
-	if serialNumber != "" {
-		param = append(param, serialNumber)
-	}
-	if date != "" {
-		param = append(param, date)
-	}
-
-	if serialNumber != "" || date != "" {
-		if len(param) < 3 {
-			e := &functions.DefinedError{}
-			e.Msg = "less param"
-			err = e
-			return nil, err
-		}
-	}
-	rows, err := common.SodaDB_R.Raw(sql, param...).Rows()
+	rows, err := common.SodaDB_R.Raw(sql).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err

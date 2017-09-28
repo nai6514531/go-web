@@ -1,5 +1,7 @@
 require('es6-promise').polyfill();
 import 'babel-polyfill';
+import moment from 'moment';
+import 'moment/locale/zh-cn';
 
 import 'whatwg-fetch';
 import ReactDOM from 'react-dom';
@@ -10,3 +12,4 @@ import 'antd/dist/antd.min.css';
 
 import './library/debug'
 
+moment.locale('zh-cn');

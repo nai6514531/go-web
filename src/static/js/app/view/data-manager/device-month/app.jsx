@@ -1,7 +1,9 @@
 import React from "react";
-import {Button, Table, Icon, Popconfirm,Breadcrumb, message} from "antd";
+import {Input, Button, Table, Icon, Popconfirm,Breadcrumb, message,DatePicker} from "antd";
 import StatisDeviceService from "../../../service/statis_device";
 import { Link } from 'react-router';
+const { MonthPicker, RangePicker } = DatePicker;
+import moment from 'moment';
 var _ = require('lodash');
 const App = React.createClass({
   propTypes: {
@@ -11,6 +13,7 @@ const App = React.createClass({
   getInitialState() {
     const self = this;
     return {
+      month:moment().format('YYYY-MM'),
       page: 1,
       perPage: 10,
       list:[],
@@ -88,7 +91,7 @@ const App = React.createClass({
     this.setState({
       loading: true,
     });
-    StatisDeviceService.list()
+    StatisDeviceService.list(this.state.month)
       .then((data) => {
         self.setState({
           loading: false,
@@ -130,6 +133,14 @@ const App = React.createClass({
       },
     }
   },
+  handleSearch(e) {
+    this.list()
+  },
+  handleMonthChange(momentMonth,month){
+    this.setState({
+      month: month
+    })
+  },
   render() {
     var self = this;
     const {list, total, columns} = this.state;
@@ -141,6 +152,10 @@ const App = React.createClass({
           <Breadcrumb.Item>模块统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
+      <div className="toolbar">
+        <MonthPicker placeholder="请选择月份" defaultValue={moment()} onChange={this.handleMonthChange} />
+        <Button type="primary item" onClick={this.handleSearch.bind(this,'account')}>查询</Button>
+      </div>
       <Table scroll={{ x: 650 }} dataSource={list}
              columns={columns} pagination={pagination}
              bordered loading={this.state.loading}

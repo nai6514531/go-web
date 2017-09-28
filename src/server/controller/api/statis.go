@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"gopkg.in/kataras/iris.v4"
-	"github.com/spf13/viper"
-	"maizuo.com/soda-manager/src/server/service"
-	"maizuo.com/soda-manager/src/server/enity"
-	"maizuo.com/soda-manager/src/server/common"
 	"time"
+
+	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/service"
 )
 
 var (
@@ -50,18 +51,18 @@ type StatisController struct {
 
 /*
 消费统计
- */
+*/
 func (self *StatisController) Consume(ctx *iris.Context) {
 	result := &enity.Result{}
 	statisService := &service.StatisService{}
-	userId,_ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
 	perPage, _ := ctx.URLParamInt("perPage")
 	page, _ := ctx.URLParamInt("page")
 	deviceService := &service.DeviceService{}
-	if len(date)==10{
-		total,err:=deviceService.TotalByUser(userId)
-		list, err := statisService.Consume(userId, date,page,perPage)
+	if len(date) == 10 {
+		total, err := deviceService.TotalByUser(userId)
+		list, err := statisService.Consume(userId, date, page, perPage)
 		if err != nil {
 			result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
 			common.Log(ctx, result)
@@ -71,8 +72,8 @@ func (self *StatisController) Consume(ctx *iris.Context) {
 		result = &enity.Result{"01070100", &enity.Pagination{total, list}, statis_msg["01070100"]}
 		common.Log(ctx, nil)
 		ctx.JSON(iris.StatusOK, result)
-	}else{
-		list, err := statisService.Consume(userId, date,page,perPage)
+	} else {
+		list, err := statisService.Consume(userId, date, page, perPage)
 		if err != nil {
 			result = &enity.Result{"01070101", err.Error(), statis_msg["01070101"]}
 			common.Log(ctx, result)
@@ -87,7 +88,7 @@ func (self *StatisController) Consume(ctx *iris.Context) {
 
 /*
 经营统计
- */
+*/
 func (self *StatisController) Operate(ctx *iris.Context) {
 	result := &enity.Result{}
 	statisService := &service.StatisService{}
@@ -95,9 +96,9 @@ func (self *StatisController) Operate(ctx *iris.Context) {
 	common.Logger.Debugln("date============", date)
 	var list interface{}
 	var err error
-	if len(date)==7|| len(date)==10{
+	if len(date) == 7 || len(date) == 10 {
 		list, err = statisService.Operate(date)
-	}else {
+	} else {
 		list, err = statisService.MonthlyOperate()
 	}
 	if err != nil {
@@ -114,22 +115,26 @@ func (self *StatisController) Operate(ctx *iris.Context) {
 
 /*
 模块统计
- */
+*/
 func (self *StatisController) Device(ctx *iris.Context) {
 	result := &enity.Result{}
 	statisService := &service.StatisService{}
-	userId ,_:= ctx.Session().GetInt(viper.GetString("server.session.user.id"))
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	date := ctx.URLParam("date")
+	groupBy := ctx.URLParam("groupBy")
 	serialNumber := ctx.URLParam("serialNumber")
-	if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {
-		result = &enity.Result{"01070302", nil, statis_msg["01070302"]}
-		common.Log(ctx, result)
-		ctx.JSON(iris.StatusOK, result)
-		return
+	if groupBy == "date" {
+		if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {
+			result = &enity.Result{"01070302", nil, statis_msg["01070302"]}
+			common.Log(ctx, result)
+			ctx.JSON(iris.StatusOK, result)
+			return
+		}
 	}
-	list, err := statisService.Device(userId, serialNumber, date)
+
+	list, err := statisService.Device(userId, serialNumber, date, groupBy)
 	if err != nil {
-		result = &enity.Result{"01070301", err.Error(), statis_msg["01070301"]+":"+err.Error()}
+		result = &enity.Result{"01070301", err.Error(), statis_msg["01070301"] + ":" + err.Error()}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
@@ -144,10 +149,10 @@ func (self *StatisController) DailyPay(ctx *iris.Context) {
 	dailyBillService := &service.DailyBillService{}
 	result := &enity.Result{}
 	data := make(map[string]interface{}, 0)
-	alipayBill,_:=dailyBillService.DailyBillByAccountType(1)
-	bankBill,_:=dailyBillService.DailyBillByAccountType(3)
-	data["alipay"]=alipayBill
-	data["bank"]=bankBill
+	alipayBill, _ := dailyBillService.DailyBillByAccountType(1)
+	bankBill, _ := dailyBillService.DailyBillByAccountType(3)
+	data["alipay"] = alipayBill
+	data["bank"] = bankBill
 	result = &enity.Result{"01070400", &data, statis_msg["01070400"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
@@ -159,14 +164,14 @@ func (self *StatisController) Balance(ctx *iris.Context) {
 	result := &enity.Result{}
 	start := time.Now().AddDate(0, 0, -7).Format("2006-01-02")
 	end := time.Now().Format("2006-01-02")
-	rechargeMap, err := statisService.Recharge(start,end)
+	rechargeMap, err := statisService.Recharge(start, end)
 	if err != nil {
 		result = &enity.Result{"01070502", err.Error(), statis_msg["01070502"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	consumptionMap, err := statisService.Consumption(start,end)
+	consumptionMap, err := statisService.Consumption(start, end)
 	if err != nil {
 		result = &enity.Result{"01070503", err.Error(), statis_msg["01070503"]}
 		common.Log(ctx, result)
@@ -197,14 +202,14 @@ func (self *StatisController) Balance(ctx *iris.Context) {
 		return
 	}
 	list = append(list, &m)
-	for i:=1; i<=7; i++ {
-		t,_:=time.Parse("2006-01-02",end)
+	for i := 1; i <= 7; i++ {
+		t, _ := time.Parse("2006-01-02", end)
 		date := t.AddDate(0, 0, -i).Format("2006-01-02")
 		m := make(map[string]interface{}, 0)
 		m["date"] = date
 		m["recharge"] = rechargeMap[date]
 		m["consume"] = consumptionMap[date]
-		m["balance"] =rechargeMap[date]-consumptionMap[date]
+		m["balance"] = rechargeMap[date] - consumptionMap[date]
 		list = append(list, &m)
 	}
 	result = &enity.Result{"01070500", &list, statis_msg["01070500"]}
