@@ -316,7 +316,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string, 
 		and
 		created_timestamp >=unix_timestamp(cast(date_format('` + date + `-01', '%Y-%m-01') as date))
 		and
-		created_timestamp <= unix_timestamp(last_day(date_add('` + date + `-01', interval 0 month)))
+		created_timestamp < unix_timestamp(date_add(last_day(date_add('` + date + `-01', interval 0 month)),interval 1 day))
 		and
 		status = 7
 		group by from_unixtime(created_timestamp,'%Y-%m-%d')
@@ -338,7 +338,7 @@ func (self *StatisService) Device(userId int, serialNumber string, date string, 
 		and
 		created_timestamp >=unix_timestamp(cast(date_format('` + date + `-01', '%Y-%m-01') as date))
 		and
-		created_timestamp <= unix_timestamp(last_day(date_add('` + date + `-01', interval 0 month)))
+		created_timestamp < unix_timestamp(date_add(last_day(date_add('` + date + `-01', interval 0 month)),interval 1 day))
 		group by from_unixtime(created_timestamp,'%Y-%m'),device_serial
 		order by created_timestamp desc
 		`
