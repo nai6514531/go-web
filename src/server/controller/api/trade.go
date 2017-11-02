@@ -1,17 +1,19 @@
 package controller
 
 import (
-	"gopkg.in/kataras/iris.v4"
-	"maizuo.com/soda-manager/src/server/service"
-	"maizuo.com/soda-manager/src/server/enity"
-	"maizuo.com/soda-manager/src/server/common"
+	"encoding/json"
+	"github.com/bitly/go-simplejson"
 	"github.com/spf13/viper"
+	"gopkg.in/kataras/iris.v4"
+	"maizuo.com/soda-manager/src/server/common"
+	"maizuo.com/soda-manager/src/server/enity"
+	"maizuo.com/soda-manager/src/server/kit/functions"
+	"maizuo.com/soda-manager/src/server/kit/wechat"
+	"maizuo.com/soda-manager/src/server/model"
+	"maizuo.com/soda-manager/src/server/model/soda"
+	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/service/soda"
 	"strings"
-	"maizuo.com/soda-manager/src/server/model"
-	"github.com/bitly/go-simplejson"
-	"maizuo.com/soda-manager/src/server/model/soda"
-	"encoding/json"
 	"time"
 )
 
@@ -59,7 +61,7 @@ type TradeController struct {
 
 /*
 模块查询&洗衣查询
- */
+*/
 func (self *TradeController) Basic(ctx *iris.Context) {
 	result := &enity.Result{}
 	tradeService := service.TradeService{}
@@ -123,14 +125,14 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		return
 	}
 	if role.RoleId == 2 {
-		if  userId != ticket.OwnerId {
+		if userId != ticket.OwnerId {
 			//限定了商家退款时只能操作自己名下的设备产生的订单
 			result = &enity.Result{"01080204", nil, trade_msg["01080204"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
 			return
 		}
-		if ticket.CreatedAt.Format("2006.01.02")!= time.Now().Format("2006.01.02") {
+		if ticket.CreatedAt.Format("2006.01.02") != time.Now().Format("2006.01.02") {
 			result = &enity.Result{"01080208", nil, trade_msg["01080208"]}
 			common.Log(ctx, result)
 			ctx.JSON(iris.StatusOK, result)
@@ -158,10 +160,20 @@ func (self *TradeController) Refund(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	// 推送退款的消息
+	accountService := &sodaService.AccountService{}
+	openId := accountService.GetOpenIdOfExtra(ticket.UserId)
+	if openId != "" {
+		(&wechat.WechatKit{}).RefundTemplateMsg(ticketId, map[string]string{
+			"keyword1": ticketId,
+			"keyword2": functions.Float64ToString(functions.Round(float64(ticket.Value)/100.00, 2), -1) + "元",
+		}, openId)
+	}
 	result = &enity.Result{"01080200", nil, statis_msg["01080200"]}
 	common.Log(ctx, nil)
 	ctx.JSON(iris.StatusOK, result)
 }
+
 //
 func (self *TradeController) Recharge(ctx *iris.Context) {
 	//这里的snapshot会储存大量相关查询得到的信息，以便在service调用的时候复用。在提交数据库时，会储存简化版本的simpleSnapshot
@@ -222,10 +234,10 @@ func (self *TradeController) Recharge(ctx *iris.Context) {
 	snapshot.Chipcard = card
 	s, _ := json.Marshal(snapshot)
 	recharge := soda.ChipcardRecharge{
-		Mobile:mobile,
-		OperatorId:userId,
-		Value:amount,
-		Snapshot:string(s),
+		Mobile:     mobile,
+		OperatorId: userId,
+		Value:      amount,
+		Snapshot:   string(s),
 	}
 
 	record, err := chipcardService.Recharge(recharge)
@@ -310,8 +322,8 @@ func (self *TradeController) ChangeCBRels(ctx *iris.Context) {
 func (self *TradeController) ChipcardBasic(ctx *iris.Context) {
 	type CardInfo struct {
 		soda.Chipcard
-		TotalCharged	int	`json:"totalCharged"`
-		TotalConsumed	int	`json:"totalConsumed"`
+		TotalCharged  int `json:"totalCharged"`
+		TotalConsumed int `json:"totalConsumed"`
 	}
 	mobile := ctx.URLParam("mobile")
 	chipcardService := sodaService.ChipcardService{}
@@ -323,7 +335,7 @@ func (self *TradeController) ChipcardBasic(ctx *iris.Context) {
 	}
 	card, err := chipcardService.BasicByMobile(mobile)
 	cardInfo := CardInfo{
-		card,0,0,
+		card, 0, 0,
 	}
 	rechargeList, err := chipcardService.ListByMobile(0, mobile, 0, 0)
 	temp := 0
