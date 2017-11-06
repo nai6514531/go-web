@@ -3,6 +3,7 @@ package sodaService
 import (
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model/soda"
+	"github.com/bitly/go-simplejson"
 )
 
 type AccountService struct {
@@ -31,4 +32,30 @@ func (self *AccountService) UpdatePasswordByMobile(mobile string, password strin
 		return false, r.Error
 	}
 	return true, nil
+}
+func (self *AccountService) GetOpenIdOfExtra(userId int) string {
+	account, err := self.GetByUserIdAndApp(userId, 1)
+	if err != nil {
+		common.Logger.Debugln("get account err:", err.Error())
+		return ""
+	}
+	if account == nil  {
+		common.Logger.Warningln("has no account!")
+		return ""
+	}
+	_json, err := simplejson.NewJson([]byte(account.Extra))
+	if err != nil {
+		common.Logger.Warningln("new json err:", err.Error())
+		return ""
+	}
+	openId := _json.Get("openid").MustString()
+	return openId
+}
+func (self *AccountService) GetByUserIdAndApp(userId int, app int) (*soda.Account, error) {
+	account := &soda.Account{}
+	r := common.SodaDB_R.Where("user_id = ? and `app` = ?", userId, app).First(account)
+	if r.Error != nil {
+		return nil, r.Error
+	}
+	return account, nil
 }

@@ -179,6 +179,17 @@
           "maxOpen": 20
         }
       }
+    },
+    "wechat": {
+      "message": {
+        "href": "",
+        "refund": {
+          "template": "hkvbtEl1E0ca0QN9izUsig-dLFOv0v8YpTD-ofhisAc",
+          "first": "您申请的订单已退款到账户余额，请前往苏打生活个人中心查看。",
+          "remark": "点击查看账户余额。",
+          "url": "http://m.sodalife.club/v1/?channel=midnight#/wallet"
+        }
+      }
     }
   },
   "device": {
