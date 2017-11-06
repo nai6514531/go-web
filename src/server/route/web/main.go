@@ -1,11 +1,11 @@
 package web
 
 import (
+	"github.com/spf13/viper"
 	"gopkg.in/kataras/iris.v4"
 	"maizuo.com/soda-manager/src/server/controller/web"
 	"maizuo.com/soda-manager/src/server/enity"
 	"maizuo.com/soda-manager/src/server/kit/common"
-	"github.com/spf13/viper"
 )
 
 func Web() {
@@ -23,7 +23,7 @@ func Web() {
 		ctx.EmitError(iris.StatusInternalServerError)
 	})
 
-	iris.StaticFS(viper.GetString("export.loadsPath"), "." + viper.GetString("export.loadsPath"), 1)
+	iris.StaticFS(viper.GetString("export.loadsPath"), "."+viper.GetString("export.loadsPath"), 1)
 
 	iris.Get("/ip-test", func(ctx *iris.Context) {
 
@@ -33,7 +33,7 @@ func Web() {
 			RequestIP     string
 			XForwardedFor string
 			XRealIP       string
-			ExternalIP string
+			ExternalIP    string
 		}
 
 		ip := &IP{
@@ -45,9 +45,13 @@ func Web() {
 			common.CommonKit{}.ExternalIP(),
 		}
 
-		result := &enity.Result{"0", ip, "", }
+		result := &enity.Result{"0", ip, ""}
 
 		ctx.JSON(iris.StatusOK, result)
+	})
+
+	iris.Get("/robots.txt", func(ctx *iris.Context) {
+		ctx.Render("robots.html", map[string]interface{}{"title": "Robots"})
 	})
 
 }
