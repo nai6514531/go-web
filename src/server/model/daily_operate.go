@@ -3,6 +3,7 @@ package model
 type DailyOperate struct {
 	Model
 	Date                 string `json:"date"`
+	TotalWalletValue     int    `json:"totalWalletValue"`
 	TotalRecharge        int    `json:"totalRecharge"`
 	TotalConsume         int    `json:"totalConsume"`
 	TotalWechatConsume   int    `json:"totalWechatConsume"`
@@ -18,6 +19,8 @@ type DailyOperate struct {
 	TotalAlipayRecharge  int    `json:"totalAlipayRecharge"`
 	TotalRechargeUser    int    `json:"totalRechargeUser"`
 	TotalConsumeUser     int    `json:"totalConsumeUser"`
+	TotalBill            int	`json:"totalBill"`
+	TotalUnsettledBill   int    `json:"totalUnsettledBill"`
 	CreatedTimestamp     int    `json:"createdTimestamp"`
 }
 

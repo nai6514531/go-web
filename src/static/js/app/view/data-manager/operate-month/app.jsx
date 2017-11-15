@@ -63,6 +63,33 @@ const App = React.createClass({
         title: '独立消费用户数',
         dataIndex: 'totalConsumeUser',
         key: 'totalConsumeUser',
+      }, {
+        title: '钱包余额',
+        dataIndex: 'totalWalletValue',
+        key: 'totalWalletValue',
+        render: (value,record,index) => {
+          if(index>0) {
+           return Math.round(value)/100 + "元";
+          }
+         }
+      },{
+        title: '账单总额',
+        dataIndex: 'totalBill',
+        key: 'totalBill',
+        render: (value,record,index) => {
+          if(index>0) {
+           return Math.round(value)/100 + "元";
+          }
+         }
+      },{
+        title: '未结算账单总额',
+        dataIndex: 'totalUnsettledBill',
+        key: 'totalUnsettledBill',
+        render: (value,record,index) => {
+          if(index>0) {
+           return Math.round(value)/100 + "元";
+          }
+         }
       },{
         title: '充值金额',
         dataIndex: 'totalRecharge',
