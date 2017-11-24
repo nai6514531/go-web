@@ -7,6 +7,7 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const confirm = Modal.confirm;
 
+import QRCode from 'qrcode.react'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
@@ -63,6 +64,8 @@ class DeviceForm extends React.Component {
       unsaved: true,
       tips:'',
       serialNumberHelp:'',
+      showCodeModal:false,
+      qrCodeUrl:"https://mnzn.net/box/login?no="
 
     };
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -236,7 +239,7 @@ class DeviceForm extends React.Component {
 		this.schoolId = schoolId;
 		this.setState({tips:''});
 	}
-	changeName(currentPulse,e) {
+  changeName(currentPulse,e) {
 		e.preventDefault();
 		this.setState({
 			currentPulse: currentPulse,
@@ -261,10 +264,10 @@ class DeviceForm extends React.Component {
 			this.props.patchPulseName(deviceId, data);
       this.theName = 1;
     }
-	}
+  }
 	showModal() {
 		this.setState({ visible: true });
-	}
+  }
 	hideModal() {
 		this.setState({ visible: false });
 	}
@@ -419,14 +422,18 @@ class DeviceForm extends React.Component {
 									{ required: true, message: '必填' },
 								],
 								initialValue: initialValue.serialNumber,
-							})( id ?
-								<Input disabled placeholder="请输入10位设备编号" />
+              })( id ?
+                <Input disabled placeholder="请输入10位设备编号" />
 								:
                 <div>
                   <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
                   <span>可直接复制 excel 表中设备编号列的数据来批量添加设备</span>
                 </div>
               )}
+              { id ?
+                <span><a onClick={() => {this.setState({ showCodeModal:true })}}>查看设备二维码</a></span>
+                : null
+              }
 						</FormItem>
             <FormItem
               {...formItemLayout}
@@ -589,6 +596,17 @@ class DeviceForm extends React.Component {
 						</div>
 					</Form>
 				</section>
+        { 
+          this.state.showCodeModal ? <Modal
+      		  wrapClassName='view-device-modal'
+            footer={null}
+            style={{ top: 100 }}
+            visible={this.state.showCodeModal}
+            onCancel={() => {this.setState({ showCodeModal:false })}}
+          >
+          <QRCode value={this.state.qrCodeUrl+initialValue.serialNumber} />
+          </Modal> : null
+        }
 			</section>
     );
   }
