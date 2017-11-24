@@ -422,15 +422,18 @@ class DeviceForm extends React.Component {
 									{ required: true, message: '必填' },
 								],
 								initialValue: initialValue.serialNumber,
-							})( id ?
-								<Input disabled placeholder="请输入10位设备编号" />
+              })( id ?
+                <Input disabled placeholder="请输入10位设备编号" />
 								:
                 <div>
                   <Input type="textarea" placeholder="请输入一个或者多个10位设备编号，以回车分隔，每行一个编号" autosize={{ minRows: 2, maxRows: 6 }} />
                   <span>可直接复制 excel 表中设备编号列的数据来批量添加设备</span>
                 </div>
               )}
-              <span><a onClick={() => {this.setState({ showCodeModal:true })}}>设备二维码</a></span>
+              { id ?
+                <span><a onClick={() => {this.setState({ showCodeModal:true })}}>查看设备二维码</a></span>
+                : null
+              }
 						</FormItem>
             <FormItem
               {...formItemLayout}
