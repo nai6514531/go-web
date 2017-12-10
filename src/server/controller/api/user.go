@@ -345,7 +345,8 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	cityService := &service.CityService{}
 	loginLogService := &service.LoginLogService{}
 	provinceService := &service.ProvinceService{}
-	city, err := cityService.GetByIP(ctx.RemoteAddr())
+	ip := ctx.RemoteAddr()
+	city, err := cityService.GetByIP(ip)
 
 	if err == nil {
 		province, err := provinceService.GetByID(city.ParentID)
@@ -358,6 +359,7 @@ func (self *UserController) Signin(ctx *iris.Context) {
 				ProvinceName: province.Name,
 				CityId:       city.ID,
 				CityName:     city.Name,
+				IP:           ip,
 			}
 			loginLogService.Create(loginLog)
 		}

@@ -16,6 +16,7 @@ type LoginLog struct {
 	ProvinceName      string    `json:"provinceName,omitempty"`
 	CityId            int       `json:"cityId,omitempty"`
 	CityName          string    `json:"cityName,omitempty"`
+	IP                string    `json:"ip,omitempty"`
 	Created_timestamp int       `json:"created_Timestamp,omitempty"`
 	CreatedAt         time.Time `json:"createdAt,omitempty"`
 	UpdatedAt         time.Time `json:"updatedAt,omitempty"`
