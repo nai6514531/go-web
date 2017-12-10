@@ -190,6 +190,12 @@
           "url": "http://m.sodalife.club/v1/?channel=midnight#/wallet"
         }
       }
+    },
+    "lbs": {
+      "tencent": {
+        "key": "",
+        "host": "https://apis.map.qq.com"
+      }
     }
   },
   "device": {

@@ -341,6 +341,29 @@ func (self *UserController) Signin(ctx *iris.Context) {
 	result := &enity.Result{"01010100", user, user_msg["01010100"]}
 	returnCleanCaptcha(result)
 	common.Log(ctx, nil)
+
+	cityService := &service.CityService{}
+	loginLogService := &service.LoginLogService{}
+	provinceService := &service.ProvinceService{}
+	city, err := cityService.GetByIP(ctx.RemoteAddr())
+
+	if err == nil {
+		province, err := provinceService.GetByID(city.ParentID)
+		if err == nil {
+			loginLog := &model.LoginLog{
+				UserId:       user.Id,
+				UserName:     user.Name,
+				UserAccount:  user.Account,
+				ProvinceId:   province.ID,
+				ProvinceName: province.Name,
+				CityId:       city.ID,
+				CityName:     city.Name,
+			}
+			loginLogService.Create(loginLog)
+		}
+	} else {
+		common.Logger.Debugln(err.Error())
+	}
 }
 
 /**

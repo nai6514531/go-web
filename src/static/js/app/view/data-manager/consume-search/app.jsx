@@ -240,7 +240,8 @@ const App = React.createClass({
   handleSearch(searchItem) {
     const pager = {page: 1, perPage: this.state.perPage};
     if (searchItem == 'account') {
-      const account = this.state.account.replace(/[\r\n\s]/g, "");
+      let account = this.state.account.replace(/[\r\n\s]/g, "");
+      account=account.replace(/[^\x00-\x7F]/g, "");
       if (account) {
         this.refs.serialNumberInput.refs.input.value = '';
         this.replaceLocation(account, '', 1, this.state.perPage);
@@ -250,7 +251,8 @@ const App = React.createClass({
         message.info('请输入洗衣手机号', 3);
       }
     } else {
-      const serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g, "");
+      let serialNumber = this.state.serialNumber.replace(/[\r\n\s]/g, "");
+      serialNumber=serialNumber.replace(/[^\x00-\x7F]/g, "");
       if (serialNumber) {
         this.refs.accountInput.refs.input.value = '';
         this.replaceLocation('', serialNumber, 1, this.state.perPage);
