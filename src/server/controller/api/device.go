@@ -152,6 +152,13 @@ var (
 		"01031700": "设备锁定成功",
 		"01031701": "设备锁定失败",
 		"01031702": "该设备不存在",
+
+		"01031800": "重置密码计数成功",
+		"01031801": "设备编号不能为空",
+		"01031802": "该设备不存在",
+		"01031803": "该设备不支持重置密码计数",
+		"01031804": "重置密码计数失败",
+		"01031805": "重置密码计数失败",
 	}
 )
 
@@ -1251,6 +1258,8 @@ func (self *DeviceController) Assign(ctx *iris.Context) {
 	if err != nil {
 		result = &enity.Result{"01031208", err.Error(), device_msg["01031208"]}
 		common.Log(ctx, result)
+		ctx.JSON(iris.StatusOK, result)
+		return
 	}
 	result = &enity.Result{"01031200", nil, device_msg["01031200"]}
 	common.Log(ctx, nil)
@@ -1281,9 +1290,48 @@ func (self *DeviceController) ResetPasswordStep(ctx *iris.Context) {
 		result = &enity.Result{"01031601", nil, device_msg["01031601"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
-	} else {
-		result = &enity.Result{"01031600", nil, device_msg["01031600"]}
+	}
+	result = &enity.Result{"01031600", nil, device_msg["01031600"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
+}
+
+func (self *DeviceController) ResetToken(ctx *iris.Context) {
+	body := simplejson.New()
+	result := &enity.Result{}
+	ctx.ReadJSON(body)
+	serialNumber, _ := body.Get("serialNumber").String()
+	if serialNumber == "" {
+		result = &enity.Result{"01031801", nil, device_msg["01031801"]}
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
+	deviceService := &service.DeviceService{}
+	device, err := deviceService.BasicBySerialNumber(serialNumber)
+	if err != nil {
+		result = &enity.Result{"01031802", err, device_msg["01031802"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	if device.Resetable != 1 {
+		result = &enity.Result{"01031803", nil, device_msg["01031803"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	resetToken, err := deviceService.GetResetToken(serialNumber)
+	if err != nil {
+		result = &enity.Result{"01031804", err, device_msg["01031804"]}
+		ctx.JSON(iris.StatusOK, result)
+		common.Log(ctx, result)
+		return
+	}
+	if resetToken == "" {
+		result = &enity.Result{"01031805", nil, device_msg["01031805"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
+	result = &enity.Result{"01031800", resetToken, device_msg["01031800"]}
+	common.Log(ctx, nil)
+	ctx.JSON(iris.StatusOK, result)
 }

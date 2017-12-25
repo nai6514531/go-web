@@ -1,7 +1,5 @@
-.view-device-list {
-  .ant-select-search--inline .ant-select-search__field {
-    width: 100%;
-  }
+.view-device-list .ant-select-search--inline .ant-select-search__field {
+  width: 100%;
 }
 .tip-error {
   color: #f50;
@@ -23,7 +21,7 @@
   width: 210px !important;
   margin: 0 auto;
 }
-canvas{
+canvas {
   display: block;
   margin: 40px auto;
 }

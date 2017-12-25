@@ -1,12 +1,15 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	simplejson "github.com/bitly/go-simplejson"
 	"github.com/jinzhu/gorm"
+	"github.com/levigross/grequests"
 	"github.com/spf13/viper"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model"
@@ -759,4 +762,25 @@ func (self *DeviceService) UnLockDevice(serial string) (bool, error) {
 		//return false, nil
 	}
 	return true, nil
+}
+
+func (self *DeviceService) GetResetToken(serial string) (string, error) {
+	api := viper.GetString("device.token.server") + "/v1/token/" + serial + "/reset"
+	if api == "" {
+		return "", errors.New("api is nil")
+	}
+	res, err := grequests.Put(api, &grequests.RequestOptions{})
+	if err != nil {
+		return "", err
+	}
+	result, err := simplejson.NewJson(res.Bytes())
+	if err != nil {
+		return "", err
+	}
+	status := result.Get("status").MustString()
+	data := ""
+	if status != "" && status == "OK" {
+		data = result.Get("data").MustString()
+	}
+	return data, nil
 }

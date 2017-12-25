@@ -62,10 +62,11 @@ class App extends React.Component {
     this.detailTotal(USER.id);
   }
   getOperateIcPermission() {
+    let self=this;
     UserService.icCardPermission()
       .then((data) => {
         if( data.status == 0 ) {
-          this.setState({
+          self.setState({
             permission: data.data
           })
         }
@@ -74,18 +75,19 @@ class App extends React.Component {
       })
   }
   detailTotal(id) {
+    let self =this;
     this.setState({
       loading: true,
     });
     UserService.detailTotal(id)
       .then((data) => {
         let list = data.data;
-        this.setState({
+        self.setState({
           loading: false,
           list: [list]
         });
       },(error)=>{
-        this.setState({
+        self.setState({
           loading: false,
         });
         message.error(error.msg,3);

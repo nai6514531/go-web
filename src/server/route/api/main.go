@@ -96,6 +96,7 @@ func Api() {
 	api.Put("/device-lock", device.Lock)
 	api.Put("/device-assign", device.Assign)
 	api.Post("/device-step", device.ResetPasswordStep)
+	api.Put("/device-token-reset", device.ResetToken)
 
 	api.Get("/reference-device", referenceDevice.List)
 	api.Get("/reference-device/:id", referenceDevice.Basic)
@@ -133,5 +134,5 @@ func Api() {
 	api.Get("/bill/:billId/cast", bill.CastByBillId)
 
 	api.Post("/wechat/actions/create/key", auth.CreateKey)
-	api.Get("/wechat/key/:key",auth.CheckKeyStatus)
+	api.Get("/wechat/key/:key", auth.CheckKeyStatus)
 }

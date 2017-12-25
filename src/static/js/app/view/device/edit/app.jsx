@@ -1,6 +1,6 @@
 import React from 'react';
 import './app.less';
-import { Button, Form, Input, Radio, Select, Cascader, Modal, Breadcrumb, message, Tooltip, Icon } from 'antd';
+import { Button, Form, Input, Radio, Select,Popconfirm, Cascader, Modal, Breadcrumb, message, Tooltip, Icon } from 'antd';
 const createForm = Form.create;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
@@ -12,6 +12,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as DeviceActions from '../../../actions/device';
 import * as RegionActions from '../../../actions/region';
+import DeviceService from "../../../service/device";
+
 import { Link } from 'react-router';
 
 
@@ -65,6 +67,8 @@ class DeviceForm extends React.Component {
       tips:'',
       serialNumberHelp:'',
       showCodeModal:false,
+      showResetTokenModal:false,
+      resetToken:"",
       qrCodeUrl:"https://mnzn.net/box/login?no="
 
     };
@@ -323,6 +327,23 @@ class DeviceForm extends React.Component {
   schoolChange(event) {
     this.schoolIdHelp = {};
   }
+  resetToken(serialNumber){
+    let self =this;
+    DeviceService
+    .resetToken(serialNumber)
+    .then((data) => {
+      if (data && data.status=="00"){
+        self.setState({
+          showResetTokenModal:true,
+          resetToken:data.data
+         })
+      }else{
+        message.error(data.msg)
+      }
+    },(error)=>{
+      message.error(error.msg,3);
+    })
+  }
 	render() {
     // 省份列表
     let ProvinceNode = [];
@@ -380,8 +401,8 @@ class DeviceForm extends React.Component {
 					'firstPulseName': device.firstPulseName,
 					'secondPulseName': device.secondPulseName,
 					'thirdPulseName': device.thirdPulseName,
-					'fourthPulseName': device.fourthPulseName,
-
+          'fourthPulseName': device.fourthPulseName,
+          "resetable":device.resetable
 				}
 			}
 		}
@@ -432,6 +453,10 @@ class DeviceForm extends React.Component {
               )}
               { id ?
                 <span><a onClick={() => {this.setState({ showCodeModal:true })}}>查看设备二维码</a></span>
+                : null
+              }
+              { initialValue.resetable ?
+                <Popconfirm title="确认重置密码计数吗?" onConfirm={this.resetToken.bind(this,initialValue.serialNumber)}><span style={{marginLeft:20}}><a onClick={() => {}}>查看设备重置计数密码</a></span></Popconfirm>
                 : null
               }
 						</FormItem>
@@ -596,7 +621,7 @@ class DeviceForm extends React.Component {
 						</div>
 					</Form>
 				</section>
-        { 
+        {
           this.state.showCodeModal ? <Modal
       		  wrapClassName='view-device-modal'
             footer={null}
@@ -605,6 +630,18 @@ class DeviceForm extends React.Component {
             onCancel={() => {this.setState({ showCodeModal:false })}}
           >
           <QRCode value={this.state.qrCodeUrl+initialValue.serialNumber} />
+          </Modal> : null
+        }
+        {
+          this.state.showResetTokenModal ? <Modal
+            title='设备重置密码'
+      		  wrapClassName='view-device-token-modal'
+            footer={null}
+            style={{ top: 100 }}
+            visible={this.state.showResetTokenModal}
+            onCancel={() => {this.setState({ showResetTokenModal:false })}}
+          >
+          <div>{this.state.resetToken}</div>
           </Modal> : null
         }
 			</section>

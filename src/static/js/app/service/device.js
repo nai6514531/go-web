@@ -51,6 +51,9 @@ const DeviceService = {
   },
   setDeviceStep: (data)=>{
     return apiPost(`/api/device-step`, data);
+  },
+  resetToken:(serialNumber)=>{
+    return apiPut(`/api/device-token-reset`,{"serialNumber":serialNumber})
   }
 };
 

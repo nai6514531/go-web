@@ -27,6 +27,7 @@ type Device struct {
 	FourthPulseName   string `json:"fourthPulseName"`
 	Password          string `json:"password"`
 	Step              int    `json:"step"`
+	Resetable         int    `json:"resetable"`
 	HasAssigned       int    `json:"hasAssigned" gorm:"-"`
 	AssignedAt        string `json:"assignedAt"`
 	HasRetrofited     int    `json:"hasRetrofited"`
