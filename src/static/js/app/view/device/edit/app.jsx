@@ -455,7 +455,7 @@ class DeviceForm extends React.Component {
                 <span><a onClick={() => {this.setState({ showCodeModal:true })}}>查看设备二维码</a></span>
                 : null
               }
-              { initialValue.resetable ?
+              { (initialValue.resetable&&USER.id==1) ?
                 <Popconfirm title="确认重置密码计数吗?" onConfirm={this.resetToken.bind(this,initialValue.serialNumber)}><span style={{marginLeft:20}}><a onClick={() => {}}>查看设备重置计数密码</a></span></Popconfirm>
                 : null
               }
