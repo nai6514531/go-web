@@ -110,7 +110,10 @@ const App = React.createClass({
             list:_list
           });
         } else if (data && data.status == '01') {
-          // nothing to do
+          this.setState({
+            total: 0,
+            list:[]
+          });
         } else {
           message.info(data.msg);
         }

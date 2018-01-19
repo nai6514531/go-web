@@ -14,9 +14,9 @@ func (self *TradeService) TotalOfDeviceForWangHai(serialNumber string, mobile st
 	var total int
 	var r *gorm.DB
 	if serialNumber != "" {
-		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("device_serial = ? and created_timestamp<unix_timestamp('2018-01-01')  and status in (3,4,5,6,7,9,10) ", serialNumber).Count(&total)
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("device_serial = ? and created_timestamp>=unix_timestamp('2018-01-01')  and status in (3,4,5,6,7,9,10) ", serialNumber).Count(&total)
 	} else if mobile != "" {
-		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("mobile = ? and created_timestamp<unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", mobile).Count(&total)
+		r = common.SodaDB_R.Model(&soda.Ticket{}).Where("mobile = ? and created_timestamp>=unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", mobile).Count(&total)
 	}
 	if r.Error != nil {
 		return 0, r.Error
@@ -29,9 +29,9 @@ func (self *TradeService) BasicOfDeviceForWangHai(serialNumber string, mobile st
 	tickets := &[]*soda.Ticket{}
 	var r *gorm.DB
 	if serialNumber != "" {
-		r = common.SodaDB_R.Where("device_serial = ? and created_timestamp<unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", serialNumber).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
+		r = common.SodaDB_R.Where("device_serial = ? and created_timestamp>=unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", serialNumber).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
 	} else if mobile != "" {
-		r = common.SodaDB_R.Where("mobile = ? and created_timestamp<unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", mobile).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
+		r = common.SodaDB_R.Where("mobile = ? and created_timestamp>=unix_timestamp('2018-01-01') and status in (3,4,5,6,7,9,10) ", mobile).Offset((page - 1) * perPage).Limit(perPage).Order("created_timestamp desc").Find(tickets)
 	}
 	if r.Error != nil {
 		return nil, r.Error
