@@ -123,6 +123,12 @@ func (self *StatisController) Device(ctx *iris.Context) {
 	date := ctx.URLParam("date")
 	groupBy := ctx.URLParam("groupBy")
 	serialNumber := ctx.URLParam("serialNumber")
+	// hard code for wanghuang
+	if groupBy == "month" && date < "2018-01" && (userId == 7424 || userId == 7423) {
+		result = &enity.Result{"01070301", nil, statis_msg["01070301"]}
+		ctx.JSON(iris.StatusOK, result)
+		return
+	}
 	if groupBy == "date" {
 		if (date != "" && serialNumber == "") || (date == "" && serialNumber != "") {
 			result = &enity.Result{"01070302", nil, statis_msg["01070302"]}

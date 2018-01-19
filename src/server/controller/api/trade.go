@@ -2,6 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"strings"
+	"time"
+
 	"github.com/bitly/go-simplejson"
 	"github.com/spf13/viper"
 	"gopkg.in/kataras/iris.v4"
@@ -13,8 +16,6 @@ import (
 	"maizuo.com/soda-manager/src/server/model/soda"
 	"maizuo.com/soda-manager/src/server/service"
 	"maizuo.com/soda-manager/src/server/service/soda"
-	"strings"
-	"time"
 )
 
 var (
@@ -69,13 +70,21 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 	account := ctx.URLParam("account")
 	page, _ := ctx.URLParamInt("page")
 	perPage, _ := ctx.URLParamInt("perPage")
+	userId, _ := ctx.Session().GetInt(viper.GetString("server.session.user.id"))
 	if serialNumber == "" && account == "" {
 		result = &enity.Result{"01080102", nil, trade_msg["01080102"]}
 		common.Log(ctx, result)
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	list, err := tradeService.BasicOfDevice(serialNumber, account, page, perPage)
+	var list *[]*map[string]interface{}
+	var err error
+	total := 0
+	if userId == 7424 || userId == 7423 {
+		list, err = tradeService.BasicOfDeviceForWangHai(serialNumber, account, page, perPage)
+	} else {
+		list, err = tradeService.BasicOfDevice(serialNumber, account, page, perPage)
+	}
 	common.Logger.Debug("list========", list)
 	if err != nil {
 		result = &enity.Result{"01080101", err.Error(), trade_msg["01080101"]}
@@ -83,7 +92,11 @@ func (self *TradeController) Basic(ctx *iris.Context) {
 		ctx.JSON(iris.StatusOK, result)
 		return
 	}
-	total, err := tradeService.TotalOfDevice(serialNumber, account)
+	if userId == 7424 || userId == 7423 {
+		total, err = tradeService.TotalOfDeviceForWangHai(serialNumber, account)
+	} else {
+		total, err = tradeService.TotalOfDevice(serialNumber, account)
+	}
 	if err != nil {
 		result = &enity.Result{"01080103", err.Error(), trade_msg["01080103"]}
 		common.Log(ctx, result)
