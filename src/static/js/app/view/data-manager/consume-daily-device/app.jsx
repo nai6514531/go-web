@@ -77,7 +77,7 @@ const App = React.createClass({
           return fourthPulseAmount + "次"
         }
       }, {
-        title: '金额',
+        title: '消费金额',
         dataIndex: 'amount',
         key: 'amount',
         width:80,

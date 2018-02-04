@@ -31,6 +31,7 @@ func (self *StatisService) Consume(userId int, date string, page int, perPage in
 			sql = `
 			select date,
 			sum(total_amount),
+			sum(total_refund),
 			sum(total_device),
 			sum(total_mode_1),
 			sum(total_mode_2),
@@ -72,6 +73,7 @@ func (self *StatisService) Consume(userId int, date string, page int, perPage in
 			sql = `
 			select month,
 			sum(total_amount),
+			sum(total_refund),
 			sum(total_device),
 			sum(total_mode_1),
 			sum(total_mode_2),
@@ -88,6 +90,7 @@ func (self *StatisService) Consume(userId int, date string, page int, perPage in
 			sql = `
 			select date,
 			total_amount,
+			total_refund,
 			total_device,
 			total_mode_1,
 			total_mode_2,
@@ -150,6 +153,7 @@ func (self *StatisService) Consume(userId int, date string, page int, perPage in
 			sql = `
 			select month,
 			total_amount,
+			total_refund,
 			total_device,
 			total_mode_1,
 			total_mode_2,
@@ -242,17 +246,19 @@ func (self *StatisService) Consume(userId int, date string, page int, perPage in
 			m := make(map[string]interface{}, 0)
 			var _date string   //日期
 			var amount float64 //金额
+			var refund float64 //退款金额
 			var dc int         //模块数
 			var dt int         //单脱
 			var kx int         //快洗
 			var bz int         //标准
 			var dw int         //大物
-			err := rows.Scan(&_date, &amount, &dc, &dt, &kx, &bz, &dw)
+			err := rows.Scan(&_date, &amount, &refund, &dc, &dt, &kx, &bz, &dw)
 			if err != nil {
 				return nil, err
 			}
 			m["date"] = _date
 			m["amount"] = amount / 100
+			m["refund"] = refund / 100
 			m["deviceCount"] = dc
 			m["firstPulseAmount"] = dt
 			m["secondPulseAmount"] = kx

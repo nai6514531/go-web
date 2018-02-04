@@ -66,12 +66,20 @@ const App = React.createClass({
           return Math.round(fourthPulseAmount*100)/100 + "次"
         }
       }, {
-        title: '金额',
+        title: '消费金额',
         dataIndex: 'amount',
         key: 'amount',
         width:80,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
+        }
+      }, {
+        title: '退款金额',
+        dataIndex: 'refund',
+        key: 'refund',
+        width:80,
+        render: (refund) => {
+          return Math.round(refund*100)/100 + "元";
         }
       }],
       loading: false,

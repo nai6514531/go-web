@@ -91,12 +91,20 @@ const App = React.createClass({
           return Math.round(fourthPulseAmount*100)/100 + "次";
         }
       }, {
-        title: '金额',
+        title: '消费金额',
         dataIndex: 'amount',
         key: 'amount',
         width:80,
         render: (amount) => {
           return Math.round(amount*100)/100 + "元";
+        }
+      }, {
+        title: '退款金额',
+        dataIndex: 'refund',
+        key: 'refund',
+        width:80,
+        render: (refund) => {
+          return Math.round(refund*100)/100 + "元";
         }
       }],
       loading: false
@@ -122,12 +130,14 @@ const App = React.createClass({
           const thirdPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.thirdPulseAmount},0)*100)/100;
           const fourthPulseAmount = Math.round(list.reduce((total,item)=>{return total+item.fourthPulseAmount},0)*100)/100;
           const amount = Math.round(list.reduce((total,item)=>{return total+item.amount},0)*100)/100;
+          const refund = Math.round(list.reduce((total,item)=>{return total+item.refund},0)*100)/100;
           const total = {
             "firstPulseAmount": firstPulseAmount,
             "secondPulseAmount": secondPulseAmount,
             "thirdPulseAmount": thirdPulseAmount,
             "fourthPulseAmount": fourthPulseAmount,
             "amount": amount,
+            "refund":refund
           };
           let theList = list.map((item, key) => {
             item.key = key;
@@ -151,8 +161,8 @@ const App = React.createClass({
           <Breadcrumb.Item>消费统计</Breadcrumb.Item>
         </Breadcrumb>
       </header>
-      <Table scroll={{ x: 450 }} dataSource={list} 
-             columns={columns} pagination={false} 
+      <Table scroll={{ x: 450 }} dataSource={list}
+             columns={columns} pagination={false}
              bordered loading={this.state.loading}
       />
     </section>);
