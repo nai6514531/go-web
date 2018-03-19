@@ -225,13 +225,18 @@ const App = React.createClass({
   render() {
     return (<div className="application application-login">
       <h2>
-        <img src={require("./WechatIMG130.png")} alt=""/>
+        <img src={require("./logo_black.png")} alt=""/>
       </h2>
       <div className="form">
         <LoginForm />
       </div>
+      <div className="ads">
+        <a target="_blank" href="http://a3.rabbitpre.com/m/VZVveab?lc=1&sui=QaIaJy7t">
+          <img src={require("./lALPBY0V4xNE7AN-zQGQ_400_126.png")} alt=""/>
+        </a>
+      </div>
       <div className="copy">
-        Copyright &copy; 2017 苏打生活. All Rights Reserved<br/>
+        Copyright &copy; 2018 苏打生活. All Rights Reserved<br/>
         客服电话:400-8678-884 粤ICP备<a href="http://www.miitbeian.gov.cn">16090794</a>号<br/>
         深圳市华策网络科技有限公司
       </div>
