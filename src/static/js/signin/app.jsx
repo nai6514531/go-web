@@ -225,7 +225,7 @@ const App = React.createClass({
   render() {
     return (<div className="application application-login">
       <h2>
-        <img src={require("./logo_black.png")} alt=""/>
+        <img className="logo" src={require("./logo_black.png")} alt=""/>
       </h2>
       <div className="form">
         <LoginForm />
