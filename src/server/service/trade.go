@@ -1,6 +1,7 @@
 package service
 
 import (
+	"time"	
 	"github.com/jinzhu/gorm"
 	"maizuo.com/soda-manager/src/server/common"
 	"maizuo.com/soda-manager/src/server/model/soda"
@@ -113,6 +114,7 @@ func (self *TradeService) BasicOfDevice(serialNumber string, mobile string, page
 		m["status"] = ticket.Status
 		m["ownerId"] = ticket.OwnerId
 		m["paymentId"] = ticket.PaymentId
+		m["timestamp"] = time.Now()
 		list = append(list, &m)
 	}
 	return &list, nil
